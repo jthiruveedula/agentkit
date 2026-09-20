@@ -4,13 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#2b2320" />
+  <meta name="theme-color" content="#05060f" />
   <title>agentkit — one agent config, every editor</title>
   <meta name="description" content="Install the same skills, subagents, and commands into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 21,8 21,16 12,22 3,16 3,8' fill='%23D97757'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <canvas id="cosmos" role="img" aria-label="Interactive 3D scene: scroll to travel from the agentkit core, past install terminals, through the 28-skill galaxy, to an overview. Drag to orbit, click a node for details."></canvas>
+  <div class="no-webgl-note" role="note">
+    <p>This page's 3D scene needs WebGL — everything below still works without it.</p>
+  </div>
+  <div class="node-tip" id="node-tip" aria-hidden="true"></div>
+
+  <aside class="detail-panel" id="detail-panel" aria-label="Selection details" aria-hidden="true">
+    <button class="detail-panel__close" type="button" aria-label="Close details">✕</button>
+    <p class="detail-panel__eyebrow"></p>
+    <h3 class="detail-panel__title"></h3>
+    <p class="detail-panel__desc"></p>
+    <a class="detail-panel__link" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener"></a>
+    <p class="detail-panel__hint">Esc closes · ← → hops between skills</p>
+  </aside>
 
   <!-- sprite: 4 real tool marks, stitched into assets/logo-sprite.svg, reused below via <use> -->
 
@@ -27,7 +41,7 @@
   </nav>
 
   <main id="main">
-    <section class="hero container" id="top">
+    <section class="hero container" id="top" data-zone="hero">
       <div class="hero__grid">
         <div>
           <p class="hero__eyebrow reveal" style="--i:0">Claude Code · Copilot · Cursor · Antigravity</p>
@@ -45,26 +59,15 @@
               <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
           </div>
-          <div class="node-card" aria-live="polite">
-            <svg class="node-card__icon" viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-claude"></use></svg>
-            <div><strong class="node-card__name"></strong> — <span class="node-card__desc"></span></div>
-          </div>
-        </div>
-
-        <div class="hero__scene-wrap">
-          <canvas id="scene" role="img" aria-label="Interactive diagram: one core configuration orbited by four tool nodes — Claude Code, Copilot, Cursor, and Antigravity. Drag to orbit, click a node to read about it."></canvas>
-          <p class="hero__scene-hint">DRAG TO ORBIT · CLICK A NODE</p>
-          <div class="hero__scene-fallback">
-            <p>One core config, four tool integrations — Claude Code, Copilot, Cursor, Antigravity. (This diagram needs WebGL; your browser or device doesn't support it.)</p>
-          </div>
+          <p class="hero__scene-hint reveal" style="--i:4">SCROLL TO TRAVEL · DRAG TO ORBIT · CLICK A NODE</p>
         </div>
       </div>
     </section>
 
-    <section class="stats container" aria-label="By the numbers">
+    <section class="stats container" aria-label="By the numbers" data-zone="hero">
       <div class="stats__row">
         <div class="stat reveal-scroll" style="--i:0">
-          <span class="stat__num"><span class="count" data-count="23">0</span><span class="unit">×</span></span>
+          <span class="stat__num"><span class="count" data-count="28">0</span><span class="unit">×</span></span>
           <span class="stat__label">skills, authored once</span>
         </div>
         <div class="stat reveal-scroll" style="--i:1">
@@ -82,8 +85,8 @@
       </div>
     </section>
 
-    <section class="tools container section">
-      <p class="tools__head reveal-scroll">Installs into</p>
+    <section class="tools container section" data-zone="hero">
+      <h2 class="tools__head reveal-scroll">Installs into</h2>
       <div class="tools__row">
         <span class="tool-chip reveal-scroll" style="--i:0"><svg viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-claude"></use></svg>Claude Code</span>
         <span class="tool-chip reveal-scroll" style="--i:1"><svg viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-copilot"></use></svg>GitHub Copilot</span>
@@ -92,9 +95,9 @@
       </div>
     </section>
 
-    <section id="install" class="install container section">
+    <section id="install" class="install container section" data-zone="install">
       <div class="section__head reveal-scroll">
-        <p class="eyebrow">Install</p>
+        <p class="eyebrow"><span class="eyebrow__num">01</span>Install</p>
         <h2>Install once. Upgrade in place.</h2>
         <p>Pick whichever channel already exists on the target machine — all delegate to the same <code class="mono">install.sh</code>. Symlinked by default — re-running is always safe, and nothing this installer didn't create ever gets overwritten.</p>
       </div>
@@ -195,11 +198,11 @@
       </div>
     </section>
 
-    <section id="skills" class="catalog container section">
+    <section id="skills" class="catalog container section" data-zone="galaxy">
       <div class="section__head reveal-scroll">
-        <p class="eyebrow">Catalog</p>
-        <h2>Twenty-three skills, authored once.</h2>
-        <p>Each is a canonical <code class="mono">SKILL.md</code>, transpiled to all four tool formats by <code class="mono">scripts/build.py</code> — never hand-copied. The cards below render from <code class="mono">assets/skills.json</code>, generated from the real frontmatter.</p>
+        <p class="eyebrow"><span class="eyebrow__num">02</span>Catalog</p>
+        <h2>Twenty-eight skills, authored once.</h2>
+        <p>Each is a canonical <code class="mono">SKILL.md</code>, transpiled to all four tool formats by <code class="mono">scripts/build.py</code> — never hand-copied. The galaxy behind this text renders from <code class="mono">assets/skills.json</code>, generated from the real frontmatter — fly through it, hover a node, click to inspect.</p>
       </div>
 
       <div class="catalog__controls reveal-scroll">
@@ -214,8 +217,13 @@
         </div>
       </div>
       <p class="catalog__count" id="skills-count" aria-live="polite"></p>
+      <p class="galaxy-hint" aria-hidden="true">◈ 28 nodes · hover to preview · click to focus · <kbd>←</kbd><kbd>→</kbd> hop · <kbd>Esc</kbd> release</p>
 
-      <div class="product-grid" id="skills-grid">
+      <div class="galaxy-stage" aria-hidden="true">
+        <p class="galaxy-stage__caption">the catalog, as a constellation</p>
+      </div>
+
+      <div class="skills-list" id="skills-list" aria-label="Skill catalog, text version">
         <p class="catalog__loading">Loading the skill catalog…</p>
       </div>
       <noscript><p class="catalog__empty is-visible">The skill catalog needs JavaScript — browse <code class="mono">skills/</code> in the repo instead.</p></noscript>
@@ -240,22 +248,19 @@
       </div>
     </section>
 
-    <section class="cta-strip container">
+    <section class="cta-strip container" data-zone="finale">
       <a class="cta-link reveal-scroll" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener">Read the source →</a>
     </section>
   </main>
 
-  <footer class="foot-line container">
+  <footer class="foot-line container" data-zone="finale">
     <p>© 2026 Jagadeesh Thiruveedula · MIT licensed · <a href="https://github.com/jthiruveedula/agentkit/releases/tag/v0.1.0">v0.1.0</a></p>
   </footer>
 
   <script type="importmap">
-  { "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-  } }
-  </script>
-  <script type="module" src="js/hero.js"></script>
+{ "imports": { "three": "./js/vendor/three.module.js" } }
+</script>
+  <script type="module" src="js/cosmos.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
