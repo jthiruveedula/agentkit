@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>agentkit — one agent config, every editor</title>
+  <meta name="description" content="Install the same skills, subagents, and commands into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolygon points='12,2 21,8 21,16 12,22 3,16 3,8' fill='%23D97757'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- sprite: 4 real tool marks, stitched into assets/logo-sprite.svg, reused below via <use> -->
+
+  <nav class="nav-pill" aria-label="Primary">
+    <a class="nav-pill__wordmark" href="#top">agentkit</a>
+    <ul class="nav-pill__links">
+      <li><a href="#install">Install</a></li>
+      <li><a href="#skills">Skills</a></li>
+    </ul>
+    <a class="nav-pill__cta" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener">GitHub →</a>
+  </nav>
+
+  <main id="top">
+    <section class="hero container">
+      <div class="hero__grid">
+        <div>
+          <p class="hero__eyebrow reveal" style="--i:0">Claude Code · Copilot · Cursor · Antigravity</p>
+          <h1 class="hero__title reveal" style="--i:1">One setup. Every editor you use.</h1>
+          <p class="hero__lede reveal" style="--i:2">
+            agentkit symlinks the same skills, subagents, and commands into all four —
+            a <code class="mono">git pull</code> in one clone updates every tool at once.
+            MIT licensed, no telemetry.
+          </p>
+          <div class="hero__code reveal" style="--i:3">
+            <code>git clone https://github.com/jthiruveedula/agentkit.git &amp;&amp; cd agentkit &amp;&amp; ./install.sh</code>
+            <button class="copy-btn" type="button" aria-label="Copy to clipboard"
+              data-copy="git clone https://github.com/jthiruveedula/agentkit.git &amp;&amp; cd agentkit &amp;&amp; ./install.sh">
+              <svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          <div class="node-card" aria-live="polite">
+            <svg class="node-card__icon" viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-claude"></use></svg>
+            <div><strong class="node-card__name"></strong> — <span class="node-card__desc"></span></div>
+          </div>
+        </div>
+
+        <div class="hero__scene-wrap">
+          <canvas id="scene" role="img" aria-label="Interactive diagram: one core configuration orbited by four tool nodes — Claude Code, Copilot, Cursor, and Antigravity. Drag to orbit, click a node to read about it."></canvas>
+          <p class="hero__scene-hint">DRAG TO ORBIT · CLICK A NODE</p>
+          <div class="hero__scene-fallback">
+            <p>One core config, four tool integrations — Claude Code, Copilot, Cursor, Antigravity. (This diagram needs WebGL; your browser or device doesn't support it.)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tools container">
+      <p class="tools__head">Installs into</p>
+      <div class="tools__row">
+        <span class="tool-chip"><svg viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-claude"></use></svg>Claude Code</span>
+        <span class="tool-chip"><svg viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-copilot"></use></svg>GitHub Copilot</span>
+        <span class="tool-chip"><svg viewBox="0 0 24 24"><use href="assets/logo-sprite.svg#logo-cursor"></use></svg>Cursor</span>
+        <span class="tool-chip"><svg viewBox="0 0 115 113"><use href="assets/logo-sprite.svg#logo-antigravity"></use></svg>Antigravity</span>
+      </div>
+    </section>
+
+    <section id="install" class="install container">
+      <div class="install__head">
+        <h2>Install once. Upgrade in place.</h2>
+        <p>Symlinked by default — re-running is always safe, and nothing this installer didn't create ever gets overwritten.</p>
+      </div>
+      <ol class="steps">
+        <li>
+          <span class="stage">1.0</span>
+          <div>
+            <h3>Clone.</h3>
+            <p>Anywhere on disk — <code class="mono">~/agentkit</code> is just the convention.</p>
+            <pre><code>git clone https://github.com/jthiruveedula/agentkit.git ~/agentkit</code><button class="copy-btn" type="button" aria-label="Copy to clipboard" data-copy="git clone https://github.com/jthiruveedula/agentkit.git ~/agentkit"><svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></pre>
+          </div>
+        </li>
+        <li>
+          <span class="stage">2.0</span>
+          <div>
+            <h3>Install.</h3>
+            <p>Symlinks into every tool you name — omit <code class="mono">--tools</code> for all four.</p>
+            <pre><code>cd ~/agentkit &amp;&amp; ./install.sh --tools=claude,cursor</code><button class="copy-btn" type="button" aria-label="Copy to clipboard" data-copy="cd ~/agentkit &amp;&amp; ./install.sh --tools=claude,cursor"><svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></pre>
+          </div>
+        </li>
+        <li>
+          <span class="stage">3.0</span>
+          <div>
+            <h3>Verify.</h3>
+            <p>Confirms the installed version and checks for a newer release.</p>
+            <pre><code>./install.sh version</code><button class="copy-btn" type="button" aria-label="Copy to clipboard" data-copy="./install.sh version"><svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></pre>
+          </div>
+        </li>
+        <li>
+          <span class="stage">4.0</span>
+          <div>
+            <h3>Stay updated.</h3>
+            <p>Pulls the latest release and re-links with your last-used <code class="mono">--tools</code> — prunes anything removed upstream.</p>
+            <pre><code>./install.sh upgrade</code><button class="copy-btn" type="button" aria-label="Copy to clipboard" data-copy="./install.sh upgrade"><svg class="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button></pre>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="skills" class="catalog container">
+      <div class="catalog__head">
+        <h2>Twenty-three skills, authored once.</h2>
+        <p>Each is a canonical <code class="mono">SKILL.md</code>, transpiled to all four tool formats by <code class="mono">scripts/build.py</code> — never hand-copied.</p>
+      </div>
+      <div class="product-grid">
+        <article class="product">
+          <h3 class="product__name">prompt-enhancer</h3>
+          <p class="product__desc">Classifies a raw prompt's intent (9 categories, deterministic scorer) and rewrites it using that intent's pattern.</p>
+          <p class="product__version">v0.1.0 · flagship</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">skill-forge</h3>
+          <p class="product__desc">Scaffolds a new compliant skill — SKILL.md, reference/scripts/tests, a golden test stub — from a one-line description.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">daily-standup</h3>
+          <p class="product__desc">Summarizes commits, closed PRs, and open threads since your last standup into a 3-line update.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">pr-review</h3>
+          <p class="product__desc">Reviews a pull request for correctness bugs and scope creep, posting inline findings.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">debug-loop</h3>
+          <p class="product__desc">Runs a hypothesize-test-narrow loop on a failing test or crash until root cause is found.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">spec-writer</h3>
+          <p class="product__desc">Turns a rough idea into a short spec — problem, scope, non-goals, acceptance criteria.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+        <article class="product">
+          <h3 class="product__name">meeting-to-actions</h3>
+          <p class="product__desc">Extracts action items with owners and dates from meeting notes or a transcript.</p>
+          <p class="product__version">v0.1.0</p>
+        </article>
+      </div>
+
+      <div class="subagents">
+        <p class="subagents__label">Data-architect stack — decides, builds, and checks a pipeline in one chain</p>
+        <div class="product-grid">
+          <article class="product">
+            <h3 class="product__name">data-architect</h3>
+            <p class="product__desc">Multi-cloud/open-source platform decisions — storage, compute, orchestration, batch vs. streaming — recorded as ADRs.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">pipeline-scaffold</h3>
+            <p class="product__desc">Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">data-quality-standards</h3>
+            <p class="product__desc">Schema, freshness, volume, idempotency, and PII checks for a pipeline before it ships.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">data-eng-router</h3>
+            <p class="product__desc">Auto-detects GCP/AWS/Azure/Databricks from task vocabulary and routes to that platform's skill.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">doc-standards</h3>
+            <p class="product__desc">Professional house style — palette, typography, table/chart formatting — for Word/Excel/PDF/PowerPoint output.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">memory-sync</h3>
+            <p class="product__desc">Mines sessions for recurring agent mistakes, ranks the repeats, writes durable fixes.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="subagents">
+        <p class="subagents__label">Plus 10 router skills that wire in pinned external sources on demand — diagrams, UI/UX, codebase reads, CLI token savings, GCP, AWS, Azure, Databricks, system design, gap discovery</p>
+        <div class="chip-row">
+          <span class="chip">ext-diagrams</span>
+          <span class="chip">ext-ui-ux</span>
+          <span class="chip">ext-codegraph</span>
+          <span class="chip">ext-cli-ops</span>
+          <span class="chip">ext-gcp</span>
+          <span class="chip">ext-aws</span>
+          <span class="chip">ext-azure</span>
+          <span class="chip">ext-databricks</span>
+          <span class="chip">ext-systems-design</span>
+          <span class="chip">ext-gap-discovery</span>
+        </div>
+      </div>
+
+      <div class="subagents">
+        <p class="subagents__label">Plus eight subagents, each with an explicit tool allowlist and handoff contract</p>
+        <div class="chip-row">
+          <span class="chip">researcher</span>
+          <span class="chip">implementer</span>
+          <span class="chip">reviewer</span>
+          <span class="chip">test-writer</span>
+          <span class="chip">doc-writer</span>
+          <span class="chip">data-platform-architect</span>
+          <span class="chip">pipeline-engineer</span>
+          <span class="chip">data-quality-engineer</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-strip container">
+      <a class="cta-link" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener">Read the source →</a>
+    </section>
+  </main>
+
+  <footer class="foot-line container">
+    <p>© 2026 Jagadeesh Thiruveedula · MIT licensed · <a href="https://github.com/jthiruveedula/agentkit/releases/tag/v0.1.0">v0.1.0</a></p>
+  </footer>
+
+  <script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }
+  </script>
+  <script type="module" src="js/hero.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -41,6 +41,11 @@ dupes=$(sort "$manifest" | uniq -d | wc -l | tr -d ' ')
 [ "$dupes" = 0 ] || { echo "FAIL: manifest has $dupes duplicate entries after re-install" >&2; exit 1; }
 echo "idempotent re-install passed"
 
+echo "== smoke test: version (read-only, no upgrade) =="
+HOME="$TMP_HOME" XDG_STATE_HOME="$TMP_HOME/.local/state" CLAUDE_HOME="$TMP_HOME/.claude" \
+  "$REPO_ROOT/install.sh" version
+echo "version command passed"
+
 echo "== smoke test: uninstall =="
 HOME="$TMP_HOME" XDG_STATE_HOME="$TMP_HOME/.local/state" CLAUDE_HOME="$TMP_HOME/.claude" \
   CURSOR_HOME="$TMP_HOME/.cursor" ANTIGRAVITY_HOME="$TMP_HOME/.antigravity" \
