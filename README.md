@@ -73,6 +73,9 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `debug-loop` | Hypothesize-test-narrow loop to root-cause a failing test or crash. |
 | `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
 | `meeting-to-actions` | Extracts action items with owners/dates from meeting notes. |
+| `data-eng-router` | Auto-detects GCP/AWS/Azure/Databricks from task vocabulary and routes to that platform's skill. |
+| `doc-standards` | Applies a consistent professional house style (palette, typography, layout) to Word/Excel/PDF/PowerPoint output. |
+| `memory-sync` | Mines recent sessions for recurring agent mistakes, ranks the repeats, writes durable fixes. |
 
 Plus 10 thin router skills that wire in the pinned [external
 sources](#external-skills) on demand — `ext-diagrams`, `ext-ui-ux`,
