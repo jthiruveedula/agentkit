@@ -1,7 +1,13 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 23,
+  "count": 28,
   "skills": [
+    {
+      "name": "context-compressor",
+      "description": "Keep long agent sessions useful under context pressure via disciplined summarization checkpoints — goal, decisions with reasons, current state, open threads, memory keys touched, each under 40 lines. Use when a session is getting long, before compaction or a risky multi-step run, at task boundaries, or before handing work off to another agent.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
     {
       "name": "daily-standup",
       "description": "Summarize what got done since the last standup — git commits, closed issues/PRs, and open threads — into a 3-line standup update (did/doing/blocked). Use when the user asks for a standup update, status report, or \"what did I do yesterday\".",
@@ -45,6 +51,12 @@
       "kind": "native"
     },
     {
+      "name": "memory",
+      "description": "Durable local memory for agents — store and retrieve episodic observations, semantic facts, and correction records from a SQLite substrate instead of re-deriving them every session. Use when the user says \"remember this\", when you need a past decision, preference, or fix, before debugging (check known corrections first), or when memory-sync surfaces a pattern worth keeping.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
       "name": "memory-sync",
       "description": "Mines recent session history for recurring agent mistakes or friction, ranks the repeated patterns, and writes durable corrections (memory files, CLAUDE.md, or skill fixes) so the same issue doesn't cost time again. Use when the user asks to do a retro on recent sessions, find recurring agent errors, or \"make agents faster/more productive\" based on past work.",
       "version": "0.1.0",
@@ -69,14 +81,32 @@
       "kind": "native"
     },
     {
+      "name": "setup-guardian",
+      "description": "Setup-health guardian for this repo — checks dist/ freshness, install targets, skill counts, action SHA pins, the CI success-gate logic, external lock pins, and risky subprocess env= usage. Use when adding or changing a skill, touching install/build/workflows, verifying a repo setup, or scheduling a periodic repo health check.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
       "name": "skill-forge",
       "description": "Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
+      "name": "smart-navigator",
+      "description": "Structure-first codebase reconnaissance — map an unfamiliar repo with manifests and a 2-level tree before reading any code, then trace entry points inward instead of reading file by file. Use when you land in an unknown codebase, need to find where something lives or what calls it, or are scoping before an implementation change.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
       "name": "spec-writer",
       "description": "Turn a rough feature idea or bug report into a short written spec — problem, scope, non-goals, acceptance criteria — before code is written. Use when the user asks for a spec, design doc, or \"write this up before we build it\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "token-saver",
+      "description": "Cut input-token burn for AI coding agents — search-before-read, targeted line ranges, diff-first workflows, batched tool calls, no re-reads, and terse output. Use when a session is burning too much context, when reads feel wasteful, or when a task involves many files/logs/shell output.",
       "version": "0.1.0",
       "kind": "native"
     },

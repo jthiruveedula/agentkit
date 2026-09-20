@@ -61,3 +61,15 @@ options, someone who picks one and writes down why.
 - `_data-architect/scripts/adr.py` — the ADR log (`new`/`list`/`search`). ADRs live at
   `<project>/docs/adr/NNNN-slug.md` — plain markdown, travels with the
   repo, readable without this script.
+
+## Token economy
+
+- Search the ADR log before re-deriving anything — re-litigating a
+  platform trade-off across sessions is pure token waste.
+- Name 2–3 real options and the axis that decides between them; never
+  dump the whole reference table at the user.
+- State the recommendation and trade-off in one paragraph, then record
+  it once as an ADR — the ADR is the read next time, not another
+  re-derivation.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

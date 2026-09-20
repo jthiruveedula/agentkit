@@ -77,3 +77,11 @@ committed fix.
 - `_memory-sync/scripts/rank_patterns.py` — clusters incident lines by shared
   vocabulary (crude stemming, not real NLP — a triage tool, not a
   classifier). `--selftest` runs its built-in check.
+
+
+## Token economy
+
+- Mine session history with `rg`/grep over logs — never re-read full transcripts.
+- Rank patterns with `_memory-sync/scripts/rank_patterns.py` before writing anything; one correction record beats ten re-derived fixes.
+- Link incidents to existing `correction` records instead of counting them twice.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

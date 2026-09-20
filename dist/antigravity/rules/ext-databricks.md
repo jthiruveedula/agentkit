@@ -19,3 +19,10 @@ confirms otherwise), a collection. Pinned in `external/skills.lock.json`.
    grep -rl "<keyword>" external/databricks-agent-skills/skills/*/SKILL.md
    ```
 3. Read and follow the matching `SKILL.md`.
+
+## Token economy
+
+- Read notebook cells / job definitions via targeted workspace-get paths, never whole workspace exports.
+- Prefer Unity Catalog system tables for metadata instead of listing objects.
+- `grep` the pinned collection for the matching skill before reading any full SKILL.md.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

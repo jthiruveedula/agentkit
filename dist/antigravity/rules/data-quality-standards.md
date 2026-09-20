@@ -36,3 +36,14 @@ people to ignore it. Pick what's meaningful for the data at hand.
 
 - `_data-quality-standards/reference/checks.md` — the full checklist: schema tests, freshness,
   volume sanity, idempotency/backfill safety, PII handling, PR checklist.
+
+## Token economy
+
+- Review the pipeline DIFF under review, not the whole warehouse —
+  `git diff` first, then checks only for changed models/tables.
+- Run only the checks relevant to what changed (new column → schema
+  tests; new source → freshness/volume), never the full checklist blind.
+- Reuse the project's existing testing convention; introducing a new
+  framework for one model costs review cycles and context.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

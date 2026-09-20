@@ -25,3 +25,10 @@ nesting skills under `skills/`:
 3. Read and follow the matching `SKILL.md`. If content from
    `agent-skills-ms` (CC-BY-4.0) is copied rather than just read for
    guidance, keep the attribution the license requires.
+
+## Token economy
+
+- Project fields: `az ... --query` JMESPath with `-o tsv|table`; never ingest full JSON payloads.
+- Scope every list call (`--resource-group`, `--subscription`) — unscoped `az list` is the classic token blowup.
+- `grep` the pinned collections for the matching skill before reading full SKILL.md files.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

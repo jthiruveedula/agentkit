@@ -48,3 +48,11 @@ user wants.
   cases in `_prompt-enhancer/tests/golden.json`.
 - `_prompt-enhancer/tests/golden.json` — golden intent-classification fixtures; add a case
   here before hand-tuning a classifier weight.
+
+
+## Token economy
+
+- Classify intent first (cheap) — then load ONLY the matched intent's pattern from `_prompt-enhancer/reference/routing-table.md`, never all nine.
+- Skip `_prompt-enhancer/reference/examples.md` unless the rewrite needs a worked pair; the pattern alone usually suffices.
+- Ask at most 2 questions on low confidence — guessing and rewriting twice costs more than asking.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

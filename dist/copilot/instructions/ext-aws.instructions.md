@@ -24,3 +24,10 @@ Two pinned AWS sources in `external/skills.lock.json`, both collections:
 3. Read and follow the matching skill's own docs. Prefer
    `aws-sample-skills` (official AWS samples, MIT-0 — no attribution
    required) when both cover the same ground.
+
+## Token economy
+
+- Filter server-side: `aws ... --query` with `--output text|table` so the CLI returns fields, not full JSON documents.
+- Confirm the task is really AWS — route through `data-eng-router` before syncing or loading the vendor collection.
+- `grep` the pinned collections for the right skill before reading any full SKILL.md.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

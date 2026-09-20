@@ -21,3 +21,10 @@ Pinned in `external/skills.lock.json`.
    ```
 3. Read and follow the matching `SKILL.md`. If none fits, say so rather
    than forcing an unrelated one.
+
+## Token economy
+
+- Project fields: `gcloud ... --format="value(...)"`, or `--format=json | jq` — never pull full resource JSON.
+- Always pass `--project`/`--region`/`--zone`; unscoped list output pages across the whole org.
+- `grep` the pinned collection for the matching skill before reading any full SKILL.md.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

@@ -43,3 +43,13 @@ repo produces look like they came from the same place.
   accessibility rules. Load in full before the first document build in a
   session; subsequent documents in the same session can skip re-reading
   it unless the user asks for a different look.
+
+## Token economy
+
+- Read `reference/house-style.md` once per document and hold it in
+  context for the whole build — never once per element.
+- Apply the house style in a single editing pass; don't re-read the
+  document per section.
+- State what changed in one line, not a design essay.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

@@ -17,3 +17,12 @@ Produce, in this order, nothing more:
 Keep it to what fits on one screen unless the feature genuinely needs more.
 A spec that needs scrolling to find the acceptance criteria has failed its
 own job.
+
+## Token economy
+
+- A short spec before code prevents the most expensive token burn of
+  all: rework. Write the spec first, never after.
+- Keep the spec to this file's five sections — problem, scope,
+  non-goals, acceptance criteria, open questions. Nothing more.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

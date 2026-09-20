@@ -86,3 +86,11 @@ model and ranking formula, `reference/recipes.md` for usage patterns.
 - **Keep keys canonical.** `user.timezone`, not `timezone` in one
   place and `user.tz` in another. Check `search` before inventing a
   new key.
+
+
+## Token economy
+
+- Search with `--limit 5` and a `--kind` filter — never broad-scan all three tables.
+- Never re-read rows you already fetched — cache them in session notes.
+- Store canonical keys (`user.timezone`) so future lookups resolve in one cheap query.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

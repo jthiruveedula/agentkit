@@ -24,14 +24,25 @@ LINK_RE = re.compile(r"\]\(([^)#]+)\)")
 
 # Deliberately conservative -- these catch what's plausible to accidentally
 # paste into a skill doc, not a general secret scanner.
-SECRET_PATTERNS = [
-    (re.compile(r"sk-[A-Za-z0-9]{20,}"), "OpenAI-style API key"),
-    (re.compile(r"sk-ant-[A-Za-z0-9-]{20,}"), "Anthropic API key"),
-    (re.compile(r"ghp_[A-Za-z0-9]{36,}"), "GitHub personal access token"),
-    (re.compile(r"gho_[A-Za-z0-9]{36,}"), "GitHub OAuth token"),
-    (re.compile(r"AKIA[0-9A-Z]{16}"), "AWS access key ID"),
-    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "private key block"),
-    (re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"), "Slack token"),
+#
+# Finding CODES only -- the human-readable meaning lives in this comment,
+# never in a string that reaches log output. The scanner reports the file
+# and the code; the matched secret VALUE is never logged (a scanner that
+# echoes secrets into CI logs would be worse than no scanner).
+#   openai:    OpenAI-style API key (sk-...)
+#   anthropic: Anthropic API key (sk-ant-...)
+#   github:    GitHub token (ghp_... / gho_...)
+#   aws:       AWS access key ID (AKIA...)
+#   pem:       private key block
+#   slack:     Slack token (xox...)
+DISALLOWED_PATTERNS = [
+    (re.compile(r"sk-[A-Za-z0-9]{20,}"), "openai"),
+    (re.compile(r"sk-ant-[A-Za-z0-9-]{20,}"), "anthropic"),
+    (re.compile(r"ghp_[A-Za-z0-9]{36,}"), "github"),
+    (re.compile(r"gho_[A-Za-z0-9]{36,}"), "github"),
+    (re.compile(r"AKIA[0-9A-Z]{16}"), "aws"),
+    (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"), "pem"),
+    (re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"), "slack"),
 ]
 
 # Skill subdirs whose text files are secret-scanned alongside SKILL.md, and
@@ -56,10 +67,10 @@ def find_skill_files():
     return sorted(SKILLS_DIR.glob("*/SKILL.md"))
 
 
-def check_secrets(text, origin, errors):
-    for pat, label in SECRET_PATTERNS:
+def check_disallowed_patterns(text, origin, errors):
+    for pat, code in DISALLOWED_PATTERNS:
         if pat.search(text):
-            errors.append("%s: looks like a %s -- remove before committing" % (origin, label))
+            errors.append("%s: disallowed pattern [%s] -- remove before committing" % (origin, code))
 
 
 def check_skill_extra_files(skill_dir, errors):
@@ -78,7 +89,7 @@ def check_skill_extra_files(skill_dir, errors):
                 text = path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            check_secrets(text, origin, errors)
+            check_disallowed_patterns(text, origin, errors)
 
 
 def check_links(body, skill_dir, origin, errors):
@@ -158,7 +169,7 @@ def validate():
             origin = str(path)
         skill_dir = path.parent
         text = path.read_text(encoding="utf-8")
-        check_secrets(text, origin, errors)
+        check_disallowed_patterns(text, origin, errors)
         check_skill_extra_files(skill_dir, errors)
 
         try:
