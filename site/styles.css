@@ -237,7 +237,21 @@ code, .mono {
   padding-block: clamp(7.5rem, 16vh, 10rem) var(--space-3xl);
   position: relative;
 }
+/* readability veil: keeps the text column legible where the 3D field
+   bleeds near it; the right side stays clear for the emblem */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    color-mix(in oklch, var(--color-bg) 88%, transparent) 0%,
+    color-mix(in oklch, var(--color-bg) 55%, transparent) 32%,
+    transparent 58%);
+  pointer-events: none;
+}
 .hero__grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
   gap: var(--space-2xl);
@@ -777,38 +791,42 @@ code, .mono {
 .skills-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-xs);
+  gap: var(--space-md);
   margin-bottom: var(--space-xl);
 }
 @media (max-width: 56rem) { .skills-list { grid-template-columns: minmax(0, 1fr); } }
 
 .skill-row {
   appearance: none;
-  display: grid;
-  grid-template-columns: auto auto 1fr auto;
-  align-items: baseline;
-  gap: var(--space-sm);
+  display: block;
   text-align: left;
   font: inherit;
   color: inherit;
   cursor: pointer;
-  padding: var(--space-sm) var(--space-md);
-  background: color-mix(in oklch, var(--color-bg-2) 30%, transparent);
+  padding: var(--space-md) var(--space-lg);
+  background: color-mix(in oklch, var(--color-bg-2) 42%, transparent);
   border: var(--rule-hair) solid color-mix(in oklch, var(--color-ink) 14%, transparent);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out), opacity var(--dur-short) var(--ease-out);
+  transition: border-color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out), transform var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
 }
 .skill-row:hover {
-  background: color-mix(in oklch, var(--color-bg-2) 55%, transparent);
+  background: color-mix(in oklch, var(--color-bg-2) 62%, transparent);
   border-color: color-mix(in oklch, var(--neon-cyan) 48%, transparent);
-  box-shadow: 0 0 22px -8px var(--glow-cyan);
+  box-shadow: 0 0 28px -10px var(--glow-cyan), var(--shadow-card);
+  transform: translateY(-2px);
 }
 .skill-row.is-dimmed { display: none; }
+.skill-row__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-2xs);
+}
 .skill-row__name {
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--color-ink);
   white-space: nowrap;
@@ -819,18 +837,31 @@ code, .mono {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--neon-cyan);
+  border: var(--rule-hair) solid color-mix(in oklch, var(--neon-cyan) 45%, transparent);
+  border-radius: var(--radius-pill);
+  padding: 0.15em 0.7em;
+  white-space: nowrap;
 }
-.skill-row__kind--router { color: var(--neon-violet); }
+.skill-row__kind--router {
+  color: var(--neon-violet);
+  border-color: color-mix(in oklch, var(--neon-violet) 45%, transparent);
+}
 .skill-row__desc {
   font-size: var(--text-sm);
+  line-height: 1.55;
   color: var(--color-ink-2);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
 }
-.skill-row__go { color: var(--color-muted); font-family: var(--font-mono); }
-.skill-row:hover .skill-row__go { color: var(--neon-cyan); }
+.skill-row__go {
+  margin-left: auto;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  transition: transform var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+.skill-row:hover .skill-row__go { color: var(--neon-cyan); transform: translateX(3px); }
 
 .catalog__empty {
   display: none;

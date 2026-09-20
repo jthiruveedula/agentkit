@@ -475,6 +475,32 @@ function boot(skills) {
   const zoneEls = Array.from(document.querySelectorAll("[data-zone]"));
   const zoneIndex = { hero: 0, install: 1, galaxy: 2, finale: 3 };
   let zoneTops = [];
+
+  // Fitment: on wide viewports the hero emblem lives in the right-hand visual
+  // column, clear of the left text column (same idea as the install
+  // station's right offset). The offset is computed from the real DOM text
+  // edge and the camera frustum, so it holds across viewport widths;
+  // narrow screens keep the centered composition and the CSS veil.
+  function fitHero() {
+    const dist = 12;
+    const halfW = dist * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect;
+    const need = 3.7; // clearance for rings + orbiting sprites on each side
+    let hx = 0, z = 10.5;
+    const textEl = document.querySelector(".hero__grid > div");
+    if (textEl && window.innerWidth >= 900) {
+      const frac = textEl.getBoundingClientRect().right / window.innerWidth;
+      const textRightWorld = (frac * 2 - 1) * halfW;
+      const target = textRightWorld + need;
+      if (target + need <= halfW * 0.99) {
+        hx = target;
+        z = dist;
+      }
+    }
+    hero.position.x = hx;
+    heroLight.position.set(hx, 2.5, 3);
+    STATIONS[0].pos.set(hx, 1.8, z);
+    STATIONS[0].look.set(hx, 0.2, 0);
+  }
   function measureZones() {
     const sy = window.scrollY;
     zoneTops = zoneEls.map((el) => ({ top: el.getBoundingClientRect().top + sy, zone: zoneIndex[el.dataset.zone] ?? 0 }));
@@ -795,6 +821,7 @@ function boot(skills) {
     renderer.setSize(window.innerWidth, window.innerHeight, false);
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+    fitHero(); // keep the emblem clear of the text column across breakpoints
     measureZones();
     if (reducedMotion) renderStatic();
   }
