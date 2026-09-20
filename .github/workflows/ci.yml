@@ -189,7 +189,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
 
@@ -290,8 +290,9 @@ jobs:
           needs = json.loads(os.environ["NEEDS_JSON"])
           # PR-only jobs (commitlint, branch-name) report "skipped" on pushes
           # to main, where branch protection does not apply -- that is fine.
-          failed = {k: v for k, v in needs.items()
-                    if v not in ("success", "skipped")}
+          # needs.* is an object {result, outputs}, not a bare string.
+          failed = {k: v.get("result") for k, v in needs.items()
+                    if v.get("result") not in ("success", "skipped")}
           if failed:
               raise SystemExit(f"required jobs did not succeed: {failed}")
           print("all required jobs succeeded")
