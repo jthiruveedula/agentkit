@@ -145,6 +145,16 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `memory-sync` | Mines recent sessions for recurring agent mistakes, ranks the repeats, writes durable fixes. |
 | `doc-standards` | Applies a consistent professional house style to Word/Excel/PDF/PowerPoint output. |
 
+**Token economy & memory**
+
+| Skill | What it does |
+|---|---|
+| `token-saver` | Cuts input-token burn: search-before-read, targeted line ranges, diff-first workflows, batched tool calls, terse output. |
+| `context-compressor` | Disciplined summarization checkpoints for long sessions — goal, decisions with reasons, state, open threads. |
+| `smart-navigator` | Structure-first repo reconnaissance: manifests + 2-level tree, then trace entry points inward. |
+| `setup-guardian` | Repo health guardian: dist/ freshness, install targets, SHA pins, skill counts (`doctor.py --watch`). |
+| `memory` | Durable local memory: episodic observations, semantic facts, and correction records in SQLite. |
+
 **External routers** — 10 thin skills wiring in the pinned [external
 sources](#external-skills) on demand: `ext-diagrams`, `ext-ui-ux`,
 `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`, `ext-aws`,
@@ -174,6 +184,10 @@ golden tests, so behavior is identical on all four tools:
 - `skills/data-architect/scripts/adr.py` — ADR scaffolding
 - `skills/pipeline-scaffold/scripts/scaffold_pipeline.py` — pipeline scaffolding
 - `skills/skill-forge/scripts/scaffold.py` — new-skill scaffolding
+- `skills/token-saver/scripts/estimate.py` — file token estimation + read strategy
+- `skills/context-compressor/scripts/checkpoint.py` — summarization checkpoint writer
+- `skills/smart-navigator/scripts/map.py` — repo manifest + tree mapping
+- `skills/setup-guardian/scripts/doctor.py` — repo health checks (`--watch` for scheduled runs)
 
 ## Landing page
 
