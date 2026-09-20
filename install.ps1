@@ -12,18 +12,27 @@
   unavailable).
 .PARAMETER Uninstall
   Remove everything this installer created, restoring any backups.
+.PARAMETER Upgrade
+  git pull the clone, then re-link using your last-used -Tools, pruning any
+  symlink whose source skill was removed upstream.
+.PARAMETER Version
+  Show the installed vs. latest released version.
 .PARAMETER DryRun
   Print what would happen without touching the filesystem.
 .EXAMPLE
   .\install.ps1 -Tools claude,cursor
 .EXAMPLE
   .\install.ps1 -Uninstall
+.EXAMPLE
+  .\install.ps1 -Upgrade
 #>
 [CmdletBinding()]
 param(
-    [string]$Tools = "claude,copilot,cursor,antigravity",
+    [string]$Tools = "",
     [switch]$Copy,
     [switch]$Uninstall,
+    [switch]$Upgrade,
+    [switch]$Version,
     [switch]$DryRun
 )
 
@@ -32,6 +41,8 @@ $AgentkitHome = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Dist = Join-Path $AgentkitHome "dist"
 $ManifestDir = Join-Path $env:LOCALAPPDATA "agentkit"
 $Manifest = Join-Path $ManifestDir "manifest.tsv"
+$ToolsFile = Join-Path $ManifestDir "tools"
+$ToolsGiven = $PSBoundParameters.ContainsKey("Tools")
 
 if (-not (Test-Path $ManifestDir)) { New-Item -ItemType Directory -Path $ManifestDir -Force | Out-Null }
 if (-not (Test-Path $Manifest)) { New-Item -ItemType File -Path $Manifest -Force | Out-Null }
@@ -144,21 +155,90 @@ function Uninstall-All {
     Write-Log "uninstall complete"
 }
 
+# drop any manifest entry whose symlink target no longer exists in dist/
+# (the source skill/agent was removed upstream) so an upgrade leaves no
+# dangling links behind.
+function Remove-StaleEntries {
+    if (-not (Test-Path $Manifest)) { return }
+    $kept = @()
+    foreach ($path in (Get-Content $Manifest)) {
+        if (-not $path) { continue }
+        $stale = $false
+        if (Test-Path $path) {
+            $item = Get-Item $path -Force -ErrorAction SilentlyContinue
+            if ($item -and $item.LinkType -eq "SymbolicLink" -and $item.Target -like "$Dist*" -and -not (Test-Path $item.Target)) {
+                $stale = $true
+            }
+        }
+        if ($stale) {
+            if (-not $DryRun) { Remove-Item -Force $path }
+            Write-Log "  pruned (removed upstream): $path"
+        } else {
+            $kept += $path
+        }
+    }
+    if (-not $DryRun) { Set-Content -Path $Manifest -Value $kept }
+}
+
+function Show-Version {
+    Push-Location $AgentkitHome
+    try {
+        $installed = git describe --tags --always 2>$null
+        if (-not $installed) { Write-Log "installed: unknown (not a git clone)"; return }
+        Write-Log "installed: $installed"
+        git fetch --tags --quiet origin 2>$null
+        $latest = (git tag --list "v*" --sort=-v:refname | Select-Object -First 1)
+        if ($latest) { Write-Log "latest:    $latest" }
+        if ($latest -and $installed -ne $latest) { Write-Log "-> run '.\install.ps1 -Upgrade' to update" }
+    } finally { Pop-Location }
+}
+
+function Invoke-Upgrade {
+    Push-Location $AgentkitHome
+    try {
+        if (-not (Test-Path ".git")) {
+            Write-Error "$AgentkitHome is not a git clone -- can't auto-upgrade; git pull it yourself, or re-clone"
+            exit 1
+        }
+        $before = git rev-parse --short HEAD
+        Write-Log "pulling latest agentkit into $AgentkitHome ..."
+        if (-not $DryRun) { git pull --ff-only }
+        $after = git rev-parse --short HEAD
+        if ($before -eq $after) { Write-Log "already up to date ($before)" } else { Write-Log "updated $before -> $after" }
+    } finally { Pop-Location }
+
+    if (-not $ToolsGiven -and (Test-Path $ToolsFile)) {
+        $script:Tools = Get-Content $ToolsFile -Raw
+    }
+    if (-not $script:Tools) { $script:Tools = "claude,copilot,cursor,antigravity" }
+
+    Remove-StaleEntries
+    Invoke-Install
+}
+
+function Invoke-Install {
+    Write-Log "agentkit install ($(if ($Copy) {'copy'} else {'link'}) mode) -- tools: $Tools"
+    foreach ($tool in $Tools -split ",") {
+        switch ($tool.Trim()) {
+            "claude"      { Install-Claude }
+            "copilot"     { Install-Copilot }
+            "cursor"      { Install-Cursor }
+            "antigravity" { Install-Antigravity }
+            default       { Write-Warn "unknown tool '$tool', skipping" }
+        }
+    }
+    if (-not $DryRun) { Set-Content -Path $ToolsFile -Value $Tools -NoNewline }
+    Write-Log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+}
+
 if (-not (Test-Path $Dist)) {
     Write-Error "dist/ not found under $AgentkitHome -- is this a full clone of the agentkit repo?"
     exit 1
 }
 
 if ($Uninstall) { Uninstall-All; exit 0 }
+if ($Version) { Show-Version; exit 0 }
+if ($Upgrade) { Invoke-Upgrade; exit 0 }
 
-Write-Log "agentkit install ($(if ($Copy) {'copy'} else {'link'}) mode) -- tools: $Tools"
-foreach ($tool in $Tools -split ",") {
-    switch ($tool.Trim()) {
-        "claude"      { Install-Claude }
-        "copilot"     { Install-Copilot }
-        "cursor"      { Install-Cursor }
-        "antigravity" { Install-Antigravity }
-        default       { Write-Warn "unknown tool '$tool', skipping" }
-    }
-}
-Write-Log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+if (-not $Tools) { $Tools = "claude,copilot,cursor,antigravity" }
+Invoke-Install
