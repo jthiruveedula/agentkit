@@ -45,7 +45,7 @@ jobs:
           New-Item -ItemType Directory -Path $env:TEMP_HOME -Force | Out-Null
           $env:USERPROFILE = $env:TEMP_HOME
           $env:LOCALAPPDATA = Join-Path $env:TEMP_HOME "AppData\Local"
-          .\install.ps1 -Tools claude,cursor
+          .\install.ps1 -Tools "claude,cursor"
           if (-not (Test-Path (Join-Path $env:TEMP_HOME ".claude\CLAUDE.md"))) {
             throw "install.ps1 did not create .claude/CLAUDE.md"
           }
