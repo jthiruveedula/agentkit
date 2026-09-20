@@ -3,6 +3,7 @@
 
 Run: python3 tests/test_checkpoint.py  (or python3 -m pytest)
 """
+
 import json
 import subprocess
 import sys
@@ -108,7 +109,10 @@ class TestLintFailures(unittest.TestCase):
         self.assertTrue(any("Decisions" in e for e in result["errors"]))
 
     def test_empty_section_fails(self):
-        body = GOLDEN.replace("## Decisions\n- Keep skills stdlib-only — no dependency installs in agent runtimes.\n- One checkpoint per workstream — supersede, never append.\n", "## Decisions\n")
+        body = GOLDEN.replace(
+            "## Decisions\n- Keep skills stdlib-only — no dependency installs in agent runtimes.\n- One checkpoint per workstream — supersede, never append.\n",
+            "## Decisions\n",
+        )
         path = write_file(body)
         proc = run("lint", str(path))
         self.assertNotEqual(proc.returncode, 0)

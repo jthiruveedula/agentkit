@@ -1,7 +1,8 @@
 """Tests for scripts/estimate.py. Run with:
-    python3 tests/test_estimate.py        # plain asserts
-    python3 -m pytest tests/test_estimate.py
+python3 tests/test_estimate.py        # plain asserts
+python3 -m pytest tests/test_estimate.py
 """
+
 import json
 import os
 import subprocess
@@ -134,8 +135,9 @@ def test_missing_file_does_not_kill_valid_files():
 
 
 if __name__ == "__main__":
-    tests = [v for k, v in sorted(globals().items())
-             if k.startswith("test_") and callable(v)]
+    tests = [
+        v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)
+    ]
     failed = 0
     for t in tests:
         try:

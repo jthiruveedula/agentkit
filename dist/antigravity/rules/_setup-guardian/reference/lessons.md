@@ -22,8 +22,11 @@ The registry is the memory; the doctor is the enforcement.
 Correct pattern:
 
 ```python
-failed = {k: v.get("result") for k, v in needs.items()
-          if v.get("result") not in ("success", "skipped")}
+failed = {
+    k: v.get("result")
+    for k, v in needs.items()
+    if v.get("result") not in ("success", "skipped")
+}
 ```
 
 ## LESSON-002 — typo'd action SHA pin broke the packaging job

@@ -21,15 +21,33 @@ except ImportError:  # Python < 3.11: fall back to regex parsing
     tomllib = None
 
 IGNORE = {
-    "node_modules", ".git", "dist", "__pycache__", ".venv", "target",
-    ".hg", ".svn", ".tox", ".eggs", "coverage", ".mypy_cache",
-    ".pytest_cache", ".ruff_cache",
+    "node_modules",
+    ".git",
+    "dist",
+    "__pycache__",
+    ".venv",
+    "target",
+    ".hg",
+    ".svn",
+    ".tox",
+    ".eggs",
+    "coverage",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
 }
 
 ENTRY_NAME = re.compile(r"^(main|cli|index|app|server|run)(\.[a-z0-9]+)?$", re.I)
 MANIFEST_FILES = [
-    "package.json", "pyproject.toml", "go.mod", "Cargo.toml",
-    "Makefile", "makefile", "README.md", "README.rst", "README.txt",
+    "package.json",
+    "pyproject.toml",
+    "go.mod",
+    "Cargo.toml",
+    "Makefile",
+    "makefile",
+    "README.md",
+    "README.rst",
+    "README.txt",
 ]
 
 
@@ -71,6 +89,7 @@ def fmt_kb(size):
 
 # ---------------------------------------------------------------- manifests
 
+
 def parse_package_json(path):
     try:
         data = json.load(open(path, encoding="utf-8"))
@@ -104,8 +123,13 @@ def parse_pyproject(path):
         name = m.group(1) if m else None
         m = re.search(r'^version\s*=\s*["\']([^"\']+)', text, re.M)
         version = m.group(1) if m else None
-    return {"kind": "pyproject.toml", "name": name, "version": version,
-            "scripts": scripts, "script_map": script_map}
+    return {
+        "kind": "pyproject.toml",
+        "name": name,
+        "version": version,
+        "scripts": scripts,
+        "script_map": script_map,
+    }
 
 
 def parse_gomod(path):
@@ -152,8 +176,12 @@ def parse_makefile(path):
                     targets.append(t)
     except OSError:
         return None
-    return {"kind": os.path.basename(path), "name": None, "version": None,
-            "scripts": targets[:15]}
+    return {
+        "kind": os.path.basename(path),
+        "name": None,
+        "version": None,
+        "scripts": targets[:15],
+    }
 
 
 def parse_readme(path):
@@ -161,9 +189,12 @@ def parse_readme(path):
         for ln in open(path, encoding="utf-8"):
             ln = ln.strip()
             if ln:
-                return {"kind": os.path.basename(path),
-                        "name": ln.lstrip("#").strip()[:80],
-                        "version": None, "scripts": []}
+                return {
+                    "kind": os.path.basename(path),
+                    "name": ln.lstrip("#").strip()[:80],
+                    "version": None,
+                    "scripts": [],
+                }
     except OSError:
         pass
     return None
@@ -195,6 +226,7 @@ def find_manifests(root):
 
 # ------------------------------------------------------------ entry points
 
+
 def find_entry_points(root, manifests):
     cands = {}  # relpath -> reason
 
@@ -213,8 +245,9 @@ def find_entry_points(root, manifests):
                 add(bin_, "package.json bin")
         if m["kind"] == "pyproject.toml":
             for k, v in (m.get("script_map") or {}).items():
-                add(v.split(":")[0].replace(".", "/") + ".py",
-                    "pyproject script:%s" % k)
+                add(
+                    v.split(":")[0].replace(".", "/") + ".py", "pyproject script:%s" % k
+                )
 
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if not is_ignored(d))
@@ -230,6 +263,7 @@ def find_entry_points(root, manifests):
 
 # ------------------------------------------------------------------ tree
 
+
 def build_tree(root, max_depth):
     def node(path, depth):
         name = os.path.basename(path)
@@ -240,8 +274,7 @@ def build_tree(root, max_depth):
                 size = 0
             return {"name": name, "type": "file", "kb": fmt_kb(size)}
         files, size = dir_stats(path)
-        n = {"name": name + "/", "type": "dir", "files": files,
-             "kb": fmt_kb(size)}
+        n = {"name": name + "/", "type": "dir", "files": files, "kb": fmt_kb(size)}
         if depth < max_depth:
             n["children"] = [node(e.path, depth + 1) for e in list_entries(path)]
         return n
@@ -272,8 +305,10 @@ def render_markdown(root, manifests, entry_points, tree):
             last = i == len(nodes) - 1
             bar, cont = ("`-- ", "    ") if last else ("|-- ", "|   ")
             if n["type"] == "dir":
-                out.append("%s%s%s (%d files, %s)" %
-                           (prefix, bar, n["name"], n["files"], n["kb"]))
+                out.append(
+                    "%s%s%s (%d files, %s)"
+                    % (prefix, bar, n["name"], n["files"], n["kb"])
+                )
                 if "children" in n:
                     emit(n["children"], prefix + cont, out)
             else:
@@ -294,15 +329,12 @@ def render_markdown(root, manifests, entry_points, tree):
 
 # ------------------------------------------------------------------ main
 
+
 def main(argv=None):
-    ap = argparse.ArgumentParser(
-        description="Structure-first repo map (stdlib only).")
-    ap.add_argument("dir", nargs="?", default=".",
-                    help="repo root (default: .)")
-    ap.add_argument("--depth", type=int, default=2,
-                    help="tree depth (default: 2)")
-    ap.add_argument("--json", action="store_true",
-                    help="emit JSON instead of markdown")
+    ap = argparse.ArgumentParser(description="Structure-first repo map (stdlib only).")
+    ap.add_argument("dir", nargs="?", default=".", help="repo root (default: .)")
+    ap.add_argument("--depth", type=int, default=2, help="tree depth (default: 2)")
+    ap.add_argument("--json", action="store_true", help="emit JSON instead of markdown")
     args = ap.parse_args(argv)
 
     root = os.path.abspath(args.dir)
@@ -314,12 +346,17 @@ def main(argv=None):
     tree = build_tree(root, max(1, args.depth))
 
     if args.json:
-        print(json.dumps({
-            "root": root,
-            "manifests": manifests,
-            "entry_points": entry_points,
-            "tree": tree,
-        }, indent=2))
+        print(
+            json.dumps(
+                {
+                    "root": root,
+                    "manifests": manifests,
+                    "entry_points": entry_points,
+                    "tree": tree,
+                },
+                indent=2,
+            )
+        )
     else:
         print(render_markdown(root, manifests, entry_points, tree))
 

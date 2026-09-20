@@ -9,6 +9,7 @@ Usage:
 Next action) to be present and non-empty, and the whole file to be
 <= 60 lines. Exit 0 on pass; non-zero with specific complaints on fail.
 """
+
 import json
 import re
 import sys
@@ -21,7 +22,10 @@ REQUIRED_SECTIONS = {
     "Goal": [r"^#+\s*goal\b"],
     "Decisions": [r"^#+\s*decisions?\b"],
     "State": [r"^#+\s*state\b"],
-    "Open threads / Next action": [r"^#+\s*open\s*threads?\b", r"^#+\s*next\s*actions?\b"],
+    "Open threads / Next action": [
+        r"^#+\s*open\s*threads?\b",
+        r"^#+\s*next\s*actions?\b",
+    ],
 }
 
 TEMPLATE = """# Checkpoint: <workstream name>
@@ -59,9 +63,7 @@ def lint(path: Path) -> tuple[bool, list[str], dict]:
     lines = path.read_text(encoding="utf-8").splitlines()
     line_count = len(lines)
     if line_count > MAX_LINES:
-        errors.append(
-            f"too long: {line_count} lines (limit {MAX_LINES}) — compress it"
-        )
+        errors.append(f"too long: {line_count} lines (limit {MAX_LINES}) — compress it")
 
     # Map each heading line to its section label, or None.
     section_body: dict[str, list[str]] = {label: [] for label in REQUIRED_SECTIONS}
@@ -83,11 +85,12 @@ def lint(path: Path) -> tuple[bool, list[str], dict]:
         return (
             not t
             or t in ("...", "—", "-", "TODO", "TBD", "N/A", "n/a", "none", "None")
-            or t.startswith("<") and t.endswith(">")
+            or t.startswith("<")
+            and t.endswith(">")
         )
 
     for label in REQUIRED_SECTIONS:
-        content = [l for l in section_body[label] if not is_placeholder(l)]
+        content = [line for line in section_body[label] if not is_placeholder(line)]
         if not content:
             if not section_body[label]:
                 errors.append(f"missing section: {label}")
@@ -97,8 +100,10 @@ def lint(path: Path) -> tuple[bool, list[str], dict]:
     info = {
         "file": str(path),
         "line_count": line_count,
-        "sections": {label: len([l for l in body if l.strip()]) > 0
-                     for label, body in section_body.items()},
+        "sections": {
+            label: len([line for line in body if line.strip()]) > 0
+            for label, body in section_body.items()
+        },
     }
     return not errors, errors, info
 
@@ -120,7 +125,9 @@ def main(argv: list[str]) -> int:
         print(json.dumps({"ok": ok, "errors": errors, **info}, indent=2))
     else:
         if ok:
-            print(f"OK: {info['file']} — {info['line_count']} lines, all sections present")
+            print(
+                f"OK: {info['file']} — {info['line_count']} lines, all sections present"
+            )
         else:
             print(f"FAIL: {info.get('file', argv[2])}")
             for e in errors:

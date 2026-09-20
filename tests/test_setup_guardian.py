@@ -95,7 +95,7 @@ def test_known_bad_shas():
 
 def test_ci_aggregator_ok():
     fixed = (
-        'failed = {k: v for k, v in needs.items() '
+        "failed = {k: v for k, v in needs.items() "
         'if v.get("result") not in ("success", "skipped")}'
     )
     ok, msg = doctor.ci_aggregator_ok(fixed)
@@ -103,8 +103,7 @@ def test_ci_aggregator_ok():
     assert isinstance(msg, str)
 
     buggy = (
-        'failed = {k: v for k, v in needs.items() '
-        'if v not in ("success", "skipped")}'
+        'failed = {k: v for k, v in needs.items() if v not in ("success", "skipped")}'
     )
     ok, msg = doctor.ci_aggregator_ok(buggy)
     assert ok is False
@@ -130,13 +129,11 @@ def test_subprocess_env_findings():
     findings = doctor.subprocess_env_findings(bad)
     assert any(level == "fail" for _, level, _ in findings)
     assert all(
-        isinstance(lineno, int) and isinstance(msg, str)
-        for lineno, _, msg in findings
+        isinstance(lineno, int) and isinstance(msg, str) for lineno, _, msg in findings
     )
 
     ok_inherit = (
-        "import os, subprocess\n"
-        'subprocess.run(["ls"], env=dict(os.environ, X="1"))\n'
+        'import os, subprocess\nsubprocess.run(["ls"], env=dict(os.environ, X="1"))\n'
     )
     assert doctor.subprocess_env_findings(ok_inherit) == []
 
@@ -227,9 +224,7 @@ def _write_skill_count_repo(repo: Path, readme_n: int, json_names, table_names):
     (repo / "README.md").write_text(f"{readme_n} skills.\n")
     assets = repo / "site" / "assets"
     assets.mkdir(parents=True, exist_ok=True)
-    (assets / "skills.json").write_text(
-        json.dumps([{"name": n} for n in json_names])
-    )
+    (assets / "skills.json").write_text(json.dumps([{"name": n} for n in json_names]))
     rows = "".join(f"| `{n}` | 0.1.0 | desc |\n" for n in table_names)
     (repo / "AGENTS.md").write_text(f"# Agents\n\n## Skill catalog\n\n{rows}")
 
@@ -263,9 +258,11 @@ def test_fix_readme_count_no_file(tmp_path):
 
 def test_main_json_and_exit_codes(monkeypatch, capsys):
     monkeypatch.setattr(
-        doctor, "run_all", lambda repo, fix=False: [
+        doctor,
+        "run_all",
+        lambda repo, fix=False: [
             doctor.CheckResult(name="x", status="pass", message="m")
-        ]
+        ],
     )
     with pytest.raises(SystemExit) as exc:
         doctor.main(["--json"])
@@ -276,9 +273,11 @@ def test_main_json_and_exit_codes(monkeypatch, capsys):
 
 def test_main_json_exit_code_on_fail(monkeypatch, capsys):
     monkeypatch.setattr(
-        doctor, "run_all", lambda repo, fix=False: [
+        doctor,
+        "run_all",
+        lambda repo, fix=False: [
             doctor.CheckResult(name="x", status="fail", message="m")
-        ]
+        ],
     )
     with pytest.raises(SystemExit) as exc:
         doctor.main(["--json"])

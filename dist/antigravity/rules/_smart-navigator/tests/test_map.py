@@ -17,11 +17,15 @@ class TestMap(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         root = Path(self.tmp.name)
-        (root / "package.json").write_text(json.dumps({
-            "name": "fixture-repo",
-            "version": "0.0.1",
-            "scripts": {"test": "pytest", "build": "make"},
-        }))
+        (root / "package.json").write_text(
+            json.dumps(
+                {
+                    "name": "fixture-repo",
+                    "version": "0.0.1",
+                    "scripts": {"test": "pytest", "build": "make"},
+                }
+            )
+        )
         (root / "src").mkdir()
         (root / "src" / "main.py").write_text("print('hi')\n")
         (root / "src" / "util.py").write_text("X = 1\n")
@@ -39,7 +43,9 @@ class TestMap(unittest.TestCase):
     def run_map(self, *args):
         r = subprocess.run(
             [sys.executable, str(SCRIPT), str(self.root), *args],
-            capture_output=True, text=True)
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(r.returncode, 0, "stderr: %s" % r.stderr)
         return r.stdout
 
@@ -47,13 +53,13 @@ class TestMap(unittest.TestCase):
         out = self.run_map()
         self.assertIn("fixture-repo", out)
         self.assertIn("0.0.1", out)
-        self.assertIn("test", out)   # script names listed
+        self.assertIn("test", out)  # script names listed
         self.assertIn("build", out)
 
     def test_entry_points_guessed(self):
         out = self.run_map()
-        self.assertIn("src/main.py", out)   # main.* name match
-        self.assertIn("bin/run", out)       # bin/ script
+        self.assertIn("src/main.py", out)  # main.* name match
+        self.assertIn("bin/run", out)  # bin/ script
 
     def test_ignored_dirs_skipped(self):
         out = self.run_map()
@@ -70,21 +76,25 @@ class TestMap(unittest.TestCase):
         paths = [ep["path"] for ep in data["entry_points"]]
         self.assertIn(os.path.join("src", "main.py"), paths)
         self.assertIn(os.path.join("bin", "run"), paths)
-        self.assertTrue(any(m["kind"] == "package.json"
-                            and m["name"] == "fixture-repo"
-                            for m in data["manifests"]))
+        self.assertTrue(
+            any(
+                m["kind"] == "package.json" and m["name"] == "fixture-repo"
+                for m in data["manifests"]
+            )
+        )
 
         def names(nodes):
             for n in nodes:
                 yield n["name"]
                 yield from names(n.get("children", []))
+
         tree_names = list(names(data["tree"]))
         for junk in ("node_modules/", ".git/", "dist/"):
             self.assertNotIn(junk, tree_names)
 
     def test_depth_flag(self):
         out = self.run_map("--depth", "1")
-        self.assertIn("src/main.py", out)   # entry points unaffected
+        self.assertIn("src/main.py", out)  # entry points unaffected
         self.assertIn("src/", out)
 
 

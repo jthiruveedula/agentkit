@@ -8,6 +8,7 @@ machine with Python 3. Detects the repo root by walking up from this file.
     python3 skills/setup-guardian/scripts/doctor.py --fix      # apply safe fixes
     python3 skills/setup-guardian/scripts/doctor.py --watch    # one JSON object
 """
+
 from __future__ import annotations
 
 import argparse
@@ -83,9 +84,7 @@ def iter_skill_names(repo: Path) -> list[str]:
     if not skills.is_dir():
         return []
     return sorted(
-        p.name
-        for p in skills.iterdir()
-        if p.is_dir() and (p / "SKILL.md").is_file()
+        p.name for p in skills.iterdir() if p.is_dir() and (p / "SKILL.md").is_file()
     )
 
 
@@ -191,9 +190,7 @@ def lock_problems(lock: dict) -> list[str]:
             if not repo:
                 problems.append("source %s: missing 'repo'" % label)
             elif not re.match(r"[^/\s]+/[^/\s]+\Z", str(repo)):
-                problems.append(
-                    "source %s: repo %r is not owner/name" % (label, repo)
-                )
+                problems.append("source %s: repo %r is not owner/name" % (label, repo))
             problems.extend(_source_problems(src, label))
         return problems
     return _source_problems(lock, str(lock.get("name", "source")))
@@ -229,9 +226,7 @@ def _code_only(py_text: str) -> str:
     except (tokenize.TokenError, IndentationError, SyntaxError):
         return py_text
     spans = [
-        (t.start, t.end)
-        for t in toks
-        if t.type in (tokenize.STRING, tokenize.COMMENT)
+        (t.start, t.end) for t in toks if t.type in (tokenize.STRING, tokenize.COMMENT)
     ]
     if not spans:
         return py_text
@@ -299,9 +294,7 @@ def tool_bases(home: Path, plat: str, env: dict[str, str]) -> dict[str, Path]:
         "claude": Path(env.get("CLAUDE_HOME") or str(home / ".claude")),
         "copilot": copilot,
         "cursor": Path(env.get("CURSOR_HOME") or str(home / ".cursor")),
-        "antigravity": Path(
-            env.get("ANTIGRAVITY_HOME") or str(home / ".antigravity")
-        ),
+        "antigravity": Path(env.get("ANTIGRAVITY_HOME") or str(home / ".antigravity")),
     }
 
 
@@ -378,18 +371,14 @@ def fix_readme_count(repo: Path, n: int) -> bool:
 
 def _run_ok(cmd: list[str], repo: Path) -> bool:
     try:
-        r = subprocess.run(
-            cmd, cwd=repo, capture_output=True, text=True, timeout=300
-        )
+        r = subprocess.run(cmd, cwd=repo, capture_output=True, text=True, timeout=300)
     except (OSError, subprocess.TimeoutExpired):
         return False
     return r.returncode == 0
 
 
 def regen_catalog(repo: Path) -> bool:
-    return _run_ok(
-        [sys.executable, "site/scripts/build-catalog.py"], repo
-    )
+    return _run_ok([sys.executable, "site/scripts/build-catalog.py"], repo)
 
 
 def rebuild_dist(repo: Path) -> bool:
@@ -470,9 +459,7 @@ def check_install_targets(repo: Path, fix: bool = False) -> CheckResult:
     if bad_tools or stale:
         details: list[str] = []
         if bad_tools:
-            details.append(
-                "missing or dangling targets for: %s" % ", ".join(bad_tools)
-            )
+            details.append("missing or dangling targets for: %s" % ", ".join(bad_tools))
         if stale:
             shown = ", ".join(stale[:5])
             if len(stale) > 5:
@@ -532,9 +519,13 @@ def check_skill_count(repo: Path, fix: bool = False) -> CheckResult:
     if readme != n:
         mismatches.append("README claims %s (skills/ has %d)" % (readme, n))
     if catalog != n:
-        mismatches.append("site/assets/skills.json lists %s (skills/ has %d)" % (catalog, n))
+        mismatches.append(
+            "site/assets/skills.json lists %s (skills/ has %d)" % (catalog, n)
+        )
     if agents != n:
-        mismatches.append("AGENTS.md catalog table lists %s (skills/ has %d)" % (agents, n))
+        mismatches.append(
+            "AGENTS.md catalog table lists %s (skills/ has %d)" % (agents, n)
+        )
     if not mismatches:
         return CheckResult(
             name,
@@ -548,8 +539,9 @@ def check_skill_count(repo: Path, fix: bool = False) -> CheckResult:
         result = check_skill_count(repo, fix=False)
         if result.status == "pass":
             result.fixed = True
-            result.message += " (auto-fixed: README count%s, catalog regen, dist rebuild)" % (
-                " updated" if changed else ""
+            result.message += (
+                " (auto-fixed: README count%s, catalog regen, dist rebuild)"
+                % (" updated" if changed else "")
             )
             return result
     return CheckResult(
@@ -583,9 +575,7 @@ def check_pinned_shas(repo: Path, fix: bool = False) -> CheckResult:
                     % (wf.name, target, ref)
                 )
             elif ref_kind(ref) == "tag":
-                warns.append(
-                    "%s: %s@%s is not SHA-pinned" % (wf.name, target, ref)
-                )
+                warns.append("%s: %s@%s is not SHA-pinned" % (wf.name, target, ref))
     if fails:
         return CheckResult(
             name,
@@ -689,9 +679,7 @@ def _iter_scan_files(repo: Path) -> list[Path]:
     files: list[Path] = []
     for root in (repo / "scripts", repo / "tests"):
         if root.is_dir():
-            files.extend(
-                p for p in root.glob("*.py") if "__pycache__" not in p.parts
-            )
+            files.extend(p for p in root.glob("*.py") if "__pycache__" not in p.parts)
     skills_scripts = repo / "skills"
     if skills_scripts.is_dir():
         files.extend(
@@ -765,7 +753,9 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--repo", default=None, help="repo root (default: auto-detect)")
     parser.add_argument("--fix", action="store_true", help="apply safe auto-fixes")
     parser.add_argument("--json", action="store_true", help="emit one JSON object")
-    parser.add_argument("--watch", action="store_true", help="watch mode: one JSON object")
+    parser.add_argument(
+        "--watch", action="store_true", help="watch mode: one JSON object"
+    )
     parser.add_argument("--check", default=None, help="run a single named check")
     args = parser.parse_args(argv)
 
