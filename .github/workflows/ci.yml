@@ -172,7 +172,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
 
@@ -189,7 +189,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
 
@@ -268,9 +268,9 @@ jobs:
               exit 0
               ;;
           esac
-          if ! printf '%s' "$BRANCH_NAME" | grep -Eq '^(feature|fix|hotfix|chore|docs|release)/[a-z0-9][a-z0-9._/-]*$'; then
+          if ! printf '%s' "$BRANCH_NAME" | grep -Eq '^(feature|feat|fix|hotfix|chore|docs|release)/[a-z0-9][a-z0-9._/-]*$'; then
             echo "::error::branch '$BRANCH_NAME' does not follow the naming standard"
-            echo "Use feature/<scope>-<desc>, fix/<scope>-<desc>, hotfix/<desc>, chore/<desc>, docs/<desc>, release/<version>."
+            echo "Use feature/<scope>-<desc> (or feat/), fix/<scope>-<desc>, hotfix/<desc>, chore/<desc>, docs/<desc>, release/<version>."
             exit 1
           fi
           echo "branch name OK: $BRANCH_NAME"

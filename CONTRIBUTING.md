@@ -27,7 +27,7 @@ squash-merge back into `main`. No long-lived feature branches.
 
 | Prefix | Use for | Example |
 |---|---|---|
-| `feature/` | new skills, tooling, site work | `feature/memory-substrate` |
+| `feature/` (or `feat/`) | new skills, tooling, site work | `feature/memory-substrate` |
 | `fix/` | bug fixes | `fix/copilot-asset-paths` |
 | `hotfix/` | urgent `main`-branch fixes | `hotfix/install-ps1-admin-check` |
 | `chore/` | maintenance, dependencies, CI | `chore/bump-ruff-0-17` |
