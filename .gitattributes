@@ -1,0 +1,15 @@
+# Force LF everywhere, regardless of platform checkout settings (autocrlf).
+# scripts/build.py always writes LF; without this, Windows checkouts
+# rewrite every generated file to CRLF and build.py --check reports the
+# whole tree as "stale" even though nothing actually changed.
+* text=auto eol=lf
+
+# Never normalize binaries.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
