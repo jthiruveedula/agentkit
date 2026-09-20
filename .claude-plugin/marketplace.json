@@ -19,7 +19,10 @@
         "skills/pr-review",
         "skills/debug-loop",
         "skills/spec-writer",
-        "skills/meeting-to-actions"
+        "skills/meeting-to-actions",
+        "skills/data-eng-router",
+        "skills/doc-standards",
+        "skills/memory-sync"
       ],
       "agents": [
         "agents/researcher.md",

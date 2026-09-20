@@ -1,0 +1,53 @@
+---
+name: data-eng-router
+description: Auto-detects which cloud/platform a data engineering task belongs to (GCP, AWS, Azure, Databricks) and routes to that platform's wired external skill. Use when the user asks for help with a data pipeline, ETL/ELT, data warehouse, data lake, or any data engineering task — before reaching for general knowledge, check whether a vendor-authored skill already covers it.
+version: 0.1.0
+allowed-tools: Bash, Read
+---
+
+# Data Engineering Router
+
+Data engineering tasks are usually platform-specific even when the request
+isn't — "load this into the warehouse" means something different on
+BigQuery than on Redshift. This skill picks the platform from the task's
+own vocabulary and hands off to the matching `ext-*` skill instead of
+answering from general knowledge alone.
+
+## Procedure
+
+1. **Classify.** Run the deterministic classifier on the task text:
+   ```
+   python3 scripts/classify.py "<the task, verbatim>"
+   ```
+   Returns `{platform, route_to, confidence, band, ask_clarifying,
+   runners_up, note}`. `platform` is one of `gcp` / `aws` / `azure` /
+   `databricks` / `ambiguous`.
+
+2. **`ambiguous` or `band: low`** — ask one short question naming the
+   likely candidates from `runners_up` (e.g. *"Is this BigQuery/GCP or
+   Redshift/AWS?"*). Don't guess a platform for a genuinely
+   platform-agnostic question (generic SQL, dbt modeling theory, data
+   modeling principles) — answer directly instead of forcing a route.
+
+3. **`medium`/`high` confidence** — state the platform in one line
+   (`Platform: gcp (0.81 confidence)`), then invoke the matching skill
+   named in `route_to`:
+   - `gcp` → `ext-gcp`
+   - `aws` → `ext-aws`
+   - `azure` → `ext-azure`
+   - `databricks` → `ext-databricks`
+
+   That skill syncs its pinned external source(s) on first use and
+   defers to the vendor's own `SKILL.md` — this router's job ends once
+   the right skill is loaded.
+
+4. **Multi-platform tasks** (e.g. "move data from S3 into BigQuery") —
+   name both platforms from `runners_up`, load both `ext-*` skills, and
+   be explicit about which side of the pipeline each one covers.
+
+## Reference
+
+- `scripts/classify.py` — the classifier. `--selftest` runs the golden
+  cases in `tests/golden.json`.
+- `tests/golden.json` — 14 golden platform-classification fixtures; add a
+  case here before hand-tuning a classifier weight.
