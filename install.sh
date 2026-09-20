@@ -4,11 +4,15 @@
 # Idempotent: re-running never clobbers a file this installer didn't create.
 #
 # Usage:
-#   ./install.sh [--tools=claude,copilot,cursor,antigravity] [--copy] [--dry-run]
+#   ./install.sh [--tools=claude,copilot,cursor,antigravity] [--copy] [--dry-run] [--with-external]
 #   ./install.sh upgrade    # git pull + re-link with your last-used --tools,
 #                            # prunes symlinks for any skill removed upstream
 #   ./install.sh uninstall
 #   ./install.sh version    # show installed vs. latest released version
+#
+# --with-external also fetches every source pinned in external/skills.lock.json
+# (scripts/sync-external.sh) in the same run, so a fresh machine is fully set
+# up -- native and external skills both -- in one command.
 #
 # Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir),
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
@@ -26,17 +30,19 @@ TOOLS_GIVEN=0
 MODE=link   # link | copy
 DRY_RUN=0
 ACTION=install
+WITH_EXTERNAL=0
 
 for arg in "$@"; do
   case "$arg" in
     --tools=*) TOOLS="${arg#--tools=}"; TOOLS_GIVEN=1 ;;
     --copy) MODE=copy ;;
     --dry-run) DRY_RUN=1 ;;
+    --with-external) WITH_EXTERNAL=1 ;;
     upgrade) ACTION=upgrade ;;
     uninstall) ACTION=uninstall ;;
     version) ACTION=version ;;
     -h|--help)
-      sed -n '2,16p' "$0"; exit 0 ;;
+      sed -n '2,19p' "$0"; exit 0 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -237,6 +243,16 @@ run_install() {
   done
   IFS=$OLD_IFS
   [ "$DRY_RUN" = 1 ] || printf '%s' "$TOOLS" > "$TOOLS_FILE"
+
+  if [ "$WITH_EXTERNAL" = 1 ]; then
+    log "fetching pinned external skill sources..."
+    if [ "$DRY_RUN" = 1 ]; then
+      log "  would run: $AGENTKIT_HOME/scripts/sync-external.sh"
+    else
+      "$AGENTKIT_HOME/scripts/sync-external.sh" || warn "sync-external.sh failed -- native skills are still installed; re-run it yourself when ready"
+    fi
+  fi
+
   log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
 }
 

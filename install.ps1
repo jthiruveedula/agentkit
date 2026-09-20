@@ -19,6 +19,9 @@
   Show the installed vs. latest released version.
 .PARAMETER DryRun
   Print what would happen without touching the filesystem.
+.PARAMETER WithExternal
+  Also fetch every source pinned in external/skills.lock.json (requires a
+  bash on PATH -- Git Bash/WSL; the sync script itself is POSIX sh).
 .EXAMPLE
   .\install.ps1 -Tools claude,cursor
 .EXAMPLE
@@ -33,7 +36,8 @@ param(
     [switch]$Uninstall,
     [switch]$Upgrade,
     [switch]$Version,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$WithExternal
 )
 
 $ErrorActionPreference = "Stop"
@@ -228,6 +232,20 @@ function Invoke-Install {
         }
     }
     if (-not $DryRun) { Set-Content -Path $ToolsFile -Value $Tools -NoNewline }
+
+    if ($WithExternal) {
+        Write-Log "fetching pinned external skill sources..."
+        $bash = Get-Command bash -ErrorAction SilentlyContinue
+        if (-not $bash) {
+            Write-Warn "no bash on PATH (install Git for Windows / WSL) -- skipping; run scripts/sync-external.sh manually once bash is available"
+        } elseif ($DryRun) {
+            Write-Log "  would run: bash scripts/sync-external.sh"
+        } else {
+            & $bash.Source (Join-Path $AgentkitHome "scripts/sync-external.sh")
+            if ($LASTEXITCODE -ne 0) { Write-Warn "sync-external.sh failed -- native skills are still installed; re-run it yourself when ready" }
+        }
+    }
+
     Write-Log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
 }
 
