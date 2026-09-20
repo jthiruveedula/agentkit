@@ -4,11 +4,22 @@
 # Idempotent: re-running never clobbers a file this installer didn't create.
 #
 # Usage:
-#   ./install.sh [--tools=claude,copilot,cursor,antigravity] [--copy] [--dry-run]
+#   ./install.sh [--tools=claude,copilot,cursor,antigravity] [--copy] [--dry-run] [--with-external] [--with-boost]
 #   ./install.sh upgrade    # git pull + re-link with your last-used --tools,
 #                            # prunes symlinks for any skill removed upstream
 #   ./install.sh uninstall
 #   ./install.sh version    # show installed vs. latest released version
+#
+# --with-external also fetches every source pinned in external/skills.lock.json
+# (scripts/sync-external.sh) in the same run, so a fresh machine is fully set
+# up -- native and external skills both -- in one command.
+#
+# --with-boost installs jfrog/boost (CLI output compression -- fewer tokens
+# spent on shell noise) and wires it into every tool named in --tools. THIS
+# ACCEPTS JFROG'S ONLINE PREVIEW AGREEMENT NON-INTERACTIVELY (boost.jfrog.com
+# /preview-agreement) and sends them command metadata (timing, exit codes,
+# token savings -- never raw output or file contents). Pass it only once you
+# already agree to those terms; it is never on by default.
 #
 # Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir),
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
@@ -26,17 +37,21 @@ TOOLS_GIVEN=0
 MODE=link   # link | copy
 DRY_RUN=0
 ACTION=install
+WITH_EXTERNAL=0
+WITH_BOOST=0
 
 for arg in "$@"; do
   case "$arg" in
     --tools=*) TOOLS="${arg#--tools=}"; TOOLS_GIVEN=1 ;;
     --copy) MODE=copy ;;
     --dry-run) DRY_RUN=1 ;;
+    --with-external) WITH_EXTERNAL=1 ;;
+    --with-boost) WITH_BOOST=1 ;;
     upgrade) ACTION=upgrade ;;
     uninstall) ACTION=uninstall ;;
     version) ACTION=version ;;
     -h|--help)
-      sed -n '2,16p' "$0"; exit 0 ;;
+      sed -n '2,25p' "$0"; exit 0 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -237,7 +252,59 @@ run_install() {
   done
   IFS=$OLD_IFS
   [ "$DRY_RUN" = 1 ] || printf '%s' "$TOOLS" > "$TOOLS_FILE"
+
+  if [ "$WITH_EXTERNAL" = 1 ]; then
+    log "fetching pinned external skill sources..."
+    if [ "$DRY_RUN" = 1 ]; then
+      log "  would run: $AGENTKIT_HOME/scripts/sync-external.sh"
+    else
+      "$AGENTKIT_HOME/scripts/sync-external.sh" || warn "sync-external.sh failed -- native skills are still installed; re-run it yourself when ready"
+    fi
+  fi
+
+  [ "$WITH_BOOST" = 1 ] && with_boost
+
   log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+}
+
+# with_boost -- installs jfrog/boost if missing, wires it into every tool in
+# $TOOLS boost supports (claude, cursor, copilot). Accepts JFrog's Online
+# Preview Agreement non-interactively -- only reached when the caller passed
+# --with-boost, which is the consent (see install.sh's own header comment).
+with_boost() {
+  log "boost (CLI output compression):"
+  if [ "$DRY_RUN" = 1 ]; then
+    log "  would install/wire boost for: $TOOLS (accepts JFrog's Online Preview Agreement)"
+    return 0
+  fi
+
+  if ! command -v boost >/dev/null 2>&1; then
+    log "  installing boost (boost.jfrog.com, preview software)..."
+    if ! curl -fsSL https://boost.jfrog.com/install.sh | sh; then
+      warn "boost install failed -- skipping; re-run with --with-boost once resolved"
+      return 0
+    fi
+  fi
+  if ! command -v boost >/dev/null 2>&1; then
+    warn "boost installed but not on PATH yet -- open a new shell, then run: boost init --accept-terms"
+    return 0
+  fi
+
+  OLD_IFS=$IFS; IFS=','
+  for tool in $TOOLS; do
+    IFS=$OLD_IFS
+    case "$tool" in
+      claude|cursor|copilot)
+        boost init "--$tool" --accept-terms >/dev/null 2>&1 \
+          && log "  wired: $tool (takes effect on its next session/reload)" \
+          || warn "  boost init --$tool failed -- see 'boost init --$tool --dry-run' for why"
+        ;;
+      antigravity) : ;;  # not a boost-supported target yet
+      *) : ;;
+    esac
+    IFS=','
+  done
+  IFS=$OLD_IFS
 }
 
 if [ ! -d "$DIST" ]; then

@@ -32,6 +32,14 @@ uvx --from git+https://github.com/jthiruveedula/agentkit agentkit
 make install
 ```
 
+Add `--with-external` (`-WithExternal` on Windows) to also fetch every
+pinned [external skill source](#external-skills) in the same command —
+one line sets up native *and* external skills on a brand-new machine:
+
+```sh
+./install.sh --with-external
+```
+
 Re-running install is always safe: already-linked files are skipped, and
 any file it didn't create is backed up (`<file>.bak.<timestamp>`) rather
 than overwritten. `git pull` in the clone updates everything downstream
@@ -65,6 +73,15 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `debug-loop` | Hypothesize-test-narrow loop to root-cause a failing test or crash. |
 | `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
 | `meeting-to-actions` | Extracts action items with owners/dates from meeting notes. |
+
+Plus 10 thin router skills that wire in the pinned [external
+sources](#external-skills) on demand — `ext-diagrams`, `ext-ui-ux`,
+`ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`, `ext-aws`,
+`ext-azure`, `ext-systems-design`, `ext-gap-discovery`. Each syncs its
+source(s) via `scripts/sync-external.sh` on first use and defers to that
+source's own `SKILL.md` — your AI tools can reach for a real
+vendor-authored GCP/AWS/Azure/diagram/UI-UX skill the same way they reach
+for `prompt-enhancer`, not just read about it in a lock file.
 
 Five subagents (`agents/`) with narrow charters and explicit handoff
 contracts: `researcher`, `implementer`, `reviewer`, `test-writer`,
@@ -115,18 +132,44 @@ directly into Claude Code.
 
 ## External skills
 
-`external/skills.lock.json` pins outside skill sources by commit SHA and
-license (diagrams, UI/UX, codebase reads, cloud provider skills, system
-design references — see the file for the full list and attribution). They
-are **not** vendored into this repo's git history; `scripts/sync-external.sh`
-fetches them on demand into the gitignored `external/<name>/`. One source
-(`awesome-system-design-resources`) is GPL-3.0 and kept reference-only —
-read for guidance, never copied verbatim into a skill body.
+`external/skills.lock.json` pins 13 outside skill sources by commit SHA
+and license (diagrams, UI/UX, codebase reads, cloud provider skills,
+system design references, gap discovery — see the file for the full list
+and attribution). They are **not** vendored into this repo's git history;
+`scripts/sync-external.sh` fetches them on demand into the gitignored
+`external/<name>/`. One source (`systems-design-resources`) is GPL-3.0 and
+kept reference-only — read for guidance, never copied verbatim into a
+skill body.
+
+Each source is also wired to a real, invokable `ext-*` skill in
+`skills/` (see the [skill catalog](#skill-catalog)) — your AI tools reach
+for these the same way they reach for `prompt-enhancer`, not just find
+them listed in a lock file. A router skill syncs its own source(s) on
+first use, so you never have to remember the sync command yourself.
 
 ```sh
-./scripts/sync-external.sh              # fetch all pinned sources
+./scripts/sync-external.sh                           # fetch all pinned sources
 ./scripts/sync-external.sh diagram-design codegraph   # fetch specific ones
+./install.sh --with-external                          # install + fetch all, one command
 ```
+
+## CLI token savings
+
+`ext-cli-ops` wires [jfrog/boost](https://boost.jfrog.com) into your
+coding agent — it compresses noisy shell output (test/build/lint/log
+dumps) so a session spends tokens on signal, not scrollback, while
+keeping errors and diffs intact. **Not on by default** — it's preview
+software: installing it accepts JFrog's Online Preview Agreement and
+sends them command metadata (timing, exit codes, token savings — never
+raw output or file contents).
+
+```sh
+./install.sh --tools=claude --with-boost   # installs boost, wires it into claude
+# or ask the ext-cli-ops skill to do it, which discloses the same terms first
+```
+
+Once wired: `DISABLE_BOOST=1 <command>` gets exact unfiltered output on
+any one command; `boost init --claude --uninstall` rolls it back.
 
 ## Build → test → contribute
 
