@@ -1,0 +1,16 @@
+[
+  {"id": "gcp-bigquery", "prompt": "load this into bigquery and schedule with cloud composer", "expect_platform": "gcp"},
+  {"id": "gcp-vertex", "prompt": "train a model on vertex ai using data from gcs", "expect_platform": "gcp"},
+  {"id": "gcp-dataflow", "prompt": "write a dataflow pipeline that reads from pub/sub", "expect_platform": "gcp"},
+  {"id": "aws-redshift", "prompt": "our redshift cluster is slow, tune the glue job feeding it", "expect_platform": "aws"},
+  {"id": "aws-athena", "prompt": "query the s3 data lake with athena", "expect_platform": "aws"},
+  {"id": "aws-kinesis", "prompt": "set up a kinesis stream into an emr job", "expect_platform": "aws"},
+  {"id": "azure-synapse", "prompt": "build a synapse pipeline fed by azure data factory", "expect_platform": "azure"},
+  {"id": "azure-adls", "prompt": "ingest into azure data lake storage from event hubs", "expect_platform": "azure"},
+  {"id": "azure-generic", "prompt": "provision an azure data factory linked service", "expect_platform": "azure"},
+  {"id": "databricks-delta", "prompt": "compact this delta lake table and update unity catalog", "expect_platform": "databricks"},
+  {"id": "databricks-spark", "prompt": "debug why the databricks spark job keeps failing", "expect_platform": "databricks"},
+  {"id": "databricks-dbx", "prompt": "deploy this dbx bundle to the workspace", "expect_platform": "databricks"},
+  {"id": "ambiguous-generic-etl", "prompt": "write an ETL pipeline for this dataset", "expect_platform": "ambiguous"},
+  {"id": "ambiguous-vague", "prompt": "help me with my data warehouse", "expect_platform": "ambiguous"}
+]
