@@ -19,6 +19,16 @@
   Show the installed vs. latest released version.
 .PARAMETER DryRun
   Print what would happen without touching the filesystem.
+.PARAMETER WithExternal
+  Also fetch every source pinned in external/skills.lock.json (requires a
+  bash on PATH -- Git Bash/WSL; the sync script itself is POSIX sh).
+.PARAMETER WithBoost
+  Install jfrog/boost (CLI output compression) and wire it into every
+  -Tools target boost supports (claude, cursor, copilot). THIS ACCEPTS
+  JFROG'S ONLINE PREVIEW AGREEMENT (boost.jfrog.com/preview-agreement)
+  NON-INTERACTIVELY and sends them command metadata (timing, exit codes,
+  token savings -- never raw output or file contents). Pass it only once
+  you already agree to those terms; never on by default.
 .EXAMPLE
   .\install.ps1 -Tools claude,cursor
 .EXAMPLE
@@ -33,7 +43,9 @@ param(
     [switch]$Uninstall,
     [switch]$Upgrade,
     [switch]$Version,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$WithExternal,
+    [switch]$WithBoost
 )
 
 $ErrorActionPreference = "Stop"
@@ -228,7 +240,61 @@ function Invoke-Install {
         }
     }
     if (-not $DryRun) { Set-Content -Path $ToolsFile -Value $Tools -NoNewline }
+
+    if ($WithExternal) {
+        Write-Log "fetching pinned external skill sources..."
+        $bash = Get-Command bash -ErrorAction SilentlyContinue
+        if (-not $bash) {
+            Write-Warn "no bash on PATH (install Git for Windows / WSL) -- skipping; run scripts/sync-external.sh manually once bash is available"
+        } elseif ($DryRun) {
+            Write-Log "  would run: bash scripts/sync-external.sh"
+        } else {
+            & $bash.Source (Join-Path $AgentkitHome "scripts/sync-external.sh")
+            if ($LASTEXITCODE -ne 0) { Write-Warn "sync-external.sh failed -- native skills are still installed; re-run it yourself when ready" }
+        }
+    }
+
+    if ($WithBoost) { Install-Boost }
+
     Write-Log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+}
+
+# Install-Boost -- installs jfrog/boost if missing, wires it into every
+# -Tools target boost supports (claude, cursor, copilot). Accepts JFrog's
+# Online Preview Agreement non-interactively -- only reached via -WithBoost,
+# which is the consent (see the .PARAMETER WithBoost doc above).
+function Install-Boost {
+    Write-Log "boost (CLI output compression):"
+    if ($DryRun) {
+        Write-Log "  would install/wire boost for: $Tools (accepts JFrog's Online Preview Agreement)"
+        return
+    }
+
+    if (-not (Get-Command boost -ErrorAction SilentlyContinue)) {
+        Write-Log "  installing boost (boost.jfrog.com, preview software)..."
+        try {
+            Invoke-RestMethod https://boost.jfrog.com/install.ps1 | Invoke-Expression
+        } catch {
+            Write-Warn "boost install failed -- skipping; re-run with -WithBoost once resolved"
+            return
+        }
+    }
+    if (-not (Get-Command boost -ErrorAction SilentlyContinue)) {
+        Write-Warn "boost installed but not on PATH yet -- open a new shell, then run: boost init --accept-terms"
+        return
+    }
+
+    foreach ($tool in $Tools -split ",") {
+        $t = $tool.Trim()
+        if ($t -in @("claude", "cursor", "copilot")) {
+            & boost init "--$t" --accept-terms *> $null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Log "  wired: $t (takes effect on its next session/reload)"
+            } else {
+                Write-Warn "  boost init --$t failed -- see 'boost init --$t -DryRun' for why"
+            }
+        }
+    }
 }
 
 if (-not (Test-Path $Dist)) {

@@ -22,7 +22,17 @@
         "skills/meeting-to-actions",
         "skills/data-eng-router",
         "skills/doc-standards",
-        "skills/memory-sync"
+        "skills/memory-sync",
+        "skills/ext-diagrams",
+        "skills/ext-ui-ux",
+        "skills/ext-codegraph",
+        "skills/ext-cli-ops",
+        "skills/ext-gcp",
+        "skills/ext-databricks",
+        "skills/ext-aws",
+        "skills/ext-azure",
+        "skills/ext-systems-design",
+        "skills/ext-gap-discovery"
       ],
       "agents": [
         "agents/researcher.md",
