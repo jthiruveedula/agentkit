@@ -10,7 +10,7 @@ alwaysApply: false
    name means a rename later touches 4 emitted copies).
 2. Run the scaffolder:
    ```
-   python3 scripts/scaffold.py <name> "<description. Use when <trigger>.>"
+   python3 _skill-forge/scripts/scaffold.py <name> "<description. Use when <trigger>.>"
    ```
    It creates `skills/<name>/{SKILL.md,reference/,scripts/,tests/}` and
    refuses if the name already exists or fails the schema `validate.py`

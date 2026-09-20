@@ -19,10 +19,10 @@ per author.
 
 2. **Pick the kind and layer**, then scaffold:
    ```
-   python3 scripts/scaffold_pipeline.py --kind dbt --layer silver --name orders
-   python3 scripts/scaffold_pipeline.py --kind airflow --name daily_extract
-   python3 scripts/scaffold_pipeline.py --kind dagster --layer gold --name revenue_mart
-   python3 scripts/scaffold_pipeline.py --kind spark --name event_dedup
+   python3 _pipeline-scaffold/scripts/scaffold_pipeline.py --kind dbt --layer silver --name orders
+   python3 _pipeline-scaffold/scripts/scaffold_pipeline.py --kind airflow --name daily_extract
+   python3 _pipeline-scaffold/scripts/scaffold_pipeline.py --kind dagster --layer gold --name revenue_mart
+   python3 _pipeline-scaffold/scripts/scaffold_pipeline.py --kind spark --name event_dedup
    ```
    `--out <dir>` targets a project root other than cwd. Re-running never
    clobbers a file you've since hand-edited — pass `--force` to overwrite
@@ -43,5 +43,5 @@ per author.
 
 ## Reference
 
-- `scripts/scaffold_pipeline.py` — the generator. Four kinds: `dbt`,
+- `_pipeline-scaffold/scripts/scaffold_pipeline.py` — the generator. Four kinds: `dbt`,
   `airflow`, `dagster`, `spark`. See its `--help` for all flags.

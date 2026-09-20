@@ -1,4 +1,4 @@
-.PHONY: install uninstall build validate test smoke ci clean
+.PHONY: install uninstall build validate test smoke ci clean lint
 
 TOOLS ?= claude,copilot,cursor,antigravity
 
@@ -26,3 +26,8 @@ ci: test smoke
 
 clean:
 	rm -rf dist/__pycache__ scripts/__pycache__ scripts/lib/__pycache__ tests/__pycache__
+
+lint:
+	ruff check .
+	ruff format --check .
+	if command -v shellcheck >/dev/null 2>&1; then shellcheck install.sh tests/smoke_install.sh scripts/*.sh; else echo "shellcheck not installed -- skipping shell lint"; fi

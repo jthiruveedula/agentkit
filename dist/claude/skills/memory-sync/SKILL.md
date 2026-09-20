@@ -19,7 +19,10 @@ committed fix.
    available, in this order:
    - claude-mem tools if present: `timeline`, `smart_search` (keywords:
      "wrong", "mistake", "fix", "correct", "redo", "again"), `get_observations`
-   - this repo's own `session-history` / `commit-context` skills if loaded
+   - this repo's own `memory` skill substrate: search past corrections
+     first (`../memory/scripts/memory.py search "<keywords>" --kind
+     correction`) so a new incident can be linked to — or ruled out
+     against — a known pattern instead of counted twice
    - failing that, ask the user to paste or describe recent friction —
      don't fabricate incidents that weren't reported.
 
@@ -48,6 +51,20 @@ committed fix.
      `data-eng-router` keeps misrouting a platform) → fix the skill
      itself and add a golden test case that would have caught it — the
      fix belongs in code, not in prose.
+
+   Whichever target you pick, also record the pattern in the `memory`
+   substrate so future sessions surface it before repeating the
+   mistake — corrections rank first in search by design:
+
+   ```
+   python3 ../memory/scripts/memory.py store --kind correction \
+     --pattern "<the repeated mistake, in the agent's own words>" \
+     --correction "<what to do instead>" \
+     --context "<repo / workflow where it happened>"
+   ```
+
+   (Paths are relative to `skills/memory-sync/`; from the repo root use
+   `skills/memory/scripts/memory.py`.)
 
 4. **Cite evidence.** Every fix names the pattern's example lines/count
    and, where available, the session/date it came from — a fix with no

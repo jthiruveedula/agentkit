@@ -1,14 +1,50 @@
 #!/usr/bin/env python3
 """Scaffold a new canonical skill. Usage:
     python3 scaffold.py <kebab-case-name> "<description. Use when X.>"
+
+Creates skills/<name>/{SKILL.md,reference/,scripts/,tests/} plus a golden
+test stub at skills/<name>/tests/test_<name>.py.
 """
 import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SKILLS_DIR = REPO_ROOT / "skills"
 NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+
+TEST_STUB = '''"""Golden tests for the {name} skill.
+
+Add (input, expected) pairs to GOLDEN_CASES below -- this file is picked up
+by the repo's pytest suite. Modeled on tests/test_golden_intent.py: each
+case pins one observable behavior of the skill so regressions fail loudly.
+"""
+import pytest
+from pathlib import Path
+
+SKILL_DIR = Path(__file__).resolve().parents[1]
+
+# (input, expected) pairs pinning the skill's core behavior.
+GOLDEN_CASES = [
+    # ("example input", "expected output"),
+]
+
+
+def run_skill(given):
+    """TODO: wire this to the skill's script/entry point, then fill in GOLDEN_CASES."""
+    raise NotImplementedError("wire run_skill to skills/{name}/scripts/ first")
+
+
+def test_skill_md_exists():
+    assert (SKILL_DIR / "SKILL.md").exists()
+
+
+def test_golden_cases():
+    if not GOLDEN_CASES:
+        pytest.skip("add (input, expected) pairs to GOLDEN_CASES")
+    for given, want in GOLDEN_CASES:
+        assert run_skill(given) == want
+'''
 
 
 def main(argv):
@@ -46,7 +82,10 @@ def main(argv):
     )
     (skill_dir / "reference" / ".gitkeep").touch()
     (skill_dir / "scripts" / ".gitkeep").touch()
-    (skill_dir / "tests" / ".gitkeep").touch()
+    test_name = "test_%s.py" % name.replace("-", "_")
+    (skill_dir / "tests" / test_name).write_text(
+        TEST_STUB.format(name=name), encoding="utf-8"
+    )
     print("created skills/%s/" % name)
     return 0
 

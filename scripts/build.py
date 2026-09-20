@@ -57,9 +57,9 @@ def emit_copilot(skills, agents):
     for s in skills:
         meta = s["meta"]
         fm = {"description": meta["description"], "applyTo": "**"}
-        body = s["body"]
+        assets = _copy_assets_into(s["dir"], out, "instructions/_%s" % meta["name"])
+        body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
         out["instructions/%s.instructions.md" % meta["name"]] = _render(fm, body, order=("description", "applyTo"))
-        _copy_assets_into(s["dir"], out, "instructions/_%s" % meta["name"])
     return out
 
 
@@ -68,8 +68,9 @@ def emit_cursor(skills, agents):
     for s in skills:
         meta = s["meta"]
         fm = {"description": meta["description"], "alwaysApply": False}
-        out["rules/%s.mdc" % meta["name"]] = _render(fm, s["body"], order=("description", "alwaysApply"))
-        _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
+        assets = _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
+        body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
+        out["rules/%s.mdc" % meta["name"]] = _render(fm, body, order=("description", "alwaysApply"))
     return out
 
 
@@ -78,13 +79,22 @@ def emit_antigravity(skills, agents):
     for s in skills:
         meta = s["meta"]
         fm = {"description": meta["description"], "trigger": "model_decision"}
-        out["rules/%s.md" % meta["name"]] = _render(fm, s["body"], order=("description", "trigger"))
+        assets = _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
+        body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
+        out["rules/%s.md" % meta["name"]] = _render(fm, body, order=("description", "trigger"))
     for a in agents:
         out["workflows/%s.md" % a["meta"]["name"]] = _render(a["meta"], a["body"])
     return out
 
 
 def _copy_assets_into(src_dir, out, prefix):
+    """Copy reference/scripts/tests files into the output tree.
+
+    Returns the list of copied asset paths relative to the skill dir
+    (e.g. "scripts/classify.py"), POSIX-style, sorted longest first so a
+    later string rewrite can replace longer paths before their prefixes.
+    """
+    copied = []
     for sub in ("reference", "scripts", "tests"):
         src = src_dir / sub
         if not src.is_dir():
@@ -92,8 +102,24 @@ def _copy_assets_into(src_dir, out, prefix):
         for f in sorted(src.rglob("*")):
             if f.is_dir() or f.name == ".gitkeep":
                 continue
-            rel = f.relative_to(src_dir)
+            rel = f.relative_to(src_dir).as_posix()
             out["%s/%s" % (prefix, rel)] = f.read_bytes()
+            copied.append(rel)
+    return sorted(copied, key=len, reverse=True)
+
+
+def _rewrite_asset_refs(body, assets, assets_dir):
+    """Rewrite bare asset rel-paths to be correct relative to the emitted
+    markdown file's own directory (e.g. "scripts/x.py" ->
+    "_<skill>/scripts/x.py" under Copilot's instructions/).
+
+    Only strings exactly matching a real asset rel-path of this skill are
+    rewritten; generic prose is left alone. Run on the original body before
+    _render.
+    """
+    for rel in assets:
+        body = body.replace(rel, "%s/%s" % (assets_dir, rel))
+    return body
 
 
 def _render(meta, body, order=None):
@@ -133,7 +159,16 @@ def render_agents_md(skills, agents):
     for a in agents:
         m = a["meta"]
         lines.append("| `%s` | %s |" % (m["name"], m["description"]))
-    lines.append("")
+    lines += [
+        "",
+        "## Tool coverage",
+        "",
+        "Subagents are emitted for Claude Code (`agents/`, under `dist/claude/`)",
+        "and Antigravity (`workflows/`, under `dist/antigravity/`). Copilot and",
+        "Cursor have no agent equivalent mapped — a known gap, documented here",
+        "intentionally.",
+        "",
+    ]
     return "\n".join(lines).encode("utf-8")
 
 

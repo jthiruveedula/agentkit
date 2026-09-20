@@ -28,6 +28,7 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | `ext-systems-design` | 0.1.0 | Route system design and scalability questions to the pinned anthropics/skills and ashishps1/awesome-system-design-resources sources. Use when actively making a system design decision (architecture, scaling, DB/cache/queue trade-offs, CAP, sharding) and want deeper reference material than general knowledge. |
 | `ext-ui-ux` | 0.1.0 | Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill skill. Use when the user wants UI/UX design work and specifically asks for the external ui-ux-pro-max toolkit rather than this repo's own design approach. |
 | `meeting-to-actions` | 0.1.0 | Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted. |
+| `memory` | 0.1.0 | Durable local memory for agents — store and retrieve episodic observations, semantic facts, and correction records from a SQLite substrate instead of re-deriving them every session. Use when the user says "remember this", when you need a past decision, preference, or fix, before debugging (check known corrections first), or when memory-sync surfaces a pattern worth keeping. |
 | `memory-sync` | 0.1.0 | Mines recent session history for recurring agent mistakes or friction, ranks the repeated patterns, and writes durable corrections (memory files, CLAUDE.md, or skill fixes) so the same issue doesn't cost time again. Use when the user asks to do a retro on recent sessions, find recurring agent errors, or "make agents faster/more productive" based on past work. |
 | `pipeline-scaffold` | 0.1.0 | Scaffolds a new dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion (bronze/silver/gold) naming and a test stub included. Use when the user asks to create a new data pipeline, model, DAG, asset, or Spark job and wants the boilerplate generated rather than hand-typed. |
 | `pr-review` | 0.1.0 | Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when the user asks to review a PR, "look at PR #N", or check a branch before merge. |
@@ -47,3 +48,10 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | `researcher` | Read-only investigation — locates code, gathers facts, compares options. Never edits files. Hand off to implementer once findings are concrete. |
 | `reviewer` | Reviews a diff/PR for correctness bugs and scope creep against its stated intent. Read-only, no fixes — reports findings for implementer to apply. |
 | `test-writer` | Writes the smallest test that would fail if the logic under test broke. Covers gaps implementer flags, not full suites for every function. |
+
+## Tool coverage
+
+Subagents are emitted for Claude Code (`agents/`, under `dist/claude/`)
+and Antigravity (`workflows/`, under `dist/antigravity/`). Copilot and
+Cursor have no agent equivalent mapped — a known gap, documented here
+intentionally.

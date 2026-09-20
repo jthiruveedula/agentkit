@@ -12,7 +12,7 @@ people to ignore it. Pick what's meaningful for the data at hand.
 ## Procedure
 
 1. **Identify what kind of check applies** from
-   `reference/checks.md` — schema (uniqueness, not-null, accepted
+   `_data-quality-standards/reference/checks.md` — schema (uniqueness, not-null, accepted
    values, relationships), freshness, volume sanity, idempotency, PII
    handling. Most pipelines need schema + freshness at minimum; volume
    and idempotency checks matter more as the pipeline gets load-bearing.
@@ -28,11 +28,11 @@ people to ignore it. Pick what's meaningful for the data at hand.
    trust-boundary work for speed).
 
 4. **For a PR review**, check the "what goes in a PR" list at the bottom
-   of `reference/checks.md` — tests present, backfill safety confirmed if
+   of `_data-quality-standards/reference/checks.md` — tests present, backfill safety confirmed if
    historical data is touched, PII flagged, ADR referenced if this
    implements an architecture decision.
 
 ## Reference
 
-- `reference/checks.md` — the full checklist: schema tests, freshness,
+- `_data-quality-standards/reference/checks.md` — the full checklist: schema tests, freshness,
   volume sanity, idempotency/backfill safety, PII handling, PR checklist.

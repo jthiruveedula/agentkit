@@ -1,0 +1,144 @@
+{
+  "generated_by": "site/scripts/build-catalog.py",
+  "count": 23,
+  "skills": [
+    {
+      "name": "daily-standup",
+      "description": "Summarize what got done since the last standup — git commits, closed issues/PRs, and open threads — into a 3-line standup update (did/doing/blocked). Use when the user asks for a standup update, status report, or \"what did I do yesterday\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "data-architect",
+      "description": "Multi-cloud/open-source data architecture decision-making — evaluates storage, compute, orchestration, and batch-vs-streaming trade-offs and records the decision as an ADR. Use when the user is choosing between data platform options (which warehouse, which orchestrator, streaming vs. batch, dbt vs. Spark), designing a new pipeline's architecture, or asks \"should I use X or Y\" for a data platform.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "data-eng-router",
+      "description": "Auto-detects which cloud/platform a data engineering task belongs to (GCP, AWS, Azure, Databricks) and routes to that platform's wired external skill. Use when the user asks for help with a data pipeline, ETL/ELT, data warehouse, data lake, or any data engineering task — before reaching for general knowledge, check whether a vendor-authored skill already covers it.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "data-quality-standards",
+      "description": "Applies schema, freshness, volume, idempotency, and PII-handling checks to a data pipeline before it ships. Use when the user is writing tests for a dbt model/pipeline, reviewing a data pipeline PR, or asks \"what checks should this have\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "debug-loop",
+      "description": "Run a tight hypothesize-test-narrow loop on a failing test or reproducible bug until root cause is found, logging each attempt. Use when the user has a failing test, stack trace, or reproducible crash and wants it root-caused, not just patched.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "doc-standards",
+      "description": "Applies a consistent professional house style (colors, typography, table/chart formatting, layout) whenever generating or editing a Word, Excel, PDF, or PowerPoint document. Use when the user asks to create, format, or polish a docx, xlsx, pdf, or pptx file, or asks for a document to \"look professional\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "meeting-to-actions",
+      "description": "Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "memory-sync",
+      "description": "Mines recent session history for recurring agent mistakes or friction, ranks the repeated patterns, and writes durable corrections (memory files, CLAUDE.md, or skill fixes) so the same issue doesn't cost time again. Use when the user asks to do a retro on recent sessions, find recurring agent errors, or \"make agents faster/more productive\" based on past work.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "pipeline-scaffold",
+      "description": "Scaffolds a new dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion (bronze/silver/gold) naming and a test stub included. Use when the user asks to create a new data pipeline, model, DAG, asset, or Spark job and wants the boilerplate generated rather than hand-typed.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "pr-review",
+      "description": "Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when the user asks to review a PR, \"look at PR #N\", or check a branch before merge.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "prompt-enhancer",
+      "description": "Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "skill-forge",
+      "description": "Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "spec-writer",
+      "description": "Turn a rough feature idea or bug report into a short written spec — problem, scope, non-goals, acceptance criteria — before code is written. Use when the user asks for a spec, design doc, or \"write this up before we build it\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "ext-aws",
+      "description": "Route AWS tasks to the pinned aws-samples/sample-agent-skills and zxkane/aws-skills collections. Use when the user asks for AWS-specific help (Lambda, S3, IAM, CDK, etc.) and wants vendor- or community-authored skill guidance.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-azure",
+      "description": "Route Azure tasks to the pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills collections. Use when the user asks for Azure-specific help (App Service, Functions, AKS, Entra ID, etc.) and wants Microsoft-authored skill guidance.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-cli-ops",
+      "description": "Wires jfrog/boost's shell-output compression into whichever coding agent is running, so noisy CLI output (test/build/lint/log dumps) stops filling the context window. Use when the user asks to save tokens on CLI/shell output, mentions jfrog Boost by name, or when a session is running many verbose shell commands and the user wants that noise cut.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-codegraph",
+      "description": "Bootstrap the pinned colbymchenry/codegraph CLI for fast codebase reads (symbol search, call paths, blast radius) instead of raw grep. Use when the user asks to understand, navigate, or answer questions about a codebase and CodeGraph isn't already installed/available.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-databricks",
+      "description": "Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user asks for Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake, etc.) and wants vendor-authored skill guidance.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-diagrams",
+      "description": "Route diagram/architecture-visualization requests to the pinned cathrynlavery/diagram-design skill. Use when the user asks to draw an architecture diagram, flowchart, sequence diagram, or system diagram and wants the external diagram-design skill's recipes.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-gap-discovery",
+      "description": "Search the pinned VoltAgent/awesome-agent-skills index to find an existing skill before building a new one from scratch. Use when the user wants a capability this repo doesn't have yet and asks to check what already exists before authoring it.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-gcp",
+      "description": "Route Google Cloud Platform tasks to the pinned google/skills collection. Use when the user asks for GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM, etc.) and wants vendor-authored skill guidance rather than general knowledge.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-systems-design",
+      "description": "Route system design and scalability questions to the pinned anthropics/skills and ashishps1/awesome-system-design-resources sources. Use when actively making a system design decision (architecture, scaling, DB/cache/queue trade-offs, CAP, sharding) and want deeper reference material than general knowledge.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-ui-ux",
+      "description": "Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill skill. Use when the user wants UI/UX design work and specifically asks for the external ui-ux-pro-max toolkit rather than this repo's own design approach.",
+      "version": "0.1.0",
+      "kind": "router"
+    }
+  ]
+}

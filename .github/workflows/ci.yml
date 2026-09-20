@@ -5,21 +5,34 @@ on:
     branches: [main]
   pull_request:
 
+# Cancel superseded runs for the same workflow/ref (e.g. rapid pushes to a PR).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: jobs opt in to whatever extra they need.
+permissions:
+  contents: read
+
 jobs:
   test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: "3.x"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - name: Install test dependency (pytest)
-        run: python -m pip install --quiet pytest
+      - name: Install test dependencies
+        run: python -m pip install --quiet pytest pytest-cov
 
       - name: Validate skill frontmatter/links/secrets
         run: python scripts/validate.py
@@ -30,8 +43,23 @@ jobs:
       - name: Golden intent classification tests
         run: python skills/prompt-enhancer/scripts/classify.py --selftest
 
+      # Coverage is measured once (Ubuntu / Python 3.13) so the matrix does not
+      # produce a dozen duplicate artifacts; every other cell runs the suite.
       - name: Unit tests
+        if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.13'
         run: python -m pytest tests/ -q
+
+      - name: Unit tests with coverage
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        run: python -m pytest tests/ -q --cov --cov-report=xml:coverage.xml --cov-report=term-missing --cov-fail-under=80
+
+      - name: Upload coverage report
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: coverage-ubuntu-py3.13
+          path: coverage.xml
+          retention-days: 14
 
       - name: Smoke install (POSIX)
         if: runner.os != 'Windows'
@@ -57,3 +85,216 @@ jobs:
             throw "install.ps1 -Uninstall left files behind"
           }
           Write-Host "install.ps1 smoke test passed"
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      # Pinned so ruff-format output never shifts under us on a new release.
+      - name: Install ruff
+        run: python -m pip install --quiet "ruff==0.16.8"
+
+      - name: Ruff check
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: ShellCheck
+        run: |
+          if ! command -v shellcheck >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          fi
+          shellcheck install.sh tests/smoke_install.sh scripts/*.sh
+
+      # Syntax-only: parses install.ps1 without executing it.
+      - name: PowerShell syntax check (install.ps1)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tokens = $null
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Join-Path $PWD 'install.ps1'), [ref]$tokens, [ref]$errors)
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+          Write-Host 'install.ps1 syntax OK'
+
+      - name: Markdown link check
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          # Fails the job on broken links (including #fragment anchors).
+          args: --no-progress --verbose README.md CONTRIBUTING.md 'site/**/*.html'
+
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        with:
+          languages: python, javascript-typescript
+
+      - uses: github/codeql-action/autobuild@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+
+      - uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # Full history: leaked secrets are usually old, not new.
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+
+      # Fails when package-lock.json is out of sync with package.json.
+      - name: Verify lockfile is in sync
+        run: npm ci --ignore-scripts
+
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+  packaging:
+    name: packaging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+
+      # Pack exactly what `npm publish` would ship, then verify the tarball
+      # carries everything the npx/Windows/--with-external paths need.
+      - name: Pack npm tarball
+        run: npm pack --ignore-scripts
+
+      - name: Verify tarball contents
+        run: |
+          tar -tzf jthiruveedula-agentkit-*.tgz > tarball.txt
+          for f in package/bin/agentkit.js package/install.sh package/install.ps1 \
+                   package/external/skills.lock.json; do
+            grep -qx "$f" tarball.txt || { echo "missing from tarball: $f"; exit 1; }
+          done
+          grep -q '^package/scripts/' tarball.txt || { echo "scripts/ missing from tarball"; exit 1; }
+          echo "tarball contents OK"
+
+      # The packed CLI must resolve install.sh from inside the tarball layout.
+      - name: Packed Node CLI resolves install.sh
+        run: |
+          rm -rf /tmp/packtest && mkdir -p /tmp/packtest
+          tar -xzf jthiruveedula-agentkit-*.tgz -C /tmp/packtest
+          node /tmp/packtest/package/bin/agentkit.js --help
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+
+      # Build a real wheel, install it into a clean venv, and prove the
+      # installed console script finds its bundled install.sh (the uvx path).
+      - name: Wheel install resolves install.sh
+        run: |
+          python -m pip install --quiet setuptools wheel
+          rm -rf /tmp/wheeldist && mkdir -p /tmp/wheeldist
+          python -m pip wheel . --no-deps -w /tmp/wheeldist
+          python -m venv /tmp/packvenv
+          /tmp/packvenv/bin/pip install --quiet /tmp/wheeldist/agentkit-*.whl
+          /tmp/packvenv/bin/python -c \
+            "from agentkit.cli import _find_install_sh as f; print('install.sh ->', f())"
+          /tmp/packvenv/bin/agentkit --help
+
+  # Conventional-commit lint on PRs. PR-only: pushes to main are squash-merges
+  # whose titles already passed this check on the PR.
+  commitlint:
+    name: commitlint
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          # The action lints a range of commits, not just the tip.
+          fetch-depth: 0
+
+      - name: Lint commit messages
+        uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
+        with:
+          configFile: .commitlintrc.json
+
+  # Branch-name lint on PRs. Bot branches (release-please, dependabot) are exempt.
+  branch-name:
+    name: branch name
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check branch name follows the standard
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          case "$BRANCH_NAME" in
+            release-please--*|dependabot/*)
+              echo "bot branch '$BRANCH_NAME' is exempt from the naming standard"
+              exit 0
+              ;;
+          esac
+          if ! printf '%s' "$BRANCH_NAME" | grep -Eq '^(feature|fix|hotfix|chore|docs|release)/[a-z0-9][a-z0-9._/-]*$'; then
+            echo "::error::branch '$BRANCH_NAME' does not follow the naming standard"
+            echo "Use feature/<scope>-<desc>, fix/<scope>-<desc>, hotfix/<desc>, chore/<desc>, docs/<desc>, release/<version>."
+            exit 1
+          fi
+          echo "branch name OK: $BRANCH_NAME"
+
+  # Single aggregator check: branch protection requires only this, so adding
+  # a new job later means extending `needs` here, not touching repo settings.
+  ci-success:
+    name: CI success
+    runs-on: ubuntu-latest
+    needs: [test, lint, codeql, gitleaks, npm-audit, packaging, commitlint, branch-name]
+    if: always()
+    steps:
+      - name: All required jobs passed
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          # PR-only jobs (commitlint, branch-name) report "skipped" on pushes
+          # to main, where branch protection does not apply -- that is fine.
+          failed = {k: v for k, v in needs.items()
+                    if v not in ("success", "skipped")}
+          if failed:
+              raise SystemExit(f"required jobs did not succeed: {failed}")
+          print("all required jobs succeeded")
+          EOF
+        env:
+          NEEDS_JSON: ${{ toJson(needs) }}
