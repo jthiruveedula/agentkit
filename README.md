@@ -153,6 +153,24 @@ first use, so you never have to remember the sync command yourself.
 ./install.sh --with-external                          # install + fetch all, one command
 ```
 
+## CLI token savings
+
+`ext-cli-ops` wires [jfrog/boost](https://boost.jfrog.com) into your
+coding agent — it compresses noisy shell output (test/build/lint/log
+dumps) so a session spends tokens on signal, not scrollback, while
+keeping errors and diffs intact. **Not on by default** — it's preview
+software: installing it accepts JFrog's Online Preview Agreement and
+sends them command metadata (timing, exit codes, token savings — never
+raw output or file contents).
+
+```sh
+./install.sh --tools=claude --with-boost   # installs boost, wires it into claude
+# or ask the ext-cli-ops skill to do it, which discloses the same terms first
+```
+
+Once wired: `DISABLE_BOOST=1 <command>` gets exact unfiltered output on
+any one command; `boost init --claude --uninstall` rolls it back.
+
 ## Build → test → contribute
 
 ```sh
