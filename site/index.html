@@ -109,7 +109,7 @@
 
     <section id="skills" class="catalog container">
       <div class="catalog__head">
-        <h2>Seven skills, authored once.</h2>
+        <h2>Twenty-three skills, authored once.</h2>
         <p>Each is a canonical <code class="mono">SKILL.md</code>, transpiled to all four tool formats by <code class="mono">scripts/build.py</code> — never hand-copied.</p>
       </div>
       <div class="product-grid">
@@ -149,14 +149,70 @@
           <p class="product__version">v0.1.0</p>
         </article>
       </div>
+
       <div class="subagents">
-        <p class="subagents__label">Plus five subagents, each with an explicit tool allowlist and handoff contract</p>
+        <p class="subagents__label">Data-architect stack — decides, builds, and checks a pipeline in one chain</p>
+        <div class="product-grid">
+          <article class="product">
+            <h3 class="product__name">data-architect</h3>
+            <p class="product__desc">Multi-cloud/open-source platform decisions — storage, compute, orchestration, batch vs. streaming — recorded as ADRs.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">pipeline-scaffold</h3>
+            <p class="product__desc">Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">data-quality-standards</h3>
+            <p class="product__desc">Schema, freshness, volume, idempotency, and PII checks for a pipeline before it ships.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">data-eng-router</h3>
+            <p class="product__desc">Auto-detects GCP/AWS/Azure/Databricks from task vocabulary and routes to that platform's skill.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">doc-standards</h3>
+            <p class="product__desc">Professional house style — palette, typography, table/chart formatting — for Word/Excel/PDF/PowerPoint output.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+          <article class="product">
+            <h3 class="product__name">memory-sync</h3>
+            <p class="product__desc">Mines sessions for recurring agent mistakes, ranks the repeats, writes durable fixes.</p>
+            <p class="product__version">v0.1.0</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="subagents">
+        <p class="subagents__label">Plus 10 router skills that wire in pinned external sources on demand — diagrams, UI/UX, codebase reads, CLI token savings, GCP, AWS, Azure, Databricks, system design, gap discovery</p>
+        <div class="chip-row">
+          <span class="chip">ext-diagrams</span>
+          <span class="chip">ext-ui-ux</span>
+          <span class="chip">ext-codegraph</span>
+          <span class="chip">ext-cli-ops</span>
+          <span class="chip">ext-gcp</span>
+          <span class="chip">ext-aws</span>
+          <span class="chip">ext-azure</span>
+          <span class="chip">ext-databricks</span>
+          <span class="chip">ext-systems-design</span>
+          <span class="chip">ext-gap-discovery</span>
+        </div>
+      </div>
+
+      <div class="subagents">
+        <p class="subagents__label">Plus eight subagents, each with an explicit tool allowlist and handoff contract</p>
         <div class="chip-row">
           <span class="chip">researcher</span>
           <span class="chip">implementer</span>
           <span class="chip">reviewer</span>
           <span class="chip">test-writer</span>
           <span class="chip">doc-writer</span>
+          <span class="chip">data-platform-architect</span>
+          <span class="chip">pipeline-engineer</span>
+          <span class="chip">data-quality-engineer</span>
         </div>
       </div>
     </section>

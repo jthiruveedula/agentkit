@@ -19,14 +19,33 @@
         "skills/pr-review",
         "skills/debug-loop",
         "skills/spec-writer",
-        "skills/meeting-to-actions"
+        "skills/meeting-to-actions",
+        "skills/data-architect",
+        "skills/pipeline-scaffold",
+        "skills/data-quality-standards",
+        "skills/data-eng-router",
+        "skills/doc-standards",
+        "skills/memory-sync",
+        "skills/ext-diagrams",
+        "skills/ext-ui-ux",
+        "skills/ext-codegraph",
+        "skills/ext-cli-ops",
+        "skills/ext-gcp",
+        "skills/ext-databricks",
+        "skills/ext-aws",
+        "skills/ext-azure",
+        "skills/ext-systems-design",
+        "skills/ext-gap-discovery"
       ],
       "agents": [
         "agents/researcher.md",
         "agents/implementer.md",
         "agents/reviewer.md",
         "agents/test-writer.md",
-        "agents/doc-writer.md"
+        "agents/doc-writer.md",
+        "agents/data-platform-architect.md",
+        "agents/pipeline-engineer.md",
+        "agents/data-quality-engineer.md"
       ]
     }
   ]
