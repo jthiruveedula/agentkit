@@ -26,7 +26,7 @@
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
 set -eu
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 AGENTKIT_HOME=${AGENTKIT_HOME:-"$SCRIPT_DIR"}
 DIST="$AGENTKIT_HOME/dist"
 MANIFEST_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/agentkit"
@@ -35,7 +35,7 @@ TOOLS_FILE="$MANIFEST_DIR/tools"
 
 TOOLS=""
 TOOLS_GIVEN=0
-MODE=link   # link | copy
+MODE="link"   # link | copy
 DRY_RUN=0
 ACTION=install
 WITH_EXTERNAL=0
@@ -280,7 +280,11 @@ do_upgrade() {
   log "pulling latest agentkit into $AGENTKIT_HOME ..."
   [ "$DRY_RUN" = 1 ] || git -C "$AGENTKIT_HOME" pull --ff-only
   after=$(git -C "$AGENTKIT_HOME" rev-parse --short HEAD 2>/dev/null || echo "$before")
-  [ "$before" = "$after" ] && log "already up to date ($before)" || log "updated $before -> $after"
+  if [ "$before" = "$after" ]; then
+    log "already up to date ($before)"
+  else
+    log "updated $before -> $after"
+  fi
 
   if [ "$TOOLS_GIVEN" = 0 ] && [ -f "$TOOLS_FILE" ]; then
     TOOLS=$(cat "$TOOLS_FILE")
@@ -297,7 +301,12 @@ do_uninstall() {
     [ -e "$path" ] || [ -L "$path" ] || continue
     [ "$DRY_RUN" = 1 ] && { log "  would remove: $path"; continue; }
     rm -rf "$path"
-    bak=$(ls -td -- "$path".bak.* 2>/dev/null | head -n1 || true)
+    # Backups are named "$path.bak.YYYYMMDDHHMMSS", so the newest is the
+    # lexicographically last glob match. (Pure POSIX sh: no ls, no -nt.)
+    bak=""
+    for _cand in "$path".bak.*; do
+      [ -e "$_cand" ] && bak=$_cand
+    done
     if [ -n "$bak" ]; then
       mv "$bak" "$path"
       log "  removed: $path (restored backup $bak)"
@@ -393,9 +402,11 @@ with_boost() {
     IFS=$OLD_IFS
     case "$tool" in
       claude|cursor|copilot)
-        boost init "--$tool" --accept-terms >/dev/null 2>&1 \
-          && log "  wired: $tool (takes effect on its next session/reload)" \
-          || warn "  boost init --$tool failed -- see 'boost init --$tool --dry-run' for why"
+        if boost init "--$tool" --accept-terms >/dev/null 2>&1; then
+          log "  wired: $tool (takes effect on its next session/reload)"
+        else
+          warn "  boost init --$tool failed -- see 'boost init --$tool --dry-run' for why"
+        fi
         ;;
       antigravity) : ;;  # not a boost-supported target yet
       *) : ;;

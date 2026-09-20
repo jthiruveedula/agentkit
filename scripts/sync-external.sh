@@ -11,7 +11,7 @@
 # exists, verification is skipped with a warning).
 set -eu
 
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
 LOCK="$SCRIPT_DIR/external/skills.lock.json"
 
 command -v jq >/dev/null 2>&1 || { echo "error: jq is required" >&2; exit 1; }
@@ -35,7 +35,7 @@ sha256_of() {
 fetch_one() {
   _name=$1; _repo=$2; _sha=$3; _want_sha256=$4
   _dest="$SCRIPT_DIR/external/$_name"
-  echo "==> $_name ($_repo @ ${_sha%${_sha#??????}}...)"
+  echo "==> $_name ($_repo @ ${_sha%"${_sha#??????}"}...)"
   rm -rf "$_dest.tmp"
   mkdir -p "$_dest.tmp"
   _archive="$_dest.tmp/archive.tar.gz"

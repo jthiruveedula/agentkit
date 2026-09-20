@@ -3,6 +3,7 @@
 Uses a fresh temp database per test -- nothing touches ~/.agentkit.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -136,7 +137,12 @@ def test_cli_help_and_bad_usage():
 def test_cli_end_to_end_json(tmp_path):
     script = REPO_ROOT / "skills" / "memory" / "scripts" / "memory.py"
     dbp = str(tmp_path / "cli.db")
-    env = {"AGENTKIT_MEMORY_DB": dbp, "PATH": "/usr/bin:/bin"}
+    # Inherit the real environment: a bare env dict drops variables Windows
+    # Python 3.10 needs to initialize (e.g. SystemRoot), failing with
+    # "y_HashRandomization_Init: failed to get random numbers".
+    env = dict(os.environ, AGENTKIT_MEMORY_DB=dbp)
+    if os.name != "nt":
+        env["PATH"] = "/usr/bin:/bin"
     r = subprocess.run(
         [
             sys.executable,
