@@ -28,3 +28,10 @@ into this MIT repo's authored content.
 4. For a live, in-context reference pass instead of a one-off read, the
    `system-design-resources` Claude Code skill (if installed) covers the
    same ground — prefer it when already loaded in the session.
+
+## Token economy
+
+- Decide from the trade-off tables in the pinned sources; don't re-read entire repos to answer one question — one targeted section beats a full clone.
+- `grep` for the topic in `systems-design-resources`, read only the hit section, then answer in your own words.
+- Keep `anthropic-skills` to its own collection: `ls` + find the one matching SKILL.md, don't browse the whole tree.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

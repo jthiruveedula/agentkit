@@ -47,3 +47,14 @@ per author.
 
 - `scripts/scaffold_pipeline.py` — the generator. Four kinds: `dbt`,
   `airflow`, `dagster`, `spark`. See its `--help` for all flags.
+
+## Token economy
+
+- Scaffold first, then fill in logic — hand-writing boilerplate burns
+  generation tokens for zero signal.
+- Adding to an existing pipeline? Generate only the missing piece, never
+  a whole fresh scaffold to copy one file from.
+- Fill in the TODOs directly; don't regenerate the scaffold to "fix" the
+  logic — the boilerplate was never the problem.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

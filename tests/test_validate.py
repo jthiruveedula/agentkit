@@ -82,7 +82,10 @@ def test_secret_pattern_detected(tmp_path):
     validate.SKILLS_DIR = tmp_path / "skills"
     try:
         errors = validate.validate()
-        assert any("GitHub personal access token" in e for e in errors), errors
+        assert any(
+            "disallowed pattern" in e and "[github]" in e for e in errors
+        ), errors
+        assert not any("ghp_" + "a" * 36 in e for e in errors), errors
     finally:
         validate.SKILLS_DIR = REPO_ROOT / "skills"
 
@@ -110,9 +113,11 @@ def test_secret_in_skill_scripts_dir_is_caught(tmp_path):
         errors = validate.validate()
         assert any(
             "scripts/helper.sh" in e.replace("\\", "/")
-            and "GitHub personal access token" in e
+            and "disallowed pattern" in e
+            and "[github]" in e
             for e in errors
         ), errors
+        assert not any("ghp_" + "b" * 36 in e for e in errors), errors
     finally:
         validate.SKILLS_DIR = REPO_ROOT / "skills"
 
@@ -131,11 +136,52 @@ def test_secret_in_skill_reference_dir_is_caught(tmp_path):
     try:
         errors = validate.validate()
         assert any(
-            "reference/notes.md" in e.replace("\\", "/") and "Anthropic API key" in e
+            "reference/notes.md" in e.replace("\\", "/")
+            and "disallowed pattern" in e
+            and "[anthropic]" in e
             for e in errors
         ), errors
+        assert not any("sk-ant-" + "c" * 20 in e for e in errors), errors
     finally:
         validate.SKILLS_DIR = REPO_ROOT / "skills"
+
+
+def test_secret_value_never_echoed_in_cli_output(tmp_path):
+    """Regression test for the CodeQL clear-text-logging alert: the scanner
+    must report the file and finding code, but the secret VALUE must never
+    appear in stdout/stderr (a scanner that echoes secrets into CI logs
+    would be worse than no scanner)."""
+    fake_token = "ghp_" + "z" * 36
+    skill_dir = tmp_path / "skills" / "leaky-cli"
+    skill_dir.mkdir(parents=True)
+    desc = "x" * 45 + " use when testing."
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: leaky-cli\ndescription: %s\nversion: 0.1.0\n---\n\n"
+        "token: %s\n" % (desc, fake_token)
+    )
+    # Point the CLI at the temp skills dir via a sitecustomize-style shim:
+    # validate.py resolves skills/ relative to the repo root, so instead run
+    # the module with SKILLS_DIR patched through a driver script.
+    driver = tmp_path / "driver.py"
+    driver.write_text(
+        "import sys\n"
+        "from pathlib import Path\n"
+        "sys.path.insert(0, %r)\n"
+        "sys.path.insert(0, %r)\n"
+        "import validate\n"
+        "validate.SKILLS_DIR = Path(%r)\n"
+        "sys.exit(validate.main())\n"
+        % (str(REPO_ROOT / "scripts"), str(REPO_ROOT / "scripts" / "lib"),
+           str(tmp_path / "skills"))
+    )
+    result = subprocess.run(
+        [sys.executable, str(driver)], capture_output=True, text=True,
+    )
+    combined = result.stdout + result.stderr
+    assert result.returncode != 0, combined
+    assert "leaky-cli" in combined, combined          # file is named
+    assert "[github]" in combined, combined           # finding code reported
+    assert fake_token not in combined, combined       # value never echoed
 
 
 def _write_lock(tmp_path, data):

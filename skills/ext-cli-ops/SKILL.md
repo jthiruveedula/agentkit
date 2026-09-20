@@ -67,3 +67,14 @@ part of a normal agentkit install — still requires the same explicit
 consent; the flag itself only exists because the user already agreed to
 it once, not a standing "always install" default. See the root `README.md`
 § CLI token savings.
+
+## Token economy
+
+- Route verbose commands (test/build/lint/log dumps) through boost —
+  unfiltered scrollback is the biggest CLI token sink there is.
+- Prefer `--quiet` / `--format=short` / `jq` field selection on every CLI
+  call, boost or not.
+- Need exact raw output once? Use `DISABLE_BOOST=1 <command>` — don't
+  debug blind through a filter.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

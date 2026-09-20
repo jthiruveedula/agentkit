@@ -26,3 +26,13 @@ applyTo: **
    rule — one guard in the shared function beats N guards in callers.
 4. Fix, then re-run the original repro plus the existing test suite. Report
    root cause in one sentence, not a beat-by-beat retelling of the loop.
+
+## Token economy
+
+- Respect the 6-iteration cap — when it hits, stop and escalate to the
+  user. Grinding past it is pure token burn.
+- Save the failing command's output once; reason from the saved copy.
+  Never re-run a failing command to "see it again".
+- Log each attempt as one line (hypothesis / result), not a paragraph.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

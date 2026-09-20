@@ -119,7 +119,7 @@ source and run `make build`.
 
 ## Skill catalog
 
-24 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+28 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 
 **Prompt & dev loop**

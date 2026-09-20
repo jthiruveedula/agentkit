@@ -1,0 +1,99 @@
+---
+name: setup-guardian
+description: Setup-health guardian for this repo — checks dist/ freshness, install targets, skill counts, action SHA pins, the CI success-gate logic, external lock pins, and risky subprocess env= usage. Use when adding or changing a skill, touching install/build/workflows, verifying a repo setup, or scheduling a periodic repo health check.
+allowed-tools: Bash, Read
+version: 0.1.0
+---
+
+# Setup Guardian
+
+Four distinct mistake classes hit this repo in one day (2026-09-20):
+a CI success gate that compared whole `needs` objects instead of
+`v.get("result")`, a typo'd action SHA pin that broke the packaging
+job, a bare subprocess `env=` dict that dropped Windows vars so child
+Python couldn't start, and a hand-written skill count that drifted.
+Every one of those was preventable by a cheap static check. This skill
+is the enforcement: `reference/lessons.md` is the registry of what we
+learned, and `scripts/doctor.py` is the doctor that refuses to let us
+forget. Run it after any change to skills, `install.sh`, `scripts/`,
+or `.github/workflows/`.
+
+## Procedure
+
+1. **Run the doctor and read the report.**
+
+   ```
+   python3 skills/setup-guardian/scripts/doctor.py
+   ```
+
+   Human lines per check: `[PASS|WARN|FAIL] <name>: <message>`, with a
+   `-> <remediation>` hint under each failure. Exit 1 if anything
+   fails, 0 otherwise. Use `--check <name>` to run a single check
+   (e.g. `--check pinned_shas` after touching a workflow).
+
+2. **Use `--fix` for the safe auto-fixes only.** The doctor rebuilds
+   `dist/`, rewrites the README skill count, and regenerates the site
+   catalog — the three generated artifacts that must never be
+   hand-edited. Everything else (bad SHA pins, broken install targets,
+   a wrong CI gate, lock drift, bare `env=`) gets a remediation, not a
+   fix, because each needs a human decision.
+
+   ```
+   python3 skills/setup-guardian/scripts/doctor.py --fix
+   ```
+
+   After a fix run, re-run the doctor and confirm `fixed=True` paths
+   are clean before pushing.
+
+3. **`--watch` for scheduled runs.** Prints exactly one JSON object to
+   stdout — `{"ok", "failures", "warnings", "checks": [...]}` — and
+   exits non-zero on any failure. Nothing else goes to stdout, so it
+   is safe to pipe into logs. Example cron entry (adjust the path to
+   your checkout):
+
+   ```
+   0 9 * * * /usr/bin/python3 /path/to/agentkit/skills/setup-guardian/scripts/doctor.py --watch >> /var/log/agentkit-doctor.log 2>&1
+   ```
+
+## Check catalog
+
+| Check | What it guards | Auto-fix |
+|---|---|---|
+| `dist_freshness` | `dist/` matches generated sources (`scripts/build.py --check` clean) | yes — rebuilds via `scripts/build.py` |
+| `install_targets` | `install.sh` symlinks exist and point at `dist/`; no stale manifest entries | no — re-run `./install.sh` |
+| `skill_count` | README count, `site/assets/skills.json`, and the AGENTS.md table all agree with `skills/` | yes — rewrites README count, regenerates catalog and `dist/` |
+| `pinned_shas` | workflow action pins are full SHAs, none on the known-bad list | no — fix the pin, verify via `git ls-remote` |
+| `ci_aggregator` | CI success gate compares `v.get("result")`, not whole `needs` objects | no — hand-edit `ci.yml` |
+| `external_lock` | `external/skills.lock.json` schema and per-source fields; checkouts match locked SHAs | no — re-run `scripts/sync-external.sh` |
+| `subprocess_env` | no bare `env={...}` dicts that drop inherited environment (Windows `SystemRoot`) | no — build from `os.environ` |
+
+## Rules
+
+- **Every repeat-mistake class gets a LESSON entry in
+  `reference/lessons.md` PLUS a doctor check.** The registry is the
+  memory; the doctor is the enforcement. A lesson without a check is a
+  hope; a check without a lesson is unexplained.
+- **Never hand-write skill counts.** The README count line,
+  `site/assets/skills.json`, and the AGENTS.md table are all generated
+  from `skills/` — use `make build` or `doctor.py --fix`.
+- **Verify new action SHA pins resolve before push.** `git ls-remote
+  https://github.com/<owner>/<repo>` must list the pinned commit; add
+  any caught typo'd SHAs to `KNOWN_BAD_SHAS` in `doctor.py`.
+- **`doctor.py` stays stdlib-only and self-contained.** No
+  `scripts.lib` import, no third-party deps — it must run on any
+  machine with Python 3, including fresh CI runners.
+- **Run the doctor after adding a skill or touching `install.sh`,
+  `scripts/build.py`, or `.github/workflows/`.** Then run `make
+  build` and `make validate` before pushing.
+
+## Token economy
+
+- **One check, not the suite.** If you only touched workflows, run
+  `doctor.py --check pinned_shas` — the full suite re-scans
+  everything you didn't change.
+- **`--json` for machines.** Parse the single JSON object with `jq`
+  instead of reading prose output, especially in `--watch` mode.
+- **`--fix` once, then verify.** Auto-fix applies safe fixes; run
+  `make build` after, don't loop doctor-fix-doctor.
+- General read/search/output patterns live in the `token-saver`
+  skill — don't duplicate them here.

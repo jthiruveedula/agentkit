@@ -21,3 +21,10 @@ Routes to `nextlevelbuilder/ui-ux-pro-max-skill` (MIT), pinned in
 3. For greenfield pages/redesigns with no explicit ask for this specific
    toolkit, prefer this repo's own `hallmark`-routed design work instead —
    this skill exists for when the user names ui-ux-pro-max by name.
+
+## Token economy
+
+- Iterate on design tokens and the textual design description first; generate mockups/images only after the description settles — each generation is expensive.
+- Read `skill.json` and `.claude/` before the CLI/scripts, not the other way around.
+- Route greenfield work through `hallmark` first when the user didn't name ui-ux-pro-max — avoids loading this whole toolkit for nothing.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

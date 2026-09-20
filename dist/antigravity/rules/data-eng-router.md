@@ -49,3 +49,14 @@ answering from general knowledge alone.
   cases in `_data-eng-router/tests/golden.json`.
 - `_data-eng-router/tests/golden.json` — 14 golden platform-classification fixtures; add a
   case here before hand-tuning a classifier weight.
+
+## Token economy
+
+- One cheap `classify.py` run routes to the right platform skill; loading
+  the wrong vendor skill first and backtracking costs more than the
+  routing step.
+- Don't hand-classify by vibes when the classifier exists — run it.
+- For genuinely platform-agnostic questions, answer directly; forcing a
+  route burns a routing step plus a full skill load for nothing.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

@@ -20,3 +20,12 @@ reviewer here.
 4. If asked to post comments, use `gh pr review <N> --comment` per finding —
    never `--approve`/`--request-changes` without the user explicitly asking
    for that verdict.
+
+## Token economy
+
+- Start with `git diff --stat`. Review the diff, not the full files — the
+  diff is the reviewable content.
+- Post inline findings only. No full-file summaries, no re-quoting the
+  diff back to the user.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

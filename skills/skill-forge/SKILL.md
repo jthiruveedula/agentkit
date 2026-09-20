@@ -23,3 +23,11 @@ allowed-tools: Bash, Read, Write
    other skill.
 5. Run `python3 scripts/build.py` to regenerate the 4 tool adapters and
    `AGENTS.md` — never hand-edit `dist/`.
+
+
+## Token economy
+
+- The scaffold generates the golden test stub — don't hand-write boilerplate.
+- Push depth into `reference/`; keep SKILL.md under 500 lines so it costs less to load.
+- Run `scripts/validate.py` once at the end, not after every edit.
+- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

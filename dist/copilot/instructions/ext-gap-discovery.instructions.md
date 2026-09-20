@@ -21,3 +21,14 @@ skill repos, not a skill itself. Pinned in `external/skills.lock.json`.
    other `ext-*` skills here, or hand the URL to the user.
 4. If nothing fits, that's the signal to actually build one — see
    `skill-forge`.
+
+## Token economy
+
+- Search the index before authoring — building a new skill from scratch
+  is the most expensive path in this repo.
+- `grep -i "<keyword>"` on the local README beats cloning candidate
+  repos to compare; read the index entry before the repo.
+- Verify a candidate with `gh api repos/<owner>/<repo>` before pulling
+  its full source into context.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

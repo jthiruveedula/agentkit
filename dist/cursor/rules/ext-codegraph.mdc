@@ -20,3 +20,14 @@ pinned in `external/skills.lock.json`.
    not run automatically), then query with `codegraph explore "<question>"`.
 4. Without CodeGraph, fall back to Read/Grep/Glob as normal — this skill
    only exists to make bootstrapping it a one-liner, not a hard dependency.
+
+## Token economy
+
+- Prefer symbol search / call-path / blast-radius queries over raw file
+  reads — one `codegraph explore "<question>"` beats five greps.
+- Index once per project (`codegraph init`); re-indexing a synced repo
+  burns the savings you just earned.
+- For a question two greps could answer, use the Read/Grep fallback —
+  don't spend the session bootstrapping the CLI.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

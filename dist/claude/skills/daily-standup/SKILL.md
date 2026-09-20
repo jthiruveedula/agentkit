@@ -22,3 +22,13 @@ version: 0.1.0
    - **Blocked:** anything with no activity for >2 days, or explicitly
      flagged in a PR/issue comment
 4. No filler, no restating the date, no "let me know if you need anything else".
+
+## Token economy
+
+- Use `git log --oneline --since=<window>` for the raw material. Never
+  read full diffs to write a standup.
+- Stay inside the window — don't scan history older than the marker to
+  "be thorough".
+- Output exactly 3 lines: Did / Doing / Blocked. Nothing else.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.

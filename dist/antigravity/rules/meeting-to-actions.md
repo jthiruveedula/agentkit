@@ -14,3 +14,13 @@ trigger: model_decision
 4. If an item has no clear owner, mark it `@unassigned` rather than
    guessing who it falls to.
 5. No summary paragraph above or below the list unless asked.
+
+## Token economy
+
+- One pass over the notes, extracting actions + owners + dates only.
+  Skip the small talk — don't summarize the meeting.
+- One read is enough; the extraction criteria are in the Procedure.
+  Don't re-read to "double-check" for items.
+- Output the flat list and stop.
+- General read/search/output patterns live in the `token-saver` skill —
+  don't duplicate them here.
