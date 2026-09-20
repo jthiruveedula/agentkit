@@ -73,6 +73,9 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `debug-loop` | Hypothesize-test-narrow loop to root-cause a failing test or crash. |
 | `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
 | `meeting-to-actions` | Extracts action items with owners/dates from meeting notes. |
+| `data-architect` | Multi-cloud/open-source data platform decisions (storage/compute/orchestration/streaming), recorded as ADRs. |
+| `pipeline-scaffold` | Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming + test stub. |
+| `data-quality-standards` | Schema/freshness/volume/idempotency/PII checks for a data pipeline before it ships. |
 | `data-eng-router` | Auto-detects GCP/AWS/Azure/Databricks from task vocabulary and routes to that platform's skill. |
 | `doc-standards` | Applies a consistent professional house style (palette, typography, layout) to Word/Excel/PDF/PowerPoint output. |
 | `memory-sync` | Mines recent sessions for recurring agent mistakes, ranks the repeats, writes durable fixes. |
@@ -86,9 +89,13 @@ source's own `SKILL.md` — your AI tools can reach for a real
 vendor-authored GCP/AWS/Azure/diagram/UI-UX skill the same way they reach
 for `prompt-enhancer`, not just read about it in a lock file.
 
-Five subagents (`agents/`) with narrow charters and explicit handoff
+Eight subagents (`agents/`) with narrow charters and explicit handoff
 contracts: `researcher`, `implementer`, `reviewer`, `test-writer`,
-`doc-writer`.
+`doc-writer`, `data-platform-architect`, `pipeline-engineer`,
+`data-quality-engineer` — the last three chain together for day-to-day
+data pipeline work: architect decides (and records an ADR) → engineer
+builds (via `pipeline-scaffold`) → quality engineer adds checks →
+`reviewer` closes the loop.
 
 ### prompt-enhancer
 

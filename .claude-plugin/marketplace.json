@@ -20,6 +20,9 @@
         "skills/debug-loop",
         "skills/spec-writer",
         "skills/meeting-to-actions",
+        "skills/data-architect",
+        "skills/pipeline-scaffold",
+        "skills/data-quality-standards",
         "skills/data-eng-router",
         "skills/doc-standards",
         "skills/memory-sync",
@@ -39,7 +42,10 @@
         "agents/implementer.md",
         "agents/reviewer.md",
         "agents/test-writer.md",
-        "agents/doc-writer.md"
+        "agents/doc-writer.md",
+        "agents/data-platform-architect.md",
+        "agents/pipeline-engineer.md",
+        "agents/data-quality-engineer.md"
       ]
     }
   ]
