@@ -109,7 +109,8 @@ def test_secret_in_skill_scripts_dir_is_caught(tmp_path):
     try:
         errors = validate.validate()
         assert any(
-            "scripts/helper.sh" in e and "GitHub personal access token" in e
+            "scripts/helper.sh" in e.replace("\\", "/")
+            and "GitHub personal access token" in e
             for e in errors
         ), errors
     finally:
@@ -130,7 +131,7 @@ def test_secret_in_skill_reference_dir_is_caught(tmp_path):
     try:
         errors = validate.validate()
         assert any(
-            "reference/notes.md" in e and "Anthropic API key" in e
+            "reference/notes.md" in e.replace("\\", "/") and "Anthropic API key" in e
             for e in errors
         ), errors
     finally:

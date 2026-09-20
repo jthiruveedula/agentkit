@@ -23,6 +23,27 @@ def test_build_produces_all_four_tools():
     assert tools == {"claude", "copilot", "cursor", "antigravity"}
 
 
+def test_build_ignores_pycache_residue():
+    # Regression: local interpreter residue must never leak into dist/.
+    # Pytest imports skill scripts at collection time, creating
+    # skills/<name>/scripts/__pycache__/ mid-run; if the build copied it,
+    # the --check drift gate would fail depending on what ran before it.
+    residue = REPO_ROOT / "skills" / "memory" / "scripts" / "__pycache__"
+    residue.mkdir(exist_ok=True)
+    marker = residue / "junk.cpython-312.pyc"
+    try:
+        marker.write_bytes(b"fake bytecode")
+        tree = build.build()
+        bad = [k for k in tree if "__pycache__" in k or k.endswith((".pyc", ".pyo"))]
+        assert not bad, bad
+    finally:
+        marker.unlink(missing_ok=True)
+        try:
+            residue.rmdir()
+        except OSError:
+            pass  # real __pycache__ from this test run may remain; harmless
+
+
 def test_check_passes_on_committed_dist():
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "build.py"), "--check"],

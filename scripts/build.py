@@ -102,6 +102,12 @@ def _copy_assets_into(src_dir, out, prefix):
         for f in sorted(src.rglob("*")):
             if f.is_dir() or f.name == ".gitkeep":
                 continue
+            # Hermetic build: never ship interpreter bytecode or OS dotfiles.
+            # They are local residue -- e.g. __pycache__ created when pytest
+            # imports a skill script mid-run -- and their presence poisons
+            # the --check drift gate depending on what ran before the build.
+            if "__pycache__" in f.parts or f.suffix in (".pyc", ".pyo") or f.name.startswith("."):
+                continue
             rel = f.relative_to(src_dir).as_posix()
             out["%s/%s" % (prefix, rel)] = f.read_bytes()
             copied.append(rel)
