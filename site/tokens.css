@@ -1,35 +1,46 @@
-/* agentkit design tokens — Midnight Coral: dark, warm-undertone aesthetic,
- * single coral accent carried over from the paper theme. Good contrast on
- * dark: body text sits at ~92% lightness, accent is lifted one step. */
+/* agentkit design tokens — Neon Indigo: near-black indigo field,
+ * three neon accents carried at full glow. Glassmorphism surfaces,
+ * GPU-cheap motion primitives, tabular numerals for counters. */
 
 :root {
-  /* colour — OKLCH, warm anchor hue 40 */
-  --color-paper:      oklch(17% 0.013 40);   /* page background */
-  --color-paper-2:    oklch(21% 0.015 40);   /* raised surface */
-  --color-surface:    oklch(24% 0.018 42);   /* card / glass base */
-  --color-elev:       oklch(27% 0.020 42);   /* hovered / emphasized */
-  --color-rule:       oklch(30% 0.016 42);
-  --color-rule-2:     oklch(25% 0.016 42);
-  --color-neutral:    oklch(62% 0.014 45);
-  --color-muted:      oklch(74% 0.012 45);
-  --color-ink:        oklch(93% 0.008 45);   /* primary text */
-  --color-ink-2:      oklch(76% 0.011 45);   /* secondary text */
-  --color-accent:     oklch(68% 0.185 35);
-  --color-accent-deep: oklch(52% 0.160 30);
-  --color-accent-ink: oklch(16% 0.030 35);   /* text on accent fill */
-  --color-focus:      oklch(74% 0.160 35);
-  --color-glow:       oklch(62% 0.190 35 / 0.28);
+  /* colour — base is near-black indigo; text is indigo-tinted white */
+  --color-bg:         #05060f;   /* page background (near-black indigo) */
+  --color-bg-2:       #0a0d1e;   /* raised surface */
+  --color-surface:    #0d1126;   /* card / glass base (pre-backdrop-filter) */
+  --color-elev:       #141a36;   /* hovered / emphasized */
+  --color-rule:       oklch(28% 0.030 275);
+  --color-rule-2:     oklch(22% 0.026 275);
+  --color-ink:        #edf0ff;   /* primary text */
+  --color-ink-2:      #a9b1d6;   /* secondary text */
+  --color-muted:      #7d87ad;   /* tertiary text */
+  --color-neutral:    #6b74a0;
+
+  /* neon accents — exact brand hexes, used at full saturation sparingly */
+  --neon-cyan:        #22d3ee;   /* primary neon */
+  --neon-violet:      #a78bfa;   /* secondary neon */
+  --neon-pink:        #f472b6;   /* sparkle accent, sparing use */
+  --color-accent:     var(--neon-cyan);
+  --color-accent-2:   var(--neon-violet);
+  --color-accent-3:   var(--neon-pink);
+  --color-accent-ink: #03141a;   /* text on cyan fill */
+  --color-focus:      #67e8f9;
+
+  /* glows (color-mix keeps them derived from the brand hexes) */
+  --glow-cyan:        color-mix(in oklch, var(--neon-cyan) 32%, transparent);
+  --glow-violet:      color-mix(in oklch, var(--neon-violet) 28%, transparent);
+  --glow-pink:        color-mix(in oklch, var(--neon-pink) 24%, transparent);
+  --color-glow:       var(--glow-cyan);
 
   /* gradients */
-  --grad-hero: radial-gradient(52rem 32rem at 72% 18%, oklch(48% 0.120 35 / 0.22), transparent 60%),
-               radial-gradient(44rem 30rem at 12% 82%, oklch(40% 0.090 45 / 0.16), transparent 62%);
-  --grad-card: linear-gradient(160deg, oklch(27% 0.022 42 / 0.85), oklch(21% 0.015 40 / 0.65));
-  --grad-accent-text: linear-gradient(100deg, oklch(88% 0.120 40), var(--color-accent) 70%);
+  --grad-accent-text: linear-gradient(100deg, #e0faff 0%, var(--neon-cyan) 38%, var(--neon-violet) 72%, var(--neon-pink) 105%);
+  --grad-glass:       linear-gradient(160deg, oklch(24% 0.040 278 / 0.72), oklch(12% 0.028 280 / 0.55));
+  --grad-button:      linear-gradient(120deg, var(--neon-cyan), var(--neon-violet));
+  --grad-sheen:       linear-gradient(105deg, transparent 40%, oklch(96% 0.01 280 / 0.14) 50%, transparent 60%);
 
-  /* type — Geist throughout (single-family discipline), Geist Mono as the outlier */
-  --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-body:    "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono:    "Geist Mono", ui-monospace, "SF Mono", monospace;
+  /* type — system stack only (no external fonts), distinctive display treatment */
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", "SF Pro Display", Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-body:    ui-sans-serif, system-ui, -apple-system, "Segoe UI", "SF Pro Text", Inter, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, "Liberation Mono", monospace;
 
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;
@@ -39,7 +50,7 @@
   --text-xl:   1.75rem;
   --text-2xl:  2.25rem;
   --text-3xl:  2.75rem;
-  --text-display: clamp(2.5rem, 4.2vw + 1rem, 4.25rem);
+  --text-display: clamp(2.75rem, 5vw + 1rem, 4.75rem);
 
   /* space — 4pt scale */
   --space-3xs: 0.125rem;
@@ -53,26 +64,27 @@
   --space-3xl: 6rem;
   --space-4xl: 9rem;
 
-  /* motion */
+  /* motion — cinematic reveals */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:  cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-micro: 120ms;
   --dur-short: 220ms;
   --dur-long:  420ms;
-  --dur-reveal: 640ms;
+  --dur-reveal: 720ms;
 
   /* structure */
   --rule-hair: 1px;
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-lg: 18px;
   --radius-pill: 999px;
 
   /* shadows */
-  --shadow-card: 0 18px 48px -24px oklch(8% 0.010 40 / 0.85);
-  --shadow-glow: 0 0 32px -6px var(--color-glow);
-  --shadow-nav: 0 12px 36px -16px oklch(8% 0.010 40 / 0.9);
+  --shadow-card: 0 24px 64px -28px oklch(4% 0.012 280 / 0.9);
+  --shadow-lift: 0 32px 80px -28px oklch(4% 0.012 280 / 0.9), 0 0 40px -12px var(--glow-cyan);
+  --shadow-nav: 0 16px 48px -20px oklch(4% 0.012 280 / 0.95), 0 0 24px -8px var(--glow-cyan);
+  --shadow-terminal: 0 24px 64px -24px oklch(4% 0.012 280 / 0.95), 0 0 48px -16px var(--glow-cyan);
 
   /* z-index scale */
   --z-base: 1;
