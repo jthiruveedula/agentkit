@@ -1,0 +1,19 @@
+{
+  "$schema": "./skills.lock.schema.json",
+  "note": "Pinned external skill sources -- fetched on demand into external/<name>/ by scripts/sync-external.sh, never vendored into this repo's git history. GPL-licensed entries are reference-only: read for guidance, never copied verbatim into a skill body.",
+  "sources": [
+    { "name": "diagram-design",   "repo": "cathrynlavery/diagram-design",                   "sha": "dc1ace47b99a419e42d01a03cb6ace5346efa8ae", "license": "MIT",       "for": "diagrams" },
+    { "name": "ui-ux-pro-max",    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",            "sha": "de5f12b400775997d213524ef02a7c7d2746806f", "license": "MIT",       "for": "ui/ux" },
+    { "name": "codegraph",        "repo": "colbymchenry/codegraph",                          "sha": "ba3c21e50d9129d2f5f3843ec3728868ae6d47a1", "license": "MIT",       "for": "codebase reads" },
+    { "name": "boost",            "repo": "jfrog/boost",                                     "sha": "9c8a076295967470728b2eb1da9c4f52b65014e3", "license": "NOASSERTION", "for": "token/CLI ops" },
+    { "name": "gcp-skills",       "repo": "google/skills",                                   "sha": "18152e0d310e4d7047e9c2ec25a37b0d22d6893e", "license": "Apache-2.0", "for": "gcp" },
+    { "name": "databricks-agent-skills", "repo": "databricks/databricks-agent-skills",       "sha": "e0af9245dd88c9d2c1c6a2de9f7133beac0cdb2d", "license": "NOASSERTION", "for": "databricks" },
+    { "name": "aws-sample-skills", "repo": "aws-samples/sample-agent-skills",                "sha": "dd0bdc07ec0485e9594e4deb497c108724a80400", "license": "MIT-0",     "for": "aws" },
+    { "name": "aws-skills",       "repo": "zxkane/aws-skills",                               "sha": "68530c6f296ccd2f5e99c79782f3e0fbf962c51a", "license": "MIT",       "for": "aws" },
+    { "name": "azure-skills",     "repo": "microsoft/azure-skills",                          "sha": "f8fac821eca9fe691b618f55313b376cb563d5dd", "license": "MIT",       "for": "azure" },
+    { "name": "agent-skills-ms",  "repo": "MicrosoftDocs/Agent-Skills",                      "sha": "d5ad46424db3892ebaa27e39fb62a54f4b22cb6e", "license": "CC-BY-4.0", "for": "azure" },
+    { "name": "anthropic-skills", "repo": "anthropics/skills",                               "sha": "34040c9c568585f6929bedeaad110ad08f079624", "license": "NOASSERTION", "for": "system design/scalability" },
+    { "name": "systems-design-resources", "repo": "ashishps1/awesome-system-design-resources", "sha": "25724090f7dd7746129b7194b55504f9d06f86ed", "license": "GPL-3.0", "for": "system design/scalability (substituted for ryanthedev/systems-design, which 404s)" },
+    { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "755521de9a19bceff41aa96275db03e40a539b36", "license": "MIT",       "for": "gap discovery" }
+  ]
+}

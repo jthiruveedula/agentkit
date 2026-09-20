@@ -1,0 +1,19 @@
+[project]
+name = "agentkit"
+version = "0.1.0"
+description = "Portable, vendor-neutral agent foundation for Claude Code, Copilot, Cursor, and Antigravity."
+requires-python = ">=3.8"
+license = { text = "MIT" }
+
+[project.scripts]
+agentkit = "agentkit.cli:main"
+
+[project.urls]
+Repository = "https://github.com/jthiruveedula/agentkit"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

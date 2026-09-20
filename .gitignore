@@ -1,0 +1,22 @@
+# local state
+*.bak.*
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+*.egg-info/
+build/
+.pytest_cache/
+
+# external skill checkouts (pinned via external/skills.lock.json, fetched on demand)
+external/*/
+!external/.gitkeep
+
+# never commit real secrets or machine state
+.env
+.env.*
+*.pem
+*.key
+manifest.json

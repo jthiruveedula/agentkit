@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "agentkit",
+  "owner": {
+    "name": "Jagadeesh Thiruveedula",
+    "url": "https://github.com/jthiruveedula"
+  },
+  "plugins": [
+    {
+      "name": "agentkit",
+      "source": "./",
+      "description": "Portable, vendor-neutral agent foundation: skills, subagents, and commands that work identically in Claude Code, Copilot, Cursor, and Antigravity.",
+      "version": "0.1.0",
+      "license": "MIT",
+      "skills": [
+        "skills/prompt-enhancer",
+        "skills/skill-forge",
+        "skills/daily-standup",
+        "skills/pr-review",
+        "skills/debug-loop",
+        "skills/spec-writer",
+        "skills/meeting-to-actions"
+      ],
+      "agents": [
+        "agents/researcher.md",
+        "agents/implementer.md",
+        "agents/reviewer.md",
+        "agents/test-writer.md",
+        "agents/doc-writer.md"
+      ]
+    }
+  ]
+}

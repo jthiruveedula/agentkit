@@ -1,0 +1,145 @@
+[
+  {
+    "id": "debug-500-refresh",
+    "prompt": "why does my login endpoint 500 on refresh, here's the stack trace",
+    "expect_intent": "debug",
+    "expect_band": "high"
+  },
+  {
+    "id": "debug-flaky-test",
+    "prompt": "this test is flaky in CI, fails intermittently with a null pointer exception",
+    "expect_intent": "debug",
+    "expect_band": "high"
+  },
+  {
+    "id": "debug-crash-repro",
+    "prompt": "app crashes on startup, help me reproduce and diagnose it",
+    "expect_intent": "debug"
+  },
+  {
+    "id": "codegen-endpoint",
+    "prompt": "implement a new REST endpoint for user signup with validation",
+    "expect_intent": "code-gen",
+    "expect_band": "high"
+  },
+  {
+    "id": "codegen-cli-scratch",
+    "prompt": "write me a CLI script from scratch that batch-renames files",
+    "expect_intent": "code-gen"
+  },
+  {
+    "id": "codegen-component",
+    "prompt": "build a React component for a paginated table",
+    "expect_intent": "code-gen"
+  },
+  {
+    "id": "refactor-dedupe",
+    "prompt": "refactor this module to remove duplication without changing behavior",
+    "expect_intent": "refactor",
+    "expect_band": "high"
+  },
+  {
+    "id": "refactor-extract",
+    "prompt": "clean up this function, extract the validation logic and rename variables for readability",
+    "expect_intent": "refactor"
+  },
+  {
+    "id": "refactor-split",
+    "prompt": "this file is a mess, split it up and simplify the control flow",
+    "expect_intent": "refactor"
+  },
+  {
+    "id": "research-compare",
+    "prompt": "compare Postgres vs MongoDB for this workload, what are the trade-offs",
+    "expect_intent": "research",
+    "expect_band": "high"
+  },
+  {
+    "id": "research-bestpractice",
+    "prompt": "what are the best practices and alternatives for handling retries in distributed systems",
+    "expect_intent": "research"
+  },
+  {
+    "id": "research-survey",
+    "prompt": "research the current landscape of vector databases and give pros and cons",
+    "expect_intent": "research"
+  },
+  {
+    "id": "datasql-query",
+    "prompt": "write a SQL query with a window function and group by to dedupe rows in this table",
+    "expect_intent": "data-sql"
+  },
+  {
+    "id": "datasql-pipeline",
+    "prompt": "design an ETL pipeline into our Snowflake warehouse using dbt",
+    "expect_intent": "data-sql"
+  },
+  {
+    "id": "datasql-pandas",
+    "prompt": "clean this pandas dataframe and write it out as parquet partitioned by date",
+    "expect_intent": "data-sql"
+  },
+  {
+    "id": "arch-system-design",
+    "prompt": "design a system to handle millions of requests with high availability and sharding",
+    "expect_intent": "architecture",
+    "expect_band": "high"
+  },
+  {
+    "id": "arch-microservices",
+    "prompt": "should this be microservices or a monolith, walk through the CAP theorem trade-offs for our consistency model",
+    "expect_intent": "architecture"
+  },
+  {
+    "id": "arch-scale",
+    "prompt": "how do we scale this service for higher throughput and lower p99 latency",
+    "expect_intent": "architecture"
+  },
+  {
+    "id": "writing-blogpost",
+    "prompt": "write a blog post announcing our new release, draft it for a non-technical audience",
+    "expect_intent": "writing",
+    "expect_band": "high"
+  },
+  {
+    "id": "writing-readme",
+    "prompt": "write the README and changelog for this project",
+    "expect_intent": "writing"
+  },
+  {
+    "id": "writing-proofread",
+    "prompt": "proofread and copy edit this email, adjust the tone",
+    "expect_intent": "writing"
+  },
+  {
+    "id": "opscli-k8s",
+    "prompt": "write a Kubernetes helm chart and terraform module to deploy this service",
+    "expect_intent": "ops-cli",
+    "expect_band": "high"
+  },
+  {
+    "id": "opscli-cicd",
+    "prompt": "set up a GitHub Actions CI/CD pipeline that builds a Dockerfile and rolls back on failure",
+    "expect_intent": "ops-cli"
+  },
+  {
+    "id": "opscli-cron",
+    "prompt": "write a bash script and crontab entry to rotate logs on this server",
+    "expect_intent": "ops-cli"
+  },
+  {
+    "id": "ambiguous-short",
+    "prompt": "help me with this",
+    "expect_intent": "ambiguous"
+  },
+  {
+    "id": "ambiguous-vague",
+    "prompt": "can you take a look at my project",
+    "expect_intent": "ambiguous"
+  },
+  {
+    "id": "ambiguous-mixed",
+    "prompt": "can you help improve this",
+    "expect_intent": "ambiguous"
+  }
+]

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install test dependency (pytest)
+        run: python -m pip install --quiet pytest
+
+      - name: Validate skill frontmatter/links/secrets
+        run: python scripts/validate.py
+
+      - name: Check dist/ has no drift from source
+        run: python scripts/build.py --check
+
+      - name: Golden intent classification tests
+        run: python skills/prompt-enhancer/scripts/classify.py --selftest
+
+      - name: Unit tests
+        run: python -m pytest tests/ -q
+
+      - name: Smoke install (POSIX)
+        if: runner.os != 'Windows'
+        run: ./tests/smoke_install.sh
+
+      - name: Smoke install (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:TEMP_HOME = Join-Path $env:RUNNER_TEMP "agentkit-home"
+          New-Item -ItemType Directory -Path $env:TEMP_HOME -Force | Out-Null
+          $env:USERPROFILE = $env:TEMP_HOME
+          $env:LOCALAPPDATA = Join-Path $env:TEMP_HOME "AppData\Local"
+          .\install.ps1 -Tools claude,cursor
+          if (-not (Test-Path (Join-Path $env:TEMP_HOME ".claude\CLAUDE.md"))) {
+            throw "install.ps1 did not create .claude/CLAUDE.md"
+          }
+          if (-not (Test-Path (Join-Path $env:TEMP_HOME ".claude\skills\prompt-enhancer\SKILL.md"))) {
+            throw "install.ps1 did not create prompt-enhancer skill"
+          }
+          .\install.ps1 -Uninstall
+          if (Test-Path (Join-Path $env:TEMP_HOME ".claude\skills\prompt-enhancer")) {
+            throw "install.ps1 -Uninstall left files behind"
+          }
+          Write-Host "install.ps1 smoke test passed"
