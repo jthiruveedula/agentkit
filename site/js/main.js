@@ -191,10 +191,12 @@ function wireCatalog() {
       <button class="skill-row${visible ? "" : " is-dimmed"}" type="button" data-skill="${esc(s.name)}"${
           visible ? "" : ' tabindex="-1" aria-hidden="true"'
         }>
-        <span class="skill-row__name">${esc(s.name)}</span>
-        <span class="skill-row__kind skill-row__kind--${kind}">${kind}</span>
+        <span class="skill-row__top">
+          <span class="skill-row__name">${esc(s.name)}</span>
+          <span class="skill-row__kind skill-row__kind--${kind}">${kind}</span>
+          <span class="skill-row__go" aria-hidden="true">→</span>
+        </span>
         <span class="skill-row__desc">${esc(s.description)}</span>
-        <span class="skill-row__go" aria-hidden="true">→</span>
       </button>`;
       })
       .join("");
