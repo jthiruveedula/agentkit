@@ -14,10 +14,10 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | `daily-standup` | 0.1.0 | Summarize what got done since the last standup — git commits, closed issues/PRs, and open threads — into a 3-line standup update (did/doing/blocked). Use when the user asks for a standup update, status report, or "what did I do yesterday". |
 | `debug-loop` | 0.1.0 | Run a tight hypothesize-test-narrow loop on a failing test or reproducible bug until root cause is found, logging each attempt. Use when the user has a failing test, stack trace, or reproducible crash and wants it root-caused, not just patched. |
 | `meeting-to-actions` | 0.1.0 | Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted. |
+| `new-skill` | 0.1.0 | A brand new skill added upstream to prove the upgrade path picks it up automatically. Use when testing the upgrade flow end to end. |
 | `pr-review` | 0.1.0 | Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when the user asks to review a PR, "look at PR #N", or check a branch before merge. |
 | `prompt-enhancer` | 0.1.0 | Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it. |
 | `skill-forge` | 0.1.0 | Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo. |
-| `spec-writer` | 0.1.0 | Turn a rough feature idea or bug report into a short written spec — problem, scope, non-goals, acceptance criteria — before code is written. Use when the user asks for a spec, design doc, or "write this up before we build it". |
 
 ## Subagents
 
