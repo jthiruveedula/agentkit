@@ -1,0 +1,45 @@
+# Publishes @jthiruveedula/agentkit to GitHub Packages on every GitHub release.
+#
+# NOTE: actions are pinned to commit SHAs (version in the trailing comment).
+# Majors are the Node 24-based releases: GitHub removed the Node 20 runtime
+# from hosted runners in September 2026, so older majors no longer run.
+name: publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896644e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      # Build gates -- the publish step never runs if any of these fail.
+      - name: Build
+        run: make build
+
+      - name: Validate
+        run: make validate
+
+      - name: Test
+        run: make test
+
+      - name: Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

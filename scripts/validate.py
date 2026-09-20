@@ -3,9 +3,13 @@
 
 Checks: frontmatter parses, required keys present, name is kebab-case and
 matches its directory, description length 40-500 chars and states a
-trigger, no duplicate names, no broken relative links, no obvious secrets.
+trigger, no duplicate names, no broken relative links, no obvious secrets
+(SKILL.md plus text files under each skill's reference/, scripts/ and
+tests/ dirs), and external/skills.lock.json conforms to
+external/skills.lock.schema.json (required fields and types per source).
 Exit 0 = clean, 1 = violations found (printed to stderr).
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -30,7 +34,22 @@ SECRET_PATTERNS = [
     (re.compile(r"xox[baprs]-[A-Za-z0-9-]{10,}"), "Slack token"),
 ]
 
+# Skill subdirs whose text files are secret-scanned alongside SKILL.md, and
+# the file types covered. Binary blobs and anything else are skipped.
+SCAN_SUBDIRS = ("reference", "scripts", "tests")
+SCAN_SUFFIXES = (".md", ".py", ".sh", ".js", ".json", ".yml", ".yaml", ".toml")
+
 REQUIRED_KEYS = ("name", "description", "version")
+
+# external/skills.lock.json validation -- mirrors
+# external/skills.lock.schema.json (stdlib only; kept in sync by hand).
+LOCK_FILE = REPO_ROOT / "external" / "skills.lock.json"
+LOCK_TOP_KEYS = ("$schema", "note", "sources")
+LOCK_REQUIRED_KEYS = ("name", "repo", "sha", "license")
+LOCK_OPTIONAL_KEYS = ("for", "sha256")
+LOCK_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+LOCK_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+LOCK_REPO_RE = re.compile(r"^[^/\s]+/[^/\s]+$")
 
 
 def find_skill_files():
@@ -43,6 +62,25 @@ def check_secrets(text, origin, errors):
             errors.append("%s: looks like a %s -- remove before committing" % (origin, label))
 
 
+def check_skill_extra_files(skill_dir, errors):
+    for sub in SCAN_SUBDIRS:
+        subdir = skill_dir / sub
+        if not subdir.is_dir():
+            continue
+        for path in sorted(subdir.rglob("*")):
+            if not path.is_file() or path.suffix.lower() not in SCAN_SUFFIXES:
+                continue
+            try:
+                origin = str(path.relative_to(REPO_ROOT))
+            except ValueError:
+                origin = str(path)
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            check_secrets(text, origin, errors)
+
+
 def check_links(body, skill_dir, origin, errors):
     for target in LINK_RE.findall(body):
         if target.startswith(("http://", "https://", "mailto:")):
@@ -50,6 +88,60 @@ def check_links(body, skill_dir, origin, errors):
         if (skill_dir / target).resolve().exists():
             continue
         errors.append("%s: broken relative link -> %s" % (origin, target))
+
+
+def check_lock(lock_path=None):
+    """Validate a skills lock file; defaults to the repo's own. Returns a
+    list of error strings (empty = valid)."""
+    errors = []
+    lock_path = Path(lock_path) if lock_path is not None else LOCK_FILE
+    try:
+        origin = str(lock_path.relative_to(REPO_ROOT))
+    except ValueError:
+        origin = str(lock_path)
+    try:
+        data = json.loads(lock_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return ["%s: lock file not found" % origin]
+    except (OSError, ValueError) as e:
+        return ["%s: cannot be read as JSON: %s" % (origin, e)]
+    if not isinstance(data, dict):
+        return ["%s: top level must be an object" % origin]
+    for key in data:
+        if key not in LOCK_TOP_KEYS:
+            errors.append("%s: unexpected top-level key '%s'" % (origin, key))
+    sources = data.get("sources")
+    if not isinstance(sources, list) or not sources:
+        errors.append("%s: 'sources' must be a non-empty array" % origin)
+        return errors
+    for i, entry in enumerate(sources):
+        where = "%s: sources[%d]" % (origin, i)
+        if not isinstance(entry, dict):
+            errors.append("%s: must be an object" % where)
+            continue
+        for key in LOCK_REQUIRED_KEYS:
+            val = entry.get(key)
+            if not isinstance(val, str) or not val:
+                errors.append("%s: missing or empty required field '%s'" % (where, key))
+        for key in LOCK_OPTIONAL_KEYS:
+            if key in entry and not isinstance(entry[key], str):
+                errors.append("%s: optional field '%s' must be a string" % (where, key))
+        for key in entry:
+            if key not in LOCK_REQUIRED_KEYS + LOCK_OPTIONAL_KEYS:
+                errors.append("%s: unexpected field '%s'" % (where, key))
+        sha = entry.get("sha")
+        if isinstance(sha, str) and sha and not LOCK_SHA_RE.match(sha):
+            errors.append("%s: 'sha' must be a 40-char hex commit sha" % where)
+        repo = entry.get("repo")
+        if isinstance(repo, str) and repo and not LOCK_REPO_RE.match(repo):
+            errors.append("%s: 'repo' must look like 'owner/name'" % where)
+        sha256 = entry.get("sha256")
+        if isinstance(sha256, str) and sha256 and not LOCK_SHA256_RE.match(sha256):
+            errors.append("%s: 'sha256' must be a 64-char hex digest" % where)
+    names = [e.get("name") for e in sources if isinstance(e, dict) and isinstance(e.get("name"), str)]
+    for name in sorted({n for n in names if names.count(n) > 1}):
+        errors.append("%s: duplicate source name '%s'" % (origin, name))
+    return errors
 
 
 def validate():
@@ -67,6 +159,7 @@ def validate():
         skill_dir = path.parent
         text = path.read_text(encoding="utf-8")
         check_secrets(text, origin, errors)
+        check_skill_extra_files(skill_dir, errors)
 
         try:
             meta, body = load(path)
@@ -100,6 +193,8 @@ def validate():
             errors.append("%s: body is %d lines, must be under 500 (push depth into reference/)" % (origin, body_lines))
 
         check_links(body, skill_dir, origin, errors)
+
+    errors.extend(check_lock())
 
     return errors
 

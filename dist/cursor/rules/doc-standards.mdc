@@ -21,7 +21,7 @@ repo produces look like they came from the same place.
    Load that skill first for the actual file-format mechanics (this skill
    doesn't duplicate its API).
 
-2. **Apply house style** from `reference/house-style.md` — palette,
+2. **Apply house style** from `_doc-standards/reference/house-style.md` — palette,
    typography, table/chart formatting, layout, accessibility. Read it
    once per document, not once per element; it's short enough to hold in
    context for the whole build.
@@ -37,7 +37,7 @@ repo produces look like they came from the same place.
 
 ## Reference
 
-- `reference/house-style.md` — the full palette, typography, layout, and
+- `_doc-standards/reference/house-style.md` — the full palette, typography, layout, and
   accessibility rules. Load in full before the first document build in a
   session; subsequent documents in the same session can skip re-reading
   it unless the user asks for a different look.

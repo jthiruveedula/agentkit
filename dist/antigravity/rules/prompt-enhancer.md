@@ -14,7 +14,7 @@ user wants.
    yourself, the classifier is what the golden tests pin down:
 
    ```
-   python3 scripts/classify.py "<the raw prompt, verbatim>"
+   python3 _prompt-enhancer/scripts/classify.py "<the raw prompt, verbatim>"
    ```
 
    It returns `{intent, confidence, band, ask_clarifying, evidence,
@@ -26,7 +26,7 @@ user wants.
 
 3. **Medium/high confidence** — state the intent and confidence out loud in
    one line, e.g. `Intent: debug (0.81 confidence)`, then rewrite using that
-   intent's pattern from `reference/routing-table.md`.
+   intent's pattern from `_prompt-enhancer/reference/routing-table.md`.
 
 4. **List assumptions.** Anything the rewrite fills in that the original
    prompt left implicit (language, framework, scope) goes in a short bullet
@@ -41,10 +41,10 @@ user wants.
 
 ## Reference
 
-- `reference/routing-table.md` — one rewrite pattern per intent.
-- `reference/examples.md` — 6 worked before/after pairs, one per major
+- `_prompt-enhancer/reference/routing-table.md` — one rewrite pattern per intent.
+- `_prompt-enhancer/reference/examples.md` — 6 worked before/after pairs, one per major
   intent family.
-- `scripts/classify.py` — the classifier. `--selftest` runs the golden
-  cases in `tests/golden.json`.
-- `tests/golden.json` — golden intent-classification fixtures; add a case
+- `_prompt-enhancer/scripts/classify.py` — the classifier. `--selftest` runs the golden
+  cases in `_prompt-enhancer/tests/golden.json`.
+- `_prompt-enhancer/tests/golden.json` — golden intent-classification fixtures; add a case
   here before hand-tuning a classifier weight.

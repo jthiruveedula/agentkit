@@ -1,0 +1,54 @@
+name: nightly
+
+on:
+  schedule:
+    # 06:00 UTC daily. Informational only -- never gates merges.
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  nightly:
+    name: nightly (ubuntu, py3.13)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install test dependencies
+        run: python -m pip install --quiet pytest pytest-cov
+
+      # Catches skills.lock pin drift: a bad SHA or a vanished tarball fails here.
+      - name: Sync pinned external skill sources
+        run: ./scripts/sync-external.sh
+
+      - name: Validate skill frontmatter/links/secrets
+        run: python scripts/validate.py
+
+      - name: Check dist/ has no drift from source
+        run: python scripts/build.py --check
+
+      - name: Golden intent classification tests
+        run: python skills/prompt-enhancer/scripts/classify.py --selftest
+
+      - name: Unit tests
+        run: python -m pytest tests/ -q
+
+      # Exercises the Boost installer download + SHA-256 verification and the
+      # external-skill fetch inside install.sh, in a throwaway HOME so the
+      # runner itself is untouched. Catches Boost download failures.
+      - name: Install with external skills and Boost (throwaway HOME)
+        run: |
+          tmp_home="$(mktemp -d)"
+          HOME="$tmp_home" ./install.sh --with-external --with-boost
+          rm -rf "$tmp_home"

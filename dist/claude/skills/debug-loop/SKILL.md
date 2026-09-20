@@ -7,6 +7,13 @@ version: 0.1.0
 
 # Debug Loop
 
+0. Check the substrate first. Before hypothesizing, search the `memory`
+   skill for known corrections matching the failure — someone (possibly
+   you, last month) may have already root-caused this exact mistake:
+   `python3 skills/memory/scripts/memory.py search "<error / tool / area>" --kind correction`
+   (from the repo root; from `skills/debug-loop/` use
+   `../memory/scripts/memory.py`). If a correction matches, apply it
+   and skip the loop.
 1. Reproduce first. Get an exact failing command and its exact output
    before touching any code — no fix without a repro.
 2. Loop, capped at 6 iterations before stopping to ask the user for more

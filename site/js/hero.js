@@ -1,8 +1,7 @@
 // agentkit hero — an interactive orbit scene, not a spinning showpiece:
-// drag to orbit, click a tool node to read what it is. Built with 3dviz-pro-max's
-// "reason about the important object, ground the representation" workflow —
-// the object here is "one config, four tool integrations" and the orbit *is*
-// the metaphor, not decoration bolted onto a headline.
+// drag to orbit, click a tool node (or its label) to read what it is.
+// The object here is "one config, four tool integrations" and the orbit
+// *is* the metaphor, not decoration bolted onto a headline.
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
@@ -16,13 +15,14 @@ const CARD_DESC = CARD?.querySelector(".node-card__desc");
 // Real path data for each tool mark — same source as assets/logo-sprite.svg
 // (Claude/Copilot/Cursor via Simple Icons, MIT; Antigravity's mark extracted
 // from antigravity.google's own nav svg). Rasterised here so each orbiting
-// node can carry its true logo as a billboard texture, tinted to its brand ink.
+// node can carry its true logo as a billboard texture. `ink` is the dark-theme
+// tint: brand colors that read on dark, light ink where the brand is near-black.
 const TOOLS = [
   {
     id: "claude",
     name: "Claude Code",
     desc: "Skills, agents, and CLAUDE.md — symlinked into ~/.claude.",
-    color: 0xd97757,
+    ink: 0xd97757,
     viewBox: [0, 0, 24, 24],
     path: "m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z",
   },
@@ -30,7 +30,7 @@ const TOOLS = [
     id: "copilot",
     name: "GitHub Copilot",
     desc: "AGENTS.md contract + user-level copilot-instructions.md.",
-    color: 0x1f2328,
+    ink: 0xf5efe8,
     viewBox: [0, 0, 24, 24],
     path: "M23.922 16.997C23.061 18.492 18.063 22.02 12 22.02 5.937 22.02.939 18.492.078 16.997A.641.641 0 0 1 0 16.741v-2.869a.883.883 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.098 10.098 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952C7.255 2.937 9.248 1.98 11.978 1.98c2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.841.841 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256Zm-11.75-5.992h-.344a4.359 4.359 0 0 1-.355.508c-.77.947-1.918 1.492-3.508 1.492-1.725 0-2.989-.359-3.782-1.259a2.137 2.137 0 0 1-.085-.104L4 11.746v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.359 4.359 0 0 1-.355-.508Zm2.328 3.25c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm-5 0c.549 0 1 .451 1 1v2c0 .549-.451 1-1 1-.549 0-1-.451-1-1v-2c0-.549.451-1 1-1Zm3.313-6.185c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z",
   },
@@ -38,7 +38,7 @@ const TOOLS = [
     id: "cursor",
     name: "Cursor",
     desc: "Rules symlinked into ~/.cursor/rules + a shared AGENTS.md.",
-    color: 0x000000,
+    ink: 0xf5efe8,
     viewBox: [0, 0, 24, 24],
     path: "M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23",
   },
@@ -46,7 +46,7 @@ const TOOLS = [
     id: "antigravity",
     name: "Antigravity",
     desc: "Rules + workflows in ~/.antigravity, Google's agentic IDE.",
-    color: 0x3186ff,
+    ink: 0x5b9dff,
     viewBox: [0, 0, 115, 113],
     path: "M89.6992 93.695C94.3659 97.195 101.366 94.8617 94.9492 88.445C75.6992 69.7783 79.7825 18.445 55.8659 18.445C31.9492 18.445 36.0325 69.7783 16.7825 88.445C9.78251 95.445 17.3658 97.195 22.0325 93.695C40.1159 81.445 38.9492 59.8617 55.8659 59.8617C72.7825 59.8617 71.6159 81.445 89.6992 93.695Z",
   },
@@ -57,21 +57,43 @@ function markTexture(tool) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = size;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fdfaf7"; // paper
+
+  // Dark glass disc with a faint coral rim — reads on the dark hero.
+  const r = size / 2 - 4;
+  ctx.fillStyle = "#241f1c";
   ctx.beginPath();
-  ctx.arc(size / 2, size / 2, size / 2 - 4, 0, Math.PI * 2);
+  ctx.arc(size / 2, size / 2, r, 0, Math.PI * 2);
   ctx.fill();
+  ctx.strokeStyle = "rgba(217, 119, 87, 0.38)";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
 
   const [minX, minY, vw, vh] = tool.viewBox;
-  const pad = size * 0.24;
+  const pad = size * 0.26;
   const scale = Math.min((size - pad * 2) / vw, (size - pad * 2) / vh);
   ctx.save();
   ctx.translate(size / 2 - (vw * scale) / 2 - minX * scale, size / 2 - (vh * scale) / 2 - minY * scale);
   ctx.scale(scale, scale);
-  ctx.fillStyle = `#${tool.color.toString(16).padStart(6, "0")}`;
+  ctx.fillStyle = `#${tool.ink.toString(16).padStart(6, "0")}`;
   ctx.fill(new Path2D(tool.path));
   ctx.restore();
 
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function glowTexture() {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, "rgba(217, 119, 87, 0.55)");
+  g.addColorStop(0.45, "rgba(217, 119, 87, 0.18)");
+  g.addColorStop(1, "rgba(217, 119, 87, 0)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -110,26 +132,79 @@ function initScene() {
   controls.minPolarAngle = Math.PI * 0.28;
   controls.maxPolarAngle = Math.PI * 0.68;
   controls.autoRotate = !reducedMotion;
-  controls.autoRotateSpeed = 0.6;
+  controls.autoRotateSpeed = 0.55;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-  const key = new THREE.DirectionalLight(0xffffff, 0.6);
+  // Gentle auto-rotation that pauses while the user interacts, resuming after idle.
+  let resumeTimer = 0;
+  controls.addEventListener("start", () => {
+    controls.autoRotate = false;
+    introDone = true;
+    if (resumeTimer) clearTimeout(resumeTimer);
+  });
+  controls.addEventListener("end", () => {
+    if (resumeTimer) clearTimeout(resumeTimer);
+    if (!reducedMotion) {
+      resumeTimer = setTimeout(() => {
+        controls.autoRotate = true;
+      }, 2800);
+    }
+  });
+
+  // Lighting: warm key, coral rim, soft ambient — tuned for the dark scene.
+  scene.add(new THREE.AmbientLight(0xfff2e8, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.1);
   key.position.set(3, 4, 5);
   scene.add(key);
+  const rim = new THREE.PointLight(0xd97757, 18, 20);
+  rim.position.set(-4, -1.5, -3);
+  scene.add(rim);
+  const fill = new THREE.PointLight(0x5b9dff, 8, 18);
+  fill.position.set(4, -2, 3);
+  scene.add(fill);
 
-  // Core — the shared config.
+  // Core — the shared config, with a breathing glow.
   const core = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.62, 1),
-    new THREE.MeshStandardMaterial({ color: 0x2a1f1a, roughness: 0.35, metalness: 0.1, wireframe: false })
+    new THREE.MeshStandardMaterial({
+      color: 0x3a2c24,
+      roughness: 0.32,
+      metalness: 0.45,
+      emissive: 0xd97757,
+      emissiveIntensity: 0.08,
+    })
   );
   scene.add(core);
   const coreWire = new THREE.Mesh(
     new THREE.IcosahedronGeometry(0.66, 1),
-    new THREE.MeshBasicMaterial({ color: 0xd97757, wireframe: true, transparent: true, opacity: 0.35 })
+    new THREE.MeshBasicMaterial({ color: 0xd97757, wireframe: true, transparent: true, opacity: 0.32 })
   );
   scene.add(coreWire);
+  const glow = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: glowTexture(), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  glow.scale.set(3.4, 3.4, 1);
+  scene.add(glow);
 
-  // Orbiting tool nodes.
+  // Faint starfield for depth (static when reduced motion is preferred).
+  const starGeo = new THREE.BufferGeometry();
+  const starCount = 260;
+  const starPos = new Float32Array(starCount * 3);
+  for (let i = 0; i < starCount; i++) {
+    const r = 9 + Math.random() * 9;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    starPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    starPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    starPos[i * 3 + 2] = r * Math.cos(phi);
+  }
+  starGeo.setAttribute("position", new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(
+    starGeo,
+    new THREE.PointsMaterial({ color: 0x9a8878, size: 0.035, transparent: true, opacity: 0.55, sizeAttenuation: true })
+  );
+  scene.add(stars);
+
+  // Orbiting tool nodes + tethers.
   const group = new THREE.Group();
   scene.add(group);
   const radius = 2.35;
@@ -141,19 +216,36 @@ function initScene() {
     const sprite = new THREE.Sprite(
       new THREE.SpriteMaterial({ map: markTexture(tool), transparent: true })
     );
-    sprite.scale.set(0.85, 0.85, 0.85);
+    sprite.scale.set(0.85, 0.85, 1);
     sprite.position.copy(pos);
     sprite.userData.tool = tool;
+    sprite.userData.baseScale = 0.85;
+    sprite.userData.targetScale = 0.85;
     group.add(sprite);
 
     const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), pos]);
     const line = new THREE.Line(
       lineGeo,
-      new THREE.LineBasicMaterial({ color: 0xc9b8ae, transparent: true, opacity: 0.6 })
+      new THREE.LineBasicMaterial({ color: 0xd97757, transparent: true, opacity: 0.28 })
     );
     scene.add(line);
 
-    return sprite;
+    // Floating HTML label for the tool name — positioned each frame.
+    const label = document.createElement("button");
+    label.type = "button";
+    label.className = "node-label";
+    label.textContent = tool.name;
+    label.setAttribute("aria-label", `Show details for ${tool.name}`);
+    label.addEventListener("click", () => showCard(tool));
+    label.addEventListener("mouseenter", () => {
+      sprite.userData.targetScale = 1.02;
+    });
+    label.addEventListener("mouseleave", () => {
+      sprite.userData.targetScale = 0.85;
+    });
+    WRAP.appendChild(label);
+
+    return { sprite, label, tool };
   });
 
   function resize() {
@@ -168,9 +260,9 @@ function initScene() {
   ro.observe(WRAP);
   resize();
 
-  // Click / tap a node — works for mouse and touch alike.
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
+  const worldPos = new THREE.Vector3();
 
   function showCard(tool) {
     if (!CARD) return;
@@ -178,47 +270,128 @@ function initScene() {
     CARD_DESC.textContent = tool.desc;
     if (CARD_ICON) CARD_ICON.setAttribute("href", `assets/logo-sprite.svg#logo-${tool.id}`);
     CARD.classList.add("is-visible");
+    nodes.forEach(({ label, tool: t }) => label.classList.toggle("is-active", t === tool));
   }
 
-  function pickNode(event) {
+  function pickNode(clientX, clientY) {
     const rect = renderer.domElement.getBoundingClientRect();
-    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(nodes)[0];
+    const hit = raycaster.intersectObjects(nodes.map((n) => n.sprite))[0];
     if (hit) showCard(hit.object.userData.tool);
   }
 
-  // Treat as a tap/click only if the pointer barely moved — otherwise it was
-  // a drag-orbit release, and clicking would fight the OrbitControls drag.
+  // Tap/click only if the pointer barely moved — otherwise it was a
+  // drag-orbit release, and clicking would fight the OrbitControls drag.
   let downX = 0;
   let downY = 0;
+  let hovered = null;
   renderer.domElement.addEventListener("pointerdown", (e) => {
     downX = e.clientX;
     downY = e.clientY;
   });
   renderer.domElement.addEventListener("pointerup", (e) => {
     const moved = Math.hypot(e.clientX - downX, e.clientY - downY);
-    if (moved < 6) pickNode(e);
+    if (moved < 6) pickNode(e.clientX, e.clientY);
   });
+  renderer.domElement.addEventListener("pointermove", (e) => {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObjects(nodes.map((n) => n.sprite))[0];
+    const next = hit ? nodes.find((n) => n.sprite === hit.object) : null;
+    if (next !== hovered) {
+      if (hovered) hovered.sprite.userData.targetScale = 0.85;
+      hovered = next;
+      if (hovered) hovered.sprite.userData.targetScale = 1.02;
+      renderer.domElement.style.cursor = hovered ? "pointer" : "";
+    }
+  });
+
+  // Keep the frame loop cheap: stop rendering while the hero is off-screen.
+  let running = true;
+  let rafId = 0;
+  let last = performance.now();
+  let introDone = reducedMotion;
+  const vis = new IntersectionObserver(
+    ([entry]) => {
+      running = entry.isIntersecting;
+      if (running && !rafId) {
+        last = performance.now();
+        rafId = requestAnimationFrame(tick);
+      }
+    },
+    { threshold: 0.02 }
+  );
+  vis.observe(WRAP);
 
   // Default to the first tool so the panel isn't empty before the first click.
   showCard(TOOLS[0]);
 
-  let last = performance.now();
+  // Entrance: a slow dolly-in from z=8.2 — skipped for reduced motion,
+  // cancelled the moment the user grabs the scene.
+  const introStart = performance.now();
+  const introFrom = 8.2;
+  const introTo = 6.4;
+
+  function placeLabels() {
+    const w = WRAP.clientWidth;
+    const h = WRAP.clientHeight;
+    nodes.forEach(({ sprite, label }) => {
+      sprite.getWorldPosition(worldPos);
+      worldPos.project(camera);
+      if (worldPos.z > 1) {
+        label.style.display = "none";
+        return;
+      }
+      label.style.display = "";
+      const x = (worldPos.x * 0.5 + 0.5) * w;
+      const y = (-worldPos.y * 0.5 + 0.5) * h + 40; // float just below the node
+      label.style.left = `${x}px`;
+      label.style.top = `${y}px`;
+    });
+  }
+
   function tick(now) {
+    rafId = 0;
+    if (!running) return; // will restart on next intersection
     const dt = Math.min((now - last) / 1000, 0.1);
     last = now;
+    const t = now / 1000;
+
+    if (!introDone) {
+      const p = Math.min((now - introStart) / 1400, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      camera.position.z = introFrom + (introTo - introFrom) * eased;
+      if (p >= 1) introDone = true;
+    }
+
     controls.update();
+
     if (!reducedMotion) {
       core.rotation.y += dt * 0.15;
       coreWire.rotation.y -= dt * 0.1;
+      stars.rotation.y += dt * 0.008;
+      const breathe = 1 + 0.025 * Math.sin(t * 1.3);
+      core.scale.setScalar(breathe);
+      glow.material.opacity = 0.75 + 0.2 * Math.sin(t * 1.3);
     }
-    nodes.forEach((n) => n.quaternion.copy(camera.quaternion)); // billboard
+
+    // Ease node scale toward hover target.
+    nodes.forEach(({ sprite }) => {
+      const cur = sprite.scale.x;
+      const next = sprite.userData.targetScale;
+      const eased = cur + (next - cur) * Math.min(dt * 10, 1);
+      sprite.scale.set(eased, eased, 1);
+    });
+
+    placeLabels();
     renderer.render(scene, camera);
-    requestAnimationFrame(tick);
+    rafId = requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
+  rafId = requestAnimationFrame(tick);
 }
 
 initScene();

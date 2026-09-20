@@ -15,7 +15,7 @@ answering from general knowledge alone.
 
 1. **Classify.** Run the deterministic classifier on the task text:
    ```
-   python3 scripts/classify.py "<the task, verbatim>"
+   python3 _data-eng-router/scripts/classify.py "<the task, verbatim>"
    ```
    Returns `{platform, route_to, confidence, band, ask_clarifying,
    runners_up, note}`. `platform` is one of `gcp` / `aws` / `azure` /
@@ -45,7 +45,7 @@ answering from general knowledge alone.
 
 ## Reference
 
-- `scripts/classify.py` — the classifier. `--selftest` runs the golden
-  cases in `tests/golden.json`.
-- `tests/golden.json` — 14 golden platform-classification fixtures; add a
+- `_data-eng-router/scripts/classify.py` — the classifier. `--selftest` runs the golden
+  cases in `_data-eng-router/tests/golden.json`.
+- `_data-eng-router/tests/golden.json` — 14 golden platform-classification fixtures; add a
   case here before hand-tuning a classifier weight.

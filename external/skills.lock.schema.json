@@ -1,0 +1,66 @@
+{
+  "$id": "https://github.com/jthiruveedula/agentkit/blob/main/external/skills.lock.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Pinned external skill sources, fetched on demand into external/<name>/ by scripts/sync-external.sh. Each source is pinned to a full commit SHA; an optional sha256 of the source tarball enables download verification.",
+  "properties": {
+    "$schema": {
+      "description": "Pointer to this schema file.",
+      "type": "string"
+    },
+    "note": {
+      "description": "Human-readable note about how the lock file is used.",
+      "type": "string"
+    },
+    "sources": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "for": {
+            "description": "What this source is used for (informational).",
+            "type": "string"
+          },
+          "license": {
+            "description": "SPDX license identifier of the source, or NOASSERTION when unknown.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "name": {
+            "description": "Source key; the directory name under external/ this source syncs into.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "repo": {
+            "description": "GitHub repository as 'owner/name'.",
+            "pattern": "^[^/\\s]+/[^/\\s]+$",
+            "type": "string"
+          },
+          "sha": {
+            "description": "Full commit SHA the source is pinned to; used in the archive download URL.",
+            "pattern": "^[0-9a-f]{40}$",
+            "type": "string"
+          },
+          "sha256": {
+            "description": "Optional SHA-256 hex digest of the source tarball. When present, scripts/sync-external.sh verifies the download against it before extracting.",
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "repo",
+          "sha",
+          "license"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "sources"
+  ],
+  "title": "agentkit external skills lock file",
+  "type": "object"
+}

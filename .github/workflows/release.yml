@@ -1,0 +1,38 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Release runs are serialized: two release-please invocations racing on the
+# same release PR would conflict.
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+# release-please pushes release commits/tags and opens/updates the release PR;
+# the publish trigger below needs to dispatch the publish workflow.
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - id: release-please
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # Releases cut by the default GITHUB_TOKEN do not trigger downstream
+      # `release:` workflows, so publish.yml would never run on its own.
+      # Dispatch it explicitly instead (publish.yml supports workflow_dispatch).
+      - name: Trigger publish workflow
+        if: steps.release-please.outputs.release_created
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run publish.yml --ref main
