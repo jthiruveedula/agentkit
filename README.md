@@ -51,6 +51,27 @@ a machine without symlink privileges (e.g. Windows without Developer Mode).
 `./install.sh uninstall` removes everything it created and restores any
 backups.
 
+## Upgrading
+
+```sh
+./install.sh version    # installed vs. latest released tag
+./install.sh upgrade    # git pull + re-link, reusing your last --tools
+```
+`upgrade` also prunes any symlink whose source skill was removed upstream —
+no manual cleanup after a release drops something. Both have `install.ps1`
+equivalents: `.\install.ps1 -Version`, `.\install.ps1 -Upgrade`.
+
+## Landing page
+
+A small interactive install page lives in [`site/`](site/) — a 3D orbit
+diagram (Three.js) of the four tools around the shared config, the install
+steps, and the skill catalog, all generated the same way as this README.
+Deployed via GitHub Pages on push to `main` (`.github/workflows/pages.yml`,
+gated on the build job). Real tool marks (Claude Code, GitHub Copilot,
+Cursor via Simple Icons MIT; Antigravity's own site mark) are stitched into
+one `site/assets/logo-sprite.svg` — no unmodified library art, no stock
+placeholders.
+
 ## Skill catalog
 
 See the generated [`AGENTS.md`](AGENTS.md) for the live table — it's

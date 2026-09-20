@@ -5,7 +5,10 @@
 #
 # Usage:
 #   ./install.sh [--tools=claude,copilot,cursor,antigravity] [--copy] [--dry-run]
+#   ./install.sh upgrade    # git pull + re-link with your last-used --tools,
+#                            # prunes symlinks for any skill removed upstream
 #   ./install.sh uninstall
+#   ./install.sh version    # show installed vs. latest released version
 #
 # Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir),
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
@@ -16,20 +19,24 @@ AGENTKIT_HOME=${AGENTKIT_HOME:-"$SCRIPT_DIR"}
 DIST="$AGENTKIT_HOME/dist"
 MANIFEST_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/agentkit"
 MANIFEST="$MANIFEST_DIR/manifest.tsv"
+TOOLS_FILE="$MANIFEST_DIR/tools"
 
-TOOLS="claude,copilot,cursor,antigravity"
+TOOLS=""
+TOOLS_GIVEN=0
 MODE=link   # link | copy
 DRY_RUN=0
 ACTION=install
 
 for arg in "$@"; do
   case "$arg" in
-    --tools=*) TOOLS="${arg#--tools=}" ;;
+    --tools=*) TOOLS="${arg#--tools=}"; TOOLS_GIVEN=1 ;;
     --copy) MODE=copy ;;
     --dry-run) DRY_RUN=1 ;;
+    upgrade) ACTION=upgrade ;;
     uninstall) ACTION=uninstall ;;
+    version) ACTION=version ;;
     -h|--help)
-      sed -n '2,13p' "$0"; exit 0 ;;
+      sed -n '2,16p' "$0"; exit 0 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -131,6 +138,71 @@ install_antigravity() {
   done
 }
 
+# prune_stale -- drop any manifest entry whose symlink target no longer
+# exists in dist/ (the source skill/agent was removed upstream), so an
+# upgrade doesn't leave a dangling link behind.
+prune_stale() {
+  [ -s "$MANIFEST" ] || return 0
+  tmp="$MANIFEST.tmp.$$"
+  : > "$tmp"
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    if [ -L "$path" ]; then
+      target=$(readlink "$path")
+      case "$target" in
+        "$DIST"/*)
+          if [ ! -e "$target" ]; then
+            [ "$DRY_RUN" = 1 ] || rm -f "$path"
+            log "  pruned (removed upstream): $path"
+            continue
+          fi
+          ;;
+      esac
+    fi
+    printf '%s\n' "$path" >> "$tmp"
+  done < "$MANIFEST"
+  [ "$DRY_RUN" = 1 ] || mv "$tmp" "$MANIFEST"
+  rm -f "$tmp" 2>/dev/null || true
+}
+
+show_version() {
+  if ! git -C "$AGENTKIT_HOME" rev-parse --git-dir >/dev/null 2>&1; then
+    log "installed: unknown (not a git clone)"
+    return 0
+  fi
+  installed=$(git -C "$AGENTKIT_HOME" describe --tags --always 2>/dev/null || echo unknown)
+  log "installed: $installed"
+  git -C "$AGENTKIT_HOME" fetch --tags --quiet origin 2>/dev/null || {
+    warn "could not reach origin to check the latest version"
+    return 0
+  }
+  latest=$(git -C "$AGENTKIT_HOME" tag --list 'v*' --sort=-v:refname | head -n1)
+  [ -n "$latest" ] && log "latest:    $latest"
+  if [ -n "$latest" ] && [ "$installed" != "$latest" ]; then
+    log "-> run './install.sh upgrade' to update"
+  fi
+}
+
+do_upgrade() {
+  if ! git -C "$AGENTKIT_HOME" rev-parse --git-dir >/dev/null 2>&1; then
+    err "$AGENTKIT_HOME is not a git clone -- can't auto-upgrade; git pull it yourself, or re-clone"
+    return 1
+  fi
+  before=$(git -C "$AGENTKIT_HOME" rev-parse --short HEAD)
+  log "pulling latest agentkit into $AGENTKIT_HOME ..."
+  [ "$DRY_RUN" = 1 ] || git -C "$AGENTKIT_HOME" pull --ff-only
+  after=$(git -C "$AGENTKIT_HOME" rev-parse --short HEAD 2>/dev/null || echo "$before")
+  [ "$before" = "$after" ] && log "already up to date ($before)" || log "updated $before -> $after"
+
+  if [ "$TOOLS_GIVEN" = 0 ] && [ -f "$TOOLS_FILE" ]; then
+    TOOLS=$(cat "$TOOLS_FILE")
+  fi
+  TOOLS=${TOOLS:-claude,copilot,cursor,antigravity}
+
+  prune_stale
+  run_install
+}
+
 do_uninstall() {
   [ -s "$MANIFEST" ] || { log "nothing to uninstall (no manifest at $MANIFEST)"; return 0; }
   while IFS= read -r path; do
@@ -149,29 +221,35 @@ do_uninstall() {
   log "uninstall complete"
 }
 
+run_install() {
+  log "agentkit install ($MODE mode) -- tools: $TOOLS"
+  OLD_IFS=$IFS; IFS=','
+  for tool in $TOOLS; do
+    IFS=$OLD_IFS
+    case "$tool" in
+      claude) install_claude ;;
+      copilot) install_copilot ;;
+      cursor) install_cursor ;;
+      antigravity) install_antigravity ;;
+      *) warn "unknown tool '$tool', skipping" ;;
+    esac
+    IFS=','
+  done
+  IFS=$OLD_IFS
+  [ "$DRY_RUN" = 1 ] || printf '%s' "$TOOLS" > "$TOOLS_FILE"
+  log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+}
+
 if [ ! -d "$DIST" ]; then
   err "dist/ not found under $AGENTKIT_HOME -- is this a full clone of the agentkit repo?"
   exit 1
 fi
 
-if [ "$ACTION" = uninstall ]; then
-  do_uninstall
-  exit 0
-fi
+case "$ACTION" in
+  uninstall) do_uninstall; exit 0 ;;
+  version) show_version; exit 0 ;;
+  upgrade) do_upgrade; exit 0 ;;
+esac
 
-log "agentkit install ($MODE mode) -- tools: $TOOLS"
-OLD_IFS=$IFS; IFS=','
-for tool in $TOOLS; do
-  IFS=$OLD_IFS
-  case "$tool" in
-    claude) install_claude ;;
-    copilot) install_copilot ;;
-    cursor) install_cursor ;;
-    antigravity) install_antigravity ;;
-    *) warn "unknown tool '$tool', skipping" ;;
-  esac
-  IFS=','
-done
-IFS=$OLD_IFS
-
-log "done. re-run any time -- already-linked files are skipped, edits outside agentkit are backed up, never overwritten."
+TOOLS=${TOOLS:-claude,copilot,cursor,antigravity}
+run_install

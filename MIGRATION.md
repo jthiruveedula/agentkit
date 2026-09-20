@@ -74,6 +74,14 @@ re-install step. If you used `--copy` instead of symlinks (Windows without
 Developer Mode), re-run `./install.ps1 -Copy` after each pull to refresh
 the copies.
 
+Or let the installer do the pull too:
+
+```sh
+./install.sh version    # shows installed vs. latest released tag
+./install.sh upgrade    # git pull + re-link with your last-used --tools,
+                         # prunes any symlink for a skill removed upstream
+```
+
 ## 7. Removing it
 
 ```sh
