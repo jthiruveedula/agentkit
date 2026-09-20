@@ -65,10 +65,17 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `debug-loop` | Hypothesize-test-narrow loop to root-cause a failing test or crash. |
 | `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
 | `meeting-to-actions` | Extracts action items with owners/dates from meeting notes. |
+| `data-architect` | Multi-cloud/open-source data platform decisions (storage/compute/orchestration/streaming), recorded as ADRs. |
+| `pipeline-scaffold` | Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming + test stub. |
+| `data-quality-standards` | Schema/freshness/volume/idempotency/PII checks for a data pipeline before it ships. |
 
-Five subagents (`agents/`) with narrow charters and explicit handoff
+Eight subagents (`agents/`) with narrow charters and explicit handoff
 contracts: `researcher`, `implementer`, `reviewer`, `test-writer`,
-`doc-writer`.
+`doc-writer`, `data-platform-architect`, `pipeline-engineer`,
+`data-quality-engineer` — the last three chain together for day-to-day
+data pipeline work: architect decides (and records an ADR) → engineer
+builds (via `pipeline-scaffold`) → quality engineer adds checks →
+`reviewer` closes the loop.
 
 ### prompt-enhancer
 

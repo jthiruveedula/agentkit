@@ -12,9 +12,12 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | Skill | Version | Trigger |
 |---|---|---|
 | `daily-standup` | 0.1.0 | Summarize what got done since the last standup — git commits, closed issues/PRs, and open threads — into a 3-line standup update (did/doing/blocked). Use when the user asks for a standup update, status report, or "what did I do yesterday". |
+| `data-architect` | 0.1.0 | Multi-cloud/open-source data architecture decision-making — evaluates storage, compute, orchestration, and batch-vs-streaming trade-offs and records the decision as an ADR. Use when the user is choosing between data platform options (which warehouse, which orchestrator, streaming vs. batch, dbt vs. Spark), designing a new pipeline's architecture, or asks "should I use X or Y" for a data platform. |
+| `data-quality-standards` | 0.1.0 | Applies schema, freshness, volume, idempotency, and PII-handling checks to a data pipeline before it ships. Use when the user is writing tests for a dbt model/pipeline, reviewing a data pipeline PR, or asks "what checks should this have". |
 | `debug-loop` | 0.1.0 | Run a tight hypothesize-test-narrow loop on a failing test or reproducible bug until root cause is found, logging each attempt. Use when the user has a failing test, stack trace, or reproducible crash and wants it root-caused, not just patched. |
 | `meeting-to-actions` | 0.1.0 | Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted. |
 | `new-skill` | 0.1.0 | A brand new skill added upstream to prove the upgrade path picks it up automatically. Use when testing the upgrade flow end to end. |
+| `pipeline-scaffold` | 0.1.0 | Scaffolds a new dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion (bronze/silver/gold) naming and a test stub included. Use when the user asks to create a new data pipeline, model, DAG, asset, or Spark job and wants the boilerplate generated rather than hand-typed. |
 | `pr-review` | 0.1.0 | Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when the user asks to review a PR, "look at PR #N", or check a branch before merge. |
 | `prompt-enhancer` | 0.1.0 | Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it. |
 | `skill-forge` | 0.1.0 | Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo. |
@@ -23,8 +26,11 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 
 | Agent | Charter |
 |---|---|
+| `data-platform-architect` | Makes multi-cloud/open-source data platform decisions — storage, compute, orchestration, batch-vs-streaming — and records them as ADRs. Doesn't write pipeline code; hands that off once the decision is made. |
+| `data-quality-engineer` | Adds schema, freshness, volume, idempotency, and PII-handling checks to a data pipeline before it ships. Covers the risk surface the pipeline-engineer flagged, not a generic checklist run blind. |
 | `doc-writer` | Writes or updates README/CHANGELOG/reference docs to match a completed change. Never edits source code. |
 | `implementer` | Makes the actual code changes from a spec or a researcher's findings. Scoped to the files the task names — flags if it needs to touch more. |
+| `pipeline-engineer` | Implements a data pipeline (dbt model, Airflow DAG, Dagster asset, PySpark job) from an already-decided architecture. Scaffolds with pipeline-scaffold, then fills in the actual transform logic. |
 | `researcher` | Read-only investigation — locates code, gathers facts, compares options. Never edits files. Hand off to implementer once findings are concrete. |
 | `reviewer` | Reviews a diff/PR for correctness bugs and scope creep against its stated intent. Read-only, no fixes — reports findings for implementer to apply. |
 | `test-writer` | Writes the smallest test that would fail if the logic under test broke. Covers gaps implementer flags, not full suites for every function. |
