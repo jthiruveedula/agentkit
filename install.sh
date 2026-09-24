@@ -143,9 +143,8 @@ install_claude() {
   # older versions made, restoring the newest backup if there is one.
   if [ -L "$base/CLAUDE.md" ] && [ "$(readlink "$base/CLAUDE.md")" = "$AGENTKIT_HOME/AGENTS.md" ]; then
     bak=
-    for f in "$base"/CLAUDE.md.bak.*; do
-      [ -e "$f" ] || continue
-      { [ -z "$bak" ] || [ "$f" -nt "$bak" ]; } && bak=$f
+    for f in "$base"/CLAUDE.md.bak.*; do  # timestamped names: glob order = age
+      [ -e "$f" ] && bak=$f
     done
     if [ "$DRY_RUN" != 1 ]; then
       rm -f "$base/CLAUDE.md"

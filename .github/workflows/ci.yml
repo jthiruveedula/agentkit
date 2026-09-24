@@ -74,8 +74,8 @@ jobs:
           $env:USERPROFILE = $env:TEMP_HOME
           $env:LOCALAPPDATA = Join-Path $env:TEMP_HOME "AppData\Local"
           .\install.ps1 -Tools "claude,cursor"
-          if (-not (Test-Path (Join-Path $env:TEMP_HOME ".claude\CLAUDE.md"))) {
-            throw "install.ps1 did not create .claude/CLAUDE.md"
+          if (Test-Path (Join-Path $env:TEMP_HOME ".claude\CLAUDE.md")) {
+            throw "install.ps1 must not create .claude/CLAUDE.md"
           }
           if (-not (Test-Path (Join-Path $env:TEMP_HOME ".claude\skills\prompt-enhancer\SKILL.md"))) {
             throw "install.ps1 did not create prompt-enhancer skill"
