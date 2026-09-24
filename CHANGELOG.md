@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/jthiruveedula/agentkit/compare/v0.3.0...v0.4.0) (2026-09-24)
+
+
+### Features
+
+* context-budget skill — session token monitor with pause/resume ([de2f1ac](https://github.com/jthiruveedula/agentkit/commit/de2f1acf15a4ae326d250c6fac721930358e83d2))
+* context-budget skill — session token monitor with pause/resume hooks ([3bf2856](https://github.com/jthiruveedula/agentkit/commit/3bf28568de020d47b7cedc0629352b62ca9f0cc2))
+
+
+### Bug Fixes
+
+* **ci:** install pytest in publish, pass --repo to publish dispatch ([f1666cf](https://github.com/jthiruveedula/agentkit/commit/f1666cf5d0b3104c946b23db972c5c0c28e03e4a))
+* **ci:** install pytest in publish, pass --repo to publish dispatch ([a1dca6e](https://github.com/jthiruveedula/agentkit/commit/a1dca6e4fe5db2881e65d8e885fe8ec686cd8ce4))
+
 ## [0.3.0](https://github.com/jthiruveedula/agentkit/compare/v0.2.0...v0.3.0) (2026-09-24)
 
 
