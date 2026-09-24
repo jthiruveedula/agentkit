@@ -142,7 +142,11 @@ install_claude() {
   # global instructions and re-sent ~3k tokens every turn). Undo the link
   # older versions made, restoring the newest backup if there is one.
   if [ -L "$base/CLAUDE.md" ] && [ "$(readlink "$base/CLAUDE.md")" = "$AGENTKIT_HOME/AGENTS.md" ]; then
-    bak=$(ls -t "$base"/CLAUDE.md.bak.* 2>/dev/null | head -n 1)
+    bak=
+    for f in "$base"/CLAUDE.md.bak.*; do
+      [ -e "$f" ] || continue
+      { [ -z "$bak" ] || [ "$f" -nt "$bak" ]; } && bak=$f
+    done
     if [ "$DRY_RUN" != 1 ]; then
       rm -f "$base/CLAUDE.md"
       [ -n "$bak" ] && mv "$bak" "$base/CLAUDE.md"

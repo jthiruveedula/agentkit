@@ -2,7 +2,6 @@
 """Tests for scripts/map.py. Stdlib only: run with `python3 tests/test_map.py`."""
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -74,8 +73,8 @@ class TestMap(unittest.TestCase):
     def test_json_parses_and_skips_ignored(self):
         data = json.loads(self.run_map("--json"))
         paths = [ep["path"] for ep in data["entry_points"]]
-        self.assertIn(os.path.join("src", "main.py"), paths)
-        self.assertIn(os.path.join("bin", "run"), paths)
+        self.assertIn("src/main.py", paths)
+        self.assertIn("bin/run", paths)
         self.assertTrue(
             any(
                 m["kind"] == "package.json" and m["name"] == "fixture-repo"
