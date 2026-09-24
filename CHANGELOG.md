@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/jthiruveedula/agentkit/compare/v0.2.0...v0.3.0) (2026-09-24)
+
+
+### Features
+
+* orchestrate skill, orchestrator and verifier subagents ([3a7e111](https://github.com/jthiruveedula/agentkit/commit/3a7e111db054f28d51d8c9165784276d973c8774))
+* orchestrate skill, orchestrator and verifier subagents ([df1bfd1](https://github.com/jthiruveedula/agentkit/commit/df1bfd1f91e41a70f96ab20d9eb48ca999d67414))
+
 ## [0.2.0](https://github.com/jthiruveedula/agentkit/compare/agentkit-v0.1.0...agentkit-v0.2.0) (2026-09-24)
 
 
