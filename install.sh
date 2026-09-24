@@ -137,7 +137,21 @@ install_claude() {
     [ -f "$f" ] || continue
     link_one "$f" "$base/agents/$(basename "$f")"
   done
-  link_one "$AGENTKIT_HOME/AGENTS.md" "$base/CLAUDE.md"
+  # Claude Code lists installed skills itself, so the AGENTS.md catalog is
+  # not linked over ~/.claude/CLAUDE.md (that displaced the user's own
+  # global instructions and re-sent ~3k tokens every turn). Undo the link
+  # older versions made, restoring the newest backup if there is one.
+  if [ -L "$base/CLAUDE.md" ] && [ "$(readlink "$base/CLAUDE.md")" = "$AGENTKIT_HOME/AGENTS.md" ]; then
+    bak=
+    for f in "$base"/CLAUDE.md.bak.*; do  # timestamped names: glob order = age
+      [ -e "$f" ] && bak=$f
+    done
+    if [ "$DRY_RUN" != 1 ]; then
+      rm -f "$base/CLAUDE.md"
+      [ -n "$bak" ] && mv "$bak" "$base/CLAUDE.md"
+    fi
+    log "  unlinked legacy CLAUDE.md -> AGENTS.md${bak:+ (restored $bak)}"
+  fi
 }
 
 install_copilot() {

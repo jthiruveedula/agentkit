@@ -20,3 +20,4 @@ external/*/
 *.pem
 *.key
 manifest.json
+.coverage

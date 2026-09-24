@@ -35,7 +35,14 @@
         "skills/ext-aws",
         "skills/ext-azure",
         "skills/ext-systems-design",
-        "skills/ext-gap-discovery"
+        "skills/ext-gap-discovery",
+        "skills/context-compressor",
+        "skills/memory",
+        "skills/setup-guardian",
+        "skills/smart-navigator",
+        "skills/token-saver",
+        "skills/genai-engineering",
+        "skills/ml-lifecycle"
       ],
       "agents": [
         "agents/researcher.md",
@@ -45,7 +52,8 @@
         "agents/doc-writer.md",
         "agents/data-platform-architect.md",
         "agents/pipeline-engineer.md",
-        "agents/data-quality-engineer.md"
+        "agents/data-quality-engineer.md",
+        "agents/ml-engineer.md"
       ]
     }
   ]

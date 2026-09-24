@@ -21,7 +21,7 @@ check() {
   fi
 }
 
-check "$TMP_HOME/.claude/CLAUDE.md"
+[ -e "$TMP_HOME/.claude/CLAUDE.md" ] && { echo "FAIL: installer must not create ~/.claude/CLAUDE.md" >&2; fail=1; }
 check "$TMP_HOME/.claude/skills/prompt-enhancer/SKILL.md"
 check "$TMP_HOME/.claude/agents/researcher.md"
 check "$TMP_HOME/.cursor/rules/prompt-enhancer.mdc"

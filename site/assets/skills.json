@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 28,
+  "count": 30,
   "skills": [
     {
       "name": "context-compressor",
@@ -45,6 +45,12 @@
       "kind": "native"
     },
     {
+      "name": "genai-engineering",
+      "description": "Builds and hardens LLM applications — RAG pipelines, tool-using agents, prompt/model selection, eval harnesses, guardrails, and cost/latency control (prompt caching, batching, model tiering). Use when the user is building or debugging a RAG system, an LLM feature, an agent, an eval set, or asks why an LLM app is slow, expensive, or hallucinating.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
       "name": "meeting-to-actions",
       "description": "Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted.",
       "version": "0.1.0",
@@ -59,6 +65,12 @@
     {
       "name": "memory-sync",
       "description": "Mines recent session history for recurring agent mistakes or friction, ranks the repeated patterns, and writes durable corrections (memory files, CLAUDE.md, or skill fixes) so the same issue doesn't cost time again. Use when the user asks to do a retro on recent sessions, find recurring agent errors, or \"make agents faster/more productive\" based on past work.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "ml-lifecycle",
+      "description": "Runs a classical/deep ML project through problem framing, leakage-safe data splits, baselines, experiment tracking, evaluation, model registry, serving, and drift monitoring. Use when the user is training or evaluating a model, setting up MLflow/W&B experiment tracking, building features, deploying a model to production, or asks why model performance dropped.",
       "version": "0.1.0",
       "kind": "native"
     },

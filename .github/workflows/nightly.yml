@@ -42,7 +42,7 @@ jobs:
         run: python skills/prompt-enhancer/scripts/classify.py --selftest
 
       - name: Unit tests
-        run: python -m pytest tests/ -q
+        run: python -m pytest tests/ skills/ -q
 
       # Exercises the Boost installer download + SHA-256 verification and the
       # external-skill fetch inside install.sh, in a throwaway HOME so the

@@ -232,7 +232,7 @@ def find_entry_points(root, manifests):
 
     def add(rel, reason):
         if rel:
-            cands.setdefault(os.path.normpath(rel), reason)
+            cands.setdefault(os.path.normpath(rel).replace(os.sep, "/"), reason)
 
     for m in manifests:
         if m["kind"] == "package.json":

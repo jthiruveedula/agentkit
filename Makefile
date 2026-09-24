@@ -17,7 +17,7 @@ validate:
 test: validate
 	python3 scripts/build.py --check
 	python3 skills/prompt-enhancer/scripts/classify.py --selftest
-	python3 -m pytest tests/ -q
+	python3 -m pytest tests/ skills/ -q
 
 smoke:
 	./tests/smoke_install.sh

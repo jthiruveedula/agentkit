@@ -67,6 +67,13 @@ same bytes twice, and keep outputs small. See
    output back to the user, no redundant summaries of what you just
    did.
 
+8. **Measure the session, not just the read.** Run
+   `_token-saver/scripts/session_audit.py` to see real spend from Claude Code
+   transcripts. Long sessions re-read their whole context every turn —
+   in practice a handful of 300+ turn sessions hold nearly all
+   cache-read tokens. `/clear` between unrelated tasks; split long work
+   into subagents.
+
 ## Rules
 
 - **Locate, then read.** A grep that costs 50 tokens beats a read

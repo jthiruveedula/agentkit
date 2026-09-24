@@ -17,7 +17,7 @@ def _fixture(lines, name="f.txt", width=40):
     """Create a temp fixture with exactly `lines` lines."""
     d = tempfile.mkdtemp()
     path = os.path.join(d, name)
-    with open(path, "w") as fh:
+    with open(path, "w", newline="\n") as fh:
         for i in range(lines):
             fh.write(f"x{i:0{width}d}\n")
     return path
@@ -89,7 +89,7 @@ def test_token_heuristic_is_chars_over_four():
     # multibyte chars: token estimate must follow decoded chars, not bytes
     d = tempfile.mkdtemp()
     path = os.path.join(d, "u.py")
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("héllo wörld\n" * 100)  # 12 chars/line inc newline
     out = _run("--json", path)
     assert out.returncode == 0

@@ -35,7 +35,7 @@ This symlinks `dist/<tool>/...` into:
 
 | Tool | Target |
 |---|---|
-| Claude Code | `~/.claude/skills/*`, `~/.claude/agents/*.md`, `~/.claude/CLAUDE.md` |
+| Claude Code | `~/.claude/skills/*`, `~/.claude/agents/*.md` |
 | Copilot | VS Code user prompts dir + `copilot-instructions.md` |
 | Cursor | `~/.cursor/rules/*.mdc`, `~/AGENTS.md` |
 | Antigravity | `~/.antigravity/rules/*.md`, `~/.antigravity/workflows/*.md` |
@@ -47,7 +47,7 @@ backed up to `<file>.bak.<timestamp>`, never overwritten silently.
 
 ```sh
 ls -l ~/.claude/skills/prompt-enhancer   # should be a symlink into ~/agentkit/dist/claude/skills/
-cat ~/.claude/CLAUDE.md | head -5        # should be the generated AGENTS.md contract
+ls ~/.claude/skills | head -5           # agentkit skills are linked here
 ```
 
 Open Claude Code / Cursor / your Copilot-enabled editor and confirm the
