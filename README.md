@@ -119,7 +119,7 @@ source and run `make build`.
 
 ## Skill catalog
 
-31 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+32 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 
 **Prompt & dev loop**
@@ -158,6 +158,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | Skill | What it does |
 |---|---|
 | `token-saver` | Cuts input-token burn: search-before-read, targeted line ranges, diff-first workflows, batched tool calls, terse output. `session_audit.py` measures real spend from transcripts. |
+| `context-budget` | Hooks that watch live session context: at a token budget the agent checkpoints and asks for `/compact` or `/clear`; the checkpoint is re-injected on resume. |
 | `context-compressor` | Disciplined summarization checkpoints for long sessions — goal, decisions with reasons, state, open threads. |
 | `smart-navigator` | Structure-first repo reconnaissance: manifests + 2-level tree, then trace entry points inward. |
 | `setup-guardian` | Repo health guardian: dist/ freshness, install targets, SHA pins, skill counts (`doctor.py --watch`). |

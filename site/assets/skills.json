@@ -1,7 +1,13 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 31,
+  "count": 32,
   "skills": [
+    {
+      "name": "context-budget",
+      "description": "Monitors the live Claude Code session's context size through hooks and pauses before it gets expensive — at a token budget the agent writes a checkpoint and asks for /compact or /clear, and the checkpoint is re-injected automatically on resume. Use when the user wants session token monitoring, automatic pause/resume, a context budget, or long autonomous runs that shouldn't silently balloon.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
     {
       "name": "context-compressor",
       "description": "Keep long agent sessions useful under context pressure via disciplined summarization checkpoints — goal, decisions with reasons, current state, open threads, memory keys touched, each under 40 lines. Use when a session is getting long, before compaction or a risky multi-step run, at task boundaries, or before handing work off to another agent.",
