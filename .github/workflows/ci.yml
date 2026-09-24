@@ -47,11 +47,11 @@ jobs:
       # produce a dozen duplicate artifacts; every other cell runs the suite.
       - name: Unit tests
         if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.13'
-        run: python -m pytest tests/ -q
+        run: python -m pytest tests/ skills/ -q
 
       - name: Unit tests with coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
-        run: python -m pytest tests/ -q --cov --cov-report=xml:coverage.xml --cov-report=term-missing --cov-fail-under=80
+        run: python -m pytest tests/ skills/ -q --cov --cov-report=xml:coverage.xml --cov-report=term-missing --cov-fail-under=80
 
       - name: Upload coverage report
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'

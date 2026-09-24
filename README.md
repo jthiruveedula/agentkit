@@ -119,7 +119,7 @@ source and run `make build`.
 
 ## Skill catalog
 
-28 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+30 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 
 **Prompt & dev loop**
@@ -145,11 +145,18 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `memory-sync` | Mines recent sessions for recurring agent mistakes, ranks the repeats, writes durable fixes. |
 | `doc-standards` | Applies a consistent professional house style to Word/Excel/PDF/PowerPoint output. |
 
+**GenAI & ML**
+
+| Skill | What it does |
+|---|---|
+| `genai-engineering` | RAG, agents, eval harnesses, guardrails, and cost/latency control for LLM apps — eval first, fix the broken layer. |
+| `ml-lifecycle` | Framing, leakage-safe splits, baselines, experiment tracking, registry, serving, and drift monitoring. |
+
 **Token economy & memory**
 
 | Skill | What it does |
 |---|---|
-| `token-saver` | Cuts input-token burn: search-before-read, targeted line ranges, diff-first workflows, batched tool calls, terse output. |
+| `token-saver` | Cuts input-token burn: search-before-read, targeted line ranges, diff-first workflows, batched tool calls, terse output. `session_audit.py` measures real spend from transcripts. |
 | `context-compressor` | Disciplined summarization checkpoints for long sessions — goal, decisions with reasons, state, open threads. |
 | `smart-navigator` | Structure-first repo reconnaissance: manifests + 2-level tree, then trace entry points inward. |
 | `setup-guardian` | Repo health guardian: dist/ freshness, install targets, SHA pins, skill counts (`doctor.py --watch`). |
@@ -165,10 +172,10 @@ GCP/AWS/Azure skill the same way they reach for `prompt-enhancer`.
 
 ### Subagents
 
-Eight subagents (`agents/`) with narrow charters and explicit handoff
+Nine subagents (`agents/`) with narrow charters and explicit handoff
 contracts: `researcher`, `implementer`, `reviewer`, `test-writer`,
 `doc-writer`, `data-platform-architect`, `pipeline-engineer`,
-`data-quality-engineer`. They ship for Claude Code and Antigravity;
+`data-quality-engineer`, `ml-engineer`. They ship for Claude Code and Antigravity;
 Copilot and Cursor have no agent equivalent — a known gap, documented in
 [`AGENTS.md`](AGENTS.md).
 
