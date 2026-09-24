@@ -101,7 +101,8 @@ def check_secret(label, name, value, file, server_name, findings):
                 "server": server_name,
                 "file": file,
                 "code": "SECRET_IN_CONFIG",
-                "severity": SEVERITY["SECRET_IN_CONFIG"],
+                # literal on purpose: CodeQL treats SECRET-named subscripts as secret reads
+                "severity": "high",
                 "detail": "%s looks like a live secret" % label,
             }
         )
