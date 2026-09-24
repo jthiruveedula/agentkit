@@ -195,3 +195,58 @@ def test_exit_code_medium_only_is_zero(tmp_path):
     )
     rc = mcp_scan.main([str(cfg)])
     assert rc == 0
+
+
+def _secret_findings(tmp_path, server):
+    cfg = write_config(tmp_path, {"mcpServers": {"s": server}})
+    findings, errors = [], []
+    mcp_scan.scan_file(cfg, findings, errors)
+    return [f for f in findings if f["code"] == "SECRET_IN_CONFIG"], json.dumps(
+        findings
+    )
+
+
+def test_secret_in_two_arg_flag_and_bare_arg_never_printed(tmp_path):
+    token = "ghp_" + "a" * 36  # built by concat so the repo's scanner stays quiet
+    found, dumped = _secret_findings(
+        tmp_path,
+        {
+            "command": "npx",
+            "args": ["pkg@1.0.0", "--api-key", "literalvalue123", token],
+        },
+    )
+    assert len(found) == 2
+    assert {f["detail"] for f in found} == {
+        "argument 3 looks like a live secret",
+        "argument 4 looks like a live secret",
+    }
+    assert token not in dumped and "literalvalue123" not in dumped
+
+
+def test_secret_in_header_flagged_placeholder_not(tmp_path):
+    found, dumped = _secret_findings(
+        tmp_path,
+        {
+            "url": "https://example.com/mcp",
+            "headers": {"Authorization": "Bearer abc123def"},
+        },
+    )
+    assert [f["detail"] for f in found] == [
+        "header Authorization looks like a live secret"
+    ]
+    assert "abc123def" not in dumped
+    found, _ = _secret_findings(
+        tmp_path,
+        {
+            "url": "https://example.com/mcp",
+            "headers": {"Authorization": "Bearer ${TOKEN}"},
+        },
+    )
+    assert found == []
+
+
+def test_package_names_are_not_secrets(tmp_path):
+    found, _ = _secret_findings(
+        tmp_path, {"command": "npx", "args": ["task-master-ai@1.2.0", "--port", "8080"]}
+    )
+    assert found == []

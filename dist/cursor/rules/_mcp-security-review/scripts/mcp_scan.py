@@ -15,6 +15,7 @@ sensitive. Exit 0 when no HIGH-severity findings, 1 otherwise.
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -38,8 +39,12 @@ SEVERITY = {
 
 PACKAGE_RUNNERS = {"npx", "uvx", "bunx", "pipx"}
 SHELLS = {"sh", "bash", "cmd", "cmd.exe", "powershell", "pwsh"}
-SECRET_KEY_RE_PARTS = ("TOKEN", "KEY", "SECRET", "PASSWORD")
-SECRET_VALUE_PATTERNS = ("sk-", "ghp_", "gho_", "xox", "AKIA")
+SECRET_KEY_RE_PARTS = ("TOKEN", "KEY", "SECRET", "PASSWORD", "AUTHORIZATION")
+# Token shapes, not substrings: "sk-" alone would match package names like
+# "task-master-ai" once positional args are scanned.
+SECRET_VALUE_RE = re.compile(
+    r"sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{36,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}"
+)
 PLACEHOLDER_MARKERS = ("<", ">", "${", "$env:", "your-", "xxx", "changeme", "example")
 
 DEFAULT_CONFIG_PATHS = [
@@ -80,19 +85,24 @@ def is_secret_key(key):
     return any(part in upper for part in SECRET_KEY_RE_PARTS)
 
 
-def check_secret(key, value, file, server_name, findings):
+def check_secret(label, name, value, file, server_name, findings):
+    """Flag `value` if it looks like a live secret. `label` (e.g. "env FOO",
+    "header Authorization", "argument 3") is the only thing ever reported --
+    the value itself never reaches a finding."""
     if not isinstance(value, str) or not value:
         return
-    key_flagged = is_secret_key(key) and not looks_like_placeholder(value)
-    pattern_flagged = any(marker in value for marker in SECRET_VALUE_PATTERNS)
-    if key_flagged or pattern_flagged:
+    name_flagged = (
+        bool(name) and is_secret_key(name) and not looks_like_placeholder(value)
+    )
+    pattern_flagged = bool(SECRET_VALUE_RE.search(value))
+    if name_flagged or pattern_flagged:
         findings.append(
             {
                 "server": server_name,
                 "file": file,
                 "code": "SECRET_IN_CONFIG",
                 "severity": SEVERITY["SECRET_IN_CONFIG"],
-                "detail": "key '%s' looks like a live secret" % key,
+                "detail": "%s looks like a live secret" % label,
             }
         )
 
@@ -203,12 +213,44 @@ def scan_server(server_name, server, file, findings):
     check_shell_wrapper(command, args, file, server_name, findings)
     check_remote_no_auth(server, file, server_name, findings)
 
-    for key, value in (server.get("env") or {}).items():
-        check_secret(key, value, file, server_name, findings)
-    for arg in args:
-        if isinstance(arg, str) and "=" in arg:
-            key, _, value = arg.partition("=")
-            check_secret(key, value, file, server_name, findings)
+    for env_name, env_value in (server.get("env") or {}).items():
+        check_secret(
+            "env %s" % env_name, env_name, env_value, file, server_name, findings
+        )
+    headers = server.get("headers")
+    for header_name, header_value in (
+        headers.items() if isinstance(headers, dict) else []
+    ):
+        check_secret(
+            "header %s" % header_name,
+            header_name,
+            header_value,
+            file,
+            server_name,
+            findings,
+        )
+    prev_flag = None
+    for i, arg in enumerate(args, 1):
+        if not isinstance(arg, str):
+            prev_flag = None
+            continue
+        if arg.startswith("-") and "=" in arg:
+            flag, _, flag_value = arg.partition("=")
+            check_secret(
+                "argument %d (%s)" % (i, flag),
+                flag,
+                flag_value,
+                file,
+                server_name,
+                findings,
+            )
+            prev_flag = None
+        elif arg.startswith("-"):
+            prev_flag = arg
+        else:
+            # `--api-key VALUE` two-arg form, or a bare secret-looking positional
+            check_secret("argument %d" % i, prev_flag, arg, file, server_name, findings)
+            prev_flag = None
 
 
 def scan_file(path, findings, errors):
