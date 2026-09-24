@@ -124,7 +124,18 @@ function Install-Claude {
     Get-ChildItem -File (Join-Path $Dist "claude\agents") -Filter *.md -ErrorAction SilentlyContinue | ForEach-Object {
         Install-One $_.FullName (Join-Path $base "agents\$($_.Name)")
     }
-    Install-One (Join-Path $AgentkitHome "AGENTS.md") (Join-Path $base "CLAUDE.md")
+    # Claude Code lists installed skills itself; don't link AGENTS.md over
+    # the user's CLAUDE.md. Undo the link older versions made.
+    $claudeMd = Join-Path $base "CLAUDE.md"
+    $item = Get-Item $claudeMd -ErrorAction SilentlyContinue
+    if ($item -and $item.LinkType -and $item.Target -eq (Join-Path $AgentkitHome "AGENTS.md")) {
+        $bak = Get-ChildItem "$claudeMd.bak.*" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if (-not $DryRun) {
+            Remove-Item -Force $claudeMd
+            if ($bak) { Move-Item -Force $bak.FullName $claudeMd }
+        }
+        Write-Log "  unlinked legacy CLAUDE.md -> AGENTS.md"
+    }
 }
 
 function Install-Copilot {

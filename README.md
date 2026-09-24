@@ -79,7 +79,7 @@ per-tool targets below:
 
 | Target tool | Linked into | Flag |
 |---|---|---|
-| Claude Code | `~/.claude/{skills,agents}`, `~/.claude/CLAUDE.md` | `--tools=claude` |
+| Claude Code | `~/.claude/{skills,agents}` (your `CLAUDE.md` is left alone) | `--tools=claude` |
 | GitHub Copilot | VS Code user prompts dir, `copilot-instructions.md` | `--tools=copilot` |
 | Cursor | `~/.cursor/rules/`, `~/AGENTS.md` | `--tools=cursor` |
 | Antigravity | `~/.antigravity/{rules,workflows}` | `--tools=antigravity` |
