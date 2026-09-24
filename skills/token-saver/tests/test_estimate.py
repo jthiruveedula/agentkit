@@ -17,7 +17,7 @@ def _fixture(lines, name="f.txt", width=40):
     """Create a temp fixture with exactly `lines` lines."""
     d = tempfile.mkdtemp()
     path = os.path.join(d, name)
-    with open(path, "w") as fh:
+    with open(path, "w", newline="\n") as fh:
         for i in range(lines):
             fh.write(f"x{i:0{width}d}\n")
     return path

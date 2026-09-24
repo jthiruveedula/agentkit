@@ -253,7 +253,7 @@ def find_entry_points(root, manifests):
         dirnames[:] = sorted(d for d in dirnames if not is_ignored(d))
         rel = os.path.relpath(dirpath, root)
         for fn in filenames:
-            r = fn if rel == "." else os.path.join(rel, fn)
+            r = fn if rel == "." else os.path.join(rel, fn).replace(os.sep, "/")
             if rel == "bin" or rel.startswith("bin" + os.sep):
                 add(r, "bin/")
             if ENTRY_NAME.match(fn):
