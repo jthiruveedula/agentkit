@@ -21,3 +21,4 @@ external/*/
 *.key
 manifest.json
 .coverage
+.claude/worktrees/

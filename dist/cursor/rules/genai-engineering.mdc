@@ -14,7 +14,9 @@ order.
 1. **Eval before tuning.** Before changing a prompt, model, or chunker,
    make sure a small eval set exists (20-50 real cases with expected
    outcomes). No eval set → build one first; see
-   `_genai-engineering/reference/patterns.md#evals`. Every later change is judged against it.
+   `_genai-engineering/reference/patterns.md#evals`. For RAG, score retrieval and generation
+   separately with the four Ragas-style metrics in `_genai-engineering/reference/patterns.md#rag-evals`.
+   Every later change is judged against it.
 
 2. **Diagnose the layer.** For a bad answer, check in order: was the right
    context retrieved (retrieval recall)? Was it in the prompt (context

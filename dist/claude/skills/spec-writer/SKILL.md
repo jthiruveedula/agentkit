@@ -14,10 +14,20 @@ Produce, in this order, nothing more:
    later; this section is not optional).
 4. **Acceptance criteria** — a checklist, each item testable/observable.
 5. **Open questions** — anything the spec can't resolve without the user.
+6. **Tasks** — the spec → plan → tasks breakdown (Spec Kit/Kiro pattern):
+   split the acceptance criteria into tasks the `implementer`/`orchestrate`
+   agents can pick up directly. Each task: `id`, `owner` (roster:
+   researcher, implementer, test-writer, verifier, reviewer, doc-writer,
+   data-platform-architect, pipeline-engineer, data-quality-engineer,
+   ml-engineer), `objective`, `acceptance check` (how to tell it's done),
+   `deps`. See `reference/spec-template.md`. For a multi-agent run, emit
+   this section as `.agentkit/plan.json` and validate it with
+   `skills/orchestrate/scripts/plan_check.py` before delegating.
 
 Keep it to what fits on one screen unless the feature genuinely needs more.
 A spec that needs scrolling to find the acceptance criteria has failed its
-own job.
+own job. Skip the Tasks section for a one-agent, one-file change — it earns
+its keep only once the spec hands off to more than one owner.
 
 ## Token economy
 

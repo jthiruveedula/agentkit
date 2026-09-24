@@ -119,7 +119,7 @@ source and run `make build`.
 
 ## Skill catalog
 
-32 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+33 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 
 **Prompt & dev loop**
@@ -131,7 +131,8 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `debug-loop` | Hypothesize-test-narrow loop on a failing test or reproducible crash until root cause is found. |
 | `orchestrate` | Lead-agent persona: validated plan (`plan_check.py`), parallel waves to roster subagents, external verification, one synthesized result. |
 | `pr-review` | Reviews a PR for correctness bugs and scope creep, posting inline findings. |
-| `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
+| `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria — ending in a roster-owned task list that `orchestrate` can run. |
+| `mcp-security-review` | Scans MCP configs (`mcp_scan.py`) for unpinned packages, secrets in config, broad filesystem roots, unauthenticated remotes; then a manual tool-description review for poisoning. |
 | `daily-standup` | Commits/PRs/issues since last standup → a 3-line did/doing/blocked update. |
 | `meeting-to-actions` | Meeting notes or transcript → action items with owners and dates. |
 
