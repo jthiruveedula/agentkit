@@ -43,7 +43,8 @@
         "skills/token-saver",
         "skills/genai-engineering",
         "skills/ml-lifecycle",
-        "skills/orchestrate"
+        "skills/orchestrate",
+        "skills/context-budget"
       ],
       "agents": [
         "agents/researcher.md",
