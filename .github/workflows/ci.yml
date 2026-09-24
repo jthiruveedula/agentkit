@@ -233,11 +233,12 @@ jobs:
           /tmp/packvenv/bin/agentkit --help
 
   # Conventional-commit lint on PRs. PR-only: pushes to main are squash-merges
-  # whose titles already passed this check on the PR.
+  # whose titles already passed this check on the PR. Dependabot is exempt:
+  # its bodies carry >100-char release-note URLs by design.
   commitlint:
     name: commitlint
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
     permissions:
       contents: read
       pull-requests: read
