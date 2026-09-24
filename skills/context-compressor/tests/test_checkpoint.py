@@ -53,7 +53,7 @@ Done:
 
 
 def write_file(body: str) -> Path:
-    tmp = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False)
+    tmp = tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8")
     tmp.write(body)
     tmp.close()
     return Path(tmp.name)

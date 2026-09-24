@@ -22,9 +22,9 @@ def test_sums_usage_and_flags_long_sessions():
     proj = os.path.join(root, "proj-a")
     os.makedirs(proj)
     lines = [_usage(2, 1000, 500, 10), {"type": "user"}, "not json", _usage(1, 50, 1500, 20)]
-    with open(os.path.join(proj, "s1.jsonl"), "w") as fh:
-        for l in lines:
-            fh.write((l if isinstance(l, str) else json.dumps(l)) + "\n")
+    with open(os.path.join(proj, "s1.jsonl"), "w", encoding="utf-8") as fh:
+        for line in lines:
+            fh.write((line if isinstance(line, str) else json.dumps(line)) + "\n")
 
     out = subprocess.run([sys.executable, SCRIPT, "--root", root, "--long", "1", "--json"],
                          capture_output=True, text=True, check=True).stdout

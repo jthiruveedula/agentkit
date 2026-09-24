@@ -23,7 +23,7 @@ import sys
 
 def session_stats(path):
     turns = base = cache_read = fresh = out = 0
-    with open(path, errors="ignore") as fh:
+    with open(path, encoding="utf-8", errors="ignore") as fh:
         for line in fh:
             try:
                 msg = json.loads(line).get("message")
