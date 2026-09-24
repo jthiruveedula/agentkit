@@ -50,6 +50,39 @@ checklist — it trains people to ignore it.
 - Never log full PII values in pipeline logs/error messages — log a
   hashed/truncated reference instead.
 
+## Data contracts
+
+Enforce a dbt contract (`contract: {enforced: true}`) once a model is
+consumed by more than its own project — another team's models, a BI tool,
+or an AI agent/semantic layer querying it directly. A contract locks the
+column names, `data_type`s, and constraints (`not_null`, `unique`,
+`primary_key`) so a silent schema change breaks the build instead of the
+downstream consumer. Don't enforce it on models still internal to one
+pipeline — it's friction with no payoff there.
+
+Breaking changes (drop/rename/retype a contracted column) go through a
+[versioned model](https://docs.getdbt.com/docs/collaborate/govern/model-versions)
+instead of a silent edit, so old consumers keep working against the prior
+version while new ones move to the latest.
+
+```yaml
+models:
+  - name: dim_customer
+    config:
+      contract: {enforced: true}
+    columns:
+      - name: customer_id
+        data_type: string
+        constraints:
+          - type: not_null
+          - type: unique
+          - type: primary_key
+      - name: email
+        data_type: string
+        constraints:
+          - type: not_null
+```
+
 ## What goes in a PR that touches a pipeline
 
 1. What schema/freshness/volume tests were added or updated.

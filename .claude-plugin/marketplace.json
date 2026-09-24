@@ -44,7 +44,8 @@
         "skills/genai-engineering",
         "skills/ml-lifecycle",
         "skills/orchestrate",
-        "skills/context-budget"
+        "skills/context-budget",
+        "skills/mcp-security-review"
       ],
       "agents": [
         "agents/researcher.md",

@@ -24,6 +24,56 @@ question→chunk pairs. Generation metrics are meaningless if recall is bad.
 - Track: pass rate, cost per case, p50/p95 latency. Commit the eval set;
   run it in CI on prompt/model changes.
 
+### RAG evals
+
+Four Ragas-style metrics, each answers a different question:
+
+| Metric | Question it answers |
+|---|---|
+| Faithfulness | Is every claim in the answer supported by the retrieved context? (catches hallucination) |
+| Answer relevancy | Does the answer actually address the question asked? |
+| Context precision | Of the chunks retrieved, how many were actually relevant? |
+| Context recall | Of the chunks needed to answer, how many were retrieved? |
+
+LLM-as-judge bias mitigations (a judge model has the same blind spots a
+human grader does):
+
+- Swap answer order/position across repeated judge calls — judges favor
+  whichever answer they see first.
+- Give the judge a written rubric, not just "rate 1-5" — vague criteria
+  drift between cases.
+- Grade against a reference answer where one exists, not vibes alone.
+- Spot-check a sample of judge scores by hand; don't fully trust an
+  ungraded judge.
+- Use a different model family for judge than for generation — a model
+  judging its own output is biased toward its own style.
+
+Minimal harness outline (stdlib only, no vendor eval framework required):
+
+```python
+def run_eval(cases):
+    results = []
+    for case in cases:  # case: {input, expected, ...}
+        t0 = time.time()
+        chunks = retrieve(case["input"])
+        answer = generate(case["input"], chunks)
+        score = score_case(case, chunks, answer)  # exact/schema, or judge call
+        results.append(
+            {
+                "id": case["id"],
+                "score": score,
+                "cost": estimate_cost(chunks, answer),
+                "latency_s": time.time() - t0,
+            }
+        )
+    return {
+        "pass_rate": sum(r["score"] >= case_threshold for r in results) / len(results),
+        "cost_total": sum(r["cost"] for r in results),
+        "p50_latency": statistics.median(r["latency_s"] for r in results),
+        "failures": [r for r in results if r["score"] < case_threshold],
+    }
+```
+
 ## Agents
 
 - Start with one call + tools; add a loop only when a task needs

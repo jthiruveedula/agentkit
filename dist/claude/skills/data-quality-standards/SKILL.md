@@ -34,6 +34,10 @@ people to ignore it. Pick what's meaningful for the data at hand.
    historical data is touched, PII flagged, ADR referenced if this
    implements an architecture decision.
 
+5. **For a model other teams, BI, or an AI agent/semantic layer consume
+   directly**, check whether it needs a dbt contract — see "Data
+   contracts" in `reference/checks.md`.
+
 ## Reference
 
 - `reference/checks.md` — the full checklist: schema tests, freshness,

@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 32,
+  "count": 33,
   "skills": [
     {
       "name": "context-budget",
@@ -53,6 +53,12 @@
     {
       "name": "genai-engineering",
       "description": "Builds and hardens LLM applications — RAG pipelines, tool-using agents, prompt/model selection, eval harnesses, guardrails, and cost/latency control (prompt caching, batching, model tiering). Use when the user is building or debugging a RAG system, an LLM feature, an agent, an eval set, or asks why an LLM app is slow, expensive, or hallucinating.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "mcp-security-review",
+      "description": "Audits MCP server configuration for security risks before trusting it — unpinned packages, secrets in config, overbroad filesystem access, unauthenticated remote transports, and shell wrappers. Use when adding a new MCP server, reviewing an .mcp.json or claude_desktop_config.json, or before granting an agent access to a new tool source.",
       "version": "0.1.0",
       "kind": "native"
     },
