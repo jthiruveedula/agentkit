@@ -232,7 +232,7 @@ def find_entry_points(root, manifests):
 
     def add(rel, reason):
         if rel:
-            cands.setdefault(os.path.normpath(rel), reason)
+            cands.setdefault(os.path.normpath(rel).replace(os.sep, "/"), reason)
 
     for m in manifests:
         if m["kind"] == "package.json":
@@ -253,7 +253,7 @@ def find_entry_points(root, manifests):
         dirnames[:] = sorted(d for d in dirnames if not is_ignored(d))
         rel = os.path.relpath(dirpath, root)
         for fn in filenames:
-            r = fn if rel == "." else os.path.join(rel, fn).replace(os.sep, "/")
+            r = fn if rel == "." else os.path.join(rel, fn)
             if rel == "bin" or rel.startswith("bin" + os.sep):
                 add(r, "bin/")
             if ENTRY_NAME.match(fn):

@@ -89,7 +89,7 @@ def test_token_heuristic_is_chars_over_four():
     # multibyte chars: token estimate must follow decoded chars, not bytes
     d = tempfile.mkdtemp()
     path = os.path.join(d, "u.py")
-    with open(path, "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("héllo wörld\n" * 100)  # 12 chars/line inc newline
     out = _run("--json", path)
     assert out.returncode == 0
