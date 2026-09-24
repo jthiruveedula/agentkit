@@ -29,6 +29,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install test dependencies
+        run: python -m pip install --quiet pytest
+
       # Build gates -- the publish step never runs if any of these fail.
       - name: Build
         run: make build
