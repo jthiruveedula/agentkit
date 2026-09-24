@@ -42,7 +42,8 @@
         "skills/smart-navigator",
         "skills/token-saver",
         "skills/genai-engineering",
-        "skills/ml-lifecycle"
+        "skills/ml-lifecycle",
+        "skills/orchestrate"
       ],
       "agents": [
         "agents/researcher.md",
@@ -53,7 +54,9 @@
         "agents/data-platform-architect.md",
         "agents/pipeline-engineer.md",
         "agents/data-quality-engineer.md",
-        "agents/ml-engineer.md"
+        "agents/ml-engineer.md",
+        "agents/orchestrator.md",
+        "agents/verifier.md"
       ]
     }
   ]

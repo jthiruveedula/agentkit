@@ -119,7 +119,7 @@ source and run `make build`.
 
 ## Skill catalog
 
-30 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+31 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 
 **Prompt & dev loop**
@@ -129,6 +129,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`, never hand-edited.
 | `prompt-enhancer` | Flagship: classifies a rough prompt's intent (9 categories) with a deterministic scorer and rewrites it using that intent's pattern. |
 | `skill-forge` | Scaffolds a new compliant skill — `SKILL.md` + `reference/`/`scripts/`/`tests/` — from a one-line description. |
 | `debug-loop` | Hypothesize-test-narrow loop on a failing test or reproducible crash until root cause is found. |
+| `orchestrate` | Lead-agent persona: validated plan (`plan_check.py`), parallel waves to roster subagents, external verification, one synthesized result. |
 | `pr-review` | Reviews a PR for correctness bugs and scope creep, posting inline findings. |
 | `spec-writer` | Turns a rough idea into a short spec: problem, scope, non-goals, acceptance criteria. |
 | `daily-standup` | Commits/PRs/issues since last standup → a 3-line did/doing/blocked update. |
@@ -172,10 +173,10 @@ GCP/AWS/Azure skill the same way they reach for `prompt-enhancer`.
 
 ### Subagents
 
-Nine subagents (`agents/`) with narrow charters and explicit handoff
+Eleven subagents (`agents/`) with narrow charters and explicit handoff
 contracts: `researcher`, `implementer`, `reviewer`, `test-writer`,
 `doc-writer`, `data-platform-architect`, `pipeline-engineer`,
-`data-quality-engineer`, `ml-engineer`. They ship for Claude Code and Antigravity;
+`data-quality-engineer`, `ml-engineer`, plus `orchestrator` (lead: plans and delegates to the others, nesting via `Agent(...)` allowlist) and `verifier` (runs tests/lint/types only — evidence, not opinion). They ship for Claude Code and Antigravity;
 Copilot and Cursor have no agent equivalent — a known gap, documented in
 [`AGENTS.md`](AGENTS.md).
 

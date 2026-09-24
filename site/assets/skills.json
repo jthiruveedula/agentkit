@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 30,
+  "count": 31,
   "skills": [
     {
       "name": "context-compressor",
@@ -71,6 +71,12 @@
     {
       "name": "ml-lifecycle",
       "description": "Runs a classical/deep ML project through problem framing, leakage-safe data splits, baselines, experiment tracking, evaluation, model registry, serving, and drift monitoring. Use when the user is training or evaluating a model, setting up MLflow/W&B experiment tracking, building features, deploying a model to production, or asks why model performance dropped.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "orchestrate",
+      "description": "Lead-agent persona that decomposes a multi-part goal into a written plan, decides whether fan-out is worth its token cost, delegates each task to the right roster subagent (in parallel where independent), verifies with external checks, and synthesizes one result. Use when a task spans several specialties (e.g. design + pipeline + tests + docs), when the user asks to \"orchestrate\", \"fan out\", \"plan and delegate\", or hands over a goal bigger than one focused change.",
       "version": "0.1.0",
       "kind": "native"
     },
