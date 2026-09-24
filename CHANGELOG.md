@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/jthiruveedula/agentkit/compare/v0.4.0...v0.5.0) (2026-09-24)
+
+
+### Features
+
+* add mcp-security-review skill ([91b9c16](https://github.com/jthiruveedula/agentkit/commit/91b9c16cffd42b6a4c0a11f22af68dbf0d5e4fc2))
+* extend spec-writer, data-quality-standards, genai-engineering ([75a58d8](https://github.com/jthiruveedula/agentkit/commit/75a58d8f889830001ad25cefabd4495c3a6619a6))
+* mcp-security-review skill; spec tasks, data contracts, RAG evals ([7f72b47](https://github.com/jthiruveedula/agentkit/commit/7f72b476988a758a4815ac38a019505b598894e8))
+* register mcp-security-review; OAuth-aware remote finding; ignore agent worktrees ([54c61ef](https://github.com/jthiruveedula/agentkit/commit/54c61efe9067c2213b5600f0ad6c4b1f3b9c1d67))
+
+
+### Bug Fixes
+
+* **mcp-scan:** literal severity for secret findings (CodeQL false positive) ([5f9a76b](https://github.com/jthiruveedula/agentkit/commit/5f9a76bd793c1b24a90f7258218af781cad004cd))
+* **mcp-scan:** report labels only; scan headers and two-arg secrets; token regexes ([88f1246](https://github.com/jthiruveedula/agentkit/commit/88f12463709700b72bd1f4fa0fd80e3fa8300116))
+
 ## [0.4.0](https://github.com/jthiruveedula/agentkit/compare/v0.3.0...v0.4.0) (2026-09-24)
 
 
