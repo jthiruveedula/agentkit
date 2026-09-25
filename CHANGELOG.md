@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](https://github.com/jthiruveedula/agentkit/compare/v0.5.0...v0.5.1) (2026-09-25)
+
+
+### Bug Fixes
+
+* **mcp-scan:** flag expanded home dirs as broad filesystem roots ([aabf2df](https://github.com/jthiruveedula/agentkit/commit/aabf2dfa16bcae5ff8930f42666493f34f7511ad))
+* **mcp-scan:** flag expanded home dirs as broad filesystem roots ([157a91b](https://github.com/jthiruveedula/agentkit/commit/157a91b6204c7a0eec3d0634ce5b7d305ee8c9b1))
+
 ## [0.5.0](https://github.com/jthiruveedula/agentkit/compare/v0.4.0...v0.5.0) (2026-09-24)
 
 
