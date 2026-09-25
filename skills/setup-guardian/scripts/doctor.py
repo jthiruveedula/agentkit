@@ -438,7 +438,9 @@ def check_install_targets(repo: Path, fix: bool = False) -> CheckResult:
     env = dict(os.environ)
     dests = expected_install_dests(repo, home, platform.system(), env)
 
-    state_dir = Path(env.get("XDG_STATE_HOME") or str(home / ".local" / "state")) / "agentkit"
+    state_dir = (
+        Path(env.get("XDG_STATE_HOME") or str(home / ".local" / "state")) / "agentkit"
+    )
     parts: list[str] = []
     bad_tools: list[str] = []
     warn_tools: list[str] = []
