@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/jthiruveedula/agentkit/compare/v0.5.2...v0.6.0) (2026-09-25)
+
+
+### Features
+
+* frontend-motion-3d skill and frontend-engineer subagent ([efda2cc](https://github.com/jthiruveedula/agentkit/commit/efda2cc038568cc8bbf9810292d855fb74792d34))
+* frontend-motion-3d skill and frontend-engineer subagent ([e80092a](https://github.com/jthiruveedula/agentkit/commit/e80092a6203084dc1660fb5cc6de6a709ef7964e))
+
 ## [0.5.2](https://github.com/jthiruveedula/agentkit/compare/v0.5.1...v0.5.2) (2026-09-25)
 
 
