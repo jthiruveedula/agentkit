@@ -23,6 +23,7 @@ ROSTER = {
     "pipeline-engineer",
     "data-quality-engineer",
     "ml-engineer",
+    "frontend-engineer",
 }
 
 

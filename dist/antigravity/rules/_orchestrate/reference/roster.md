@@ -7,6 +7,7 @@
 | Pipeline code (dbt, Airflow, Dagster, Spark) | `pipeline-engineer` | after ADR |
 | Data tests, freshness, PII | `data-quality-engineer` | after pipeline |
 | Model training/eval, RAG, LLM features, evals | `ml-engineer` | needs a named metric |
+| UI, animation, 3D (three.js/R3F, GSAP, Motion) | `frontend-engineer` | needs a perf/a11y budget |
 | General code change from a spec | `implementer` | scoped to named files |
 | Missing tests for changed logic | `test-writer` | smallest failing test |
 | Run tests/lint/types/schema checks | `verifier` | external evidence only |
