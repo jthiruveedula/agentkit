@@ -250,3 +250,35 @@ def test_package_names_are_not_secrets(tmp_path):
         tmp_path, {"command": "npx", "args": ["task-master-ai@1.2.0", "--port", "8080"]}
     )
     assert found == []
+
+
+def test_broad_fs_expanded_home_dirs(tmp_path):
+    for root in ["/Users/alice", "/home/bob/", "~/", "C:\\Users\\carol"]:
+        cfg = write_config(
+            tmp_path,
+            {
+                "mcpServers": {
+                    "fs": {
+                        "command": "npx",
+                        "args": ["-y", "server-filesystem@1.0.0", root],
+                    }
+                }
+            },
+        )
+        findings, errors = [], []
+        mcp_scan.scan_file(cfg, findings, errors)
+        assert "BROAD_FS" in codes(findings), root
+    cfg = write_config(
+        tmp_path,
+        {
+            "mcpServers": {
+                "fs": {
+                    "command": "npx",
+                    "args": ["-y", "server-filesystem@1.0.0", "/Users/alice/proj"],
+                }
+            }
+        },
+    )
+    findings, errors = [], []
+    mcp_scan.scan_file(cfg, findings, errors)
+    assert "BROAD_FS" not in codes(findings)

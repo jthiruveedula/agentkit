@@ -24,7 +24,7 @@ from pathlib import Path
 #   UNPINNED        (medium): npx/uvx/bunx/pipx package arg has no pinned
 #                    version, or is pinned to @latest
 #   SECRET_IN_CONFIG (high):  env/args value looks like a live secret
-#   BROAD_FS        (high):  filesystem server rooted at /, ~, or $HOME
+#   BROAD_FS        (high):  filesystem server rooted at /, ~, $HOME, or an expanded home dir
 #   REMOTE_NO_AUTH  (medium): remote server on plain http (non-localhost)
 #                    (low when https with no auth headers: OAuth is typical)
 #   SHELL_WRAPPER   (low):   command is a shell invoked with -c
@@ -37,6 +37,7 @@ SEVERITY = {
     "SHELL_WRAPPER": "low",
 }
 
+HOME_DIR_RE = re.compile(r"^(/Users/[^/]+|/home/[^/]+|[A-Za-z]:\\Users\\[^\\]+)$")
 PACKAGE_RUNNERS = {"npx", "uvx", "bunx", "pipx"}
 SHELLS = {"sh", "bash", "cmd", "cmd.exe", "powershell", "pwsh"}
 SECRET_KEY_RE_PARTS = ("TOKEN", "KEY", "SECRET", "PASSWORD", "AUTHORIZATION")
@@ -143,16 +144,21 @@ def check_broad_fs(command, args, server, file, server_name, findings):
     candidates = list(args or [])
     if isinstance(server.get("cwd"), str):
         candidates.append(server["cwd"])
-    broad_roots = {"/", "~", "$HOME", "%USERPROFILE%"}
+    broad_roots = {"/", "~", "$HOME", "%USERPROFILE%", os.path.expanduser("~")}
     for arg in candidates:
-        if isinstance(arg, str) and arg.strip() in broad_roots:
+        if not isinstance(arg, str):
+            continue
+        root = arg.strip()
+        root = root.rstrip("/\\") or root  # "~/" and "/Users/x/" count too; keep "/"
+        # a whole home dir, expanded (/Users/<name>, /home/<name>, C:\Users\<name>)
+        if root in broad_roots or HOME_DIR_RE.match(root):
             findings.append(
                 {
                     "server": server_name,
                     "file": file,
                     "code": "BROAD_FS",
                     "severity": SEVERITY["BROAD_FS"],
-                    "detail": "filesystem root '%s' grants broad access" % arg.strip(),
+                    "detail": "filesystem root '%s' grants broad access" % root,
                 }
             )
 
