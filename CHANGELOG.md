@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.2](https://github.com/jthiruveedula/agentkit/compare/v0.5.1...v0.5.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **ci:** tolerate blocked release-PR creation; ignore vendored JS in CodeQL ([aece50b](https://github.com/jthiruveedula/agentkit/commit/aece50b5bebed53e0fa2eefe648b4c9761853940))
+* **doctor:** check only installed tools; drop stale CLAUDE.md target ([667caba](https://github.com/jthiruveedula/agentkit/commit/667caba17cf6ba784f67f0b0fb8981c57d0d449e))
+* repo health — doctor targets, release workflow, CodeQL vendor ignore ([fe8fb9a](https://github.com/jthiruveedula/agentkit/commit/fe8fb9a16dc929b59072bd14f0ed3d2465d708ef))
+
 ## [0.5.1](https://github.com/jthiruveedula/agentkit/compare/v0.5.0...v0.5.1) (2026-09-25)
 
 
