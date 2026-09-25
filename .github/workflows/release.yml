@@ -22,11 +22,28 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
+      # Repo policy blocks Actions from opening PRs, so release-please fails at
+      # its last step (PR create) after pushing the release branch. Tolerate
+      # that one failure; scripts/release-pr.sh opens the PR from the branch.
       - id: release-please
+        continue-on-error: true
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Check release-please outcome
+        if: steps.release-please.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch=release-please--branches--main--components--agentkit
+          if gh api "repos/${{ github.repository }}/branches/$branch" --silent; then
+            echo "::warning::release PR not opened (Actions can't create PRs); run scripts/release-pr.sh"
+          else
+            echo "::error::release-please failed before pushing $branch"
+            exit 1
+          fi
 
       # Releases cut by the default GITHUB_TOKEN do not trigger downstream
       # `release:` workflows, so publish.yml would never run on its own.
