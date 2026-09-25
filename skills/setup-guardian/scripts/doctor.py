@@ -321,7 +321,6 @@ def expected_install_dests(
         out["claude"].append((bases["claude"] / "skills" / d.name, d))
     for f in files(dist / "claude" / "agents", "*.md"):
         out["claude"].append((bases["claude"] / "agents" / f.name, f))
-    out["claude"].append((bases["claude"] / "CLAUDE.md", repo / "AGENTS.md"))
 
     out["copilot"].append(
         (bases["copilot"] / "copilot-instructions.md", repo / "AGENTS.md")
@@ -416,16 +415,36 @@ def check_dist_freshness(repo: Path, fix: bool = False) -> CheckResult:
     )
 
 
+ALL_TOOLS = ("claude", "copilot", "cursor", "antigravity")
+
+
+def installed_tools(state_dir: Path) -> tuple[str, ...]:
+    """Tools from the installer's saved --tools (state_dir/tools), else all.
+
+    Checking every tool made a claude-only install report copilot/cursor/
+    antigravity as "missing" -- a permanent false FAIL.
+    """
+    try:
+        saved = (state_dir / "tools").read_text(encoding="utf-8").strip()
+    except OSError:
+        return ALL_TOOLS
+    picked = tuple(t for t in ALL_TOOLS if t in {s.strip() for s in saved.split(",")})
+    return picked or ALL_TOOLS
+
+
 def check_install_targets(repo: Path, fix: bool = False) -> CheckResult:
     name = "install_targets"
     home = Path.home()
     env = dict(os.environ)
     dests = expected_install_dests(repo, home, platform.system(), env)
 
+    state_dir = (
+        Path(env.get("XDG_STATE_HOME") or str(home / ".local" / "state")) / "agentkit"
+    )
     parts: list[str] = []
     bad_tools: list[str] = []
     warn_tools: list[str] = []
-    for tool in ("claude", "copilot", "cursor", "antigravity"):
+    for tool in installed_tools(state_dir):
         c = {"ok": 0, "missing": 0, "dangling": 0, "elsewhere": 0, "copy": 0}
         for dest, src in dests[tool]:
             c[classify_dest(dest, src)] += 1
@@ -441,11 +460,7 @@ def check_install_targets(repo: Path, fix: bool = False) -> CheckResult:
         elif c["elsewhere"] or c["copy"]:
             warn_tools.append(tool)
 
-    manifest = (
-        Path(env.get("XDG_STATE_HOME") or str(home / ".local" / "state"))
-        / "agentkit"
-        / "manifest.tsv"
-    )
+    manifest = state_dir / "manifest.tsv"
     stale: list[str] = []
     if manifest.is_file():
         for line in manifest.read_text(encoding="utf-8").splitlines():
