@@ -1,0 +1,66 @@
+---
+name: frontend-motion-3d
+description: Picks the right stack for frontend UI, animation, and 3D work — CSS/Motion for UI transitions, GSAP + ScrollTrigger for timelines and scroll storytelling, three.js / React Three Fiber for 3D scenes, HyperFrames for rendered video — and ships it within a performance and accessibility budget (reduced motion, 60fps, LCP, WebGL fallback). Use when the user asks for animations, scroll effects, 3D scenes, WebGL, motion design, interactive hero sections, or a UI that should "feel alive".
+allowed-tools: Read, Edit, Write, Grep, Bash
+version: 0.1.0
+---
+
+# Frontend Motion & 3D
+
+Motion and 3D fail the same ways: the wrong tool for the effect, janky
+frames nobody measured, and users who asked for less motion getting it
+anyway. Choose the lightest tool, set the budget, then build.
+
+## Procedure
+
+1. **Match the effect to the lightest tool** (`reference/stack.md` has the
+   full table):
+   - hover, enter/exit, layout shifts → CSS transitions or `motion-dev`
+   - sequenced timelines, text splits, SVG morphs → `gsap-core`, `gsap-timeline`, `gsap-plugins`
+   - scroll-driven storytelling, pinning, scrub → `gsap-scrolltrigger` (or CSS scroll-driven animations for simple cases)
+   - a 3D scene, model viewer, shaders → three.js; in React, React Three Fiber + drei
+   - immersive scroll-through 3D world → `scroll-world`; 3D data viz → `3dviz-pro-max`
+   - rendered video / motion graphics from HTML → `hyperframes`
+   - visual direction, layout, type, color → `hallmark` first
+   Detect what the project already uses (`package.json`) and stay with it.
+   Never add a second animation library for an effect the first covers.
+
+2. **Set the budget before code.** 60fps on a mid-range laptop; animate
+   only `transform` and `opacity`; LCP element never waits on JS or a 3D
+   scene; 3D bundle lazy-loaded below the fold; `devicePixelRatio`
+   capped at 2; textures compressed (KTX2/Draco for models).
+
+3. **Build the accessible baseline first.** Content and navigation work
+   with motion off and without WebGL. Then layer motion on:
+   - honor `prefers-reduced-motion` (`gsap.matchMedia()`, Motion's
+     `useReducedMotion`, or a CSS media query) — reduce to fades, don't
+     just speed up
+   - a static image or poster when WebGL is unavailable or the context is lost
+   - no autoplaying motion over 5s without a pause control; nothing that
+     flashes more than 3 times per second
+   - focus order and keyboard access unchanged by pinned sections
+
+4. **Clean up.** Kill tweens/ScrollTriggers on unmount (`gsap.context()`
+   / `useGSAP`), dispose three.js geometries, materials, textures, and the
+   renderer; stop the render loop when off-screen.
+
+5. **Verify with numbers.** Performance panel trace (no long frames
+   during the animation), Lighthouse LCP/CLS, reduced-motion toggled on,
+   WebGL disabled. For a browser check use `ego-browser`. Report the
+   numbers; "looks smooth" is not evidence.
+
+6. **Hand off** multi-file UI builds to the `frontend-engineer` subagent
+   with the effect list, the chosen stack, and the budget from step 2.
+
+## Reference
+
+- `reference/stack.md` — effect → tool table, three.js/R3F setup rules,
+  performance budget, accessibility checklist.
+
+## Token economy
+
+- Load one routed skill (e.g. `gsap-scrolltrigger`) for the effect at
+  hand, not the whole family.
+- Read the component and its styles, not the whole app; check
+  `package.json` once for the existing animation/3D stack.
+- General read/search/output patterns live in the `token-saver` skill.

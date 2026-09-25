@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 33,
+  "count": 34,
   "skills": [
     {
       "name": "context-budget",
@@ -47,6 +47,12 @@
     {
       "name": "doc-standards",
       "description": "Applies a consistent professional house style (colors, typography, table/chart formatting, layout) whenever generating or editing a Word, Excel, PDF, or PowerPoint document. Use when the user asks to create, format, or polish a docx, xlsx, pdf, or pptx file, or asks for a document to \"look professional\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "frontend-motion-3d",
+      "description": "Picks the right stack for frontend UI, animation, and 3D work — CSS/Motion for UI transitions, GSAP + ScrollTrigger for timelines and scroll storytelling, three.js / React Three Fiber for 3D scenes, HyperFrames for rendered video — and ships it within a performance and accessibility budget (reduced motion, 60fps, LCP, WebGL fallback). Use when the user asks for animations, scroll effects, 3D scenes, WebGL, motion design, interactive hero sections, or a UI that should \"feel alive\".",
       "version": "0.1.0",
       "kind": "native"
     },

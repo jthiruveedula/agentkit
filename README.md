@@ -61,6 +61,7 @@ downstream instantly, since the tools read through the symlinks.
 | Pipeline tests, data contracts, PII, freshness | `data-quality-standards` | `data-quality-engineer` |
 | RAG, LLM features, agents, evals, LLM cost | `genai-engineering` | `ml-engineer` |
 | Train, evaluate, deploy, monitor a model | `ml-lifecycle` | `ml-engineer` |
+| UI, animation, scroll effects, 3D / WebGL | `frontend-motion-3d` | `frontend-engineer` |
 | Rough idea → spec → task list | `spec-writer` | — |
 | Failing test or crash | `debug-loop` | — |
 | Prove a change works (tests, lint, types) | — | `verifier` |
@@ -104,6 +105,7 @@ feed straight into a plan.
 | `pipeline-engineer` | Implements pipelines from a decided architecture | sonnet |
 | `data-quality-engineer` | Checks for the risks the pipeline flagged | sonnet |
 | `ml-engineer` | ML and GenAI work against a named metric | sonnet |
+| `frontend-engineer` | UI, motion, and 3D within a perf/a11y budget | sonnet |
 
 Subagents ship for Claude Code and Antigravity. Copilot and Cursor have
 no agent equivalent — a known gap, documented in [`AGENTS.md`](AGENTS.md).
@@ -128,7 +130,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-33 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+34 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -159,6 +161,12 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 |---|---|
 | `genai-engineering` | RAG, agents, eval harnesses (incl. RAG metrics and LLM-judge bias controls), guardrails, cost/latency levers. |
 | `ml-lifecycle` | Framing, leakage-safe splits, baselines, experiment tracking, registry, serving, drift monitoring. |
+
+**Frontend, motion & 3D**
+
+| Skill | What it does |
+|---|---|
+| `frontend-motion-3d` | Effect → lightest tool (CSS, Motion, GSAP/ScrollTrigger, three.js/R3F, HyperFrames), with a 60fps/LCP budget, reduced-motion, and WebGL fallback. |
 
 **Token economy, memory & safety**
 

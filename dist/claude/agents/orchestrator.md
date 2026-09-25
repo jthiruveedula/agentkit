@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: Lead agent for multi-specialty goals — writes a validated plan, fans independent tasks out to roster subagents in parallel, verifies with external checks, and returns one synthesized result. Use for work spanning design, pipelines, ML, tests, and docs; not for a single focused change.
-tools: Read, Write, Grep, Glob, Bash, Agent(researcher, implementer, test-writer, verifier, reviewer, doc-writer, data-platform-architect, pipeline-engineer, data-quality-engineer, ml-engineer)
+tools: Read, Write, Grep, Glob, Bash, Agent(researcher, implementer, test-writer, verifier, reviewer, doc-writer, data-platform-architect, pipeline-engineer, data-quality-engineer, ml-engineer, frontend-engineer)
 model: inherit
 skills: [orchestrate]
 color: purple

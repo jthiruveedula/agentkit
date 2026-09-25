@@ -45,7 +45,8 @@
         "skills/ml-lifecycle",
         "skills/orchestrate",
         "skills/context-budget",
-        "skills/mcp-security-review"
+        "skills/mcp-security-review",
+        "skills/frontend-motion-3d"
       ],
       "agents": [
         "agents/researcher.md",
@@ -58,7 +59,8 @@
         "agents/data-quality-engineer.md",
         "agents/ml-engineer.md",
         "agents/orchestrator.md",
-        "agents/verifier.md"
+        "agents/verifier.md",
+        "agents/frontend-engineer.md"
       ]
     }
   ]

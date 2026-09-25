@@ -49,7 +49,7 @@ independent or needs separate context.
 `_orchestrate/reference/roster.md` maps needs to owners. Default owners:
 `researcher`, `implementer`, `test-writer`, `verifier`, `reviewer`,
 `doc-writer`, `data-platform-architect`, `pipeline-engineer`,
-`data-quality-engineer`, `ml-engineer`.
+`data-quality-engineer`, `ml-engineer`, `frontend-engineer`.
 
 ## Token economy
 
