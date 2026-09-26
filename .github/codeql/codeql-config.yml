@@ -1,5 +1,1 @@
 name: agentkit
-# Vendored third-party bundles (three.js) aren't our code; their findings
-# can't be fixed here and drown out real ones.
-paths-ignore:
-  - site/js/vendor

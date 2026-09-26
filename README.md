@@ -298,8 +298,8 @@ accepts JFrog's Online Preview Agreement and sends them command metadata
 ## Landing page
 
 **[jthiruveedula.github.io/agentkit](https://jthiruveedula.github.io/agentkit/)**
-— a 3D cosmos with an explorable skill galaxy, per-OS install tabs, and a
-searchable catalog generated from the real `SKILL.md` frontmatter
+— a scroll-driven launch page (Build → Skills → Agents → Install) with
+per-OS install tabs and a skill grid generated from the real `SKILL.md` frontmatter
 (`site/scripts/build-catalog.py` → `site/assets/skills.json`). Deploys via
 GitHub Pages on push to `main`.
 
