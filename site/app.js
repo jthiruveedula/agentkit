@@ -41,6 +41,7 @@ const lerp = (a, b, e) => a + (b - a) * e;
 const ACC = 'var(--acc, #c6ff3d)';
 const hash = x => { const s = Math.sin(x * 127.1 + 3.7) * 43758.5453; return s - Math.floor(s); };
 const GLY = '<>/\\[]{}=+*#01_';
+const SPOTLIGHT = 'ext-meta-muse';
 const CODE = ['---', 'name: orchestrate', 'kind: native', 'version: 1.0.0', '---', '# plan → fan out → verify'];
 
 // ?accent=ultraviolet|solar|ice, ?tempo=calm|overdrive, ?hud=0
@@ -211,10 +212,11 @@ function render() {
   // skills — scattered debris assembles, then ripples
   const asm = ease(c01(pS / 0.45));
   const vis = Math.round(c01((pS - 0.05) / 0.6) * skills.length);
-  const hot = skills.find(s => s.name === S.hotSkill) || (vis ? skills[vis - 1] : null);
+  // once every tile is lit, spotlight the newest skill until the visitor hovers another
+  const hot = skills.find(s => s.name === S.hotSkill) || (vis && vis === skills.length && skills.find(s => s.name === SPOTLIGHT)) || (vis ? skills[vis - 1] : null);
   const hotI = hot ? skills.indexOf(hot) : 0;
   txt($('count'), pad(vis));
-  txt($('hotName'), hot ? hot.name : ' ');
+  txt($('hotName'), hot ? hot.name + (hot.name === SPOTLIGHT ? ' · NEW' : '') : ' ');
   txt($('hotDesc'), hot ? hot.description.split(/\. Use (when|for)/)[0].replace(/\.$/, '') + '.' : '');
   E.cells.forEach((el, i) => { const s = skills[i], on = i < vis, router = s.kind === 'router', isHot = hot && hot.name === s.name, k = 1 - asm;
     const rip = on && !still ? Math.max(0, Math.sin(t * 4 - Math.abs(i - hotI) * 0.55)) * 0.16 * c01(asm * 2 - 1) : 0;
