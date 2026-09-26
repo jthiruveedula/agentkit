@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 34,
+  "count": 35,
   "skills": [
     {
       "name": "context-budget",
@@ -191,6 +191,12 @@
     {
       "name": "ext-gcp",
       "description": "Route Google Cloud Platform tasks to the pinned google/skills collection. Use when the user asks for GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM, etc.) and wants vendor-authored skill guidance rather than general knowledge.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-meta-muse",
+      "description": "Wire Meta Muse image generation (generate, edit, iterate) into the coding agent through the pinned muse-image-mcp server and the Meta Model API. Use when the user asks for Meta Muse, Muse image generation, or wants AI-generated images/assets (hero art, textures, mockups) from Meta's model inside Claude Code, Cursor, or Claude Desktop.",
       "version": "0.1.0",
       "kind": "router"
     },

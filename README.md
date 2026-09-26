@@ -130,7 +130,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-34 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+35 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -182,10 +182,11 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
-**External routers** — 10 thin skills that wire in the pinned
+**External routers** — 11 thin skills that wire in the pinned
 [external sources](#external-skills) on demand: `ext-diagrams`,
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
-`ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`.
+`ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,
+`ext-meta-muse` (Meta Muse image generation via a pinned MCP server).
 
 ## Deterministic where it matters
 
