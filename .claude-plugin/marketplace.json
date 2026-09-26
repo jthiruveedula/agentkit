@@ -46,7 +46,8 @@
         "skills/orchestrate",
         "skills/context-budget",
         "skills/mcp-security-review",
-        "skills/frontend-motion-3d"
+        "skills/frontend-motion-3d",
+        "skills/ext-meta-muse"
       ],
       "agents": [
         "agents/researcher.md",
