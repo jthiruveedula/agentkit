@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/jthiruveedula/agentkit/compare/v0.7.0...v0.8.0) (2026-09-26)
+
+
+### Features
+
+* **site:** feature Meta Muse in hero pill ([eb605c4](https://github.com/jthiruveedula/agentkit/commit/eb605c4249830c65f162f4a224fad38f0466ee34))
+* **site:** feature Meta Muse in hero pill ([b0ed91a](https://github.com/jthiruveedula/agentkit/commit/b0ed91aec00d5ce99bff9fe377eba15119c8e2d9))
+* **site:** spotlight Meta Muse in Skills chapter ([d1be3a1](https://github.com/jthiruveedula/agentkit/commit/d1be3a1a2efd53b64437440ee6f922e78787e463))
+* **site:** spotlight Meta Muse in Skills chapter ([97e46f8](https://github.com/jthiruveedula/agentkit/commit/97e46f8a793da070714c22ec88b275ba477e9c66))
+* **site:** v3 launch site redesign ([5429526](https://github.com/jthiruveedula/agentkit/commit/5429526fe9145a658796e8384a894d2c7181f683))
+* **site:** v3 launch site redesign ([5d1fde3](https://github.com/jthiruveedula/agentkit/commit/5d1fde393464be452126cd530a8954843781c34e))
+
 ## [0.7.0](https://github.com/jthiruveedula/agentkit/compare/v0.6.0...v0.7.0) (2026-09-26)
 
 
