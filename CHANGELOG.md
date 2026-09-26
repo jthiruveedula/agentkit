@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.0](https://github.com/jthiruveedula/agentkit/compare/v0.6.0...v0.7.0) (2026-09-26)
+
+
+### Features
+
+* ext-meta-muse router for Meta Muse image generation ([6e0b561](https://github.com/jthiruveedula/agentkit/commit/6e0b561db47fe90438dec4723afa6e1082c18bb0))
+* ext-meta-muse router for Meta Muse image generation ([f827133](https://github.com/jthiruveedula/agentkit/commit/f827133ee3799d000e4481bc3c52e65af3b26d8e))
+
 ## [0.6.0](https://github.com/jthiruveedula/agentkit/compare/v0.5.2...v0.6.0) (2026-09-25)
 
 
