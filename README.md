@@ -68,6 +68,7 @@ downstream instantly, since the tools read through the symlinks.
 | Review a diff or PR | `pr-review` | `reviewer` |
 | Audit an MCP server before trusting it | `mcp-security-review` | — |
 | Session getting long / expensive | `context-budget`, `token-saver` | — |
+| Why sessions are slow; what to automate | `session-insights` | — |
 
 ## Orchestration
 
@@ -118,6 +119,10 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 - **Measure** — `python3 skills/token-saver/scripts/session_audit.py`
   reports per-session turns, startup context, fresh input, cache reads,
   and output from Claude Code transcripts, and flags long sessions.
+- **Understand** — `python3 skills/session-insights/scripts/insights.py`
+  analyzes your prompts and friction (vague asks, corrections, interrupts,
+  tool errors, re-reads, repeated prompts/commands) and ranks concrete
+  suggestions; `--incidents` feeds `memory-sync`.
 - **Cap** — `context-budget` hooks watch live context. Past
   `AGENTKIT_BUDGET_TOKENS` (default 200k) the agent finishes its step,
   writes a checkpoint to `~/.agentkit/checkpoints/`, and asks for
@@ -130,7 +135,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-35 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+36 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -177,6 +182,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `context-compressor` | Checkpoint template and linter for long sessions and handoffs. |
 | `smart-navigator` | Structure-first repo reconnaissance: manifests + tree, then entry points inward. |
 | `memory` | Durable local memory (observations, facts, corrections) in SQLite. |
+| `session-insights` | Prompt analytics + friction report with ranked productivity suggestions. |
 | `memory-sync` | Mines recent sessions for recurring agent mistakes and writes durable fixes. |
 | `mcp-security-review` | `mcp_scan.py` flags unpinned packages, secrets in config (names only), broad filesystem roots, unauthenticated remotes, shell wrappers. |
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
@@ -208,6 +214,7 @@ is identical on all four tools:
 | `context-compressor/scripts/checkpoint.py` | Checkpoint render + lint |
 | `smart-navigator/scripts/map.py` | Repo manifest + tree map |
 | `memory-sync/scripts/rank_patterns.py` | Ranks recurring session patterns |
+| `session-insights/scripts/insights.py` | Prompt analytics, friction, automation candidates |
 | `setup-guardian/scripts/doctor.py` | Repo health checks (`--watch`) |
 | `skill-forge/scripts/scaffold.py` | New-skill scaffolding |
 
