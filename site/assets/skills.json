@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 35,
+  "count": 36,
   "skills": [
     {
       "name": "context-budget",
@@ -113,6 +113,12 @@
     {
       "name": "prompt-enhancer",
       "description": "Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "session-insights",
+      "description": "Prompt analytics and friction report over past Claude Code sessions — intent mix, underspecified prompts, correction/redo rate, interrupts, tool errors, permission denials, file re-reads, and prompts/commands repeated across sessions — ending in ranked, evidence-backed suggestions to work faster. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or \"what am I doing wrong / what should I automate\".",
       "version": "0.1.0",
       "kind": "native"
     },
