@@ -121,8 +121,14 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
   and output from Claude Code transcripts, and flags long sessions.
 - **Understand** — `python3 skills/session-insights/scripts/insights.py`
   analyzes your prompts and friction (vague asks, corrections, interrupts,
-  tool errors, re-reads, repeated prompts/commands) and ranks concrete
-  suggestions; `--incidents` feeds `memory-sync`.
+  tool errors, re-reads, repeated prompts/commands), tags session outcomes,
+  attributes cost to intent and subagents, and ranks concrete suggestions.
+  `--save` keeps a weekly trend, `--html` renders a local dashboard,
+  `--draft-commands` turns repeated prompts into slash commands, and
+  `--incidents` feeds `memory-sync`.
+- **Nudge** — `nudge_hook.py install` adds a UserPromptSubmit hook that
+  catches vague task prompts live and asks the agent to state its target
+  and done-condition first. Advisory, never blocks.
 - **Cap** — `context-budget` hooks watch live context. Past
   `AGENTKIT_BUDGET_TOKENS` (default 200k) the agent finishes its step,
   writes a checkpoint to `~/.agentkit/checkpoints/`, and asks for
@@ -214,7 +220,8 @@ is identical on all four tools:
 | `context-compressor/scripts/checkpoint.py` | Checkpoint render + lint |
 | `smart-navigator/scripts/map.py` | Repo manifest + tree map |
 | `memory-sync/scripts/rank_patterns.py` | Ranks recurring session patterns |
-| `session-insights/scripts/insights.py` | Prompt analytics, friction, automation candidates |
+| `session-insights/scripts/insights.py` | Prompt analytics, outcomes, cost, trend, dashboard, command drafts |
+| `session-insights/scripts/nudge_hook.py` | Live vague-prompt nudge hook (`install`) |
 | `setup-guardian/scripts/doctor.py` | Repo health checks (`--watch`) |
 | `skill-forge/scripts/scaffold.py` | New-skill scaffolding |
 

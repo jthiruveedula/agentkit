@@ -9,7 +9,8 @@
 {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t4", "content": "...", "is_error": false}, {"type": "tool_result", "tool_use_id": "t5", "content": "The user doesn't want to proceed with this tool use.", "is_error": true}]}}
 {"type": "user", "message": {"role": "user", "content": [{"type": "text", "text": "[Request interrupted by user]"}]}}
 {"type": "user", "message": {"role": "user", "content": "fix it"}}
-{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "done"}], "usage": {"input_tokens": 10, "output_tokens": 5}}}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "done"}, {"type": "tool_use", "id": "t6", "name": "Agent", "input": {"prompt": "check callers"}}], "usage": {"input_tokens": 10, "output_tokens": 5}}}
 {"type": "user", "message": {"role": "user", "content": "still broken, the test fails"}}
 {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "ok"}], "usage": {"input_tokens": 10, "output_tokens": 5}}}
 {"type": "user", "message": {"role": "user", "content": "subagent prompt"}, "isSidechain": true}
+{"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text": "callers checked"}], "usage": {"input_tokens": 50, "output_tokens": 10}}, "isSidechain": true}

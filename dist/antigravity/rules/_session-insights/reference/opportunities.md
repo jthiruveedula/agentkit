@@ -21,7 +21,29 @@ by value against effort. All of it stays local and stdlib-only.
 - **memory-sync feed**: `--incidents` gives memory-sync something to mine
   automatically. Before this, its step 1 asked the user to describe friction.
 
-## Next opportunities (ranked)
+## Added in v0.2
+
+| # | Opportunity | Where |
+|---|---|---|
+| 1 | Weekly insights + trend | `insights.py --save` / `--trend` and the cron line in SKILL.md |
+| 2 | Live prompt-quality nudge | `nudge_hook.py install` |
+| 3 | Auto-draft slash commands | `insights.py --draft-commands DIR` |
+| 4 | Outcome tagging + success by prompt trait | `outcomes`, `success_by_trait` |
+| 5 | Tool-error → setup fix | `setup_gaps` (`SETUP_FIXES` table) |
+| 6 | Cost per intent | `cost_by_intent` |
+| 7 | Subagent ROI (tokens, share, success with/without) | `subagents` |
+| 8 | HTML dashboard | `insights.py --html PATH` |
+
+## Next opportunities
+
+- **Cross-tool parity**: Copilot/Cursor transcript adapters behind the
+  same `parse_session` shape.
+- **Outcome from git**: confirm "shipped" against `git log` in the
+  session's cwd instead of trusting the command text.
+- **Nudge telemetry**: count nudges fired vs. prompts that then got a
+  correction, to measure whether the hook pays for itself.
+
+## Original roadmap (v0.1)
 
 | # | Opportunity | Value | Effort | Approach |
 |---|---|---|---|---|
