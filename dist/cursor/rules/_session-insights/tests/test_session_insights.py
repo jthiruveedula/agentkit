@@ -35,3 +35,147 @@ def test_json_and_incidents(tmp_path):
     assert r.returncode == 0 and '"correction_rate": 0.5' in r.stdout, r.stdout
     r = run("--root", str(tmp_path), "--incidents")
     assert r.stdout.count("\n") == 3, r.stdout
+
+
+def _load(name):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "si_" + name, SCRIPT.parent / (name + ".py")
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _root(tmp_path, copies=1):
+    fixture = (SCRIPT.parents[1] / "tests" / "fixture.jsonl").read_text()
+    for i in range(copies):
+        proj = tmp_path / "projects" / f"p{i}"
+        proj.mkdir(parents=True)
+        (proj / f"s{i}.jsonl").write_text(fixture)
+    return tmp_path / "projects"
+
+
+def test_outcome_cost_subagents_and_gaps(tmp_path):
+    ins = _load("insights")
+    root = _root(tmp_path, copies=3)
+    sessions = [
+        ins.parse_session(str(f), ins._load_classifier())
+        for f in sorted(root.glob("*/*.jsonl"))
+    ]
+    m = ins.analyze(sessions)
+    assert m["outcomes"] == {"abandoned": 3} and m["success_rate"] == 0.0
+    assert m["subagents"]["calls"] == 3 and m["subagents"]["share"] == 0.44
+    assert m["setup_gaps"][0]["gap"] == "missing Python deps"
+    assert sum(v["sessions"] for v in m["cost_by_intent"].values()) == 3
+
+
+def test_outcome_rules():
+    ins = _load("insights")
+    base = {"shipped": False, "last_test_ok": None, "ended_on_friction": False}
+    assert ins.outcome(dict(base, shipped=True)) == "shipped"
+    assert ins.outcome(dict(base, last_test_ok=True)) == "tests-green"
+    assert ins.outcome(dict(base, last_test_ok=False)) == "abandoned"
+    assert ins.outcome(base) == "exploratory"
+
+
+def test_subagent_transcript_dir(tmp_path):
+    ins = _load("insights")
+    root = _root(tmp_path)
+    sub = root / "p0" / "s0" / "subagents"
+    sub.mkdir(parents=True)
+    (sub / "agent-1.jsonl").write_text(
+        '{"message": {"id": "m1", "usage": {"input_tokens": 100}}}\n'
+        '{"message": {"id": "m1", "usage": {"input_tokens": 100}}}\nnot json\n'
+    )
+    s = ins.parse_session(str(root / "p0" / "s0.jsonl"), lambda t: "debug")
+    assert s["subagent_tokens"] == 160  # 60 inline + 100 deduped by message id
+
+
+def test_save_trend_html_and_drafts(tmp_path, monkeypatch, capsys):
+    ins = _load("insights")
+    monkeypatch.setenv("AGENTKIT_HOME", str(tmp_path / "home"))
+    root = _root(tmp_path, copies=3)
+    old = {"date": "2026-01-01", "correction_rate": 0.9, "vague_rate": 0.1}
+    (tmp_path / "home" / "insights").mkdir(parents=True)
+    (tmp_path / "home" / "insights" / "2026-01-01.json").write_text(
+        __import__("json").dumps(old)
+    )
+    out_html = tmp_path / "r.html"
+    assert ins.main(["--root", str(root), "--save", "--html", str(out_html)]) == 0
+    text = capsys.readouterr().out
+    assert "since 2026-01-01" in text and "corrections 90% -> 50% (better)" in text
+    assert "vague prompts 10% -> 25% (worse)" in text
+    assert len(ins.history()) == 2
+    page = out_html.read_text()
+    assert "2026-01-01" in page and "missing Python deps" in page
+
+    cmds = tmp_path / "cmds"
+    assert ins.main(["--root", str(root), "--draft-commands", str(cmds)]) == 0
+    drafts = list(cmds.glob("*.md"))
+    assert drafts, capsys.readouterr().out
+    body = drafts[0].read_text()
+    assert "$ARGUMENTS" in body and body.startswith("---\ndescription:")
+    drafts[0].write_text("hand edited")
+    ins.main(["--root", str(root), "--draft-commands", str(cmds)])
+    assert drafts[0].read_text() == "hand edited"  # never overwrites
+
+
+def test_save_prunes_old_snapshots(tmp_path):
+    ins = _load("insights")
+    home = tmp_path / "h"
+    home.mkdir()
+    for d in range(1, 6):
+        (home / f"2026-01-0{d}.json").write_text("{}")
+    ins.save({"x": 1}, home=str(home), keep=3)
+    assert len(list(home.glob("*.json"))) == 3
+
+
+def test_nudge_verdicts(monkeypatch):
+    nh = _load("nudge_hook")
+    monkeypatch.delenv("AGENTKIT_NUDGE", raising=False)
+    hit = nh.verdict("fix the bug")
+    assert "done-condition" in hit["hookSpecificOutput"]["additionalContext"]
+    assert hit["systemMessage"]
+    for quiet in (
+        "fix the bug in src/app.py",
+        "yes go ahead",
+        "/clear",
+        "",
+        "no, revert",
+    ):
+        assert nh.verdict(quiet) is None, quiet
+    monkeypatch.setenv("AGENTKIT_NUDGE", "model")
+    assert "systemMessage" not in nh.verdict("refactor this")
+    monkeypatch.setenv("AGENTKIT_NUDGE", "off")
+    assert nh.verdict("fix the bug") is None
+
+
+def test_nudge_check_never_raises(capsys):
+    import io
+
+    nh = _load("nudge_hook")
+    assert nh.check(io.StringIO("not json")) == 0
+    assert nh.check(io.StringIO('{"prompt": "implement a login page"}')) == 0
+    assert "UserPromptSubmit" in capsys.readouterr().out
+
+
+def test_nudge_install_idempotent(tmp_path):
+    import json
+
+    nh = _load("nudge_hook")
+    settings = tmp_path / "settings.json"
+    other = {"hooks": [{"type": "command", "command": "other.sh"}]}
+    settings.write_text(json.dumps({"hooks": {"UserPromptSubmit": [other]}}))
+    assert nh.main(["install", "--settings", str(settings)]) == 0
+    nh.main(["install", "--settings", str(settings)])
+    groups = json.loads(settings.read_text())["hooks"]["UserPromptSubmit"]
+    assert len(groups) == 2 and (tmp_path / "settings.json.bak").exists()
+    nh.main(["install", "--settings", str(settings), "--uninstall"])
+    assert json.loads(settings.read_text())["hooks"]["UserPromptSubmit"] == [other]
+    fresh = tmp_path / "new" / "settings.json"
+    nh.main(["install", "--settings", str(fresh)])
+    nh.main(["install", "--settings", str(fresh), "--uninstall"])
+    assert json.loads(fresh.read_text()) == {}
+    assert nh.main([]) == 2

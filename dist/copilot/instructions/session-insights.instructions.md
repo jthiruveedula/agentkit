@@ -1,5 +1,5 @@
 ---
-description: Prompt analytics and friction report over past Claude Code sessions — intent mix, underspecified prompts, correction/redo rate, interrupts, tool errors, permission denials, file re-reads, and prompts/commands repeated across sessions — ending in ranked, evidence-backed suggestions to work faster. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or "what am I doing wrong / what should I automate".
+description: Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or "what am I doing wrong / what should I automate".
 applyTo: **
 ---
 
@@ -33,11 +33,32 @@ by hand. Deterministic script first, model judgment second.
    ```
 
 4. **Act on the automation candidates.** A prompt opener repeated in
-   3+ sessions becomes a slash command or a `skill-forge` skill. A
-   command reused in 3+ sessions goes on the permission allowlist
-   (read-only) or into a make target (multi-step).
+   3+ sessions becomes a slash command or a `skill-forge` skill. Draft
+   them from the user's own past prompts (never overwrites; review each
+   before committing):
+   ```
+   python3 _session-insights/scripts/insights.py --draft-commands .claude/commands
+   ```
+   A command reused in 3+ sessions goes on the permission allowlist
+   (read-only) or into a make target (multi-step). A setup gap
+   (missing deps, CLI, env var) goes into a SessionStart hook.
 
-5. **Report briefly**: 3-5 suggestions with the metric behind each,
+5. **Track the trend.** `--save` stores a dated snapshot in
+   `~/.agentkit/insights/` (keeps 12) and prints what moved since the
+   last one; `--html` writes a static dashboard. Schedule it weekly:
+   ```
+   # crontab -e
+   0 9 * * 1 python3 ~/.claude/skills/session-insights/_session-insights/scripts/insights.py --last 200 --save --html ~/.agentkit/insights/latest.html
+   ```
+
+6. **Prevent at the source** (optional): install the live nudge, which
+   adds one line of context when a task prompt names no target and no
+   done-condition. Advisory only; `AGENTKIT_NUDGE=off` disables it.
+   ```
+   python3 _session-insights/scripts/nudge_hook.py install          # --uninstall to remove
+   ```
+
+7. **Report briefly**: 3-5 suggestions with the metric behind each,
    then the one change to make first. Quote prompts only as short
    truncated examples — transcripts can hold sensitive text.
 
@@ -54,6 +75,10 @@ by hand. Deterministic script first, model judgment second.
 | Re-read | same file `Read` 3+ times in a session | `token-saver`; facts into CLAUDE.md |
 | Repeat opener | first 6 words shared by 3+ sessions | Slash command / skill |
 | Repeat command | Bash command head in 3+ sessions | Allowlist or script |
+| Outcome | shipped (commit/push/PR), tests-green, abandoned, exploratory | Compare prompt traits by success rate |
+| Cost per intent | session tokens by dominant intent | Cheaper model or scoped subagent |
+| Subagent share | sidechain + `subagents/` tokens vs main | Fan out only for independent work |
+| Setup gap | tool errors matching missing deps / CLI / env / port | SessionStart hook or setup script |
 
 Heuristics, not NLP: treat a suggestion as a lead to confirm, not a verdict.
 Further automation ideas and their status: `_session-insights/reference/opportunities.md`.
