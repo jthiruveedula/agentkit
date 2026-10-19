@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/jthiruveedula/agentkit/compare/v0.8.0...v0.9.0) (2026-10-19)
+
+
+### Features
+
+* **session-insights:** cost per intent, subagent spend, and setup-gap fixes ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** draft slash commands from repeated prompt openers ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** live vague-prompt nudge hook ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** outcomes, cost, trend, dashboard, command drafts, live nudge ([93573f9](https://github.com/jthiruveedula/agentkit/commit/93573f9aed3ed955870e78805404c13eebba83f3))
+* **session-insights:** tag session outcomes and correlate prompt habits with success ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** weekly snapshots with trend and a static HTML dashboard ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+
 ## [0.8.0](https://github.com/jthiruveedula/agentkit/compare/v0.7.0...v0.8.0) (2026-10-15)
 
 
