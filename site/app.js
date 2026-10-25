@@ -68,12 +68,11 @@ const sp = s => Math.max(vh * .5, s.h - vh);
 function layout() {
   vh = innerHeight;
   dh = root.scrollHeight;
-  ST.forEach(s => { s.t = s.el.getBoundingClientRect().top + scrollY; s.h = s.el.offsetHeight; });
+  ST.forEach(s => { s.t = s.el.offsetTop; s.h = s.el.offsetHeight; });
   W = [];
   if (mo) {
     const a = (i, f, pt) => {
-      const y = ST[i].t + f * sp(ST[i]), off = ST[i].el.classList.contains('pin') ? 0 : y;
-      W.push([y, () => { const p = pt(); return [p[0], p[1] - off]; }]);
+      W.push([ST[i].t + f * sp(ST[i]), pt]);
     };
     const first = slips.firstElementChild || $('cnt'), spot = slips.querySelector('.sp') || first;
     const scale = $('scale'), sc = c(scale), cmd = $('cmd'), cw = cmd.offsetWidth, cm = c(cmd);
@@ -102,7 +101,7 @@ function layout() {
     a(4, 0, needle); a(4, 1, needle);
     CP = c($('caret'));
     const ly = dh - vh;
-    W.push([ly, () => [CP[0], CP[1] - ly]]);
+    W.push([ly, () => [CP[0], CP[1] + ST[5].t - ly]]);
   }
   tick();
 }
@@ -110,9 +109,15 @@ function layout() {
 function tick() {
   raf = 0;
   climb();
-  const y = scrollY, max = Math.max(1, dh - vh);
+  const y = scrollY, max = dh - vh;
   if (mo) {
-    ST.forEach(s => { s.p = clamp((y - s.t) / sp(s)); set(s.el, '--p', s.p.toFixed(3)); });
+    const A = ST.map(s => clamp((y - s.t + vh) / vh));
+    ST.forEach((s, i) => {
+      const o = A[i + 1] || 0;
+      s.p = clamp((y - s.t) / sp(s));
+      set(s.el, '--p', s.p); set(s.el, '--q', A[i]); set(s.el, '--o', o);
+      s.el.classList.toggle('tr', A[i] % 1 + o % 1 > 0);
+    });
     spin(cnt, S.total * clamp((ST[1].p - .15) / .45));
     T.forEach(([b, s, d]) => txt(b, ST[2].p > s + d ? 'LINKED' : 'QUEUED'));
     const p3 = ST[3].p, n = p3 > 0 && p3 < 1 ? Math.round(clamp((p3 - .06) / .86) * 12) : -1;
@@ -122,7 +127,7 @@ function tick() {
     let i = 0;
     while (i < W.length - 2 && y >= W[i + 1][0]) i++;
     const t = clamp((y - W[i][0]) / Math.max(1, W[i + 1][0] - W[i][0])), p = W[i][1](), q = W[i + 1][1](), rest = y >= W[W.length - 1][0] - 2;
-    set(baton, 'transform', `translate3d(${(p[0] + (q[0] - p[0]) * t).toFixed(1)}px,${(p[1] + (q[1] - p[1]) * t).toFixed(1)}px,0)`);
+    set(baton, 'transform', `translate3d(${p[0] + (q[0] - p[0]) * t}px,${p[1] + (q[1] - p[1]) * t}px,0)`);
     baton.classList.toggle('rest', rest);
     root.classList.toggle('br', rest);
     set(root, '--fin', y >= max - 4 ? 1 : 0);
@@ -187,7 +192,6 @@ new IntersectionObserver((es, o) => {
     ['psh', 'trv'].forEach(id => txt($(id), d.sha));
     txt($('tag'), cu.counts.agents);
     layout();
-    climb();
   }).catch(() => {});
 }, { rootMargin: '150%' }).observe($('proof'));
 function paint(g) {
