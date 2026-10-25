@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/jthiruveedula/agentkit/compare/v0.13.0...v0.13.1) (2026-10-25)
+
+
+### Bug Fixes
+
+* **site:** resolve plate collisions and land the ending on the install caret ([#62](https://github.com/jthiruveedula/agentkit/issues/62)) ([6169fe1](https://github.com/jthiruveedula/agentkit/commit/6169fe16954c4b65d8fbbe12c2c9a935bcf4b680))
+
 ## [0.13.0](https://github.com/jthiruveedula/agentkit/compare/v0.12.0...v0.13.0) (2026-10-25)
 
 
