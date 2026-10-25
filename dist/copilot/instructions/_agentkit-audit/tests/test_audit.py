@@ -164,14 +164,10 @@ def test_out_atomic_compact(tmp_path):
     assert not list(out.parent.glob(".*.tmp"))
 
 
-def test_fallback_parser_matches_repo_parser(tmp_path, monkeypatch):
-    # Installed layout: no scripts/lib above the copy, so the fallback parse() runs.
-    dst = tmp_path / "kit" / "skills" / "agentkit-audit" / "scripts" / "audit.py"
-    dst.parent.mkdir(parents=True)
-    dst.write_text(P.read_text())
-    monkeypatch.delitem(sys.modules, "frontmatter", raising=False)
-    monkeypatch.setattr(sys, "path", [p for p in sys.path if "scripts/lib" not in p])
-    s = importlib.util.spec_from_file_location("audit_installed", dst)
+def test_fallback_parser_matches_repo_parser(monkeypatch):
+    # Installed copy has no scripts/lib: block the import so the fallback parse() runs.
+    monkeypatch.setitem(sys.modules, "frontmatter", None)
+    s = importlib.util.spec_from_file_location("audit_installed", P)
     installed = importlib.util.module_from_spec(s)
     s.loader.exec_module(installed)
     assert installed.parse is not audit.parse
