@@ -55,6 +55,16 @@ html.mo .pin{height:var(--h,100vh)}
 html.mo .stage+.stage{margin-top:0}
 html.mo .pin .frame{position:sticky;top:0;height:100svh;overflow:hidden}
 html.mo .pin .g{height:100%}
+/* sheet-slide: --q = hand-off into this sheet, --o = hand-off out (0..1, scroll-derived).
+   Outgoing stage is held still (translate cancels scroll), sinks back and dims; incoming frame lifts in from below. */
+html.mo .stage{background:var(--paper)}
+html.mo .tr{transform-origin:50% calc(100% - 50svh);transform:translate3d(0,calc(var(--o,0)*100svh),0) perspective(1500px) translateZ(calc(var(--o,0)*-140px)) rotateX(calc(var(--o,0)*2.5deg))}
+html.mo .frame{position:relative;background:var(--paper)}
+html.mo .tr .frame{transform-origin:50% 0;transform:perspective(1500px) rotateX(calc((1 - var(--q,1))*-7deg))}
+html.mo .tr,html.mo .tr .frame{will-change:transform}
+html.mo .stage::after{content:"";position:absolute;z-index:5;left:0;right:0;bottom:0;height:100svh;pointer-events:none;opacity:var(--o,0);
+background:radial-gradient(ellipse 90% 26% at 50% 100%,rgba(0,0,0,.8),transparent),linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2))}
+html.mo .stage+.stage::before{height:3px;background:linear-gradient(var(--rule) 1px,color-mix(in srgb,var(--paper) 55%,var(--ink)) 1px 2px,transparent 2px)}
 html.mo #baton{display:block;position:fixed;z-index:60;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--reg);pointer-events:none;will-change:transform}
 html.mo #baton.rest{width:calc(var(--cs)*.6);height:calc(var(--cs)*1.1);margin:calc(var(--cs)*-.55) 0 0 calc(var(--cs)*-.3);border-radius:0;animation:bk calc(1.1s/var(--tempo,1)) steps(1) infinite}
 html.mo.br .caret{visibility:hidden}
@@ -244,4 +254,4 @@ footer a{color:var(--ink);margin-left:14px;text-underline-offset:3px}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
 @media print{#plates,.top,#tb,.stage::before,#baton,#readout,.skip{display:none}.stage{break-inside:avoid;contain:none;overflow:hidden}#proof,#install{content-visibility:visible}.g{min-height:0}html{background:#fff}
 html.mo{scroll-behavior:auto}html.mo .stage{--p:1!important}html.mo .pin{height:auto}html.mo .pin .frame{position:static;height:auto;overflow:visible}html.mo .pin .g{height:auto}
-html.mo .big,html.mo .slips li{transform:none}html.mo .stamp{opacity:1}html.mo .cap::before{display:inline}}
+html.mo .stage,html.mo .frame,html.mo .tr .frame{transform:none!important}html.mo .stage::after{display:none}html.mo .big,html.mo .slips li{transform:none}html.mo .stamp{opacity:1}html.mo .cap::before{display:inline}}
