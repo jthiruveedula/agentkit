@@ -27,7 +27,8 @@ LLM apps fail in retrieval, missing evals, and unmeasured cost. Work in that ord
    RAG for small corpora; hybrid (BM25 + vector) before a fancier
    retriever; a single well-scoped call before an agent loop; a cheaper
    model tier for classification/extraction, the strong model only where
-   evals show it's needed.
+   evals show it's needed. To check a GGUF/safetensors file's
+   metadata and tensor totals without loading it, use `ext-rea`.
 
 4. **Control cost and latency explicitly.** Stable prefix first (system
    prompt, tools, few-shot) so prompt caching hits; batch APIs for

@@ -20,6 +20,8 @@ Choose the lightest tool, set the budget, then build.
    - immersive scroll-through 3D world → `scroll-world`; 3D data viz → `3dviz-pro-max`
    - rendered video / motion graphics from HTML → `hyperframes`
    - visual direction, layout, type, color → `hallmark` first
+   - how a live reference site builds an effect → `ext-rea`
+     (`inspect_web_page`, `analyze_web_bundle`), then reimplement it. Never copy its code or assets.
    Detect what the project already uses (`package.json`) and stay with it.
    Never add a second animation library for an effect the first covers.
 

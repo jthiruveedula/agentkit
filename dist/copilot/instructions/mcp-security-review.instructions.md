@@ -51,7 +51,8 @@ Review before trusting.
      command and args so the actual invocation is inspectable.
    - Any server that triggers irreversible actions (delete, send, pay,
      deploy) should require human confirmation before that call runs,
-     regardless of scan result.
+     regardless of scan result. That includes servers whose tools launch or
+     instrument local programs (e.g. REA's `capture_*` and `instrument_with_frida`).
 
 ## Reference
 

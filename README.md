@@ -141,7 +141,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-37 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+38 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -199,6 +199,8 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
 `ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,
 `ext-meta-muse` (Meta Muse image generation via a pinned MCP server).
+`ext-rea` routes reverse engineering of shipped artifacts (binaries, bundles,
+APKs, crash reports, live sites) to the pinned REA MCP server.
 
 ## Deterministic where it matters
 
