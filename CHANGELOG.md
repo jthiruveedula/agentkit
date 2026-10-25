@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/jthiruveedula/agentkit/compare/v0.9.0...v0.10.0) (2026-10-25)
+
+
+### Features
+
+* add ext-rea skill and wire REA reverse engineering into related skills ([#46](https://github.com/jthiruveedula/agentkit/issues/46)) ([77e4515](https://github.com/jthiruveedula/agentkit/commit/77e4515d02269863283e745c4bfded47165b8594))
+* agentkit-audit skill, motion audit dashboard, security hardening, third-party update loop ([#44](https://github.com/jthiruveedula/agentkit/issues/44)) ([a713a0c](https://github.com/jthiruveedula/agentkit/commit/a713a0ce96f7404f91cf75626ce3bd0aa650d560))
+
+
+### Bug Fixes
+
+* close remaining audit findings and cover bump/fallback paths ([#51](https://github.com/jthiruveedula/agentkit/issues/51)) ([072c5cc](https://github.com/jthiruveedula/agentkit/commit/072c5ccfea9f2336f7f9019e8afe879b5b783e8e))
+
 ## [0.9.0](https://github.com/jthiruveedula/agentkit/compare/v0.8.0...v0.9.0) (2026-10-19)
 
 
