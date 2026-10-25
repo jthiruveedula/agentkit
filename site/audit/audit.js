@@ -163,12 +163,12 @@ function graph(C){
   }
   G.nodes.forEach(function(n){
     var p=pos[n.id];if(!p)return;
-    var u=U[n.id],col=!deg[n.id]?'#5d636d':(u&&u.flags.length?'#ffb02e':'#c6ff3d');
+    var u=U[n.id],col=!deg[n.id]?'s-idle':(u&&u.flags.length?'s-flag':'s-ok');
     var g=svg('g',{class:'node',tabindex:0,role:'img','aria-label':n.label+', '+n.kind+(u?', '+u.flags.length+' flags':'')},ng);els[n.id]=g;
     var isH=n===hub,r=isH?13:n.kind==='agent'?9:5;
     svg('circle',{cx:p[0],cy:p[1],r:r+5,class:'ring'},g);
-    if(n.kind==='agent')svg('rect',{x:p[0]-r,y:p[1]-r,width:2*r,height:2*r,rx:3,fill:col,stroke:'#06070a','stroke-width':1.5},g);
-    else svg('circle',{cx:p[0],cy:p[1],r:r,fill:col,stroke:'#06070a','stroke-width':1},g);
+    if(n.kind==='agent')svg('rect',{x:p[0]-r,y:p[1]-r,width:2*r,height:2*r,rx:3,class:col},g);
+    else svg('circle',{cx:p[0],cy:p[1],r:r,class:col},g);
     if(n.kind==='agent'){var t=svg('text',{x:p[0],y:p[1]+r+12,'text-anchor':'middle'},g);t.textContent=n.label}
     g.addEventListener('mouseenter',function(){hl(n,true,p[0],p[1])});
     g.addEventListener('mouseleave',function(){hl(n,false)});
