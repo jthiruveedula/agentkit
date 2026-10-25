@@ -25,9 +25,11 @@ contents). Never install silently.
    - Hooks fail open: if a filter breaks, the command still runs
 
    ```
-   curl -fsSL https://boost.jfrog.com/install.sh | bash      # macOS/Linux/WSL
-   # Windows PowerShell: irm https://boost.jfrog.com/install.ps1 | iex
+   curl -fsSLo boost-install.sh https://boost.jfrog.com/install.sh  # macOS/Linux/WSL
+   # Windows PowerShell: irm https://boost.jfrog.com/install.ps1 -OutFile boost-install.ps1
    ```
+   Show the user the script, then run it (`bash boost-install.sh`, or
+   `& .\boost-install.ps1`) only after they agree. Never pipe it straight into a shell.
 3. Wire it in, dry-run first (`--cursor`/`--codex`/`--copilot` as needed):
    ```
    boost init --claude --dry-run

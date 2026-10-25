@@ -106,3 +106,15 @@ def test_manual_pins(tmp_path):
     (tmp_path / "install.sh").write_text('BOOST_INSTALL_SH_SHA256="abc"\n')
     pins = {m["pin"] for m in cu.manual_pins(tmp_path)}
     assert pins == {"muse-image-mcp@0.1.3", "boost installer sha256"}
+
+
+def test_bump_sha256_failure_marks_row_and_keeps_lock(lock):
+    sources = json.loads(LOCK)["sources"]
+    rows = [cu.check_source(s, fake_get) for s in sources]
+
+    def boom(repo, sha):
+        raise OSError("network down")
+
+    assert cu.bump(lock, rows, sources, sha256_fn=boom) == []
+    assert rows[0]["error"].startswith("sha256_failed")
+    assert lock.read_text() == LOCK  # nothing half-written
