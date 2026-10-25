@@ -180,6 +180,11 @@ function graph(C){
 }
 
 /* ---- gallery ---- */
+/* preview motif from what the unit does: name first, then its first tag */
+var MOTIF_N={route:4,pipe:4,doc:3,scan:4,stack:3,squeeze:3,wave:5,spark:3,morph:2,orbit:3};
+var BY_NAME=[[/^ext-|router/,'route'],[/token|compress|budget/,'squeeze'],[/memory|context|session/,'stack'],[/review|audit|security|guardian|verif|quality|debug|test/,'scan'],[/data|pipeline/,'pipe'],[/^ml-/,'wave'],[/genai|prompt/,'spark'],[/frontend|motion|ui-/,'morph'],[/doc|spec|meeting|standup|writer/,'doc'],[/orchestrat|navigat|research|implement|forge/,'orbit']];
+var BY_TAG={router:'route',data:'pipe',docs:'doc',review:'scan',memory:'stack',ml:'wave',genai:'spark',frontend:'morph',ops:'orbit'};
+function motif(u){for(var i=0;i<BY_NAME.length;i++)if(BY_NAME[i][0].test(u.name))return BY_NAME[i][1];return BY_TAG[u.tags[0]]||'orbit'}
 function gallery(C){
   var tagc={};C.units.forEach(function(u){u.tags.forEach(function(t){tagc[t]=(tagc[t]||0)+1})});
   var tags=Object.keys(tagc).sort();
@@ -193,7 +198,7 @@ function gallery(C){
   var U=C.units.slice().sort(function(a,b){return b.tokens-a.tokens});
   U.forEach(function(u,i){
     var c=el('article','card u rise',null,grid);c.tabIndex=0;c._u=u;c.style.setProperty('--i',i%8);
-    var gl=el('div','glyph '+u.kind,null,c);gl.setAttribute('aria-hidden','true');el('i',null,null,gl);el('i',null,null,gl);el('i',null,null,gl);
+    var mo=motif(u),gl=el('div','glyph '+u.kind+' m-'+mo,null,c);gl.setAttribute('aria-hidden','true');for(var k=0;k<MOTIF_N[mo];k++)el('i',null,null,gl).style.setProperty('--k',k);
     el('h4',null,u.name,c);el('div','meta',u.kind+' · '+fmt(u.tokens)+' tok',c);
     var m=el('div','mini',null,c);
     ['PEI','OVS','CRI','SRS'].forEach(function(k){var v=u.scores[k];el('span',null,k,m);var b=el('div','bar'+(v<60?' w':''),null,m);var f=el('i',null,null,b);f.style.setProperty('--w',Math.min(v,100)/100);b.setAttribute('title',k+' '+Math.round(v))});
