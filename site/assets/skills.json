@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 37,
+  "count": 38,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -209,6 +209,12 @@
     {
       "name": "ext-meta-muse",
       "description": "Wire Meta Muse image generation (generate, edit, iterate) into the agent via the pinned muse-image-mcp server. Use when the user asks for Meta Muse or AI-generated images/assets (hero art, textures, mockups).",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-rea",
+      "description": "Route reverse-engineering of shipped artifacts (binaries, Electron/JS bundles, APKs, .NET, model files, crash reports, live sites) to the pinned REA MCP server. Use when a question depends on a build, package or runtime with no source available.",
       "version": "0.1.0",
       "kind": "router"
     },

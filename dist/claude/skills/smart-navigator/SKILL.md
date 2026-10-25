@@ -10,7 +10,8 @@ version: 0.1.0
 Map first, read later. A repo's manifests and skeleton answer
 "where does X live" and "what calls it" faster than reading code.
 See `reference/recon-playbook.md` for the full protocol with a
-worked example.
+worked example. No source, only a shipped build, binary or
+bundle? Use `ext-rea` instead.
 
 ## Procedure
 

@@ -16,6 +16,9 @@ allowed-tools: Bash, Read, Grep, Edit
    and skip the loop.
 1. Reproduce first. Get an exact failing command and its exact output
    before touching any code — no fix without a repro. Save the output once; never re-run just to see it again.
+   If the bug exists only in a shipped build, a third-party binary, or a crash
+   report with no source, gather Evidence with `ext-rea` first
+   (`inspect_recorded_crash`, `compare_application_versions`).
 2. Loop, capped at 6 iterations before stopping to ask the user for more
    context:
    - State one falsifiable hypothesis for the cause
