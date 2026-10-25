@@ -1,12 +1,10 @@
+# Deploys the site to GitHub Pages on every GitHub release, same as publish.yml.
+# Merges to main do not deploy; release.yml dispatches this when a release is cut.
 name: Deploy site
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "site/**"
-      - "skills/agentkit-audit/**"
-      - ".github/workflows/pages.yml"
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:

@@ -46,10 +46,13 @@ jobs:
           fi
 
       # Releases cut by the default GITHUB_TOKEN do not trigger downstream
-      # `release:` workflows, so publish.yml would never run on its own.
-      # Dispatch it explicitly instead (publish.yml supports workflow_dispatch).
-      - name: Trigger publish workflow
+      # `release:` workflows, so publish.yml and pages.yml would never run on
+      # their own. Dispatch them explicitly (both support workflow_dispatch).
+      - name: Trigger release workflows (publish, deploy site)
         if: steps.release-please.outputs.release_created
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run publish.yml --ref main --repo "${{ github.repository }}"
+        run: |
+          for wf in publish.yml pages.yml; do
+            gh workflow run "$wf" --ref main --repo "${{ github.repository }}"
+          done
