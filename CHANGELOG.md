@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/jthiruveedula/agentkit/compare/v0.11.0...v0.12.0) (2026-10-25)
+
+
+### Features
+
+* **site:** field-manual plate redesign with scroll-driven story ([#58](https://github.com/jthiruveedula/agentkit/issues/58)) ([ac6f3fb](https://github.com/jthiruveedula/agentkit/commit/ac6f3fb6e8ad038d0b1e924b0a9ca470a7255c57))
+
 ## [0.11.0](https://github.com/jthiruveedula/agentkit/compare/v0.10.0...v0.11.0) (2026-10-25)
 
 
