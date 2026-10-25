@@ -42,6 +42,10 @@ jobs:
       - name: Check dist/ has no drift from source
         run: python scripts/build.py --check
 
+      # Site deploys only on release, so its checks gate PRs here.
+      - name: Site structure and security checks
+        run: python site/scripts/check_site.py
+
       - name: Golden intent classification tests
         run: python skills/prompt-enhancer/scripts/classify.py --selftest
 
