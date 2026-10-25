@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/jthiruveedula/agentkit/compare/v0.15.0...v0.16.0) (2026-10-25)
+
+
+### Features
+
+* **site:** bring the audit dashboard onto the field-manual print theme ([#68](https://github.com/jthiruveedula/agentkit/issues/68)) ([ce38fa3](https://github.com/jthiruveedula/agentkit/commit/ce38fa314b66aeba12f81c48bcaf14eab5043a5e))
+
 ## [0.15.0](https://github.com/jthiruveedula/agentkit/compare/v0.14.0...v0.15.0) (2026-10-25)
 
 
