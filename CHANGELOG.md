@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/jthiruveedula/agentkit/compare/v0.13.1...v0.14.0) (2026-10-25)
+
+
+### Features
+
+* **site:** two-plate print direction with blue registration ink ([#64](https://github.com/jthiruveedula/agentkit/issues/64)) ([df5b243](https://github.com/jthiruveedula/agentkit/commit/df5b2438791d15959295392198fb5e21a737dad8))
+
 ## [0.13.1](https://github.com/jthiruveedula/agentkit/compare/v0.13.0...v0.13.1) (2026-10-25)
 
 
