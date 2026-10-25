@@ -31,6 +31,7 @@ CHECKS = [
     "ci_aggregator",
     "external_lock",
     "subprocess_env",
+    "stale_pins",
 ]
 
 
@@ -690,6 +691,31 @@ def check_external_lock(repo: Path, fix: bool = False) -> CheckResult:
     )
 
 
+def check_stale_pins(repo: Path, fix: bool = False) -> CheckResult:
+    """Optional: reads external/updates.json (written by scripts/check-external-updates.py)."""
+    name = "stale_pins"
+    p = repo / "external" / "updates.json"
+    if not p.is_file():
+        return CheckResult(name, "pass", "no external/updates.json; skipped")
+    try:
+        rows = json.loads(p.read_text(encoding="utf-8"))["sources"]
+        stale = [
+            "%s (%s behind%s)" % (r["name"], r.get("behind_by"), ", archived" if r.get("archived") else "")
+            for r in rows
+            if (r.get("behind_by") or 0) > 0 or r.get("archived") or r.get("license_changed") or r.get("error")
+        ]
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        return CheckResult(name, "warn", "cannot parse external/updates.json: %s" % e)
+    if stale:
+        return CheckResult(
+            name,
+            "warn",
+            "pins need attention: " + "; ".join(stale),
+            remediation="python scripts/check-external-updates.py --bump, then review the PR",
+        )
+    return CheckResult(name, "pass", "all %d pinned sources up to date" % len(rows))
+
+
 def _iter_scan_files(repo: Path) -> list[Path]:
     files: list[Path] = []
     for root in (repo / "scripts", repo / "tests"):
@@ -754,6 +780,7 @@ _CHECK_FUNCS = {
     "ci_aggregator": check_ci_aggregator,
     "external_lock": check_external_lock,
     "subprocess_env": check_subprocess_env,
+    "stale_pins": check_stale_pins,
 }
 
 

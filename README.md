@@ -130,7 +130,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-35 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+36 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -301,7 +301,8 @@ accepts JFrog's Online Preview Agreement and sends them command metadata
 — a scroll-driven launch page (Build → Skills → Agents → Install) with
 per-OS install tabs and a skill grid generated from the real `SKILL.md` frontmatter
 (`site/scripts/build-catalog.py` → `site/assets/skills.json`). Deploys via
-GitHub Pages on push to `main`.
+GitHub Pages on push to `main`. The [audit dashboard](https://jthiruveedula.github.io/agentkit/audit/)
+shows live repo scores from the `agentkit-audit` skill (`skills/agentkit-audit/scripts/audit.py`).
 
 ## Security
 

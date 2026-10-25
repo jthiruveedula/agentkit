@@ -1,6 +1,6 @@
 ---
 name: skill-forge
-description: Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo.
+description: Scaffolds a compliant new skill (SKILL.md, reference/scripts/tests, golden test stub) from a one-line description. Use when asked to create, scaffold, or add a new skill to this repo.
 allowed-tools: Bash, Read, Write
 version: 0.1.0
 ---
@@ -24,10 +24,6 @@ version: 0.1.0
 5. Run `python3 scripts/build.py` to regenerate the 4 tool adapters and
    `AGENTS.md` — never hand-edit `dist/`.
 
-
 ## Token economy
 
-- The scaffold generates the golden test stub — don't hand-write boilerplate.
-- Push depth into `reference/`; keep SKILL.md under 500 lines so it costs less to load.
-- Run `scripts/validate.py` once at the end, not after every edit.
-- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.
+Run `scripts/validate.py` once at the end, not after every edit.

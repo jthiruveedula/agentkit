@@ -1,6 +1,6 @@
 ---
 name: pipeline-engineer
-description: Implements a data pipeline (dbt model, Airflow DAG, Dagster asset, PySpark job) from an already-decided architecture. Scaffolds with pipeline-scaffold, then fills in the actual transform logic.
+description: Implements a dbt model, Airflow DAG, Dagster asset, or PySpark job from an already-decided architecture. Use when the ADR exists and transform logic is needed.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
 ---
@@ -25,3 +25,5 @@ the actual risk surface, not a generic checklist run blind.
 **Handoff contract (to reviewer):** states which files changed, which ADR
 this implements, and whether a backfill was tested — same as the
 `implementer` contract, plus the data-specific backfill/idempotency note.
+
+**Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.

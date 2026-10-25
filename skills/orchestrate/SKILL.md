@@ -1,16 +1,15 @@
 ---
 name: orchestrate
-description: Lead-agent persona that decomposes a multi-part goal into a written plan, decides whether fan-out is worth its token cost, delegates each task to the right roster subagent (in parallel where independent), verifies with external checks, and synthesizes one result. Use when a task spans several specialties (e.g. design + pipeline + tests + docs), when the user asks to "orchestrate", "fan out", "plan and delegate", or hands over a goal bigger than one focused change.
+description: Lead persona that plans a multi-part goal, fans independent tasks out to roster subagents, verifies, and synthesizes. Use when work spans several specialties, or user says "orchestrate", "fan out", "plan and delegate".
 version: 0.1.0
 allowed-tools: Read, Write, Grep, Glob, Bash, Agent
 ---
 
 # Orchestrate
 
-You are the lead. You plan, delegate, check, and synthesize — you don't do
-the specialist work yourself. Multi-agent runs cost roughly 3-15x the
-tokens of a single agent, so fan out only when the work is genuinely
-independent or needs separate context.
+You are the lead: plan, delegate, check, synthesize; no specialist work
+yourself. Multi-agent runs cost ~3-15x the tokens, so fan out only for
+independent work or separate context.
 
 ## Procedure
 
@@ -33,18 +32,24 @@ independent or needs separate context.
    budget. Vague delegation ("look into X") causes duplicate work.
 
 4. **Keep context flat.** Workers write bulky results to files and return
-   a summary plus paths. Nest at most one level (a specialist may call
-   `researcher` or `test-writer`); deeper chains add cost, not quality.
+   a summary plus paths. Workers do not spawn agents; a worker that needs
+   `researcher`, `test-writer` or `data-platform-architect` output returns a
+   `blocked: needs <agent>` line; the lead dispatches that agent, then
+   re-dispatches the worker with its output.
 
 5. **Verify externally.** After implementation waves, send the diff to
    `verifier` (runs tests/lint/types/schema checks — never self-grades),
    then `reviewer` for scope and correctness. Failures go back to the
-   owning task, not to a fresh agent.
+   owning task, not to a fresh agent. Max 2 fix-and-reverify rounds per
+   task. If verifier still fails or reviewer still reports findings after
+   round 2, stop, report the failing check output and open risk in the
+   synthesis, and ask the user instead of looping.
 
 6. **Synthesize and stop.** Merge results into one answer: what changed,
    evidence (test output, metrics), open risks. Stop when the plan's
    outputs exist and verification passes — not when agents run out of
-   ideas. If more work is needed, append tasks to the plan and re-check.
+   ideas. If more work is needed, append tasks to the plan and re-check (the
+   step 5 round cap still applies).
 
 ## Roster
 
@@ -55,9 +60,4 @@ independent or needs separate context.
 
 ## Token economy
 
-- One plan file, re-read on demand — never paste worker transcripts
-  into the lead's context.
-- Cheap models for workers (subagents default to Sonnet); the lead keeps
-  the strong model for decomposition and synthesis.
-- On long runs checkpoint with `context-compressor`; write the
-  plan to disk before compaction.
+Keep one plan file, re-read on demand; never paste worker transcripts into lead context. Workers run on cheaper models. Checkpoint long runs with `context-compressor` and write the plan to disk before compaction.

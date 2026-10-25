@@ -1,12 +1,11 @@
 ---
-description: Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted.
+description: Convert meeting notes or a transcript into action items with owners and dates. Use when the user pastes meeting notes, a transcript or call summary and wants action items extracted.
 alwaysApply: false
 ---
 
 # Meeting to Actions
 
-1. Read the notes once fully before extracting anything — action items
-   said in passing near the end often reference context set earlier.
+1. Read the notes fully first; late action items often reference earlier context.
 2. Extract only items that are actual commitments ("I'll do X", "let's
    have Y send Z") — not general discussion points or FYIs.
 3. Output a flat list: `- [ ] <action> — @<owner> — <date if stated,
@@ -17,10 +16,5 @@ alwaysApply: false
 
 ## Token economy
 
-- One pass over the notes, extracting actions + owners + dates only.
-  Skip the small talk — don't summarize the meeting.
-- One read is enough; the extraction criteria are in the Procedure.
-  Don't re-read to "double-check" for items.
+- One pass; no re-read to "double-check"; don't summarize the meeting.
 - Output the flat list and stop.
-- General read/search/output patterns live in the `token-saver` skill —
-  don't duplicate them here.

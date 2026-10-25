@@ -1,5 +1,5 @@
 ---
-description: Structure-first codebase reconnaissance — map an unfamiliar repo with manifests and a 2-level tree before reading any code, then trace entry points inward instead of reading file by file. Use when you land in an unknown codebase, need to find where something lives or what calls it, or are scoping before an implementation change.
+description: Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.
 applyTo: **
 ---
 
@@ -12,17 +12,15 @@ worked example.
 
 ## Procedure
 
-1. **Read manifests first.** Cheapest high-signal reads, top-level
-   only — they name entry points, scripts, and architecture:
+1. **Map first.** `python3 _smart-navigator/scripts/map.py .` already extracts
+   manifest key fields. If you still need a manifest, bound it:
 
    ```
-   cat package.json pyproject.toml go.mod Cargo.toml 2>/dev/null
-   head -30 README.md
+   head -n 40 package.json    # likewise pyproject.toml, go.mod, Cargo.toml
+   head -n 30 README.md
    ```
 
-   Or let the map extract key fields for you (step 2).
-
-2. **Skeleton before flesh.** Generate the map — 2-level tree,
+2. **Skeleton before flesh.** Run the map for a 2-level tree,
    per-directory file counts and sizes, manifests, guessed entry
    points. Ignored: `node_modules`, `.git`, `dist`,
    `__pycache__`, `.venv`, `target`.
@@ -42,18 +40,18 @@ worked example.
    at a time:
 
    ```
-   rg -n '^(import|from .* import|const .* = require)' <entry>
+   rg -n '^(import|from .* import|const .* = require)' <entry> | head -n 40
    ```
 
    Repeat on the next hop. This builds the call spine without
    opening every file.
 
 4. **Symbol search before full reads.** For a specific function,
-   class, or route, search and read only the matched hunks plus
-   ~20 lines of context:
+   class, or route, list hits first, then read only the one you need:
 
    ```
-   rg -n -C 20 '<symbol>' <weighted-dir>/
+   rg -n -m 3 '<symbol>' <weighted-dir>/ | head -n 20
+   sed -n '<start>,<end>p' <file>
    ```
 
 5. **Stop when both are answered.** Stop mapping when you can
@@ -70,11 +68,3 @@ worked example.
   not the design.
 - **Never re-list what the map already showed.** The map is the
   source of truth for structure; don't `ls` to confirm it.
-
-
-## Token economy
-
-- Always run `_smart-navigator/scripts/map.py` before any read — 2-level tree and symbol search first.
-- Read by weight: the biggest-KB directory wins; skip generated code and lockfiles.
-- Honor the stop conditions: stop mapping once X's location and callers are known.
-- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

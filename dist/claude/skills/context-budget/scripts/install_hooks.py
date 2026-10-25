@@ -73,12 +73,18 @@ def main(argv=None):
             settings = json.load(fh)
     except FileNotFoundError:
         settings = {}
+    except ValueError:
+        print("settings is not valid JSON; refusing to overwrite", file=sys.stderr)
+        return 2
+    if not isinstance(settings, dict):
+        print("settings is not a JSON object; refusing to overwrite", file=sys.stderr)
+        return 2
     out = apply(settings, a.uninstall)
     text = json.dumps(out, indent=2) + "\n"
     if a.dry_run:
         print(text)
         return 0
-    if os.path.exists(a.settings):
+    if os.path.exists(a.settings) and not os.path.exists(a.settings + ".bak"):
         shutil.copy2(a.settings, a.settings + ".bak")
     os.makedirs(os.path.dirname(os.path.abspath(a.settings)), exist_ok=True)
     with open(a.settings, "w", encoding="utf-8") as fh:

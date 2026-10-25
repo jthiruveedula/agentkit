@@ -1,6 +1,6 @@
 ---
 name: frontend-engineer
-description: Builds frontend UI, animation, and 3D features — components, motion (CSS, Motion, GSAP/ScrollTrigger), three.js / React Three Fiber scenes — within a stated performance and accessibility budget. Applies frontend-motion-3d; takes visual direction from hallmark.
+description: Builds UI, motion (CSS, Motion, GSAP), and 3D (three.js/R3F) within a performance and a11y budget. Use for animation, scroll effects, WebGL, or interactive UI work.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
 ---
@@ -22,3 +22,5 @@ ask for it or apply `hallmark` defaults and say so.
 effect and why, measured numbers (frame time, LCP/CLS, bundle delta),
 reduced-motion and no-WebGL behavior, and any remaining a11y gaps. Hands
 test runs to `verifier`; browser checks use `ego-browser`.
+
+**Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.

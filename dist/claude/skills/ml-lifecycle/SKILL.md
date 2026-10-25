@@ -1,6 +1,6 @@
 ---
 name: ml-lifecycle
-description: Runs a classical/deep ML project through problem framing, leakage-safe data splits, baselines, experiment tracking, evaluation, model registry, serving, and drift monitoring. Use when the user is training or evaluating a model, setting up MLflow/W&B experiment tracking, building features, deploying a model to production, or asks why model performance dropped.
+description: Run an ML project from framing and leakage-safe splits through tracking, evaluation, registry, serving and drift monitoring. Use when training or evaluating a model, setting up MLflow/W&B, deploying a model, or when performance dropped.
 allowed-tools: Read, Edit, Write, Grep, Bash
 version: 0.1.0
 ---
@@ -48,8 +48,5 @@ doesn't match the business goal. Guard those first, tune last.
 
 ## Token economy
 
-- Inspect data with `df.shape`, `df.dtypes`, `describe()` and small
-  `head()` samples — never print full frames or training logs.
-- Summarize experiment runs as a metrics table; open one run's details
-  only when comparing.
-- General read/search/output patterns live in the `token-saver` skill.
+- Inspect data with `df.shape`, `dtypes`, `describe()`, small `head()`; never print full frames or logs.
+- Summarize runs as a metrics table; open one run only to compare.

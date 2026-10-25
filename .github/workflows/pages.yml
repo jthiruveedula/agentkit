@@ -5,13 +5,12 @@ on:
     branches: [main]
     paths:
       - "site/**"
+      - "skills/agentkit-audit/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -22,11 +21,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Site structure and security checks
+        run: python3 site/scripts/check_site.py
+      - name: Site security tests
+        run: |
+          python3 -m pip install --quiet pytest
+          python3 -m pytest tests/test_site_security.py -q
       - name: Validate site has no obvious secrets or broken structure
         run: |
           test -f site/index.html
           test -f site/assets/logo-sprite.svg
-          ! grep -rIE '(sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{36,}|AKIA[0-9A-Z]{16})' site/
+          test -f site/audit/index.html
+          python3 -c 'import json;json.load(open("site/assets/audit.json"))'
+          ! grep -rIE '(sk-[A-Za-z0-9]{20,}|sk-ant-|ghp_[A-Za-z0-9]{36,}|gho_[A-Za-z0-9]{20,}|xox[abprs]-|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY)' site/
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: site
@@ -34,6 +46,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

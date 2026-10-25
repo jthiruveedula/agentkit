@@ -1,20 +1,15 @@
 ---
-description: Setup-health guardian for this repo — checks dist/ freshness, install targets, skill counts, action SHA pins, the CI success-gate logic, external lock pins, and risky subprocess env= usage. Use when adding or changing a skill, touching install/build/workflows, verifying a repo setup, or scheduling a periodic repo health check.
+description: Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.
 trigger: model_decision
 ---
 
 # Setup Guardian
 
-Four distinct mistake classes hit this repo in one day (2026-09-20):
-a CI success gate that compared whole `needs` objects instead of
-`v.get("result")`, a typo'd action SHA pin that broke the packaging
-job, a bare subprocess `env=` dict that dropped Windows vars so child
-Python couldn't start, and a hand-written skill count that drifted.
-Every one of those was preventable by a cheap static check. This skill
-is the enforcement: `_setup-guardian/reference/lessons.md` is the registry of what we
-learned, and `_setup-guardian/scripts/doctor.py` is the doctor that refuses to let us
-forget. Run it after any change to skills, `install.sh`, `scripts/`,
-or `.github/workflows/`.
+Cheap static checks for mistake classes that already hit this repo
+(whole-`needs` CI gate, typo'd action SHA, bare subprocess `env=` dropping
+Windows vars, hand-written skill counts). `_setup-guardian/reference/lessons.md` is the
+registry; `_setup-guardian/scripts/doctor.py` is the enforcement. Run after any change to
+skills, `install.sh`, `scripts/`, or `.github/workflows/`.
 
 ## Procedure
 
@@ -53,6 +48,16 @@ or `.github/workflows/`.
    0 9 * * * /usr/bin/python3 /path/to/agentkit/skills/setup-guardian/_setup-guardian/scripts/doctor.py --watch >> /var/log/agentkit-doctor.log 2>&1
    ```
 
+4. **Stale third-party pins (report only).**
+
+   ```
+   python3 scripts/check-external-updates.py
+   ```
+
+   Lists pinned external sources with newer upstream commits. Never
+   auto-bump: review upstream changes, then update `external/skills.lock.json`
+   via `scripts/sync-external.sh` as a deliberate change.
+
 ## Check catalog
 
 | Check | What it guards | Auto-fix |
@@ -86,12 +91,4 @@ or `.github/workflows/`.
 
 ## Token economy
 
-- **One check, not the suite.** If you only touched workflows, run
-  `doctor.py --check pinned_shas` — the full suite re-scans
-  everything you didn't change.
-- **`--json` for machines.** Parse the single JSON object with `jq`
-  instead of reading prose output, especially in `--watch` mode.
-- **`--fix` once, then verify.** Auto-fix applies safe fixes; run
-  `make build` after, don't loop doctor-fix-doctor.
-- General read/search/output patterns live in the `token-saver`
-  skill — don't duplicate them here.
+Run one check (`--check <name>`) when you only touched one area; `--json` for machine parsing; `--fix` once, then `make build` and verify, don't loop.

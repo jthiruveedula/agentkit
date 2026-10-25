@@ -1,16 +1,15 @@
 ---
 name: mcp-security-review
-description: Audits MCP server configuration for security risks before trusting it — unpinned packages, secrets in config, overbroad filesystem access, unauthenticated remote transports, and shell wrappers. Use when adding a new MCP server, reviewing an .mcp.json or claude_desktop_config.json, or before granting an agent access to a new tool source.
+description: Audit MCP server config for security risks: unpinned packages, secrets, broad filesystem access, unauthenticated remotes, shell wrappers. Use when adding an MCP server or reviewing .mcp.json or claude_desktop_config.json.
 allowed-tools: Read, Bash, Grep, Glob
 version: 0.1.0
 ---
 
 # MCP Security Review
 
-MCP servers are dependencies with tool-call access, and their tool
-descriptions are untrusted input the model reads as context. Tool
-poisoning and indirect prompt injection via descriptions or tool output
-are real attack classes in 2026 — review before trusting, not after.
+MCP servers are dependencies with tool-call access; their tool descriptions
+and outputs are untrusted input (tool poisoning, indirect prompt injection).
+Review before trusting.
 
 ## Procedure
 
@@ -27,9 +26,8 @@ are real attack classes in 2026 — review before trusting, not after.
    python3 skills/mcp-security-review/scripts/mcp_scan.py
    ```
 
-   With no arguments it scans whichever default locations above exist.
-   Pass explicit paths to scan others; add `--json` for machine output.
-   Findings are `{server, file, code, severity, detail}` — codes:
+   No arguments scans the default locations above that exist; pass paths
+   for others, `--json` for machine output. Findings are `{server, file, code, severity, detail}` — codes:
    `UNPINNED` (medium), `SECRET_IN_CONFIG` (high), `BROAD_FS` (high),
    `REMOTE_NO_AUTH` (medium), `SHELL_WRAPPER` (low). The scanner never
    prints a secret value, only the flagged key name. Exit code is 1 if
@@ -65,10 +63,5 @@ are real attack classes in 2026 — review before trusting, not after.
 
 ## Token economy
 
-- Run the scanner once across all default configs rather than
-  reading each JSON file by hand — it already does the parsing.
-- Only manually inspect tool descriptions for servers the scanner
-  flagged or that are new since the last review, not the whole list
-  every time.
-- General read/search/output patterns live in the `token-saver`
-  skill — don't duplicate them here.
+- Run the scanner once across all default configs; don't hand-read JSON.
+- Manually inspect tool descriptions only for flagged or new servers.

@@ -42,7 +42,7 @@ const ACC = 'var(--acc, #c6ff3d)';
 const hash = x => { const s = Math.sin(x * 127.1 + 3.7) * 43758.5453; return s - Math.floor(s); };
 const GLY = '<>/\\[]{}=+*#01_';
 const SPOTLIGHT = 'ext-meta-muse';
-const CODE = ['---', 'name: orchestrate', 'kind: native', 'version: 1.0.0', '---', '# plan → fan out → verify'];
+const CODE = ['---', 'name: orchestrate', 'kind: native', 'version: 0.1.0', '---', '# plan → fan out → verify'];
 
 // ?accent=ultraviolet|solar|ice, ?tempo=calm|overdrive, ?hud=0
 const q = new URLSearchParams(location.search);
@@ -64,10 +64,13 @@ function css(el, o) {
 }
 function txt(el, s) { if (el._t !== s) { el._t = s; el.textContent = s; } }
 function attr(el, k, v) { v = String(v); if (el.getAttribute(k) !== v) el.setAttribute(k, v); }
-function mk(tag, parent, html) { const el = document.createElement(tag); if (html) el.innerHTML = html; parent.appendChild(el); return el; }
+function mk(tag, parent, text) { const el = document.createElement(tag); if (text) el.textContent = text; parent.appendChild(el); return el; }
 const SVGNS = 'http://www.w3.org/2000/svg';
 function mkSvg(tag, parent, attrs) { const el = document.createElementNS(SVGNS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent.appendChild(el); return el; }
-const logo = (tg, size) => `<svg viewBox="${tg.vb}" width="${size}" height="${size}" aria-hidden="true" style="color:#eceef2"><use href="${tg.href}"></use></svg>`;
+function logo(parent, tg, size) {
+  const s = mkSvg('svg', parent, { viewBox: tg.vb, width: size, height: size, 'aria-hidden': 'true' });
+  s.style.color = '#eceef2'; mkSvg('use', s, { href: tg.href });
+}
 
 const S = { t: 0, pB: 0, pS: 0, pA: 0, instAt: -1, sp: 0, ch: 0, tab: 2, copied: null, skills: [], hotSkill: null, hotAgent: null, mx: 0, my: 0 };
 
@@ -86,7 +89,7 @@ E.streams = []; for (let i = 0; i < 12; i++) E.streams.push(mk('div', orbitEl));
 E.core = mk('div', orbitEl);
 E.orbit = TARGETS.map(tg => {
   const pos = mk('div', orbitEl);
-  const chip = mk('div', pos, logo(tg, 22));
+  const chip = mk('div', pos); logo(chip, tg, 22);
   mk('span', pos, tg.name.toUpperCase()).style.cssText = 'font-size:10px;letter-spacing:0.14em;color:#8a909a;white-space:nowrap';
   return { pos, chip };
 });
@@ -95,7 +98,7 @@ E.lines = TARGETS.map(() => mkSvg('line', $('buildLines'), { pathLength: 1, stro
 const fx = $('buildFx');
 E.beams = []; for (let i = 0; i < 12; i++) E.beams.push(mk('div', fx));
 E.clones = TARGETS.map(tg => {
-  const box = mk('div', fx, logo(tg, 30));
+  const box = mk('div', fx); logo(box, tg, 30);
   mk('span', box, tg.name).style.cssText = 'font-family:Unbounded,sans-serif;font-weight:500;font-size:14px';
   const track = mk('span', box); track.style.cssText = 'position:relative;height:3px;border-radius:3px;background:rgba(255,255,255,0.08);display:block;margin-top:auto';
   const bar = mk('span', track);
@@ -134,8 +137,7 @@ E.after = AFTER.map((cmd, i) => {
 
 let ct;
 function copy(text, key) {
-  try { navigator.clipboard.writeText(text); } catch (e) {}
-  S.copied = key; clearTimeout(ct); ct = setTimeout(() => { S.copied = null; }, 1600);
+  navigator.clipboard?.writeText(text).then(() => { S.copied = key; kick(); clearTimeout(ct); ct = setTimeout(() => { S.copied = null; kick(); }, 1600); }, () => {});
 }
 $('heroCopy').addEventListener('click', () => copy('npx github:jthiruveedula/agentkit', 'hero'));
 $('copyCmd').addEventListener('click', () => copy(CHANNELS[S.tab].cmd, 'tab'));
@@ -149,7 +151,7 @@ function buildCells() {
     return b;
   });
 }
-fetch('assets/skills.json').then(r => r.json()).then(d => { S.skills = d.skills || []; buildCells(); }).catch(() => {});
+fetch('assets/skills.json').then(r => r.json()).then(d => { S.skills = d.skills || []; S.total = d.count; buildCells(); kick(); }).catch(() => { $('hotDesc').textContent = 'Skill catalog unavailable. See the repo for the full list.'; });
 
 addEventListener('pointermove', e => { S.mx = e.clientX / innerWidth - 0.5; S.my = e.clientY / innerHeight - 0.5; }, { passive: true });
 
@@ -207,7 +209,7 @@ function render() {
     css(K.box, { position: 'absolute', left: lerp(50, xs[i], e2) + '%', top: lerp(55, cys[i], e2) + '%', width: narrow ? '40vw' : 'min(19vw,190px)', minWidth: 116, height: narrow ? '21vh' : 'min(180px,30vh)', padding: 16, borderRadius: 18, boxSizing: 'border-box', transform: `translate(-50%,-50%) perspective(800px) rotateX(${lerp(75, 0, e2)}deg) rotateY(${done ? 0 : (1 - lp) * -18 * (i < 2 ? -1 : 1)}deg) scale(${lerp(0.5, 1, e2) + pop * 0.08})`, opacity: e2 > 0.02 ? 1 : 0, background: done ? `color-mix(in srgb, ${ACC} 10%, #0e1014)` : 'rgba(14,16,20,0.92)', border: '1px solid ' + (done ? ACC : 'rgba(255,255,255,0.1)'), boxShadow: done ? `0 0 ${40 + pop * 60}px -10px ${ACC}` : 'none', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 2 });
     css(K.bar, { position: 'absolute', left: 0, top: 0, height: 3, borderRadius: 3, width: lp * 100 + '%', background: ACC });
     txt(K.stat, done ? 'LINKED ✓' : lp > 0 ? Math.round(lp * 100) + '%' : 'QUEUED');
-    css(K.stat, { fontSize: 10, letterSpacing: '0.14em', color: done ? ACC : '#5d636d' }); });
+    css(K.stat, { fontSize: 10, letterSpacing: '0.14em', color: done ? ACC : '#8a909a' }); });
 
   // skills — scattered debris assembles, then ripples
   const asm = ease(c01(pS / 0.45));
@@ -215,7 +217,7 @@ function render() {
   // once every tile is lit, spotlight the newest skill until the visitor hovers another
   const hot = skills.find(s => s.name === S.hotSkill) || (vis && vis === skills.length && skills.find(s => s.name === SPOTLIGHT)) || (vis ? skills[vis - 1] : null);
   const hotI = hot ? skills.indexOf(hot) : 0;
-  txt($('count'), pad(vis));
+  txt($('count'), pad(skills.length ? vis : (S.total || 0)));
   txt($('hotName'), hot ? hot.name + (hot.name === SPOTLIGHT ? ' · NEW' : '') : ' ');
   txt($('hotDesc'), hot ? hot.description.split(/\. Use (when|for)/)[0].replace(/\.$/, '') + '.' : '');
   E.cells.forEach((el, i) => { const s = skills[i], on = i < vis, router = s.kind === 'router', isHot = hot && hot.name === s.name, k = 1 - asm;
@@ -240,7 +242,8 @@ function render() {
   const hotA = AGENTS[hi];
   txt($('agentDesc'), narrow ? hotA.name + ' — ' + hotA.description : hotA.description);
   const tools = $('agentTools');
-  if (tools._hi !== hi) { tools._hi = hi; tools.innerHTML = hotA.tools.map(x => `<span style="font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);color:#c3c8d0">${x}</span>`).join(''); }
+  if (tools._hi !== hi) { tools._hi = hi; tools.textContent = '';
+    hotA.tools.forEach(x => { mk('span', tools, x).style.cssText = 'font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);color:#c3c8d0'; }); }
   AGENTS.forEach((_, i) => { const [x, y] = pos(i), l = E.netLines[i];
     attr(l, 'x2', x); attr(l, 'y2', y); attr(l, 'stroke', litOf(i) || i === S.hotAgent ? ACC : 'rgba(255,255,255,0.14)');
     css(l, { strokeDasharray: 1, strokeDashoffset: 0 });
@@ -251,7 +254,7 @@ function render() {
   AGENTS.forEach((a, i) => { const [x, y] = pos(i), on = i === hi || litOf(i), checked = (beat === 2 && i < vcount) || (beat === 3 && ret < 0.5), right = x >= 50, N = E.nodes[i];
     css(N.b, { position: 'absolute', left: x + '%', top: y + '%', transform: 'translate(-50%,-50%)', background: 'transparent', border: 0, padding: 8, cursor: 'pointer', font: 'inherit', zIndex: 4 });
     css(N.dot, { display: 'block', width: i === hi ? 18 : 12, height: i === hi ? 18 : 12, borderRadius: '50%', background: checked ? '#ffffff' : on ? ACC : `color-mix(in srgb, ${ACC} ${Math.round(scan(i) * 60)}%, #06070a)`, border: '1.5px solid ' + (checked ? '#ffffff' : on ? ACC : 'rgba(255,255,255,0.35)'), boxShadow: on ? `0 0 22px ${ACC}` : 'none', transition: 'all .3s' });
-    css(N.label, { position: 'absolute', top: '50%', [right ? 'left' : 'right']: '100%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', fontSize: 11, letterSpacing: '0.04em', color: i === hi ? '#ffffff' : on ? '#b7bcc4' : '#6d737d', opacity: narrow ? 0 : 1, transition: 'color .3s' }); });
+    css(N.label, { position: 'absolute', top: '50%', [right ? 'left' : 'right']: '100%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', fontSize: 11, letterSpacing: '0.04em', color: i === hi ? '#ffffff' : on ? '#b7bcc4' : '#9aa0aa', opacity: narrow ? 0 : 1, transition: 'color .3s' }); });
 
   // install terminal
   const chn = CHANNELS[tab];
@@ -275,23 +278,28 @@ function render() {
   }
 }
 
-// --- loop: ~30fps, pauses with the tab (rAF stops when hidden; dt clamped on return)
+// --- loop: ~30fps; stops when the tab is hidden, and (reduced motion) when idle.
+// Reads are batched before render() writes, so no layout thrash.
 const refs = ['build', 'skills', 'agents', 'install'].map($);
-const prog = el => { const r = el.getBoundingClientRect(); return c01(-r.top / Math.max(1, r.height - innerHeight)); };
+const prog = (r) => c01(-r.top / Math.max(1, r.height - innerHeight));
 const speed = TEMPO[tempo];
-let last = performance.now();
+let last = performance.now(), running = false, dirty = true;
 function loop(now) {
+  if (document.hidden || (speed === 0 && !dirty)) { running = false; return; }
   requestAnimationFrame(loop);
-  const dt = now - last; if (dt < 33) return; last = now;
+  const dt = now - last; if (dt < 33) return; last = now; dirty = false;
   const vh = innerHeight, se = document.scrollingElement || document.documentElement;
-  let ch = 0; refs.forEach((el, i) => { if (el.getBoundingClientRect().top < vh * 0.5) ch = i + 1; });
-  const ir = refs[3].getBoundingClientRect().top;
+  const rs = refs.map(el => el.getBoundingClientRect()), st = se.scrollTop, sh = se.scrollHeight;
+  let ch = 0; rs.forEach((r, i) => { if (r.top < vh * 0.5) ch = i + 1; });
   S.t += (Math.min(dt, 100) / 1000) * speed;
-  S.pB = prog(refs[0]); S.pS = prog(refs[1]); S.pA = prog(refs[2]); S.ch = ch;
-  S.sp = c01(se.scrollTop / Math.max(1, se.scrollHeight - vh));
-  if (S.instAt < 0 && ir < vh * 0.7) S.instAt = S.t;
+  S.pB = prog(rs[0]); S.pS = prog(rs[1]); S.pA = prog(rs[2]); S.ch = ch;
+  S.sp = c01(st / Math.max(1, sh - vh));
+  if (S.instAt < 0 && rs[3].top < vh * 0.7) S.instAt = S.t;
   render();
 }
+function kick() { dirty = true; if (!running && !document.hidden) { running = true; last = performance.now() - 40; requestAnimationFrame(loop); } }
+['scroll', 'resize', 'pointermove', 'click', 'focusin', 'pointerover'].forEach(ev => addEventListener(ev, kick, { passive: true }));
+document.addEventListener('visibilitychange', kick);
 render();
-requestAnimationFrame(loop);
+kick();
 })();

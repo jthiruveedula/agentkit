@@ -1,0 +1,41 @@
+---
+description: Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard.
+trigger: model_decision
+---
+
+# Agentkit Audit
+
+Deterministic repo audit: `_agentkit-audit/scripts/audit.py` scores every skill and agent and
+the site, lists findings, and builds the agent/skill graph. The model
+narrates and fixes; it never invents numbers. Heuristics and weights are in
+`_agentkit-audit/reference/metrics.md`; narrative template in `_agentkit-audit/reference/persona.md`.
+
+## Procedure
+
+1. **Run the audit** and keep the report as the baseline:
+
+   ```
+   python3 skills/agentkit-audit/_agentkit-audit/scripts/audit.py --out /tmp/baseline.json
+   ```
+
+2. **Read findings**, not the whole report: group by `category`, look at
+   the lowest KPI first (APS is a harmonic mean, so it tracks the weakest).
+3. **Write the narrative**: three acts and KPI table from
+   `_agentkit-audit/reference/persona.md`, using only numbers from the report.
+4. **Apply fixes** to the named units (edit sources, not `dist/` or
+   `AGENTS.md`; then `python3 scripts/build.py`).
+5. **Re-run with the baseline** to get real deltas:
+
+   ```
+   python3 skills/agentkit-audit/_agentkit-audit/scripts/audit.py --baseline /tmp/baseline.json --out site/assets/audit.json
+   ```
+
+6. **Verify** with `python3 scripts/validate.py` and `python3 -m pytest`,
+   then open `site/audit/` to confirm the dashboard renders the new report.
+   Stop and report if validation fails; do not hand-edit audit.json.
+
+## Rules
+
+- Scores only from `audit.py`; if a number is missing, re-run.
+- Fix by category, highest APS gain per effort first.
+- Read only the units named in findings (targeted reads, no whole-repo dumps).

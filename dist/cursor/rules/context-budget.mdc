@@ -1,15 +1,11 @@
 ---
-description: Monitors the live Claude Code session's context size through hooks and pauses before it gets expensive — at a token budget the agent writes a checkpoint and asks for /compact or /clear, and the checkpoint is re-injected automatically on resume. Use when the user wants session token monitoring, automatic pause/resume, a context budget, or long autonomous runs that shouldn't silently balloon.
+description: Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs.
 alwaysApply: false
 ---
 
 # Context Budget
 
-Every turn re-reads the whole context, so cost grows with session length,
-not with the size of the latest question. In practice a few long sessions
-hold nearly all cache-read tokens (`token-saver/scripts/session_audit.py`
-shows your own numbers). This skill makes the length visible and turns it
-into a pause/resume loop instead of a silent balloon.
+Every turn re-reads the whole context, so cost grows with session length. This skill turns that into a pause/resume loop.
 
 ## Procedure
 
@@ -40,12 +36,4 @@ into a pause/resume loop instead of a silent balloon.
 
 ## Reference
 
-- `_context-budget/reference/design.md` — why these hook events, the state file, and the
-  failure-mode rules (never block, never crash the session).
-
-## Token economy
-
-- The hook reads only the last 512KB of the transcript and stays silent
-  below budget, so its own cost is near zero.
-- It warns once per step past the budget, not on every tool call.
-- General read/search/output patterns live in the `token-saver` skill.
+- `_context-budget/reference/design.md` — hook events, state file, failure-mode rules.

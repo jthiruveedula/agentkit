@@ -3,10 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<!-- style-src keeps 'unsafe-inline' because pages use inline <style> and style="" attributes; script-src is strict 'self' (no inline JS). Ceiling: CSS injection is not blocked. -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#06070a">
 <title>agentkit — one kit, every agent</title>
-<meta name="description" content="Install the same skills, subagents, and commands into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed.">
+<meta name="description" content="Install the same skills and subagents into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='%23c6ff3d'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +25,9 @@ a:hover{color:#ffffff}
 .copy-cmd:hover{background:rgba(255,255,255,0.04)}
 .after:hover{border-color:var(--acc);color:#ffffff}
 @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+#chapters{display:flex;min-width:0;flex:0 1 auto}
 @media (max-width:639px){#hud{display:none}}
+@media (max-width:479px){#chapters{display:none}}
 </style>
 </head>
 <body>
@@ -32,12 +37,13 @@ a:hover{color:#ffffff}
 
   <nav aria-label="Primary" style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;align-items:center;gap:6px;padding:6px 6px 6px 18px;border-radius:999px;background:rgba(14,16,20,0.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.09);max-width:calc(100% - 32px);box-sizing:border-box">
     <a href="#core" style="display:flex;align-items:center;gap:8px;font-family:Unbounded,sans-serif;font-weight:800;font-size:13px;letter-spacing:0.04em;margin-right:10px;white-space:nowrap"><span style="width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc)"></span>AGENTKIT</a>
-    <div id="chapters" style="display:flex;gap:2px;overflow-x:auto"></div>
-    <a class="gh" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener" style="padding:9px 16px;border-radius:999px;background:var(--acc);color:#06070a;font-size:12px;font-weight:600;white-space:nowrap">GitHub ↗</a>
+    <div id="chapters" style="gap:2px;overflow-x:auto"></div>
+    <a class="after" href="audit/" style="padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);font-size:12px;white-space:nowrap">Audit</a>
+    <a class="gh" href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener noreferrer" style="padding:9px 16px;border-radius:999px;background:var(--acc);color:#06070a;font-size:12px;font-weight:600;white-space:nowrap">GitHub ↗</a>
   </nav>
 
   <div id="hud">
-    <div aria-hidden="true" style="position:fixed;left:24px;bottom:20px;z-index:40;display:flex;gap:18px;font-size:10px;letter-spacing:0.14em;color:#5d636d">
+    <div aria-hidden="true" style="position:fixed;left:24px;bottom:20px;z-index:40;display:flex;gap:18px;font-size:10px;letter-spacing:0.14em;color:#8a909a">
       <span><span id="chN">00</span> / 04</span><span><span id="pct">00</span>%</span><span>T+<span id="up">00:00</span></span>
     </div>
     <div aria-hidden="true" id="ticks" style="position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:10px"></div>
@@ -52,7 +58,7 @@ a:hover{color:#ffffff}
 
   <main style="position:relative;z-index:1">
     <section id="core" style="position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:110px 24px 64px;box-sizing:border-box;gap:28px">
-      <a href="https://github.com/jthiruveedula/agentkit/tree/main/skills/ext-meta-muse" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);font-size:11px;letter-spacing:0.1em;color:#aab0ba">
+      <a href="https://github.com/jthiruveedula/agentkit/tree/main/skills/ext-meta-muse" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:10px;padding:6px 14px 6px 6px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);font-size:11px;letter-spacing:0.1em;color:#aab0ba">
         <span style="padding:3px 9px;border-radius:999px;background:var(--acc);color:#06070a;font-weight:600">NEW</span>META MUSE IMAGE GEN →
       </a>
       <div id="orbit" aria-hidden="true" style="position:relative;width:min(560px,82vw);aspect-ratio:1"></div>
@@ -83,9 +89,9 @@ a:hover{color:#ffffff}
           <span style="font-family:Unbounded,sans-serif;font-weight:300;font-size:clamp(24px,3vw,44px);letter-spacing:-0.02em">skills</span>
         </h2>
         <div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:8px;width:min(920px,100%)"></div>
-        <div aria-live="polite" style="height:64px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;max-width:620px">
+        <div style="height:64px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;max-width:620px">
           <span id="hotName" style="font-family:Unbounded,sans-serif;font-weight:500;font-size:18px">&nbsp;</span>
-          <span id="hotDesc" style="font-size:12px;line-height:1.5;color:#7d838d"></span>
+          <span id="hotDesc" aria-live="polite" style="font-size:12px;line-height:1.5;color:#7d838d"></span>
         </div>
       </div>
     </section>
@@ -113,7 +119,7 @@ a:hover{color:#ffffff}
       <div style="width:min(860px,100%);border-radius:18px;border:1px solid rgba(255,255,255,0.1);background:rgba(12,14,18,0.85);overflow:hidden;box-shadow:0 40px 120px -40px var(--acc)">
         <div style="display:flex;align-items:center;gap:6px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.08);flex-wrap:wrap">
           <div id="channels" style="display:contents"></div>
-          <span id="activeName" style="margin-left:auto;font-size:10px;letter-spacing:0.14em;color:#5d636d"></span>
+          <span id="activeName" style="margin-left:auto;font-size:10px;letter-spacing:0.14em;color:#8a909a"></span>
         </div>
         <div style="padding:36px 26px;min-height:120px;display:flex;align-items:center">
           <code style="font-family:inherit;font-size:clamp(14px,1.7vw,20px);line-height:1.6;white-space:pre-wrap;word-break:break-all"><span style="color:var(--acc)">$ </span><span id="typed"></span><span id="caret"></span></code>
@@ -123,9 +129,9 @@ a:hover{color:#ffffff}
       <div id="after" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px"></div>
     </section>
 
-    <footer style="padding:32px 24px 56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;letter-spacing:0.1em;color:#5d636d">
+    <footer style="padding:32px 24px 56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,0.08);font-size:11px;letter-spacing:0.1em;color:#8a909a">
       <span>© 2026 JAGADEESH THIRUVEEDULA · MIT · ZERO TELEMETRY</span>
-      <a href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener" style="color:var(--acc)">SOURCE ↗</a>
+      <a href="https://github.com/jthiruveedula/agentkit" target="_blank" rel="noopener noreferrer" style="color:var(--acc)">SOURCE ↗</a>
     </footer>
   </main>
 </div>

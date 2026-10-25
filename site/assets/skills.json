@@ -1,214 +1,220 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 35,
+  "count": 36,
   "skills": [
     {
+      "name": "agentkit-audit",
+      "description": "Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
       "name": "context-budget",
-      "description": "Monitors the live Claude Code session's context size through hooks and pauses before it gets expensive — at a token budget the agent writes a checkpoint and asks for /compact or /clear, and the checkpoint is re-injected automatically on resume. Use when the user wants session token monitoring, automatic pause/resume, a context budget, or long autonomous runs that shouldn't silently balloon.",
+      "description": "Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "context-compressor",
-      "description": "Keep long agent sessions useful under context pressure via disciplined summarization checkpoints — goal, decisions with reasons, current state, open threads, memory keys touched, each under 40 lines. Use when a session is getting long, before compaction or a risky multi-step run, at task boundaries, or before handing work off to another agent.",
+      "description": "Write short summarization checkpoints (goal, decisions+reasons, state, open threads, memory keys) to survive context pressure. Use when a session is long, before compaction or risky multi-step runs, at task boundaries, or before handoff.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "daily-standup",
-      "description": "Summarize what got done since the last standup — git commits, closed issues/PRs, and open threads — into a 3-line standup update (did/doing/blocked). Use when the user asks for a standup update, status report, or \"what did I do yesterday\".",
+      "description": "Summarize commits, closed issues/PRs and open threads since the last standup into 3 lines (did/doing/blocked). Use when the user asks for a standup update, status report, or \"what did I do yesterday\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "data-architect",
-      "description": "Multi-cloud/open-source data architecture decision-making — evaluates storage, compute, orchestration, and batch-vs-streaming trade-offs and records the decision as an ADR. Use when the user is choosing between data platform options (which warehouse, which orchestrator, streaming vs. batch, dbt vs. Spark), designing a new pipeline's architecture, or asks \"should I use X or Y\" for a data platform.",
+      "description": "Decide data platform trade-offs (storage, compute, orchestration, batch vs streaming) and record an ADR. Use when choosing a warehouse/orchestrator, streaming vs batch, dbt vs Spark, designing a pipeline architecture, or \"should I use X or Y\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "data-eng-router",
-      "description": "Auto-detects which cloud/platform a data engineering task belongs to (GCP, AWS, Azure, Databricks) and routes to that platform's wired external skill. Use when the user asks for help with a data pipeline, ETL/ELT, data warehouse, data lake, or any data engineering task — before reaching for general knowledge, check whether a vendor-authored skill already covers it.",
+      "description": "Detect the cloud/platform of a data engineering task (GCP, AWS, Azure, Databricks) and route to its ext-* skill. Use when asked for help with a data pipeline, ETL/ELT, warehouse, or data lake.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "data-quality-standards",
-      "description": "Applies schema, freshness, volume, idempotency, and PII-handling checks to a data pipeline before it ships. Use when the user is writing tests for a dbt model/pipeline, reviewing a data pipeline PR, or asks \"what checks should this have\".",
+      "description": "Apply schema, freshness, volume, idempotency and PII checks to a data pipeline before it ships. Use when writing tests for a dbt model/pipeline, reviewing a pipeline PR, or asked \"what checks should this have\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "debug-loop",
-      "description": "Run a tight hypothesize-test-narrow loop on a failing test or reproducible bug until root cause is found, logging each attempt. Use when the user has a failing test, stack trace, or reproducible crash and wants it root-caused, not just patched.",
+      "description": "Run a capped hypothesize-test-narrow loop on a failing test or reproducible bug to find root cause, not patch it. Use when the user has a failing test, stack trace, or reproducible crash.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "doc-standards",
-      "description": "Applies a consistent professional house style (colors, typography, table/chart formatting, layout) whenever generating or editing a Word, Excel, PDF, or PowerPoint document. Use when the user asks to create, format, or polish a docx, xlsx, pdf, or pptx file, or asks for a document to \"look professional\".",
+      "description": "Apply a consistent professional house style (palette, type, tables/charts, layout) to Word, Excel, PDF or PowerPoint files. Use when creating, formatting or polishing a docx/xlsx/pdf/pptx or when asked to \"look professional\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "frontend-motion-3d",
-      "description": "Picks the right stack for frontend UI, animation, and 3D work — CSS/Motion for UI transitions, GSAP + ScrollTrigger for timelines and scroll storytelling, three.js / React Three Fiber for 3D scenes, HyperFrames for rendered video — and ships it within a performance and accessibility budget (reduced motion, 60fps, LCP, WebGL fallback). Use when the user asks for animations, scroll effects, 3D scenes, WebGL, motion design, interactive hero sections, or a UI that should \"feel alive\".",
+      "description": "Pick the lightest stack for UI animation and 3D (CSS/Motion, GSAP+ScrollTrigger, three.js/R3F, HyperFrames) within a perf and a11y budget. Use when asked for animations, scroll effects, 3D/WebGL, motion design, interactive heroes.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "genai-engineering",
-      "description": "Builds and hardens LLM applications — RAG pipelines, tool-using agents, prompt/model selection, eval harnesses, guardrails, and cost/latency control (prompt caching, batching, model tiering). Use when the user is building or debugging a RAG system, an LLM feature, an agent, an eval set, or asks why an LLM app is slow, expensive, or hallucinating.",
+      "description": "Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "mcp-security-review",
-      "description": "Audits MCP server configuration for security risks before trusting it — unpinned packages, secrets in config, overbroad filesystem access, unauthenticated remote transports, and shell wrappers. Use when adding a new MCP server, reviewing an .mcp.json or claude_desktop_config.json, or before granting an agent access to a new tool source.",
+      "description": "Audit MCP server config for security risks: unpinned packages, secrets, broad filesystem access, unauthenticated remotes, shell wrappers. Use when adding an MCP server or reviewing .mcp.json or claude_desktop_config.json.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "meeting-to-actions",
-      "description": "Convert raw meeting notes or a transcript into a short list of action items with owners and dates. Use when the user pastes meeting notes, a transcript, or call summary and wants action items extracted.",
+      "description": "Convert meeting notes or a transcript into action items with owners and dates. Use when the user pastes meeting notes, a transcript or call summary and wants action items extracted.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "memory",
-      "description": "Durable local memory for agents — store and retrieve episodic observations, semantic facts, and correction records from a SQLite substrate instead of re-deriving them every session. Use when the user says \"remember this\", when you need a past decision, preference, or fix, before debugging (check known corrections first), or when memory-sync surfaces a pattern worth keeping.",
+      "description": "Durable local SQLite memory: store and search episodes, facts and corrections. Use when the user says \"remember this\", when you need a past decision, preference or fix, or before debugging (check corrections first).",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "memory-sync",
-      "description": "Mines recent session history for recurring agent mistakes or friction, ranks the repeated patterns, and writes durable corrections (memory files, CLAUDE.md, or skill fixes) so the same issue doesn't cost time again. Use when the user asks to do a retro on recent sessions, find recurring agent errors, or \"make agents faster/more productive\" based on past work.",
+      "description": "Mine recent session history for recurring agent mistakes, rank repeated patterns, and write durable corrections. Use when the user asks for a retro on recent sessions, recurring agent errors, or to make agents faster.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "ml-lifecycle",
-      "description": "Runs a classical/deep ML project through problem framing, leakage-safe data splits, baselines, experiment tracking, evaluation, model registry, serving, and drift monitoring. Use when the user is training or evaluating a model, setting up MLflow/W&B experiment tracking, building features, deploying a model to production, or asks why model performance dropped.",
+      "description": "Run an ML project from framing and leakage-safe splits through tracking, evaluation, registry, serving and drift monitoring. Use when training or evaluating a model, setting up MLflow/W&B, deploying a model, or when performance dropped.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "orchestrate",
-      "description": "Lead-agent persona that decomposes a multi-part goal into a written plan, decides whether fan-out is worth its token cost, delegates each task to the right roster subagent (in parallel where independent), verifies with external checks, and synthesizes one result. Use when a task spans several specialties (e.g. design + pipeline + tests + docs), when the user asks to \"orchestrate\", \"fan out\", \"plan and delegate\", or hands over a goal bigger than one focused change.",
+      "description": "Lead persona that plans a multi-part goal, fans independent tasks out to roster subagents, verifies, and synthesizes. Use when work spans several specialties, or user says \"orchestrate\", \"fan out\", \"plan and delegate\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "pipeline-scaffold",
-      "description": "Scaffolds a new dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion (bronze/silver/gold) naming and a test stub included. Use when the user asks to create a new data pipeline, model, DAG, asset, or Spark job and wants the boilerplate generated rather than hand-typed.",
+      "description": "Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub. Use when asked to create a new pipeline, model, DAG, asset, or Spark job boilerplate.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "pr-review",
-      "description": "Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when the user asks to review a PR, \"look at PR #N\", or check a branch before merge.",
+      "description": "Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when asked to review a PR, \"look at PR #N\", or check a branch before merge.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "prompt-enhancer",
-      "description": "Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it.",
+      "description": "Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "setup-guardian",
-      "description": "Setup-health guardian for this repo — checks dist/ freshness, install targets, skill counts, action SHA pins, the CI success-gate logic, external lock pins, and risky subprocess env= usage. Use when adding or changing a skill, touching install/build/workflows, verifying a repo setup, or scheduling a periodic repo health check.",
+      "description": "Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "skill-forge",
-      "description": "Scaffold a new compliant skill — canonical SKILL.md, reference/scripts/tests dirs, and a golden test stub — from a one-line description. Use when the user asks to create, scaffold, or add a new skill to this repo.",
+      "description": "Scaffolds a compliant new skill (SKILL.md, reference/scripts/tests, golden test stub) from a one-line description. Use when asked to create, scaffold, or add a new skill to this repo.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "smart-navigator",
-      "description": "Structure-first codebase reconnaissance — map an unfamiliar repo with manifests and a 2-level tree before reading any code, then trace entry points inward instead of reading file by file. Use when you land in an unknown codebase, need to find where something lives or what calls it, or are scoping before an implementation change.",
+      "description": "Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "spec-writer",
-      "description": "Turn a rough feature idea or bug report into a short written spec — problem, scope, non-goals, acceptance criteria — before code is written. Use when the user asks for a spec, design doc, or \"write this up before we build it\".",
+      "description": "Turns a rough feature idea or bug report into a short spec: problem, scope, non-goals, acceptance criteria, tasks. Use when asked for a spec, design doc, or \"write this up before we build it\".",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "token-saver",
-      "description": "Cut input-token burn for AI coding agents — search-before-read, targeted line ranges, diff-first workflows, batched tool calls, no re-reads, and terse output. Use when a session is burning too much context, when reads feel wasteful, or when a task involves many files/logs/shell output.",
+      "description": "Cuts input-token burn: search before read, line ranges, diff-first, batched calls, no re-reads, terse output. Use when a session burns context, reads feel wasteful, or a task spans many files/logs/shell output.",
       "version": "0.1.0",
       "kind": "native"
     },
     {
       "name": "ext-aws",
-      "description": "Route AWS tasks to the pinned aws-samples/sample-agent-skills and zxkane/aws-skills collections. Use when the user asks for AWS-specific help (Lambda, S3, IAM, CDK, etc.) and wants vendor- or community-authored skill guidance.",
+      "description": "Route AWS tasks to pinned aws-samples/sample-agent-skills and zxkane/aws-skills. Use when the user wants AWS-specific help (Lambda, S3, IAM, CDK) from vendor or community skills.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-azure",
-      "description": "Route Azure tasks to the pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills collections. Use when the user asks for Azure-specific help (App Service, Functions, AKS, Entra ID, etc.) and wants Microsoft-authored skill guidance.",
+      "description": "Route Azure tasks to pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills. Use when the user wants Azure-specific help (App Service, Functions, AKS, Entra ID) from Microsoft-authored skills.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-cli-ops",
-      "description": "Wires jfrog/boost's shell-output compression into whichever coding agent is running, so noisy CLI output (test/build/lint/log dumps) stops filling the context window. Use when the user asks to save tokens on CLI/shell output, mentions jfrog Boost by name, or when a session is running many verbose shell commands and the user wants that noise cut.",
+      "description": "Wire jfrog/boost shell-output compression into the running coding agent. Use when the user wants to save tokens on CLI/shell output, names jfrog Boost, or verbose commands are flooding context.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-codegraph",
-      "description": "Bootstrap the pinned colbymchenry/codegraph CLI for fast codebase reads (symbol search, call paths, blast radius) instead of raw grep. Use when the user asks to understand, navigate, or answer questions about a codebase and CodeGraph isn't already installed/available.",
+      "description": "Bootstrap the pinned colbymchenry/codegraph CLI for symbol search, call paths and blast radius. Use when the user wants to understand or navigate a codebase and CodeGraph isn't installed.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-databricks",
-      "description": "Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user asks for Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake, etc.) and wants vendor-authored skill guidance.",
+      "description": "Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user wants Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake) from vendor skills.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-diagrams",
-      "description": "Route diagram/architecture-visualization requests to the pinned cathrynlavery/diagram-design skill. Use when the user asks to draw an architecture diagram, flowchart, sequence diagram, or system diagram and wants the external diagram-design skill's recipes.",
+      "description": "Route diagram requests to the pinned cathrynlavery/diagram-design skill. Use when the user wants an architecture diagram, flowchart, sequence or system diagram from the external diagram-design recipes.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-gap-discovery",
-      "description": "Search the pinned VoltAgent/awesome-agent-skills index to find an existing skill before building a new one from scratch. Use when the user wants a capability this repo doesn't have yet and asks to check what already exists before authoring it.",
+      "description": "Search the pinned VoltAgent/awesome-agent-skills index for an existing skill. Use when the user wants a capability this repo lacks and asks what already exists before authoring a new skill.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-gcp",
-      "description": "Route Google Cloud Platform tasks to the pinned google/skills collection. Use when the user asks for GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM, etc.) and wants vendor-authored skill guidance rather than general knowledge.",
+      "description": "Route Google Cloud tasks to the pinned google/skills collection. Use when the user wants GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM) from vendor skills.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-meta-muse",
-      "description": "Wire Meta Muse image generation (generate, edit, iterate) into the coding agent through the pinned muse-image-mcp server and the Meta Model API. Use when the user asks for Meta Muse, Muse image generation, or wants AI-generated images/assets (hero art, textures, mockups) from Meta's model inside Claude Code, Cursor, or Claude Desktop.",
+      "description": "Wire Meta Muse image generation (generate, edit, iterate) into the agent via the pinned muse-image-mcp server. Use when the user asks for Meta Muse or AI-generated images/assets (hero art, textures, mockups).",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-systems-design",
-      "description": "Route system design and scalability questions to the pinned anthropics/skills and ashishps1/awesome-system-design-resources sources. Use when actively making a system design decision (architecture, scaling, DB/cache/queue trade-offs, CAP, sharding) and want deeper reference material than general knowledge.",
+      "description": "Route system design questions to pinned anthropics/skills and awesome-system-design-resources. Use when making an architecture, scaling, DB/cache/queue, CAP or sharding decision and wanting deeper references.",
       "version": "0.1.0",
       "kind": "router"
     },
     {
       "name": "ext-ui-ux",
-      "description": "Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill skill. Use when the user wants UI/UX design work and specifically asks for the external ui-ux-pro-max toolkit rather than this repo's own design approach.",
+      "description": "Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill. Use when the user names the ui-ux-pro-max toolkit explicitly; otherwise prefer this repo's hallmark design work.",
       "version": "0.1.0",
       "kind": "router"
     }

@@ -1,17 +1,13 @@
 ---
 name: data-eng-router
-description: Auto-detects which cloud/platform a data engineering task belongs to (GCP, AWS, Azure, Databricks) and routes to that platform's wired external skill. Use when the user asks for help with a data pipeline, ETL/ELT, data warehouse, data lake, or any data engineering task — before reaching for general knowledge, check whether a vendor-authored skill already covers it.
+description: Detect the cloud/platform of a data engineering task (GCP, AWS, Azure, Databricks) and route to its ext-* skill. Use when asked for help with a data pipeline, ETL/ELT, warehouse, or data lake.
 allowed-tools: Bash, Read
 version: 0.1.0
 ---
 
 # Data Engineering Router
 
-Data engineering tasks are usually platform-specific even when the request
-isn't — "load this into the warehouse" means something different on
-BigQuery than on Redshift. This skill picks the platform from the task's
-own vocabulary and hands off to the matching `ext-*` skill instead of
-answering from general knowledge alone.
+Picks the platform from the task's vocabulary and hands off to the matching `ext-*` skill instead of answering from general knowledge.
 
 ## Procedure
 
@@ -51,14 +47,3 @@ answering from general knowledge alone.
   cases in `tests/golden.json`.
 - `tests/golden.json` — 14 golden platform-classification fixtures; add a
   case here before hand-tuning a classifier weight.
-
-## Token economy
-
-- One cheap `classify.py` run routes to the right platform skill; loading
-  the wrong vendor skill first and backtracking costs more than the
-  routing step.
-- Don't hand-classify by vibes when the classifier exists — run it.
-- For genuinely platform-agnostic questions, answer directly; forcing a
-  route burns a routing step plus a full skill load for nothing.
-- General read/search/output patterns live in the `token-saver` skill —
-  don't duplicate them here.

@@ -1,6 +1,6 @@
 ---
 name: token-saver
-description: Cut input-token burn for AI coding agents — search-before-read, targeted line ranges, diff-first workflows, batched tool calls, no re-reads, and terse output. Use when a session is burning too much context, when reads feel wasteful, or when a task involves many files/logs/shell output.
+description: Cuts input-token burn: search before read, line ranges, diff-first, batched calls, no re-reads, terse output. Use when a session burns context, reads feel wasteful, or a task spans many files/logs/shell output.
 allowed-tools: Bash, Read
 version: 0.1.0
 ---
@@ -58,9 +58,9 @@ same bytes twice, and keep outputs small. See
    { read A; read B; read C; }
    ```
 
-6. **Don't re-read.** Cache file contents in session notes or a
-   memory file after first read. Re-read only after you (or a tool)
-   edited the file. If a long output must be referenced again, save
+6. **Don't re-read.** Record conclusions and `path:line` refs in
+   session notes, not file contents. Re-read the narrow range only after
+   an edit. If a long output must be referenced again, save
    it to `/tmp` and `grep` the file instead of re-running the command.
 
 7. **Compact outputs.** Request terse output from tools
@@ -90,10 +90,6 @@ same bytes twice, and keep outputs small. See
 - **Output diet in responses.** Terse by default: confirm actions in
   one line, show only deltas, link files instead of pasting them.
 
-
 ## Token economy
 
-- One-off need? Skip the skill entirely: `python3 scripts/estimate.py --budget <n> <files>` tells you whether the read fits.
-- Don't read `reference/patterns.md` whole — jump to the one section matching your task.
-- Batch independent searches/reads in one call; never sequential round-trips.
-- This skill is the canonical read/search/output reference other skills point at — keep it tight, don't duplicate this section anywhere else.
+One-off need? Skip the skill: `python3 scripts/estimate.py --budget <n> <files>`. Jump to the one matching section of `reference/patterns.md`. This skill is the canonical read/search/output reference other skills point at.

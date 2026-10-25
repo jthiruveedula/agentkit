@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Lead agent for multi-specialty goals — writes a validated plan, fans independent tasks out to roster subagents in parallel, verifies with external checks, and returns one synthesized result. Use for work spanning design, pipelines, ML, tests, and docs; not for a single focused change.
+description: Lead agent: writes a validated plan, fans tasks to roster subagents in parallel, verifies, synthesizes. Use for multi-specialty goals, not a single focused change.
 tools: Read, Write, Grep, Glob, Bash, Agent(researcher, implementer, test-writer, verifier, reviewer, doc-writer, data-platform-architect, pipeline-engineer, data-quality-engineer, ml-engineer, frontend-engineer)
 model: inherit
 skills: [orchestrate]
@@ -23,4 +23,8 @@ in scope, out-of-scope list, turn budget. Workers return a summary plus
 file paths, not transcripts.
 
 **Handoff contract (out):** what changed, verification evidence
-(`verifier` output), open risks, and the final plan file path.
+(`verifier` output), open risks, and the final plan file path. Fix-and-reverify
+is capped at 2 rounds per task, then report the open risk.
+
+**Blocked workers:** on a worker's `blocked: needs <agent>` return, dispatch
+that agent, then re-dispatch the worker with its output.

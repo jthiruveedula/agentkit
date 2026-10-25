@@ -36,6 +36,18 @@ def _stem(word):
     return word
 
 
+SECRET = re.compile(
+    r"(?i)\b(?:sk-[a-z0-9_-]{8,}|gh[pousr]_[a-z0-9]{16,}|AKIA[0-9A-Z]{12,}|xox[a-z]-[a-z0-9-]{8,}"
+    r"|eyJ[a-z0-9_-]{10,}\.[a-z0-9_.-]+|bearer\s+\S{12,})"
+    r"|(?i:(?:token|secret|password|passwd|api[_-]?key)\s*[=:]\s*\S+)"
+)
+
+
+def redact(line):
+    """Mask likely secrets so they never reach incident lines or memory."""
+    return SECRET.sub("[REDACTED]", line)
+
+
 def tokens(line):
     words = re.findall(r"[a-z0-9']+", line.lower())
     return {_stem(w) for w in words if w not in STOPWORDS and len(w) > 2}
@@ -46,7 +58,7 @@ def cluster(lines, min_shared=2, min_count=2):
     shares >= min_shared significant words with, else starts a new one."""
     clusters = []  # list of {"tokens": set, "lines": [line, ...]}
     for line in lines:
-        line = line.strip()
+        line = redact(line.strip())
         if not line:
             continue
         t = tokens(line)
@@ -81,6 +93,8 @@ def selftest():
     assert len(patterns) == 2, patterns
     assert patterns[0]["count"] == 3, patterns[0]
     assert patterns[1]["count"] == 2, patterns[1]
+    out = cluster(["x token=abc123 wrong flag", "y ghp_" + "a" * 20 + " wrong flag"])
+    assert "abc123" not in str(out) and "ghp_" not in str(out), out
     print("2/2 selftest clusters found correctly")
     return 0
 
