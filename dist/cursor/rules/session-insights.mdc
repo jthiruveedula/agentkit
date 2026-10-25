@@ -1,5 +1,5 @@
 ---
-description: Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or "what am I doing wrong / what should I automate".
+description: Prompt analytics and friction report over past Claude Code sessions (vague prompts, corrections, tool errors, cost per intent, repeated prompts) with ranked fixes, an HTML dashboard and drafted slash commands. Use when the user wants prompt analytics, a session retro, or to know what to automate.
 alwaysApply: false
 ---
 

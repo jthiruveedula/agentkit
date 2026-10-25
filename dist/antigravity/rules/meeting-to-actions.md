@@ -5,6 +5,8 @@ trigger: model_decision
 
 # Meeting to Actions
 
+## Procedure
+
 1. Read the notes fully first; late action items often reference earlier context.
 2. Extract only items that are actual commitments ("I'll do X", "let's
    have Y send Z") — not general discussion points or FYIs.
@@ -13,6 +15,7 @@ trigger: model_decision
 4. If an item has no clear owner, mark it `@unassigned` rather than
    guessing who it falls to.
 5. No summary paragraph above or below the list unless asked.
+6. Verify every line matches the `- [ ] ... — @owner — date` format; if not, fix and re-check until all do.
 
 ## Token economy
 

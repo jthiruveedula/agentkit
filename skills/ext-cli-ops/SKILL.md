@@ -38,7 +38,7 @@ contents). Never install silently.
    boost init --claude --accept-terms   # only with explicit user OK
    ```
    Takes effect next session/reload; don't claim it's live now.
-4. Verify: `boost version`, `boost report -t`
+4. Verify: `boost version`, `boost report -t`; if either fails, fix the wiring and re-run until both pass.
 5. Rollback if asked: `boost init --claude --uninstall`
 
 `./install.sh --with-boost` runs steps 2-3 for Claude Code and needs the

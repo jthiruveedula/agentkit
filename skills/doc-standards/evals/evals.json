@@ -1,0 +1,28 @@
+[
+  {
+    "query": "Make this quarterly report Word doc look professional.",
+    "files": [],
+    "expected_behavior": [
+      "Loads the docx skill for file mechanics first",
+      "Applies house style from reference/house-style.md (palette, typography, table formatting)",
+      "Ends with a one-line statement of the palette/font applied"
+    ]
+  },
+  {
+    "query": "Format my budget spreadsheet professionally.",
+    "files": [],
+    "expected_behavior": [
+      "Uses the xlsx skill as the base",
+      "Applies house style in one pass including header row and accessibility"
+    ]
+  },
+  {
+    "query": "Add a revenue chart to the deck; I haven't got the numbers yet but make it look real.",
+    "files": [],
+    "expected_behavior": [
+      "Does not fabricate numbers",
+      "Asks for data or leaves a clearly labeled placeholder",
+      "Still applies house style to the chart"
+    ]
+  }
+]

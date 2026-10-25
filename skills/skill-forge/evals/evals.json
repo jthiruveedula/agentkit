@@ -1,0 +1,29 @@
+[
+  {
+    "query": "Create a new skill called log-triage that summarizes noisy CI logs.",
+    "files": [],
+    "expected_behavior": [
+      "Confirms the kebab-case name and description with Use when trigger",
+      "Runs python3 scripts/scaffold.py with the name and description",
+      "Runs python3 scripts/validate.py from the repo root",
+      "Runs scripts/build.py rather than hand-editing dist/"
+    ]
+  },
+  {
+    "query": "Scaffold a skill called Log_Triage.",
+    "files": [],
+    "expected_behavior": [
+      "Flags that the name is not kebab-case and asks for or proposes a valid one before scaffolding",
+      "Does not run the scaffolder with the invalid name"
+    ]
+  },
+  {
+    "query": "Add a skill named debug-loop that does X.",
+    "files": [],
+    "expected_behavior": [
+      "Notes that the scaffolder refuses because the skill already exists",
+      "Does not overwrite the existing skill directory",
+      "Proposes a different name or editing the existing skill"
+    ]
+  }
+]

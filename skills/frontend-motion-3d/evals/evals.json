@@ -1,0 +1,30 @@
+[
+  {
+    "query": "Add a fade-in on scroll to my landing page sections. The project already uses GSAP.",
+    "files": [],
+    "expected_behavior": [
+      "Detects GSAP in package.json and does not add a second animation library",
+      "Picks gsap-scrolltrigger or CSS scroll-driven animation as the lightest fit",
+      "Honors prefers-reduced-motion with a reduced fade fallback",
+      "Animates only transform and opacity"
+    ]
+  },
+  {
+    "query": "Build a 3D product viewer in our React app.",
+    "files": [],
+    "expected_behavior": [
+      "Chooses three.js via React Three Fiber and drei",
+      "Lazy-loads the 3D bundle and caps devicePixelRatio at 2",
+      "Provides a static poster fallback when WebGL is unavailable",
+      "Disposes geometries, materials, textures and renderer on unmount"
+    ]
+  },
+  {
+    "query": "Copy the hero animation code from competitor.com exactly.",
+    "files": [],
+    "expected_behavior": [
+      "Uses ext-rea to inspect how the effect is built",
+      "Reimplements the effect and refuses to copy the site's code or assets"
+    ]
+  }
+]

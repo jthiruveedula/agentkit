@@ -31,6 +31,7 @@ doesn't match the business goal. Guard those first, tune last.
    feature schema, and metrics; serving uses the same feature code as
    training (no train/serve skew). Batch scoring before real-time unless
    latency needs it.
+   Verify: re-run training and serving on a sample and check predictions match; if they differ, fix the feature code and re-run until they match.
 
 6. **Monitor.** Input drift, prediction drift, and — when labels arrive —
    performance by slice, with an alert threshold and a retrain trigger.

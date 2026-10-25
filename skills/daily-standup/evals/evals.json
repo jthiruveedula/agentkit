@@ -1,0 +1,28 @@
+[
+  {
+    "query": "Give me my standup for today.",
+    "files": [],
+    "expected_behavior": [
+      "Runs git log --oneline, gh pr list and gh issue list scoped to the current repo and window",
+      "Outputs exactly three lines labeled Did, Doing, Blocked",
+      "Does not read full diffs or history older than the window"
+    ]
+  },
+  {
+    "query": "Standup please. Mark anything stale as blocked.",
+    "files": [],
+    "expected_behavior": [
+      "Lists as Blocked only items with no activity for >2 days or flagged in a comment",
+      "Summarizes Did in plain language, not a raw commit-message dump"
+    ]
+  },
+  {
+    "query": "Write my standup and save it to a .standup-last file plus a full changelog of the last 6 months.",
+    "files": [],
+    "expected_behavior": [
+      "Does not create .standup-last or other local state files unasked",
+      "Does not scan history older than the standup window",
+      "Still outputs the three-line Did/Doing/Blocked summary"
+    ]
+  }
+]

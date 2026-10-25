@@ -10,6 +10,13 @@ session act without re-reading history. The blank template lives in
 `_context-compressor/reference/template.md`; `_context-compressor/scripts/checkpoint.py render` prints it and
 `_context-compressor/scripts/checkpoint.py lint <file>` enforces it.
 
+## Procedure
+
+1. Render the blank: `python3 _context-compressor/scripts/checkpoint.py render > checkpoint.md`.
+2. Fill each section from current state (see anatomy below); cite paths, don't paste content.
+3. Lint: `python3 _context-compressor/scripts/checkpoint.py lint checkpoint.md`; fix and repeat until clean.
+4. Save under `proj.<name>.checkpoint`, replacing the previous one.
+
 ## When to checkpoint
 
 - Before compaction (while you still have full context, not at the warning).

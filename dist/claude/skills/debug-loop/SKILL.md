@@ -7,6 +7,8 @@ version: 0.1.0
 
 # Debug Loop
 
+## Procedure
+
 0. Check the substrate first. Before hypothesizing, search the `memory`
    skill for known corrections matching the failure — someone (possibly
    you, last month) may have already root-caused this exact mistake:
@@ -31,3 +33,4 @@ version: 0.1.0
    rule — one guard in the shared function beats N guards in callers.
 4. Fix, then re-run the original repro plus the existing test suite. Report
    root cause in one sentence, not a beat-by-beat retelling of the loop.
+5. Verify the fix: check the repro and test suite both pass; if either fails, return to step 2 and re-run until they pass.

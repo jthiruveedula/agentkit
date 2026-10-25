@@ -43,7 +43,7 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | `pipeline-scaffold` | 0.1.0 | Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub. Use when asked to create a new pipeline, model, DAG, asset, or Spark job boilerplate. |
 | `pr-review` | 0.1.0 | Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when asked to review a PR, "look at PR #N", or check a branch before merge. |
 | `prompt-enhancer` | 0.1.0 | Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up. |
-| `session-insights` | 0.2.0 | Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or "what am I doing wrong / what should I automate". |
+| `session-insights` | 0.2.0 | Prompt analytics and friction report over past Claude Code sessions (vague prompts, corrections, tool errors, cost per intent, repeated prompts) with ranked fixes, an HTML dashboard and drafted slash commands. Use when the user wants prompt analytics, a session retro, or to know what to automate. |
 | `setup-guardian` | 0.1.0 | Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check. |
 | `skill-forge` | 0.1.0 | Scaffolds a compliant new skill (SKILL.md, reference/scripts/tests, golden test stub) from a one-line description. Use when asked to create, scaffold, or add a new skill to this repo. |
 | `smart-navigator` | 0.1.0 | Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change. |
@@ -55,16 +55,16 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | Agent | Charter |
 |---|---|
 | `data-platform-architect` | Decides data platform architecture (storage, compute, orchestration, batch vs streaming) and records ADRs; writes no pipeline code. Use when choosing a warehouse, orchestrator, or streaming approach. |
-| `data-quality-engineer` | Adds schema, freshness, volume, idempotency, and PII checks to a data pipeline for the risks flagged. Use before a pipeline ships. |
-| `doc-writer` | Updates README/CHANGELOG/reference docs to match a completed change; never edits source. Use after a change that alters user-facing behavior. |
+| `data-quality-engineer` | Adds schema, freshness, volume, idempotency, and PII checks to a data pipeline for the risks flagged. Use when a pipeline is about to ship. |
+| `doc-writer` | Updates README/CHANGELOG/reference docs to match a completed change; never edits source. Use when a completed change alters user-facing behavior. |
 | `frontend-engineer` | Builds UI, motion (CSS, Motion, GSAP), and 3D (three.js/R3F) within a performance and a11y budget. Use for animation, scroll effects, WebGL, or interactive UI work. |
 | `implementer` | Makes code changes from a spec or researcher findings, scoped to the named files. Use when the change is already scoped with acceptance criteria. |
 | `ml-engineer` | Implements ML and GenAI work (training/eval, RAG, LLM calls, eval harnesses) against a named metric. Use for model, RAG, agent, or LLM-cost tasks. |
 | `orchestrator` | Lead agent: writes a validated plan, fans tasks to roster subagents in parallel, verifies, synthesizes. Use for multi-specialty goals, not a single focused change. |
 | `pipeline-engineer` | Implements a dbt model, Airflow DAG, Dagster asset, or PySpark job from an already-decided architecture. Use when the ADR exists and transform logic is needed. |
 | `researcher` | Read-only investigation: locates code, gathers facts, compares options; cites file:line or URL. Use when you need facts before any edit. |
-| `reviewer` | Reviews a diff/PR for correctness bugs and scope creep; read-only, reports findings only. Use after implementation, before merge. |
-| `test-writer` | Writes the smallest test that fails if the logic under test breaks. Use for coverage gaps implementer flagged. |
+| `reviewer` | Reviews a diff/PR for correctness bugs and scope creep; read-only, reports findings only. Use when a diff is ready for review, after implementation and before merge. |
+| `test-writer` | Writes the smallest test that fails if the logic under test breaks. Use when `implementer` flags coverage gaps. |
 | `verifier` | Runs external checks only (tests, linters, type checkers, build) and reports pass/fail with decisive output; never edits files. Use to prove a change works. |
 
 ## Tool coverage

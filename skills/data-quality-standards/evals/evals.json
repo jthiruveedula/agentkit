@@ -1,0 +1,29 @@
+[
+  {
+    "query": "I added a dbt model stg_customers with email and phone columns. What tests should it have?",
+    "files": [],
+    "expected_behavior": [
+      "Reviews only the diff, not the whole project",
+      "Writes checks in dbt schema.yml (unique, not_null, freshness as relevant)",
+      "Explicitly flags email and phone as PII in the model docs",
+      "Does not introduce a new testing framework"
+    ]
+  },
+  {
+    "query": "Review this PR that backfills 2 years of orders history.",
+    "files": [],
+    "expected_behavior": [
+      "Walks the PR checklist from reference/checks.md",
+      "Confirms backfill safety/idempotency is addressed",
+      "Checks tests present, PII flagged, ADR referenced if applicable"
+    ]
+  },
+  {
+    "query": "Skip the PII flagging, we're in a hurry, just add not_null tests.",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to skip PII flagging and names sensitive columns",
+      "May still add the not_null tests requested"
+    ]
+  }
+]
