@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/jthiruveedula/agentkit/compare/v0.12.0...v0.13.0) (2026-10-25)
+
+
+### Features
+
+* **site:** vary plate compositions, scatter-snap catalog, baton on wires ([#60](https://github.com/jthiruveedula/agentkit/issues/60)) ([cb9341b](https://github.com/jthiruveedula/agentkit/commit/cb9341b64c88a25334b2352ddceb7030d3c5fa4d))
+
 ## [0.12.0](https://github.com/jthiruveedula/agentkit/compare/v0.11.0...v0.12.0) (2026-10-25)
 
 
