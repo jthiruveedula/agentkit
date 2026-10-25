@@ -1,305 +1,273 @@
-// agentkit launch site — one rAF loop (~30fps), scroll-driven chapters.
-// Motion maths ported 1:1 from the v3 design prototype.
+// agentkit field manual. One scroll engine: write --p per stage, CSS does the rest.
+// The request dot (#baton) hops between real content anchors by scroll position.
 (() => {
 'use strict';
 
-const CLONE = 'git clone https://github.com/jthiruveedula/agentkit.git ~/agentkit && cd ~/agentkit && ./install.sh';
+const CLONE = 'git clone https://github.com/jthiruveedula/agentkit.git ~/agentkit && cd ~/agentkit && ';
 const CHANNELS = [
-  { label: 'sh', name: 'MACOS / LINUX', cmd: CLONE },
-  { label: 'ps1', name: 'WINDOWS', cmd: 'git clone https://github.com/jthiruveedula/agentkit.git $HOME\\agentkit\ncd $HOME\\agentkit; .\\install.ps1' },
-  { label: 'npx', name: 'NODE', cmd: 'npx github:jthiruveedula/agentkit' },
-  { label: 'uvx', name: 'PYTHON', cmd: 'uvx --from git+https://github.com/jthiruveedula/agentkit agentkit' },
-  { label: 'make', name: 'MAKE', cmd: 'git clone https://github.com/jthiruveedula/agentkit.git ~/agentkit && cd ~/agentkit && make install' },
+  CLONE + './install.sh',
+  'git clone https://github.com/jthiruveedula/agentkit.git $HOME\\agentkit\ncd $HOME\\agentkit; .\\install.ps1',
+  'npx github:jthiruveedula/agentkit',
+  'uvx --from git+https://github.com/jthiruveedula/agentkit agentkit',
+  CLONE + 'make install',
 ];
-const AFTER = ['./install.sh version', './install.sh upgrade', './install.sh --with-external'];
-const TARGETS = [
-  { name: 'Claude Code', href: '#logo-claude', vb: '0 0 24 24' },
-  { name: 'Copilot', href: '#logo-copilot', vb: '0 0 24 24' },
-  { name: 'Cursor', href: '#logo-cursor', vb: '0 0 24 24' },
-  { name: 'Antigravity', href: '#logo-antigravity', vb: '0 0 115 113' },
-];
-const AGENTS = [
-  { name: 'researcher', description: 'Read-only investigation. Never edits files.', tools: ['Read', 'Grep', 'Glob', 'Bash', 'WebFetch'] },
-  { name: 'implementer', description: 'Makes the code changes from a spec or findings.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'] },
-  { name: 'reviewer', description: 'Finds correctness bugs and scope creep. No fixes.', tools: ['Read', 'Grep', 'Bash'] },
-  { name: 'test-writer', description: 'The smallest test that fails if the logic breaks.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Bash'] },
-  { name: 'verifier', description: 'Runs external checks only and reports pass/fail.', tools: ['Read', 'Grep', 'Glob', 'Bash'] },
-  { name: 'doc-writer', description: 'Keeps docs truthful to the code. Never edits source.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Glob'] },
-  { name: 'data-platform-architect', description: 'Decides the data platform and records it as an ADR.', tools: ['Read', 'Grep', 'Glob', 'Bash', 'Write'] },
-  { name: 'pipeline-engineer', description: 'Builds dbt, Airflow, Dagster or Spark units from a decided ADR.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'] },
-  { name: 'data-quality-engineer', description: 'Schema, freshness, volume, idempotency and PII checks.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Bash'] },
-  { name: 'ml-engineer', description: 'ML and GenAI work, judged against a named metric.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'] },
-  { name: 'frontend-engineer', description: 'UI, motion and 3D within a performance budget.', tools: ['Read', 'Edit', 'Write', 'Grep', 'Glob', 'Bash'] },
-];
-const CHAP = [['Build', '#build'], ['Skills', '#skills'], ['Agents', '#agents'], ['Install', '#install']];
-const PALETTE = { lime: '#c6ff3d', ultraviolet: '#9d7bff', solar: '#ff7a2f', ice: '#5ee7ff' };
-const TEMPO = { still: 0, calm: 0.45, live: 1, overdrive: 2.2 };
-const pad = n => String(n).padStart(2, '0');
-const c01 = x => Math.min(1, Math.max(0, x));
-const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-const lerp = (a, b, e) => a + (b - a) * e;
-const ACC = 'var(--acc, #c6ff3d)';
-const hash = x => { const s = Math.sin(x * 127.1 + 3.7) * 43758.5453; return s - Math.floor(s); };
-const GLY = '<>/\\[]{}=+*#01_';
 const SPOTLIGHT = 'ext-meta-muse';
-const CODE = ['---', 'name: orchestrate', 'kind: native', 'version: 0.1.0', '---', '# plan → fan out → verify'];
 
-// ?accent=ultraviolet|solar|ice, ?tempo=calm|overdrive, ?hud=0
-const q = new URLSearchParams(location.search);
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const accent = PALETTE[q.get('accent')] || PALETTE.lime;
-const tempo = reduce ? 'still' : (q.get('tempo') in TEMPO ? q.get('tempo') : 'live');
-const hud = q.get('hud') !== '0';
-
-// --- tiny DOM helpers: cached writes so unchanged values never touch the DOM
 const $ = id => document.getElementById(id);
-const UNITLESS = { opacity: 1, zIndex: 1, strokeDasharray: 1, strokeDashoffset: 1 };
-function css(el, o) {
+const all = s => [...document.querySelectorAll(s)];
+const clamp = x => Math.min(1, Math.max(0, x));
+const root = document.documentElement;
+const q = new URLSearchParams(location.search), tp = q.get('tempo');
+const tempo = +{ calm: .6, live: 1, overdrive: 1.6 }[tp] || 1;
+const acc = { proof: '#D1242F', ink: 'var(--ink)' }[q.get('accent')];
+if (typeof acc === 'string') root.style.setProperty('--reg', acc);
+root.style.setProperty('--tempo', tp === 'still' ? 0 : tempo);
+if (q.get('hud') === '0') $('tb').hidden = true;
+const mq = matchMedia('(prefers-reduced-motion: reduce)');
+// small, short or zoomed viewports get the flat manual (the pinned plates need the room)
+const film = () => !mq.matches && tp !== 'still' && innerWidth >= 900 && innerHeight >= 560;
+const mo = film(), w0 = innerWidth;
+mq.addEventListener('change', () => location.reload());
+if (mo) root.classList.add('mo');
+function set(el, k, v) {
   const c = el._c || (el._c = {});
-  for (const k in o) {
-    let v = o[k];
-    v = typeof v === 'number' && !UNITLESS[k] ? v + 'px' : String(v);
-    if (c[k] !== v) { c[k] = v; el.style.setProperty(k.replace(/[A-Z]/g, m => '-' + m.toLowerCase()), v); }
+  v = String(v);
+  if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); }
+}
+function txt(el, s) { s = String(s); if (el._t !== s) { el._t = s; el.textContent = s; } }
+function mk(tag, parent, text, cls) {
+  const el = document.createElement(tag);
+  if (text != null) el.textContent = text;
+  if (cls) el.className = cls;
+  parent.appendChild(el);
+  return el;
+}
+function reel(host, n, dot) {
+  host.textContent = '';
+  const r = [];
+  for (let k = 0; k < n; k++) {
+    if (dot && k === n - 1) mk('span', host, '.');
+    const s = mk('b', mk('span', host, null, 'rl'));
+    for (let d = 0; d < 11; d++) mk('i', s, d % 10);
+    r.push(s);
   }
+  return r;
 }
-function txt(el, s) { if (el._t !== s) { el._t = s; el.textContent = s; } }
-function attr(el, k, v) { v = String(v); if (el.getAttribute(k) !== v) el.setAttribute(k, v); }
-function mk(tag, parent, text) { const el = document.createElement(tag); if (text) el.textContent = text; parent.appendChild(el); return el; }
-const SVGNS = 'http://www.w3.org/2000/svg';
-function mkSvg(tag, parent, attrs) { const el = document.createElementNS(SVGNS, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); parent.appendChild(el); return el; }
-function logo(parent, tg, size) {
-  const s = mkSvg('svg', parent, { viewBox: tg.vb, width: size, height: size, 'aria-hidden': 'true' });
-  s.style.color = '#eceef2'; mkSvg('use', s, { href: tg.href });
+const spin = (r, n) => r.forEach((s, k) => {
+  const p = r.length - 1 - k;
+  set(s, '--v', (Math.floor(n / 10 ** p) % 10 + (p ? Math.max(0, (n / 10 ** (p - 1)) % 10 - 9) : n % 1)).toFixed(2));
+});
+
+const S = { total: 0, ap: 0, au: null, cu: 0, reel: null };
+const ST = all('.stage').map(el => ({ el, t: 0, h: 0, p: 0 }));
+const T = all('.term').map(t => [t.lastElementChild, +t.style.getPropertyValue('--s'), +t.style.getPropertyValue('--d')]);
+const slips = $('slips'), baton = $('baton'), plates = all('#plates a'), ro = $('readout');
+const cnt = reel($('cnt'), 2);
+let vh = 0, dh = 0, W = [], Q = [], CP = [0, 0], N4 = [0, 0, 0], raf = 0, cur = -1, ty = 0;
+function c(el) {
+  let x = el.offsetWidth / 2, y = el.offsetHeight / 2;
+  for (let e = el; e && !e.classList.contains('frame'); e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+  return [x, y];
 }
+const P = v => () => v;
+const fix = el => P(c(el));
+// scroll distance behind a stage's --p
+const sp = s => Math.max(vh * .5, s.h - vh);
 
-const S = { t: 0, pB: 0, pS: 0, pA: 0, instAt: -1, sp: 0, ch: 0, tab: 2, copied: null, skills: [], hotSkill: null, hotAgent: null, mx: 0, my: 0 };
-
-const root = $('root');
-root.style.setProperty('--acc', accent);
-if (!hud) $('hud').remove();
-
-// --- build the DOM once
-const E = {};
-E.chapters = CHAP.map(([name, href]) => { const a = mk('a', $('chapters')); a.href = href; a.textContent = name; return a; });
-E.ticks = [0, 1, 2, 3, 4].map(() => mk('span', $('ticks') || document.createElement('div')));
-
-const orbitEl = $('orbit');
-E.rings = [0, 1, 2].map(() => mk('div', orbitEl));
-E.streams = []; for (let i = 0; i < 12; i++) E.streams.push(mk('div', orbitEl));
-E.core = mk('div', orbitEl);
-E.orbit = TARGETS.map(tg => {
-  const pos = mk('div', orbitEl);
-  const chip = mk('div', pos); logo(chip, tg, 22);
-  mk('span', pos, tg.name.toUpperCase()).style.cssText = 'font-size:10px;letter-spacing:0.14em;color:#8a909a;white-space:nowrap';
-  return { pos, chip };
-});
-
-E.lines = TARGETS.map(() => mkSvg('line', $('buildLines'), { pathLength: 1, stroke: ACC, 'stroke-opacity': 0.5, 'stroke-width': 1.5, 'vector-effect': 'non-scaling-stroke' }));
-const fx = $('buildFx');
-E.beams = []; for (let i = 0; i < 12; i++) E.beams.push(mk('div', fx));
-E.clones = TARGETS.map(tg => {
-  const box = mk('div', fx); logo(box, tg, 30);
-  mk('span', box, tg.name).style.cssText = 'font-family:Unbounded,sans-serif;font-weight:500;font-size:14px';
-  const track = mk('span', box); track.style.cssText = 'position:relative;height:3px;border-radius:3px;background:rgba(255,255,255,0.08);display:block;margin-top:auto';
-  const bar = mk('span', track);
-  const stat = mk('span', box);
-  return { box, bar, stat };
-});
-E.src = $('src');
-E.code = CODE.map(() => { const s = mk('span', E.src); s.style.cssText = 'font-size:11px;line-height:1.4;color:#06070a;white-space:pre;min-height:15px'; return s; });
-
-E.cells = [];
-
-const net = $('net');
-E.netLines = AGENTS.map(() => mkSvg('line', $('netLines'), { x1: 50, y1: 50, pathLength: 1, 'stroke-width': 0.35 }));
-E.pulses = AGENTS.map(() => mk('div', net));
-E.sweep = mk('div', net); E.shock = mk('div', net);
-E.core2 = mk('div', net); E.coreText = mk('span', E.core2); E.coreText.style.cssText = 'font-size:8px;letter-spacing:0.14em;color:#06070a;font-weight:600';
-E.nodes = AGENTS.map((a, i) => {
-  const b = mk('button', net); b.type = 'button'; b.setAttribute('aria-label', a.name);
-  const hover = () => { S.hotAgent = i; };
-  b.addEventListener('mouseenter', hover); b.addEventListener('focus', hover); b.addEventListener('click', hover);
-  const dot = mk('span', b), label = mk('span', b); label.textContent = a.name;
-  return { b, dot, label };
-});
-
-E.channels = CHANNELS.map((c, i) => {
-  const b = mk('button', $('channels')); b.type = 'button'; b.textContent = c.label;
-  b.addEventListener('click', () => { S.tab = i; S.instAt = S.t; });
-  return b;
-});
-E.after = AFTER.map((cmd, i) => {
-  const b = mk('button', $('after')); b.type = 'button'; b.className = 'after';
-  b.style.cssText = 'padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#aab0ba;font:inherit;font-size:12px;cursor:pointer';
-  b.addEventListener('click', () => copy(cmd, 'a' + i));
-  return b;
-});
-
-let ct;
-function copy(text, key) {
-  navigator.clipboard?.writeText(text).then(() => { S.copied = key; kick(); clearTimeout(ct); ct = setTimeout(() => { S.copied = null; kick(); }, 1600); }, () => {});
-}
-$('heroCopy').addEventListener('click', () => copy('npx github:jthiruveedula/agentkit', 'hero'));
-$('copyCmd').addEventListener('click', () => copy(CHANNELS[S.tab].cmd, 'tab'));
-
-function buildCells() {
-  const grid = $('grid');
-  E.cells = S.skills.map(s => {
-    const b = mk('button', grid); b.type = 'button'; b.setAttribute('aria-label', s.name);
-    const hover = () => { S.hotSkill = s.name; };
-    b.addEventListener('mouseenter', hover); b.addEventListener('focus', hover); b.addEventListener('click', hover);
-    return b;
-  });
-}
-fetch('assets/skills.json').then(r => r.json()).then(d => { S.skills = d.skills || []; S.total = d.count; buildCells(); kick(); }).catch(() => { $('hotDesc').textContent = 'Skill catalog unavailable. See the repo for the full list.'; });
-
-addEventListener('pointermove', e => { S.mx = e.clientX / innerWidth - 0.5; S.my = e.clientY / innerHeight - 0.5; }, { passive: true });
-
-// --- render: same maths as the prototype's renderVals()
-function render() {
-  const { t, pB, pS, pA, ch, sp, tab, copied, instAt } = S;
-  const still = tempo === 'still';
-  const skills = S.skills;
-  const blink = still || Math.floor(t * 2) % 2 === 0;
-
-  // hero orbit — ignition sequence + parallax
-  const intro = still ? 1 : ease(c01(t / 2.6));
-  const px = S.mx, py = S.my;
-  const scr = (s, p) => s.split('').map((c, i) => c === ' ' || i / s.length < p ? c : GLY[(i * 7 + Math.floor(t * 24)) % GLY.length]).join('');
-  [30, 42, 50].forEach((r, i) => { const g = ease(c01(intro * 1.7 - i * 0.22));
-    css(E.rings[i], { position: 'absolute', left: '50%', top: '50%', width: r * 2 * g + '%', height: r * 2 * g + '%', opacity: g, transform: `translate(-50%,-50%) translate(${px * -10 * (i + 1)}px,${py * -10 * (i + 1)}px) rotate(${t * (i % 2 ? -8 : 6)}deg)`, borderRadius: '50%', border: i === 1 ? '1px dashed rgba(255,255,255,0.16)' : '1px solid rgba(255,255,255,0.08)', boxSizing: 'border-box' }); });
-  const ang = i => t * 0.22 + i * Math.PI / 2 - Math.PI / 4;
-  TARGETS.forEach((tg, i) => {
-    const fly = ease(c01(intro * 1.6 - 0.45 - i * 0.1)), R = lerp(110, 42, fly), a = ang(i) - (1 - fly) * 1.5;
-    const x = 50 + R * Math.cos(a) + px * 5, y = 50 + R * Math.sin(a) + py * 5;
-    const hitP = (t * 0.55 + i * 0.25) % 1, lit = intro > 0.95 && hitP > 0.85;
-    css(E.orbit[i].pos, { position: 'absolute', left: x + '%', top: y + '%', transform: `translate(-50%,-50%) scale(${lerp(0.4, 1, fly)})`, opacity: fly, filter: `blur(${(1 - fly) * 8}px)`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 2 });
-    css(E.orbit[i].chip, { width: 54, height: 54, borderRadius: 16, display: 'grid', placeItems: 'center', background: 'rgba(14,16,20,0.9)', border: '1px solid ' + (lit ? ACC : 'rgba(255,255,255,0.12)'), boxShadow: lit ? `0 0 28px -4px ${ACC}` : 'none', transform: `scale(${lit ? 1.08 : 1})`, transition: 'border-color .3s, box-shadow .3s, transform .3s' });
-  });
-  const live = c01(intro * 2 - 1);
-  TARGETS.forEach((_, i) => { for (let k = 0; k < 3; k++) { const p = (t * 0.55 + i * 0.25 - k * 0.04) % 1, a = ang(i), r = 8 + p * 34;
-    css(E.streams[i * 3 + k], { position: 'absolute', left: (50 + r * Math.cos(a) + px * 3) + '%', top: (50 + r * Math.sin(a) + py * 3) + '%', width: 6 - k * 1.6, height: 6 - k * 1.6, borderRadius: '50%', transform: 'translate(-50%,-50%)', background: ACC, boxShadow: `0 0 12px ${ACC}`, opacity: still ? 0 : Math.sin(((p % 1) + 1) % 1 * Math.PI) * live * (1 - k * 0.3) }); } });
-  const ign = ease(c01(intro * 2.2)), flash = still ? 0 : Math.max(0, 1 - Math.abs(t - 0.9) * 3);
-  const cs = (1 + Math.sin(t * 2.4) * 0.05) * ign + flash * 0.3;
-  css(E.core, { position: 'absolute', left: '50%', top: '50%', width: '22%', height: '22%', borderRadius: '50%', transform: `translate(-50%,-50%) translate(${px * 8}px,${py * 8}px) scale(${cs})`, background: `radial-gradient(circle at ${35 - px * 20}% ${30 - py * 20}%, #ffffff 0%, ${ACC} 38%, transparent 72%)`, boxShadow: `0 0 ${90 + flash * 200}px ${10 + flash * 40}px color-mix(in srgb, ${ACC} 45%, transparent)` });
-  txt($('h1a'), scr('One kit.', c01(intro * 1.5 - 0.3)));
-  txt($('h1b'), scr('Every agent.', c01(intro * 1.5 - 0.5)));
-  txt($('heroCopyLabel'), copied === 'hero' ? 'COPIED' : 'COPY');
-
-  // build — typed source, compile glitch, beams, 3D landing
-  const e2 = ease(c01((pB - 0.25) / 0.3)), e3 = ease(c01((pB - 0.6) / 0.28));
-  const phase = pB < 0.25 ? 0 : pB < 0.6 ? 1 : 2;
-  // narrow: 2×2 cards; short: SKILL.md card clears the title (design overlapped at 360×640 / 909×540)
-  const narrow = innerWidth < 640, vhPx = innerHeight;
-  const srcY = lerp(55, Math.max(36, 24000 / vhPx), e2), xs = narrow ? [28, 72, 28, 72] : [17, 39, 61, 83];
-  const cys = narrow ? [61, 61, 84, 84] : [72, 72, 72, 72];
-  const total = CODE.join('').length; let budget = Math.floor(c01(pB / 0.22) * total);
-  const glitch = phase === 1 && !still;
-  CODE.forEach((ln, li) => { const s = ln.slice(0, Math.max(0, budget)); budget -= ln.length;
-    txt(E.code[li], glitch ? s.split('').map((c, ci) => hash(ci + li * 31 + Math.floor(t * 12)) > 0.9 ? GLY[(ci + li) % GLY.length] : c).join('') : s); });
-  xs.forEach((x, i) => { const lp = c01(e3 * 1.35 - i * 0.12); for (let k = 0; k < 3; k++) { const p = (t * 0.8 + k / 3 + i * 0.13) % 1;
-    css(E.beams[i * 3 + k], { position: 'absolute', left: lerp(50, x, p) + '%', top: lerp(srcY + 7, cys[i] - 11, p) + '%', width: 7, height: 7, borderRadius: '50%', transform: 'translate(-50%,-50%)', background: ACC, boxShadow: `0 0 14px ${ACC}`, opacity: still ? 0 : c01((e2 - 0.9) * 10) * (lp >= 1 ? 0 : 1) * Math.sin(p * Math.PI), zIndex: 1 }); } });
-  txt($('buildStep'), ['01 — WRITE', '02 — COMPILE', '03 — LINK'][phase]);
-  txt($('buildWord'), ['Write once.', 'Transpile.', 'Run everywhere.'][phase]);
-  css(E.src, { position: 'absolute', left: '50%', top: srcY + '%', width: 220, padding: 18, borderRadius: 18, background: ACC, transform: `translate(-50%,-50%) scale(${lerp(1, 0.82, e2) * (glitch ? 1 + hash(Math.floor(t * 14)) * 0.03 : 1)}) rotate(${lerp(-4, 0, c01(pB * 4))}deg) translateX(${glitch && hash(Math.floor(t * 9)) > 0.8 ? 4 : 0}px)`, display: 'flex', flexDirection: 'column', gap: 2, boxSizing: 'border-box', zIndex: 3, boxShadow: `0 30px 80px -20px ${ACC}` + (glitch ? ', -3px 0 0 #ff2e6e, 3px 0 0 #2ee6ff' : '') });
-  xs.forEach((x, i) => { const l = E.lines[i];
-    attr(l, 'x1', 50); attr(l, 'y1', srcY + 7); attr(l, 'x2', lerp(50, x, e2)); attr(l, 'y2', lerp(55, cys[i] - (narrow ? 8 : 11), e2));
-    css(l, { strokeDasharray: 1, strokeDashoffset: 1 - e2 }); });
-  TARGETS.forEach((tg, i) => { const lp = c01(e3 * 1.35 - i * 0.12), done = lp >= 1, pop = done ? Math.max(0, 1 - (e3 * 1.35 - i * 0.12 - 1) * 4) : 0, K = E.clones[i];
-    css(K.box, { position: 'absolute', left: lerp(50, xs[i], e2) + '%', top: lerp(55, cys[i], e2) + '%', width: narrow ? '40vw' : 'min(19vw,190px)', minWidth: 116, height: narrow ? '21vh' : 'min(180px,30vh)', padding: 16, borderRadius: 18, boxSizing: 'border-box', transform: `translate(-50%,-50%) perspective(800px) rotateX(${lerp(75, 0, e2)}deg) rotateY(${done ? 0 : (1 - lp) * -18 * (i < 2 ? -1 : 1)}deg) scale(${lerp(0.5, 1, e2) + pop * 0.08})`, opacity: e2 > 0.02 ? 1 : 0, background: done ? `color-mix(in srgb, ${ACC} 10%, #0e1014)` : 'rgba(14,16,20,0.92)', border: '1px solid ' + (done ? ACC : 'rgba(255,255,255,0.1)'), boxShadow: done ? `0 0 ${40 + pop * 60}px -10px ${ACC}` : 'none', display: 'flex', flexDirection: 'column', gap: 12, zIndex: 2 });
-    css(K.bar, { position: 'absolute', left: 0, top: 0, height: 3, borderRadius: 3, width: lp * 100 + '%', background: ACC });
-    txt(K.stat, done ? 'LINKED ✓' : lp > 0 ? Math.round(lp * 100) + '%' : 'QUEUED');
-    css(K.stat, { fontSize: 10, letterSpacing: '0.14em', color: done ? ACC : '#8a909a' }); });
-
-  // skills — scattered debris assembles, then ripples
-  const asm = ease(c01(pS / 0.45));
-  const vis = Math.round(c01((pS - 0.05) / 0.6) * skills.length);
-  // once every tile is lit, spotlight the newest skill until the visitor hovers another
-  const hot = skills.find(s => s.name === S.hotSkill) || (vis && vis === skills.length && skills.find(s => s.name === SPOTLIGHT)) || (vis ? skills[vis - 1] : null);
-  const hotI = hot ? skills.indexOf(hot) : 0;
-  txt($('count'), pad(skills.length ? vis : (S.total || 0)));
-  txt($('hotName'), hot ? hot.name + (hot.name === SPOTLIGHT ? ' · NEW' : '') : ' ');
-  txt($('hotDesc'), hot ? hot.description.split(/\. Use (when|for)/)[0].replace(/\.$/, '') + '.' : '');
-  E.cells.forEach((el, i) => { const s = skills[i], on = i < vis, router = s.kind === 'router', isHot = hot && hot.name === s.name, k = 1 - asm;
-    const rip = on && !still ? Math.max(0, Math.sin(t * 4 - Math.abs(i - hotI) * 0.55)) * 0.16 * c01(asm * 2 - 1) : 0;
-    css(el, { aspectRatio: '1', borderRadius: router ? '50%' : 10, cursor: 'pointer', padding: 0, background: isHot ? '#ffffff' : on && !router ? ACC : 'transparent', border: '1.5px solid ' + (isHot ? '#ffffff' : on ? ACC : 'rgba(255,255,255,0.12)'), boxShadow: isHot ? '0 0 24px rgba(255,255,255,0.6)' : on && !router ? `0 0 18px -4px ${ACC}` : 'none', opacity: lerp(0.15, 1, asm), transform: `translate(${(hash(i) - 0.5) * 1400 * k}px,${(hash(i + 99) - 0.5) * 900 * k}px) rotate(${(hash(i + 7) - 0.5) * 540 * k}deg) scale(${(on ? 1 : 0.7) + rip})`, transition: 'background .35s, box-shadow .35s' }); });
-
-  // agents — plan → fan out → verify → return
-  const beat = pA < 0.22 ? 0 : pA < 0.5 ? 1 : pA < 0.75 ? 2 : 3;
-  const TAU = Math.PI * 2, sw = still ? -1 : ((t * 1.8) % TAU);
-  const scan = i => { if (beat !== 0 || sw < 0) return 0; const d = ((sw - i / 11 * TAU) % TAU + TAU) % TAU; return d < 0.9 ? 1 - d / 0.9 : 0; };
-  const fan = ease(c01((pA - 0.22) / 0.25)), ver = c01((pA - 0.5) / 0.22), ret = ease(c01((pA - 0.75) / 0.2));
-  const vcount = Math.floor(ver * 11.99);
-  const hi = S.hotAgent ?? Math.min(10, beat === 2 ? vcount : Math.floor(c01(pA / 0.9) * 11));
-  const pos = i => { const a = i / 11 * Math.PI * 2 - Math.PI / 2, r = 40; return [50 + r * Math.cos(a), 50 + r * Math.sin(a)]; };
-  const litOf = i => beat === 0 ? scan(i) > 0.4 : beat === 1 ? fan > 0.97 : beat === 2 ? true : beat === 3 ? ret < 0.5 : false;
-  const doneFlash = beat === 3 && ret > 0.92;
-  txt($('netStep'), ['01 — PLAN', '02 — PARALLEL DISPATCH', '03 — EXTERNAL CHECKS', '04 — ONE RESULT'][beat]);
-  txt($('netWord'), ['Plan.', 'Fan out.', 'Verify.', 'Return.'][beat]);
-  css(E.sweep, { position: 'absolute', inset: '10%', borderRadius: '50%', background: `conic-gradient(from ${sw * 180 / Math.PI}deg, color-mix(in srgb, ${ACC} 38%, transparent) 0deg, transparent 55deg)`, opacity: beat === 0 && !still ? 1 : 0, transition: 'opacity .5s', zIndex: 1, maskImage: 'radial-gradient(circle, transparent 22%, #000 23%)', WebkitMaskImage: 'radial-gradient(circle, transparent 22%, #000 23%)' });
-  css(E.shock, { position: 'absolute', left: '50%', top: '50%', width: lerp(18, 110, ret) + '%', aspectRatio: '1', borderRadius: '50%', transform: 'translate(-50%,-50%)', border: `2px solid ${ACC}`, opacity: beat === 3 && ret > 0.85 ? (1 - (ret - 0.85) / 0.15) * 0.9 + 0.1 : 0, boxShadow: `0 0 40px ${ACC}`, zIndex: 1 });
-  txt(E.coreText, doneFlash ? '✓' : 'LEAD');
-  const hotA = AGENTS[hi];
-  txt($('agentDesc'), narrow ? hotA.name + ' — ' + hotA.description : hotA.description);
-  const tools = $('agentTools');
-  if (tools._hi !== hi) { tools._hi = hi; tools.textContent = '';
-    hotA.tools.forEach(x => { mk('span', tools, x).style.cssText = 'font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid rgba(255,255,255,0.12);color:#c3c8d0'; }); }
-  AGENTS.forEach((_, i) => { const [x, y] = pos(i), l = E.netLines[i];
-    attr(l, 'x2', x); attr(l, 'y2', y); attr(l, 'stroke', litOf(i) || i === S.hotAgent ? ACC : 'rgba(255,255,255,0.14)');
-    css(l, { strokeDasharray: 1, strokeDashoffset: 0 });
-    const p = beat === 0 ? 0 : beat === 3 ? 1 - ret : beat === 2 ? 1 : c01(fan * 1.25 - hash(i) * 0.25);
-    const wob = beat === 2 && !still ? Math.sin(t * 6 + i) * 0.02 : 0;
-    css(E.pulses[i], { position: 'absolute', left: lerp(50, x, p + wob) + '%', top: lerp(50, y, p + wob) + '%', width: 9, height: 9, borderRadius: '50%', transform: 'translate(-50%,-50%)', background: beat === 2 && i < vcount ? '#ffffff' : ACC, boxShadow: `0 0 16px ${ACC}`, opacity: beat === 0 || (beat === 3 && ret > 0.97) ? 0 : 1, zIndex: 2 }); });
-  css(E.core2, { position: 'absolute', left: '50%', top: '50%', width: 'max(17%, 64px)', aspectRatio: '1', borderRadius: '50%', transform: `translate(-50%,-50%) scale(${(beat === 0 ? 1 + Math.sin(t * 5) * 0.06 : 1 + Math.sin(t * 2.4) * 0.03) + (doneFlash ? 0.12 : 0)})`, background: doneFlash ? '#ffffff' : ACC, boxShadow: `0 0 ${doneFlash ? 160 : 80}px -6px ${ACC}`, display: 'grid', placeItems: 'center', zIndex: 3, transition: 'background .3s' });
-  AGENTS.forEach((a, i) => { const [x, y] = pos(i), on = i === hi || litOf(i), checked = (beat === 2 && i < vcount) || (beat === 3 && ret < 0.5), right = x >= 50, N = E.nodes[i];
-    css(N.b, { position: 'absolute', left: x + '%', top: y + '%', transform: 'translate(-50%,-50%)', background: 'transparent', border: 0, padding: 8, cursor: 'pointer', font: 'inherit', zIndex: 4 });
-    css(N.dot, { display: 'block', width: i === hi ? 18 : 12, height: i === hi ? 18 : 12, borderRadius: '50%', background: checked ? '#ffffff' : on ? ACC : `color-mix(in srgb, ${ACC} ${Math.round(scan(i) * 60)}%, #06070a)`, border: '1.5px solid ' + (checked ? '#ffffff' : on ? ACC : 'rgba(255,255,255,0.35)'), boxShadow: on ? `0 0 22px ${ACC}` : 'none', transition: 'all .3s' });
-    css(N.label, { position: 'absolute', top: '50%', [right ? 'left' : 'right']: '100%', transform: 'translateY(-50%)', whiteSpace: 'nowrap', fontSize: 11, letterSpacing: '0.04em', color: i === hi ? '#ffffff' : on ? '#b7bcc4' : '#9aa0aa', opacity: narrow ? 0 : 1, transition: 'color .3s' }); });
-
-  // install terminal
-  const chn = CHANNELS[tab];
-  const chars = instAt < 0 ? 0 : still ? chn.cmd.length : Math.floor((t - instAt) * 55);
-  E.channels.forEach((b, i) => { attr(b, 'aria-pressed', i === tab);
-    css(b, { padding: '6px 12px', borderRadius: 8, border: 0, font: 'inherit', fontSize: 12, cursor: 'pointer', background: i === tab ? ACC : 'transparent', color: i === tab ? '#06070a' : '#8a909a' }); });
-  txt($('activeName'), chn.name);
-  txt($('typed'), chn.cmd.slice(0, chars));
-  css($('caret'), { display: 'inline-block', width: '0.55em', height: '1.1em', verticalAlign: 'text-bottom', marginLeft: 3, background: ACC, opacity: blink ? 1 : 0 });
-  txt($('copyCmd'), copied === 'tab' ? 'COPIED ✓' : 'COPY COMMAND');
-  E.after.forEach((b, i) => txt(b, copied === 'a' + i ? 'copied ✓' : AFTER[i]));
-
-  // chrome
-  css($('glow'), { position: 'fixed', left: '50%', top: '-30vh', width: '120vw', height: '90vh', transform: `translateX(-50%) translateY(${sp * 40}vh)`, pointerEvents: 'none', zIndex: 0, background: `radial-gradient(ellipse at center, color-mix(in srgb, ${ACC} 14%, transparent) 0%, transparent 60%)` });
-  E.chapters.forEach((a, i) => { if (ch === i + 1) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
-    css(a, { padding: '8px 12px', borderRadius: 999, fontSize: 12, whiteSpace: 'nowrap', color: ch === i + 1 ? '#06070a' : '#9aa0aa', background: ch === i + 1 ? '#eceef2' : 'transparent', transition: 'all .25s' }); });
-  if (hud) {
-    txt($('chN'), pad(ch)); txt($('pct'), pad(Math.round(sp * 100)));
-    txt($('up'), [Math.floor(t / 60) % 60, Math.floor(t) % 60].map(pad).join(':'));
-    E.ticks.forEach((el, i) => css(el, { display: 'block', width: i === ch ? 18 : 6, height: 2, borderRadius: 2, background: i === ch ? ACC : 'rgba(255,255,255,0.2)', marginLeft: 'auto', transition: 'all .3s' }));
+function layout() {
+  vh = innerHeight;
+  dh = root.scrollHeight;
+  ST.forEach(s => { s.t = s.el.getBoundingClientRect().top + scrollY; s.h = s.el.offsetHeight; });
+  W = [];
+  if (mo) {
+    // pinned stages: frame coords are viewport coords. Others scroll, so subtract the scroll at the waypoint.
+    const a = (i, f, pt) => {
+      const y = ST[i].t + f * sp(ST[i]), off = ST[i].el.classList.contains('pin') ? 0 : y;
+      W.push([y, () => { const p = pt(); return [p[0], p[1] - off]; }]);
+    };
+    const first = slips.firstElementChild || $('cnt'), spot = slips.querySelector('.sp') || first;
+    const scale = $('scale'), sc = c(scale), cmd = $('cmd'), cw = cmd.offsetWidth, cm = c(cmd);
+    N4 = [sc[0] - scale.offsetWidth / 2, sc[1] - scale.offsetHeight / 2 + 1, scale.offsetWidth];
+    const needle = () => [N4[0] + N4[2] * S.ap / 100, N4[1]];
+    const n38 = c($('n38'));
+    a(0, 0, P([cm[0] - cw / 2 - 18, cm[1]])); a(0, 1, P([n38[0], n38[1] + vh * .06])); // .big drifts 6vh by p=1
+    a(1, .08, fix($('cnt'))); a(1, .45, fix(first)); a(1, .92, fix(spot));
+    a(2, .05, fix(document.querySelector('.fm')));
+    all('.term').forEach((t, i) => a(2, .3 + i * .2, fix(t)));
+    const o = $('org'), oc = c(o), ow = o.offsetWidth, oh = o.offsetHeight;
+    const ob = (x, y) => P([oc[0] - ow / 2 + x * ow / 100, oc[1] - oh / 2 + y * oh / 62]);
+    Q = [document.querySelector('.orch'), ...all('.ag:not(.orch)'), $('res')];
+    Q.forEach((e, i) => {
+      const f = .06 + .86 * i / 12;
+      [0, .02].forEach(d => a(3, f + d, fix(e)));
+      if (i === 11 && o.firstElementChild.getClientRects().length) { a(3, f + .035, ob(75, 61)); a(3, f + .05, ob(91.67, 61)); }
+    });
+    a(4, 0, needle); a(4, 1, needle);
+    CP = c($('caret'));
+    const ly = dh - vh; // rest = bottom of the page, where the caret is
+    W.push([ly, () => [CP[0], CP[1] - ly]]);
   }
+  tick();
 }
 
-// --- loop: ~30fps; stops when the tab is hidden, and (reduced motion) when idle.
-// Reads are batched before render() writes, so no layout thrash.
-const refs = ['build', 'skills', 'agents', 'install'].map($);
-const prog = (r) => c01(-r.top / Math.max(1, r.height - innerHeight));
-const speed = TEMPO[tempo];
-let last = performance.now(), running = false, dirty = true;
-function loop(now) {
-  if (document.hidden || (speed === 0 && !dirty)) { running = false; return; }
-  requestAnimationFrame(loop);
-  const dt = now - last; if (dt < 33) return; last = now; dirty = false;
-  const vh = innerHeight, se = document.scrollingElement || document.documentElement;
-  const rs = refs.map(el => el.getBoundingClientRect()), st = se.scrollTop, sh = se.scrollHeight;
-  let ch = 0; rs.forEach((r, i) => { if (r.top < vh * 0.5) ch = i + 1; });
-  S.t += (Math.min(dt, 100) / 1000) * speed;
-  S.pB = prog(rs[0]); S.pS = prog(rs[1]); S.pA = prog(rs[2]); S.ch = ch;
-  S.sp = c01(st / Math.max(1, sh - vh));
-  if (S.instAt < 0 && rs[3].top < vh * 0.7) S.instAt = S.t;
-  render();
+function tick() {
+  raf = 0;
+  const y = scrollY, max = Math.max(1, dh - vh);
+  if (mo) {
+    ST.forEach(s => { s.p = clamp((y - s.t) / sp(s)); set(s.el, '--p', s.p.toFixed(3)); });
+    spin(cnt, S.total * clamp((ST[1].p - .04) / .67));
+    T.forEach(([b, s, d]) => txt(b, ST[2].p > s + d ? 'LINKED' : 'QUEUED'));
+    const p3 = ST[3].p, n = p3 > 0 && p3 < 1 ? Math.round(clamp((p3 - .06) / .86) * 12) : -1;
+    Q.forEach((e, k) => e.classList.toggle('cur', k === n && k < 12));
+    $('res').classList.toggle('hit', p3 >= .92);
+    slips.classList.toggle('live', ST[1].p > Math.min(.95, .24 + .0125 * (slips.children.length - 1)));
+    if (W.length > 1) {
+      let i = 0;
+      while (i < W.length - 2 && y >= W[i + 1][0]) i++;
+      const t = clamp((y - W[i][0]) / Math.max(1, W[i + 1][0] - W[i][0]));
+      const p = W[i][1](), q = W[i + 1][1]();
+      set(baton, 'transform', `translate3d(${(p[0] + (q[0] - p[0]) * t).toFixed(1)}px,${(p[1] + (q[1] - p[1]) * t).toFixed(1)}px,0)`);
+      const rest = y >= W[W.length - 1][0] - 2;
+      baton.classList.toggle('rest', rest);
+      root.classList.toggle('br', rest);
+    }
+    set(root, '--fin', y >= max - 4 ? 1 : 0);
+  }
+  let k = 0;
+  ST.forEach((s, i) => { if (s.t <= y + vh * .5) k = i; });
+  if (k !== cur) {
+    plates.forEach((a, i) => a.setAttribute('aria-current', i === k));
+    txt($('tsh'), k + 1);
+    cur = k;
+  }
+  txt($('tsp'), Math.round(100 * Math.min(1, y / max)));
 }
-function kick() { dirty = true; if (!running && !document.hidden) { running = true; last = performance.now() - 40; requestAnimationFrame(loop); } }
-['scroll', 'resize', 'pointermove', 'click', 'focusin', 'pointerover'].forEach(ev => addEventListener(ev, kick, { passive: true }));
-document.addEventListener('visibilitychange', kick);
-render();
-kick();
+const kick = () => { raf = raf || (document.hidden ? 0 : requestAnimationFrame(tick)); };
+addEventListener('scroll', kick, { passive: true });
+document.addEventListener('visibilitychange', () => document.hidden || kick());
+addEventListener('resize', () => film() !== mo && innerWidth !== w0 ? location.reload() : requestAnimationFrame(layout));
+addEventListener('load', layout);
+if (document.fonts) document.fonts.ready.then(layout);
+fetch('assets/skills.json').then(r => r.json()).then(d => {
+  const list = (d.skills || []).sort((a, b) => a.name < b.name ? -1 : 1);
+  S.total = d.count || list.length;
+  ['g38', 'n38', 'tsk'].forEach(id => txt($(id), S.total));
+  list.forEach((s, i) => {
+    const li = mk('li', slips, null, s.kind === 'native' ? '' : 'x'), b = mk('button', li, s.name);
+    b.type = 'button';
+    b.setAttribute('aria-label', s.name + ', ' + s.kind);
+    b.dataset.d = (s.description || '').split('. ')[0];
+    li.style.setProperty('--i', i);
+    if (s.name === SPOTLIGHT) { li.className += ' sp'; li.append($('sp').content.cloneNode(true)); }
+  });
+  if (!mo) spin(cnt, S.total);
+  layout();
+}).catch(() => {
+  txt($('tsk'), 'n/a');
+  ro.children[0].textContent = 'Skill catalog unavailable.';
+  ro.dataset.e = 1;
+  ro.classList.add('on');
+});
+txt($('tag'), all('.ag').length);
+function loadAudit() {
+  fetch('assets/audit.json').then(r => r.json()).then(d => {
+    S.au = d;
+    const cu = d.current, base = (d.baseline && d.baseline.scores) || {}, aps = $('aps');
+    aps.textContent = '';
+    const host = mk('span', aps);
+    host.setAttribute('aria-hidden', 'true');
+    S.reel = reel(host, 3, true);
+    mk('span', aps, cu.scores.APS, 'vh');
+    $('apsbt').hidden = cu.scores.APS >= cu.targets.APS;
+    set(document.querySelector('.vn'), 'left', cu.targets.APS + '%');
+    $('nd').hidden = false;
+    set($('b0'), 'left', (base.APS || 0) + '%');
+    all('.rows li').forEach(li => {
+      const k = li.dataset.k, v = cu.scores[k], t = cu.targets[k];
+      set(li.querySelector('.bar i'), '--v', v);
+      set(li.querySelector('.bar u'), 'left', t + '%');
+      li.querySelector('.bt').hidden = v >= t;
+    });
+    txt($('ptk'), cu.tokens.total.toLocaleString('en-US'));
+    txt($('psh'), d.sha);
+    txt($('trv'), d.sha);
+    txt($('tag'), cu.counts.agents);
+    layout();
+    climb();
+  }).catch(() => {});
+}
+function paint(g) {
+  const cu = S.au.current, b = (S.au.baseline.scores || {}).APS || 0, gr = Math.min(g, 1);
+  S.ap = b + (cu.scores.APS - b) * g;
+  set($('nd'), 'left', S.ap + '%');
+  spin(S.reel, Math.round(Math.min(S.ap, cu.scores.APS) * 10));
+  set($('proof'), '--g', gr);
+  all('.rows li').forEach(li => txt(li.querySelector('.v'), +(cu.scores[li.dataset.k] * gr).toFixed(1)));
+  kick();
+}
+function climb() {
+  if (!S.au || S.cu || (mo && scrollY < ST[4].t - vh * .6)) return;
+  S.cu = 1;
+  if (!mo) return paint(1);
+  let el = 0, last = performance.now();
+  const f = now => {
+    el += Math.min(now - last, 50); // hidden tab pauses the clock
+    last = now;
+    const t = Math.min(1, el * tempo / 1400), u = t - 1;
+    paint(1 + 1.74 * u * u * u + .74 * u * u);
+    if (t < 1) requestAnimationFrame(f);
+  };
+  requestAnimationFrame(f);
+}
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { o.disconnect(); loadAudit(); } }, { rootMargin: '150%' }).observe($('proof'));
+} else loadAudit();
+addEventListener('scroll', climb, { passive: true });
+const mn = document.querySelector('main');
+function hide() { if (ro.dataset.e) return; all('main .on').forEach(b => b.classList.remove('on')); ro.classList.remove('on'); }
+['pointerover', 'focusin', 'click'].forEach(ev => mn.addEventListener(ev, e => {
+  const b = e.target.closest('[data-d]');
+  hide();
+  if (!b || ro.dataset.e) return;
+  b.classList.add('on');
+  ro.children[0].textContent = b.textContent.toLowerCase();
+  ro.children[1].textContent = b.dataset.d;
+  ro.children[2].textContent = b.dataset.t ? 'tools: ' + b.dataset.t : '';
+  ro.classList.add('on');
+}));
+['pointerleave', 'focusout'].forEach(ev => mn.addEventListener(ev, hide));
+function type(cmd) {
+  cancelAnimationFrame(ty);
+  const t0 = performance.now(), f = now => {
+    const n = mo ? Math.min(cmd.length, (now - t0) * .055 * tempo | 0) : cmd.length;
+    txt($('typed'), cmd.slice(0, n));
+    CP = c($('caret'));
+    if (mo) tick();
+    if (n < cmd.length) ty = requestAnimationFrame(f); else layout();
+  };
+  f(t0);
+}
+document.querySelector('.tabs').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const tabs = [...b.parentNode.children], cmd = CHANNELS[tabs.indexOf(b)];
+  tabs.forEach(t => t.setAttribute('aria-pressed', t === b));
+  $('full').textContent = cmd;
+  $('cpy').dataset.cmd = cmd;
+  type(cmd);
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('.cp');
+  if (!b) return;
+  const lb = b.querySelector('.lb'), old = lb && lb.textContent;
+  const done = ok => {
+    $('status').textContent = ok ? 'Copied' : 'Copy failed. Select the command text instead.';
+    if (!ok) return;
+    if (lb) lb.textContent = 'COPIED';
+    b.classList.add('ok');
+    setTimeout(() => { b.classList.remove('ok'); if (lb) lb.textContent = old; }, 1600);
+  };
+  if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.cmd).then(() => done(true), () => done(false));
+  else done(false);
+});
 })();
