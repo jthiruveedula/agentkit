@@ -314,10 +314,12 @@ accepts JFrog's Online Preview Agreement and sends them command metadata
 ## Landing page
 
 **[jthiruveedula.github.io/agentkit](https://jthiruveedula.github.io/agentkit/)**
-— a scroll-driven launch page (Build → Skills → Agents → Install) with
-per-OS install tabs and a skill grid generated from the real `SKILL.md` frontmatter
-(`site/scripts/build-catalog.py` → `site/assets/skills.json`). Deploys via
-GitHub Pages on push to `main`. The [audit dashboard](https://jthiruveedula.github.io/agentkit/audit/)
+— a scroll-scrubbed field-manual film in six plates (0 Title, 1 Catalog,
+2 Tools, 3 Agents, 4 Proof, 5 Install) with per-OS install tabs and a skill
+catalog generated from the real `SKILL.md` frontmatter
+(`site/scripts/build-catalog.py` → `site/assets/skills.json`). Reduced-motion and
+no-JS visitors get the same plates as a static printed manual. Deploys via
+GitHub Pages when a release is published. The [audit dashboard](https://jthiruveedula.github.io/agentkit/audit/)
 shows live repo scores from the `agentkit-audit` skill (`skills/agentkit-audit/scripts/audit.py`).
 
 ## Security
