@@ -1,0 +1,4 @@
+# Pages and tree URLs that only exist after a PR merges to main (deploy is
+# post-merge), so a PR adding them would always fail its own link check.
+^https://jthiruveedula\.github\.io/agentkit/audit/?$
+^https://github\.com/jthiruveedula/agentkit/tree/main/skills/agentkit-audit/?$
