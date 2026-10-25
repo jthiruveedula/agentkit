@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 36,
+  "count": 37,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -120,6 +120,12 @@
       "name": "prompt-enhancer",
       "description": "Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up.",
       "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "session-insights",
+      "description": "Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or \"what am I doing wrong / what should I automate\".",
+      "version": "0.2.0",
       "kind": "native"
     },
     {

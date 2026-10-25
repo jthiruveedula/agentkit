@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.9.0](https://github.com/jthiruveedula/agentkit/compare/v0.8.0...v0.9.0) (2026-10-19)
+
+
+### Features
+
+* **session-insights:** cost per intent, subagent spend, and setup-gap fixes ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** draft slash commands from repeated prompt openers ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** live vague-prompt nudge hook ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** outcomes, cost, trend, dashboard, command drafts, live nudge ([93573f9](https://github.com/jthiruveedula/agentkit/commit/93573f9aed3ed955870e78805404c13eebba83f3))
+* **session-insights:** tag session outcomes and correlate prompt habits with success ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+* **session-insights:** weekly snapshots with trend and a static HTML dashboard ([5fbdea4](https://github.com/jthiruveedula/agentkit/commit/5fbdea40282c05d9201a5c8fc1f8ca24d5f33a27))
+
+## [0.8.0](https://github.com/jthiruveedula/agentkit/compare/v0.7.0...v0.8.0) (2026-10-15)
+
+
+### Features
+
+* session-insights skill for prompt analytics and productivity suggestions ([#39](https://github.com/jthiruveedula/agentkit/issues/39)) ([a09bee5](https://github.com/jthiruveedula/agentkit/commit/a09bee522f724b9d99a2ba2ea32dbbcdf7618b63))
+* **site:** feature Meta Muse in hero pill ([eb605c4](https://github.com/jthiruveedula/agentkit/commit/eb605c4249830c65f162f4a224fad38f0466ee34))
+* **site:** feature Meta Muse in hero pill ([b0ed91a](https://github.com/jthiruveedula/agentkit/commit/b0ed91aec00d5ce99bff9fe377eba15119c8e2d9))
+* **site:** spotlight Meta Muse in Skills chapter ([d1be3a1](https://github.com/jthiruveedula/agentkit/commit/d1be3a1a2efd53b64437440ee6f922e78787e463))
+* **site:** spotlight Meta Muse in Skills chapter ([97e46f8](https://github.com/jthiruveedula/agentkit/commit/97e46f8a793da070714c22ec88b275ba477e9c66))
+* **site:** v3 launch site redesign ([5429526](https://github.com/jthiruveedula/agentkit/commit/5429526fe9145a658796e8384a894d2c7181f683))
+* **site:** v3 launch site redesign ([5d1fde3](https://github.com/jthiruveedula/agentkit/commit/5d1fde393464be452126cd530a8954843781c34e))
+
 ## [0.7.0](https://github.com/jthiruveedula/agentkit/compare/v0.6.0...v0.7.0) (2026-09-26)
 
 

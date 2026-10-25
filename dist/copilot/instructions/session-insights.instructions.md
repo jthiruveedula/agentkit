@@ -1,0 +1,90 @@
+---
+description: Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or "what am I doing wrong / what should I automate".
+applyTo: **
+---
+
+# Session Insights
+
+`token-saver/scripts/session_audit.py` measures what sessions *cost*.
+This skill measures *why*: what the user typed, where the agent was
+corrected or interrupted, which tools failed, and what keeps being done
+by hand. Deterministic script first, model judgment second.
+
+## Procedure
+
+1. **Run the report** (local only, reads transcripts, sends nothing):
+   ```
+   python3 _session-insights/scripts/insights.py --last 50
+   python3 _session-insights/scripts/insights.py --project myrepo --json
+   ```
+   Thresholds need about 5+ prompts to fire; widen `--last` if the
+   report says "none".
+
+2. **Read the suggestions top-down.** Each one names its evidence (a
+   rate, a count, an example prompt) and an action pointing at an
+   existing skill or harness feature. Don't add suggestions the data
+   doesn't show.
+
+3. **Feed friction into memory-sync** so repeated mistakes become
+   durable corrections instead of a one-off note:
+   ```
+   python3 _session-insights/scripts/insights.py --incidents > incidents.txt
+   python3 ../memory-sync/scripts/rank_patterns.py incidents.txt
+   ```
+
+4. **Act on the automation candidates.** A prompt opener repeated in
+   3+ sessions becomes a slash command or a `skill-forge` skill. Draft
+   them from the user's own past prompts (never overwrites; review each
+   before committing):
+   ```
+   python3 _session-insights/scripts/insights.py --draft-commands .claude/commands
+   ```
+   A command reused in 3+ sessions goes on the permission allowlist
+   (read-only) or into a make target (multi-step). A setup gap
+   (missing deps, CLI, env var) goes into a SessionStart hook.
+
+5. **Track the trend.** `--save` stores a dated snapshot in
+   `~/.agentkit/insights/` (keeps 12) and prints what moved since the
+   last one; `--html` writes a static dashboard. Schedule it weekly:
+   ```
+   # crontab -e
+   0 9 * * 1 python3 ~/.claude/skills/session-insights/_session-insights/scripts/insights.py --last 200 --save --html ~/.agentkit/insights/latest.html
+   ```
+
+6. **Prevent at the source** (optional): install the live nudge, which
+   adds one line of context when a task prompt names no target and no
+   done-condition. Advisory only; `AGENTKIT_NUDGE=off` disables it.
+   ```
+   python3 _session-insights/scripts/nudge_hook.py install          # --uninstall to remove
+   ```
+
+7. **Report briefly**: 3-5 suggestions with the metric behind each,
+   then the one change to make first. Quote prompts only as short
+   truncated examples — transcripts can hold sensitive text.
+
+## Signals
+
+| Signal | How it is detected | Typical fix |
+|---|---|---|
+| Vague prompt | < 8 words, no file/symbol/error/URL named | Name the target and done-condition; `prompt-enhancer` |
+| No done-condition | no "should / must / done when / passes" | Acceptance line; `spec-writer` |
+| Correction | follow-up opens with no / wrong / actually / still / undo | `memory-sync`; plan before edit |
+| Interrupt | `[Request interrupted by user]` | Plan mode for risky work |
+| Denial | tool result says the user declined | `/fewer-permission-prompts`, deny rules |
+| Tool error | `is_error` tool results, by tool | Memory correction; SessionStart hook |
+| Re-read | same file `Read` 3+ times in a session | `token-saver`; facts into CLAUDE.md |
+| Repeat opener | first 6 words shared by 3+ sessions | Slash command / skill |
+| Repeat command | Bash command head in 3+ sessions | Allowlist or script |
+| Outcome | shipped (commit/push/PR), tests-green, abandoned, exploratory | Compare prompt traits by success rate |
+| Cost per intent | session tokens by dominant intent | Cheaper model or scoped subagent |
+| Subagent share | sidechain + `subagents/` tokens vs main | Fan out only for independent work |
+| Setup gap | tool errors matching missing deps / CLI / env / port | SessionStart hook or setup script |
+
+Heuristics, not NLP: treat a suggestion as a lead to confirm, not a verdict.
+Further automation ideas and their status: `_session-insights/reference/opportunities.md`.
+
+## Token economy
+
+- Run the script; never read raw transcripts into context.
+- Use `--json` only when post-processing; the text report is shorter.
+- General read/search/output patterns live in the `token-saver` skill.

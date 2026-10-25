@@ -39,7 +39,7 @@ jobs:
           test -f site/audit/index.html
           python3 -c 'import json;json.load(open("site/assets/audit.json"))'
           ! grep -rIE '(sk-[A-Za-z0-9]{20,}|sk-ant-|ghp_[A-Za-z0-9]{36,}|gho_[A-Za-z0-9]{20,}|xox[abprs]-|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY)' site/
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
