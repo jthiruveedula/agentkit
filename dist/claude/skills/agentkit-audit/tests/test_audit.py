@@ -200,5 +200,7 @@ def test_evals_loop_and_negated_whole_file(tmp_path):
 def test_repo_test_loading_skill_scripts_counts(tmp_path):
     root = _mk(tmp_path, "# Foo\n")
     (root / "tests").mkdir()
-    (root / "tests" / "test_foo.py").write_text('P = ROOT / "skills" / "foo" / "scripts" / "x.py"\n')
+    (root / "tests" / "test_foo.py").write_text(
+        'P = ROOT / "skills" / "foo" / "scripts" / "x.py"\n'
+    )
     assert "srs.tests" not in _heur(audit.audit(root))
