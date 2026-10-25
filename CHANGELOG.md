@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/jthiruveedula/agentkit/compare/v0.10.0...v0.11.0) (2026-10-25)
+
+
+### Features
+
+* **audit:** raise APS to 94.1 with evals, validation loops and scorer recalibration ([#56](https://github.com/jthiruveedula/agentkit/issues/56)) ([47a89a5](https://github.com/jthiruveedula/agentkit/commit/47a89a5750c17f41a86ccc5cbb1e9b53dc719a2d))
+* **site:** content-based gallery preview motifs ([#53](https://github.com/jthiruveedula/agentkit/issues/53)) ([c834cdf](https://github.com/jthiruveedula/agentkit/commit/c834cdf62b41d9adb0e65d6f86284b5fa2103011))
+
 ## [0.10.0](https://github.com/jthiruveedula/agentkit/compare/v0.9.0...v0.10.0) (2026-10-25)
 
 
