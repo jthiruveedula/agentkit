@@ -3,7 +3,7 @@
    Motion: JS writes --p (0..1) per stage; everything below is CSS maths on it. */
 :root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#E5007E;
 --f1:"Big Shoulders Display","Roboto Condensed","Arial Narrow",ui-sans-serif,sans-serif;--f2:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
---serif:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,serif;--pl:max(5vw,64px)}
+--serif:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,serif;--pl:max(5vw,64px);--cs:clamp(14px,2.2vw,30px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#FF3A99}}
 :root[data-theme=dark]{--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#FF3A99}
 *{box-sizing:border-box;margin:0}
@@ -35,7 +35,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .top a:hover{background:var(--ink);color:var(--paper)}
 /* drawing-office title block: bottom-right, one chamfered corner */
 #tb{position:fixed;z-index:50;right:40px;bottom:40px;width:264px;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border-top:2px solid var(--ink);border-left:2px solid var(--ink);font-size:.75rem;letter-spacing:.06em;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% 100%,14px 100%,0 calc(100% - 14px))}
-#tb>*{padding:2px 8px;border:0 solid var(--ink);border-width:0 1px 1px 0;line-height:1.6}
+#tb>*{padding:2px 8px;border:0 solid var(--ink);border-width:0 1px 1px 0;line-height:19px}
+#tb::after{content:"";position:absolute;left:-3.3px;bottom:6.7px;width:22px;height:2px;background:var(--ink);transform:rotate(45deg)}
 #tb i{font-style:normal;font-weight:500}
 #tb u{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--reg);margin-right:6px;text-decoration:none}
 #fin{font-weight:500}
@@ -48,6 +49,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* stages: static printed manual by default, sticky film under html.mo */
 .stage{--p:1;position:relative;contain:layout paint}
+.stage+.stage::before{content:"";position:absolute;z-index:1;left:0;right:0;top:0;height:1px;background:var(--rule);pointer-events:none}
 #proof,#install{content-visibility:auto;contain-intrinsic-size:auto 100vh}
 @media screen{html:not(.mo){scroll-padding-bottom:150px}html:not(.mo) .g{padding-bottom:150px}}
 /* body sits in grid cols 2-9 of 12; captions live in cols 10-12 */
@@ -59,7 +61,7 @@ html.mo .stage+.stage{margin-top:0}
 html.mo .pin .frame{position:sticky;top:0;height:100svh;overflow:hidden}
 html.mo .pin .g{height:100%}
 html.mo #baton{display:block;position:fixed;z-index:60;left:0;top:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--reg);pointer-events:none;will-change:transform}
-html.mo #baton.rest{animation:bk calc(1.1s/var(--tempo,1)) steps(1) infinite}
+html.mo #baton.rest{width:calc(var(--cs)*.6);height:calc(var(--cs)*1.1);margin:calc(var(--cs)*-.55) 0 0 calc(var(--cs)*-.3);border-radius:0;animation:bk calc(1.1s/var(--tempo,1)) steps(1) infinite}
 html.mo.br .caret{visibility:hidden}
 html.mo .cap::before{display:none}
 html.mo #fin::after{opacity:var(--fin,0)}
@@ -74,14 +76,18 @@ html.mo #fin::after{opacity:var(--fin,0)}
 .cp:hover,.cp.ok{background:var(--ink);color:var(--paper)}
 .fn{margin-top:auto;font:italic .8125rem var(--serif);color:var(--ink2)}
 
+#tools .n{left:auto;top:auto;right:calc(-27.5vw - .1em);bottom:calc(100% + 18px);font-size:min(34vh,22vw)}
+#agents .n{right:auto;top:auto;left:calc(8% - .03em);bottom:calc(100% + 6px);font-size:min(32vh,22vw)}
+#install .n{bottom:172px}
 /* plate compositions (desktop): numerals bleed off alternating edges, captions move */
 @media (min-width:900px){
 #skills .n{right:auto;left:-.12em}
-#tools .n{bottom:auto;top:-.2em}
 #tools .g{padding:84px 12.5vw 56px 27.5vw}
 #tools .cap{left:12.5vw;width:13vw}
-#agents .n{right:auto;bottom:auto;left:-.08em;top:-.18em}
 #agents .cap{top:50%}
+#tools .n{right:calc(-12.5vw - .1em)}
+#proof .pf{margin:auto 0 0}
+#install .ib{margin:12svh 0 0}
 #proof .n{right:auto;left:42vw;bottom:auto;top:-.24em}
 #proof .cap{top:84px;width:auto;height:46vh;writing-mode:vertical-rl;letter-spacing:.12em}
 }
@@ -196,7 +202,7 @@ html.mo .res.hit .stamp{opacity:1;animation:st 90ms ease-out}
 .tabs button{padding:6px 16px;border:1px solid var(--ink);border-left:2px dashed var(--ink);margin-right:-1px;font-weight:500;font-size:.75rem;letter-spacing:.08em}
 .tabs button[aria-pressed=true]{box-shadow:inset 0 -3px 0 var(--ink)}
 .tabs button:not([aria-pressed=true]):hover{background:color-mix(in srgb,var(--ink) 10%,transparent);z-index:1}
-.cmd{font:500 clamp(.875rem,2.2vw,1.875rem)/1.5 var(--f2);white-space:pre-wrap;word-break:break-all;max-width:70ch;min-height:3em}
+.cmd{font:500 var(--cs)/1.5 var(--f2);white-space:pre-wrap;word-break:break-all;max-width:70ch;min-height:3em}
 .caret{display:inline-block;width:.6em;height:1.1em;background:var(--ink);vertical-align:text-bottom;margin-left:2px}
 .cmdw{max-width:1000px}
 .stub{margin:18px 0 26px;padding:12px 22px 12px 26px;border:2px solid var(--ink);border-left:2px dashed var(--ink);font-size:.8125rem}
@@ -214,7 +220,7 @@ footer a{color:var(--ink);margin-left:14px;text-underline-offset:3px}
 #plates a[aria-current=true]{border-left-color:transparent;border-bottom-color:var(--ink)}
 .top{top:40px;right:8px}.top a{padding:2px 8px}
 .xh,#tb .t2,#fin{display:none}
-#tb{right:8px;bottom:8px;width:200px}
+#tb{right:8px;bottom:8px;width:216px}
 .g{padding:76px 20px 48px}
 #core .g{padding-top:110px}
 h1 .a1{margin-left:calc(-20px - .05em)}
@@ -245,6 +251,6 @@ h1 .a1{margin-left:calc(-20px - .05em)}
 .tk a{display:block;margin:6px 0 0}
 }
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
-@media print{.cols,.xh,#plates,.top,#tb,#baton,#readout,.skip{display:none}.stage{break-inside:avoid;contain:none;overflow:hidden}#proof,#install{content-visibility:visible}.g{min-height:0}html{background:#fff}
+@media print{.cols,.xh,#plates,.top,#tb,.stage::before,#baton,#readout,.skip{display:none}.stage{break-inside:avoid;contain:none;overflow:hidden}#proof,#install{content-visibility:visible}.g{min-height:0}html{background:#fff}
 html.mo{scroll-behavior:auto}html.mo .stage{--p:1!important}html.mo .pin{height:auto}html.mo .pin .frame{position:static;height:auto;overflow:visible}html.mo .pin .g{height:auto}
 html.mo .big,html.mo .slips li{transform:none}html.mo .stamp{opacity:1}html.mo .cap::before{display:inline}}
