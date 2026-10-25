@@ -22,3 +22,4 @@ external/*/
 manifest.json
 .coverage
 .claude/worktrees/
+external/updates.json

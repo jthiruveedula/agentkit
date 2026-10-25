@@ -1,21 +1,17 @@
 ---
-description: Scaffolds a new dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion (bronze/silver/gold) naming and a test stub included. Use when the user asks to create a new data pipeline, model, DAG, asset, or Spark job and wants the boilerplate generated rather than hand-typed.
+description: Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub. Use when asked to create a new pipeline, model, DAG, asset, or Spark job boilerplate.
 trigger: model_decision
 ---
 
 # Pipeline Scaffold
 
-Ceremony-only boilerplate — the transform logic is still yours (or the
-`pipeline-engineer` subagent's) to fill in. This skill exists so every
-pipeline unit in a project starts from the same shape instead of drifting
-per author.
+Boilerplate only — transform logic is yours (or `pipeline-engineer`'s).
 
 ## Procedure
 
 1. **Confirm the architecture decision first.** If this is a new pipeline
-   (not adding to an existing one) and no ADR covers it yet, run
-   `data-architect` first — don't scaffold a Spark job for something an
-   ADR would have routed to dbt instead.
+   (not adding to an existing one) and no ADR covers it, run
+   `data-architect` first.
 
 2. **Pick the kind and layer**, then scaffold:
    ```
@@ -41,18 +37,7 @@ per author.
    not `silver/shopify_orders_cleaned`. The source system lives in the
    bronze layer's ingestion config, not the model name.
 
-## Reference
-
-- `_pipeline-scaffold/scripts/scaffold_pipeline.py` — the generator. Four kinds: `dbt`,
-  `airflow`, `dagster`, `spark`. See its `--help` for all flags.
-
 ## Token economy
 
-- Scaffold first, then fill in logic — hand-writing boilerplate burns
-  generation tokens for zero signal.
-- Adding to an existing pipeline? Generate only the missing piece, never
-  a whole fresh scaffold to copy one file from.
-- Fill in the TODOs directly; don't regenerate the scaffold to "fix" the
-  logic — the boilerplate was never the problem.
-- General read/search/output patterns live in the `token-saver` skill —
-  don't duplicate them here.
+- Adding to an existing pipeline? Generate only the missing piece.
+- Fill TODOs directly; don't regenerate the scaffold to "fix" logic.

@@ -1,5 +1,5 @@
 ---
-description: Keep long agent sessions useful under context pressure via disciplined summarization checkpoints — goal, decisions with reasons, current state, open threads, memory keys touched, each under 40 lines. Use when a session is getting long, before compaction or a risky multi-step run, at task boundaries, or before handing work off to another agent.
+description: Write short summarization checkpoints (goal, decisions+reasons, state, open threads, memory keys) to survive context pressure. Use when a session is long, before compaction or risky multi-step runs, at task boundaries, or before handoff.
 applyTo: **
 ---
 
@@ -12,15 +12,10 @@ session act without re-reading history. The blank template lives in
 
 ## When to checkpoint
 
-- **Before compaction.** Write the checkpoint to the memory file while
-  you still have full context — never wait for the warning.
-- **Before a risky multi-step run.** Migrations, refactors, bulk edits:
-  checkpoint so a bad step is recoverable from the note, not from
-  archaeology.
-- **At natural task boundaries.** One task done, next not started —
-  the cheapest moment to write it down.
-- **Before handing off.** Any brief to another agent/session starts as
-  a compressed checkpoint (see Handoff format).
+- Before compaction (while you still have full context, not at the warning).
+- Before a risky multi-step run (migrations, refactors, bulk edits).
+- At task boundaries.
+- Before handing off (see Handoff format).
 
 ## Checkpoint anatomy
 
@@ -51,7 +46,7 @@ checkpoint failed. See `_context-compressor/reference/keep-drop.md` for the tabl
 - **Supersede, don't append.** Rewriting one checkpoint replaces the
   old one; appending versions makes every future read pay for history.
 - Lint it: `python3 _context-compressor/scripts/checkpoint.py lint checkpoint.md`.
-  Tolerance is 60 lines; aim for 40.
+  Limit 60 lines; aim for 40.
 
 ## Handoff format
 
@@ -66,11 +61,3 @@ Next: <the single action the subagent should take first>
 
 No transcripts, no history, no speculation. The brief fits in a single
 task message; the subagent re-derives the rest from the repo.
-
-
-## Token economy
-
-- Checkpoints stay under 40 lines; supersede old ones, never append versions.
-- Run `python3 _context-compressor/scripts/checkpoint.py lint` instead of eyeballing the length.
-- Checkpoint at task boundaries, not at the compaction warning.
-- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.

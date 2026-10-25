@@ -1,15 +1,13 @@
 ---
 name: genai-engineering
-description: Builds and hardens LLM applications — RAG pipelines, tool-using agents, prompt/model selection, eval harnesses, guardrails, and cost/latency control (prompt caching, batching, model tiering). Use when the user is building or debugging a RAG system, an LLM feature, an agent, an eval set, or asks why an LLM app is slow, expensive, or hallucinating.
+description: Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.
 version: 0.1.0
 allowed-tools: Read, Edit, Write, Grep, Bash
 ---
 
 # GenAI Engineering
 
-LLM apps fail in predictable places: retrieval, not generation; missing
-evals, not missing prompts; and cost that nobody measured. Work in that
-order.
+LLM apps fail in retrieval, missing evals, and unmeasured cost. Work in that order.
 
 ## Procedure
 
@@ -51,8 +49,5 @@ order.
 
 ## Token economy
 
-- Read the prompt template, retrieval config, and one failing trace —
-  not the whole app — before proposing a change.
-- Run evals as a script that prints a pass-rate summary, not per-case
-  dumps; open individual failures only when diagnosing.
-- General read/search/output patterns live in the `token-saver` skill.
+- Read the prompt template, retrieval config and one failing trace, not the whole app.
+- Evals print a pass-rate summary; open single failures only to diagnose.

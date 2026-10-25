@@ -1,6 +1,6 @@
 ---
 name: prompt-enhancer
-description: Classify a raw prompt's intent (code-gen, debug, refactor, research, data-sql, architecture, writing, ops-cli, ambiguous) and rewrite it using that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up before running it.
+description: Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up.
 allowed-tools: Bash, Read
 version: 0.1.0
 ---
@@ -43,18 +43,4 @@ user wants.
 
 ## Reference
 
-- `reference/routing-table.md` — one rewrite pattern per intent.
-- `reference/examples.md` — 6 worked before/after pairs, one per major
-  intent family.
-- `scripts/classify.py` — the classifier. `--selftest` runs the golden
-  cases in `tests/golden.json`.
-- `tests/golden.json` — golden intent-classification fixtures; add a case
-  here before hand-tuning a classifier weight.
-
-
-## Token economy
-
-- Classify intent first (cheap) — then load ONLY the matched intent's pattern from `reference/routing-table.md`, never all nine.
-- Skip `reference/examples.md` unless the rewrite needs a worked pair; the pattern alone usually suffices.
-- Ask at most 2 questions on low confidence — guessing and rewriting twice costs more than asking.
-- General read/search/output patterns live in the `token-saver` skill — don't duplicate them here.
+`reference/routing-table.md` (one pattern per intent; load only the matched one), `reference/examples.md` (worked pairs; skip unless needed), `scripts/classify.py --selftest` (golden cases in `tests/golden.json`; add a case before tuning a weight).

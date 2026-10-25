@@ -25,6 +25,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -91,6 +93,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -144,6 +148,8 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
@@ -160,6 +166,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # Full history: leaked secrets are usually old, not new.
           fetch-depth: 0
 
@@ -172,6 +179,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -189,6 +198,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
@@ -246,6 +257,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           # The action lints a range of commits, not just the tip.
           fetch-depth: 0
 
@@ -277,12 +289,50 @@ jobs:
           fi
           echo "branch name OK: $BRANCH_NAME"
 
+  # Flags newly introduced vulnerable/disallowed dependencies. PR-only.
+  dependency-review:
+    name: dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: high
+
+  # Static audit of the workflows themselves (injection, unpinned actions,
+  # excessive permissions). Offline: no token, no network audits.
+  workflow-lint:
+    name: workflow lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install zizmor
+        run: python -m pip install --quiet "zizmor==1.16.3"
+
+      - name: Audit workflows
+        run: zizmor --offline --min-severity medium .github/workflows
+
   # Single aggregator check: branch protection requires only this, so adding
   # a new job later means extending `needs` here, not touching repo settings.
   ci-success:
     name: CI success
     runs-on: ubuntu-latest
-    needs: [test, lint, codeql, gitleaks, npm-audit, packaging, commitlint, branch-name]
+    needs: [test, lint, codeql, gitleaks, npm-audit, packaging, commitlint, branch-name,
+             dependency-review, workflow-lint]
     if: always()
     steps:
       - name: All required jobs passed
@@ -290,7 +340,7 @@ jobs:
           python3 - <<'EOF'
           import json, os
           needs = json.loads(os.environ["NEEDS_JSON"])
-          # PR-only jobs (commitlint, branch-name) report "skipped" on pushes
+          # PR-only jobs (commitlint, branch-name, dependency-review) report "skipped" on pushes
           # to main, where branch protection does not apply -- that is fine.
           # needs.* is an object {result, outputs}, not a bare string.
           failed = {k: v.get("result") for k, v in needs.items()

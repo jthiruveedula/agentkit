@@ -1,0 +1,93 @@
+name: external-updates
+
+on:
+  schedule:
+    # Mondays 07:00 UTC. Opens/updates ONE PR; never auto-merges.
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: external-updates
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  update:
+    name: check third-party pins
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Check upstream and bump eligible pins
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/check-external-updates.py --json --out "$RUNNER_TEMP/updates.json" --bump >/dev/null
+
+      - name: Verify bumped pins
+        id: changed
+        run: |
+          if git diff --quiet -- external/skills.lock.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            ./scripts/sync-external.sh
+            python scripts/validate.py
+          fi
+
+      # PRs pushed with GITHUB_TOKEN do not trigger pull_request CI, so the
+      # required checks never report. Set EXTERNAL_UPDATES_TOKEN (fine-grained
+      # PAT or App token: contents + pull-requests write on this repo only) to
+      # get CI on the bump PR; without it, close and reopen the PR to run CI.
+      - name: Open or update PR
+        if: steps.changed.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.EXTERNAL_UPDATES_TOKEN || secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          UPDATES: ${{ runner.temp }}/updates.json
+        run: |
+          set -eu
+          branch=chore/external-skill-updates
+          python - <<'PY' > "$RUNNER_TEMP/body.md"
+          import json, os
+          rows = json.load(open(os.environ["UPDATES"]))["sources"]
+          print("Automated third-party pin update (`scripts/check-external-updates.py --bump`).\n")
+          print("## Bumped\n\n| source | behind | compare |\n|---|---|---|")
+          for r in rows:
+              if r.get("bumped"):
+                  print("| %s | %s | %s |" % (r["name"], r["behind_by"], r["compare_url"]))
+          print("\n## Flagged (not bumped)\n")
+          for r in rows:
+              why = r["error"] or ("archived" if r["archived"] else "license changed" if r["license_changed"] else "")
+              if why and not r.get("bumped"):
+                  print("- %s: %s %s" % (r["name"], why, r["compare_url"] or ""))
+          print("\n## Reviewer checklist\n")
+          print("- [ ] Read the upstream diff for each compare link")
+          print("- [ ] License unchanged and acceptable")
+          print("- [ ] No new scripts that execute on install")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add external/skills.lock.json
+          git commit -m "chore: bump external skill pins"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" "HEAD:refs/heads/${branch}" --force
+          for l in dependencies third-party; do
+            gh label create "$l" --repo "$REPO" 2>/dev/null || true
+          done
+          if gh pr view "$branch" --repo "$REPO" >/dev/null 2>&1; then
+            gh pr edit "$branch" --repo "$REPO" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --repo "$REPO" --head "$branch" --base main \
+              --title "chore: bump external skill pins" --body-file "$RUNNER_TEMP/body.md" \
+              --label dependencies --label third-party
+          fi

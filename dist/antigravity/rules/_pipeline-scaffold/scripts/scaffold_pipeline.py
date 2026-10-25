@@ -10,6 +10,7 @@ agent (or you) fills in the actual transform logic, not the ceremony.
     python3 scaffold_pipeline.py --kind spark --name event_dedup
 """
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -135,6 +136,8 @@ def main(argv=None):
     ap.add_argument("--out", default=".", help="project root to scaffold into (default: cwd)")
     ap.add_argument("--force", action="store_true", help="overwrite existing files")
     args = ap.parse_args(argv)
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", args.name):
+        ap.error("--name must be snake_case [a-z0-9_]")
 
     out = Path(args.out)
     if args.kind == "dbt":

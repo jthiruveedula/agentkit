@@ -1,0 +1,2 @@
+# Fake token in an offline test fixture (replaced in a later commit); history-only finding.
+d29f5283970009b1fa657da1395870ba7930f059:tests/test_check_external_updates.py:generic-api-key:95

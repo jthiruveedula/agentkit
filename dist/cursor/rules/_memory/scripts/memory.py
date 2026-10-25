@@ -108,10 +108,15 @@ def default_db_path():
 
 def connect(db_path):
     path = db_path or os.environ.get("AGENTKIT_MEMORY_DB") or default_db_path()
-    parent = os.path.dirname(os.path.abspath(path))
-    if parent:
-        os.makedirs(parent, exist_ok=True)
+    special = path == ":memory:" or path.startswith("file:")
+    if not special:
+        os.makedirs(os.path.dirname(os.path.abspath(path)), mode=0o700, exist_ok=True)
     try:
+        if not special and not os.path.exists(
+            path
+        ):  # 0600 before sqlite's umask default
+            flags = os.O_CREAT | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
+            os.close(os.open(path, flags, 0o600))
         db = sqlite3.connect(path)
     except sqlite3.Error as e:
         raise SystemExit("cannot open memory db %s: %s" % (path, e))
@@ -129,7 +134,39 @@ def connect(db_path):
     except sqlite3.Error as e:
         raise SystemExit("memory db schema failed (FTS5 missing?): %s" % e)
     db.execute("PRAGMA user_version=1;")
+    for suffix in () if special else ("", "-wal", "-shm"):  # tighten files and sidecars
+        try:
+            os.chmod(path + suffix, 0o600)
+        except OSError:
+            pass
     return db, path
+
+
+SECRET_RE = re.compile(
+    r"(sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}"
+    r"|xox[abprs]-[A-Za-z0-9-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|(?i:(?:api[_-]?key|secret|token|passw(?:or)?d)\s*[:=]\s*\S{8,}))"
+)
+
+
+def warn_if_secret(*texts):
+    """Warn (stderr) when text looks like a credential; memory is plaintext."""
+    if any(t and SECRET_RE.search(t) for t in texts):
+        print(
+            "warning: stored text looks like a secret/credential; memory is "
+            "plaintext. Run `forget` and store a redacted note instead.",
+            file=sys.stderr,
+        )
+        return True
+    return False
+
+
+def warn_if_outside_home(path):
+    if path == ":memory:" or path.startswith("file:"):
+        return
+    home = os.path.join(os.path.realpath(str(Path.home())), ".agentkit")
+    if not os.path.realpath(path).startswith(home + os.sep):
+        print("warning: memory db outside ~/.agentkit: %s" % path, file=sys.stderr)
 
 
 def utcnow():
@@ -403,8 +440,10 @@ def main(argv=None):
 
     args = ap.parse_args(argv)
     db, path = connect(args.db)
+    warn_if_outside_home(path)
 
     if args.cmd == "store":
+        warn_if_secret(args.text, args.pattern, args.correction, args.context)
         if args.kind == "episode":
             if not args.text:
                 ap.error("--text is required for episodes")

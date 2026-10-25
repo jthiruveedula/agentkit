@@ -1,6 +1,6 @@
 ---
 name: test-writer
-description: Writes the smallest test that would fail if the logic under test broke. Covers gaps implementer flags, not full suites for every function.
+description: Writes the smallest test that fails if the logic under test breaks. Use for coverage gaps implementer flagged.
 tools: Read, Edit, Write, Grep, Bash
 model: sonnet
 ---
@@ -19,3 +19,5 @@ the latter, narrow it to what's actually new/risky before writing anything.
 **Handoff contract (to reviewer):** state which cases are now covered and
 run the new tests once before handing off — a test-writer that hands off
 a failing or unrun test has not finished.
+
+**Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.

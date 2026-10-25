@@ -34,6 +34,19 @@ sha256_of() {
 # source was skipped (already reported).
 fetch_one() {
   _name=$1; _repo=$2; _sha=$3; _want_sha256=$4
+  # Lock fields reach paths, rm -rf and URLs: validate before any use.
+  _bad=
+  case "$_name" in ""|.|..|*[!A-Za-z0-9._-]*) _bad=name ;; esac
+  case "$_repo" in */*/*|/*|*/|""|*[!A-Za-z0-9._/-]*) _bad=repo ;; esac
+  case "$_repo" in */*) ;; *) _bad=repo ;; esac
+  case "$_repo" in .*/*|*/.|*/..) _bad=repo ;; esac
+  case "$_sha" in *[!0-9a-f]*) _bad=sha ;; esac
+  [ "${#_sha}" -eq 40 ] || _bad=sha
+  case "$_want_sha256" in *[!0-9a-f]*) _bad=sha256 ;; esac
+  if [ -n "$_bad" ]; then
+    echo "error: invalid lock entry (bad $_bad) -- skipped" >&2
+    return 1
+  fi
   _dest="$SCRIPT_DIR/external/$_name"
   echo "==> $_name ($_repo @ ${_sha%"${_sha#??????}"}...)"
   rm -rf "$_dest.tmp"

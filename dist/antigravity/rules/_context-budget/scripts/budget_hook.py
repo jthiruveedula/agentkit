@@ -29,6 +29,8 @@ import time
 
 TAIL_BYTES = 512 * 1024
 FRESH_SECONDS = 24 * 3600
+# Must match skills/context-compressor/scripts/checkpoint.py MAX_LINES.
+MAX_RESUME_LINES = 60
 
 
 def _home():
@@ -124,6 +126,10 @@ def resume(hook):
         return None
     if not body:
         return None
+    lines = body.splitlines()  # cap = checkpoint.py MAX_LINES
+    body = "\n".join(lines[:MAX_RESUME_LINES]) + (
+        "\n[truncated]" if len(lines) > MAX_RESUME_LINES else ""
+    )
     ctx = "Resuming from agentkit checkpoint (%s):\n\n%s" % (cp, body)
     return {
         "hookSpecificOutput": {

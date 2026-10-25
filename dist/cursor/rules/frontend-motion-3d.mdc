@@ -1,13 +1,11 @@
 ---
-description: Picks the right stack for frontend UI, animation, and 3D work — CSS/Motion for UI transitions, GSAP + ScrollTrigger for timelines and scroll storytelling, three.js / React Three Fiber for 3D scenes, HyperFrames for rendered video — and ships it within a performance and accessibility budget (reduced motion, 60fps, LCP, WebGL fallback). Use when the user asks for animations, scroll effects, 3D scenes, WebGL, motion design, interactive hero sections, or a UI that should "feel alive".
+description: Pick the lightest stack for UI animation and 3D (CSS/Motion, GSAP+ScrollTrigger, three.js/R3F, HyperFrames) within a perf and a11y budget. Use when asked for animations, scroll effects, 3D/WebGL, motion design, interactive heroes.
 alwaysApply: false
 ---
 
 # Frontend Motion & 3D
 
-Motion and 3D fail the same ways: the wrong tool for the effect, janky
-frames nobody measured, and users who asked for less motion getting it
-anyway. Choose the lightest tool, set the budget, then build.
+Choose the lightest tool, set the budget, then build.
 
 ## Procedure
 
@@ -54,11 +52,3 @@ anyway. Choose the lightest tool, set the budget, then build.
 
 - `_frontend-motion-3d/reference/stack.md` — effect → tool table, three.js/R3F setup rules,
   performance budget, accessibility checklist.
-
-## Token economy
-
-- Load one routed skill (e.g. `gsap-scrolltrigger`) for the effect at
-  hand, not the whole family.
-- Read the component and its styles, not the whole app; check
-  `package.json` once for the existing animation/3D stack.
-- General read/search/output patterns live in the `token-saver` skill.

@@ -1,5 +1,5 @@
 ---
-description: Turn a rough feature idea or bug report into a short written spec — problem, scope, non-goals, acceptance criteria — before code is written. Use when the user asks for a spec, design doc, or "write this up before we build it".
+description: Turns a rough feature idea or bug report into a short spec: problem, scope, non-goals, acceptance criteria, tasks. Use when asked for a spec, design doc, or "write this up before we build it".
 trigger: model_decision
 ---
 
@@ -30,9 +30,4 @@ its keep only once the spec hands off to more than one owner.
 
 ## Token economy
 
-- A short spec before code prevents the most expensive token burn of
-  all: rework. Write the spec first, never after.
-- Keep the spec to this file's five sections — problem, scope,
-  non-goals, acceptance criteria, open questions. Nothing more.
-- General read/search/output patterns live in the `token-saver` skill —
-  don't duplicate them here.
+Write the spec before code; rework is the costliest burn.

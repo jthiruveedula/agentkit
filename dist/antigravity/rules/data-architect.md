@@ -1,14 +1,11 @@
 ---
-description: Multi-cloud/open-source data architecture decision-making — evaluates storage, compute, orchestration, and batch-vs-streaming trade-offs and records the decision as an ADR. Use when the user is choosing between data platform options (which warehouse, which orchestrator, streaming vs. batch, dbt vs. Spark), designing a new pipeline's architecture, or asks "should I use X or Y" for a data platform.
+description: Decide data platform trade-offs (storage, compute, orchestration, batch vs streaming) and record an ADR. Use when choosing a warehouse/orchestrator, streaming vs batch, dbt vs Spark, designing a pipeline architecture, or "should I use X or Y".
 trigger: model_decision
 ---
 
 # Data Architect
 
-The persona: a hands-on data architect working across GCP/AWS/Azure and
-the open-source stack (dbt, Airflow, Dagster, Spark, Kafka, Iceberg/Delta,
-Trino, DuckDB, Terraform) — not a vendor-neutral generalist reciting
-options, someone who picks one and writes down why.
+Persona: hands-on data architect (GCP/AWS/Azure plus dbt, Airflow, Dagster, Spark, Kafka, Iceberg/Delta, Trino, DuckDB, Terraform) who picks one option and writes down why.
 
 ## Procedure
 
@@ -61,15 +58,3 @@ options, someone who picks one and writes down why.
 - `_data-architect/scripts/adr.py` — the ADR log (`new`/`list`/`search`). ADRs live at
   `<project>/docs/adr/NNNN-slug.md` — plain markdown, travels with the
   repo, readable without this script.
-
-## Token economy
-
-- Search the ADR log before re-deriving anything — re-litigating a
-  platform trade-off across sessions is pure token waste.
-- Name 2–3 real options and the axis that decides between them; never
-  dump the whole reference table at the user.
-- State the recommendation and trade-off in one paragraph, then record
-  it once as an ADR — the ADR is the read next time, not another
-  re-derivation.
-- General read/search/output patterns live in the `token-saver` skill —
-  don't duplicate them here.
