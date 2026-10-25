@@ -15,6 +15,8 @@ community MCP server
 `efdff86a22a15be864c67c16acbf399c2e865dea`. Source reviewed at that pin:
 talks only to `api.meta.ai`, writes images to a local folder, runs no shell.
 
+## Procedure
+
 1. If `mcp__muse-image__*` tools exist, use them.
 2. Otherwise the user needs a Meta Model API key in their shell environment
    as `MODEL_API_KEY`. Never ask them to paste it into chat; never write it to a config file.
@@ -27,7 +29,8 @@ talks only to `api.meta.ai`, writes images to a local folder, runs no shell.
    command/args with `"env": {"MODEL_API_KEY": "${MODEL_API_KEY}"}`.
 4. Run `mcp-security-review` on the config before first use (expect no findings).
 5. Tools `generate_image`, `edit_image`, `iterate_image` return file paths, not base64. Save to the project's asset folder, compress (WebP/AVIF) before shipping; hand frontend/3D use to `frontend-motion-3d`.
-6. To bump the pin, first read the diff between pinned commit and new tag (network calls, `child_process`, file writes).
+6. Verify each output file exists and is compressed; if not, re-run until it is.
+7. To bump the pin, first read the diff between pinned commit and new tag (network calls, `child_process`, file writes).
 
 Scope: images only. Muse's other abilities have no verified public API.
 

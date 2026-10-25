@@ -1,0 +1,29 @@
+[
+  {
+    "query": "Should we use Snowflake or BigQuery for our analytics warehouse? We're all-in on GCP with a 3-person team.",
+    "files": [],
+    "expected_behavior": [
+      "Runs python3 scripts/adr.py search for the topic before deriving a trade-off",
+      "Names 2-3 options and the deciding axis (existing cloud, ops ownership) rather than dumping a table",
+      "States one recommendation and what is given up in one paragraph",
+      "Loads ext-gcp for BigQuery-specific mechanics"
+    ]
+  },
+  {
+    "query": "We decided Kafka + Iceberg for ingestion. Record that.",
+    "files": [],
+    "expected_behavior": [
+      "Runs python3 scripts/adr.py new with title, --context, --decision and --consequences",
+      "Consequences state what the choice costs or gives up"
+    ]
+  },
+  {
+    "query": "Write the dbt models and Airflow DAG for our new orders pipeline.",
+    "files": [],
+    "expected_behavior": [
+      "Does not write pipeline code itself",
+      "Redirects to pipeline-scaffold or the pipeline-engineer subagent after the architecture decision",
+      "Does not create an ADR for a purely reversible low-stakes choice"
+    ]
+  }
+]

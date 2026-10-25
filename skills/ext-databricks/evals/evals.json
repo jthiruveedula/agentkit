@@ -1,0 +1,28 @@
+[
+  {
+    "query": "I need to set up a Databricks job with Unity Catalog permissions. Any vendor skills?",
+    "files": [],
+    "expected_behavior": [
+      "Runs sync-external.sh databricks-agent-skills only if external/databricks-agent-skills/ is missing",
+      "Greps external/databricks-agent-skills/skills/*/SKILL.md before reading",
+      "Reads and follows the matching SKILL.md"
+    ]
+  },
+  {
+    "query": "Copy the Delta Lake skill text from the Databricks collection into our repo.",
+    "files": [],
+    "expected_behavior": [
+      "Notes the license is NOASSERTION and treats it as all-rights-reserved",
+      "Asks the user to confirm licensing before copying"
+    ]
+  },
+  {
+    "query": "Help me with a BigQuery partitioning problem.",
+    "files": [],
+    "expected_behavior": [
+      "Does not route to the Databricks skill collection",
+      "Indicates this is a GCP task (ext-gcp), not Databricks",
+      "Does not sync databricks-agent-skills"
+    ]
+  }
+]

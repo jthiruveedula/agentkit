@@ -1,0 +1,29 @@
+[
+  {
+    "query": "I'm building a churn model on 2 years of subscription data. Set up the training pipeline.",
+    "files": [],
+    "expected_behavior": [
+      "Names the decision, metric and a non-ML baseline before modeling",
+      "Uses a time-based split, and a group split if users repeat",
+      "Fits scalers/encoders on train only",
+      "Logs params, data version, commit and metrics to the existing tracker"
+    ]
+  },
+  {
+    "query": "Our fraud model's AUC is 0.99 on the test set. Can we deploy it?",
+    "files": [],
+    "expected_behavior": [
+      "Checks for leakage using reference/checklist.md before trusting the number",
+      "Asks for or runs slice metrics and error analysis, not just aggregate AUC",
+      "Requires registering the model with data version and feature schema and using the same feature code at serving"
+    ]
+  },
+  {
+    "query": "Write me a React landing page for our ML product.",
+    "files": [],
+    "expected_behavior": [
+      "Recognizes this is out of scope for ml-lifecycle",
+      "Does not apply the ML procedure or invent a model workflow"
+    ]
+  }
+]

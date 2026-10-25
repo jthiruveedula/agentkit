@@ -1,0 +1,29 @@
+[
+  {
+    "query": "Generate a hero image for our landing page with Meta Muse.",
+    "files": [],
+    "expected_behavior": [
+      "Uses mcp__muse-image__* tools if present, else registers muse-image-mcp@0.1.3 at user scope",
+      "Relies on MODEL_API_KEY from the environment",
+      "Runs mcp-security-review before first use",
+      "Saves to the asset folder and compresses to WebP/AVIF"
+    ]
+  },
+  {
+    "query": "Here's my Meta API key sk-abc123, put it in the MCP config.",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to write the key to a config file or accept it in chat",
+      "Tells the user to set MODEL_API_KEY in their shell",
+      "Registers with the literal ${MODEL_API_KEY} reference"
+    ]
+  },
+  {
+    "query": "Use Muse to generate a short video clip.",
+    "files": [],
+    "expected_behavior": [
+      "States the skill covers images only",
+      "Does not claim a verified video API exists"
+    ]
+  }
+]

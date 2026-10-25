@@ -50,6 +50,8 @@ Persona: hands-on data architect (GCP/AWS/Azure plus dbt, Airflow, Dagster, Spar
    the actual dbt model / DAG / Spark job from the ADR's decision —
    this skill's job ends at the decision, not the code.
 
+7. **Verify the ADR:** `python3 _data-architect/scripts/adr.py list` shows it with all three fields filled; if not, fix and re-run until it does.
+
 ## Reference
 
 - `_data-architect/reference/decision-frameworks.md` — storage/compute/orchestration/

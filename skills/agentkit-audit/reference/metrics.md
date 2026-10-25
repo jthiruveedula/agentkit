@@ -15,11 +15,11 @@ Units: every `skills/*/SKILL.md` and `agents/*.md`. Tokens = chars/4 (SKILL.md o
 
 ## CRI (context hygiene) - base 70
 - +5 per distinct term (offset, limit, range, grep, rg, summar*, targeted, head, tail, checkpoint, diff), max +30.
-- -15 per whole-file instruction ("read the entire/whole/all", "whole file", "read every"). `cri.whole_file`
+- -15 per whole-file instruction ("read the entire/whole/all", "whole file", "read every"), unless a negation (don't, never, avoid, not, instead of) appears in the 60 chars before it. `cri.whole_file`
 - -20 for skill >1.5x token target with no reference/. `cri.no_reference`
 
 ## SRS (robustness)
-- Skill: tests/ 30, scripts/ 30. Agent: tools scoped 30, references a skill/agent in backticks 30.
+- Skill: tests 30 = `tests/test*`, or a repo `tests/test_*.py` that loads `skills/<name>/scripts`, or >=3 scenarios in `evals/evals.json` (`[{query, files, expected_behavior[]}]`, Anthropic's eval format; not shipped to dist/). Validation 30 = `scripts/`, or a body line with a check word (validate/verify/lint/check/test) followed by repeat/until/re-run/again (validate-fix-repeat loop). Scripts are optional for prompt-only skills per Anthropic's skill-authoring guidance. Agent: tools scoped 30, references a skill/agent in backticks 30.
 - Security budget 40, minus 20/10/5 per high/med/low `sec.*` finding (one per heuristic per unit, floor 0). Replaces the old safety-word count (noisy).
 - `sec.shell` (high): scripts/*.py call with `shell=True`, `os.system`, `os.popen` (strings/comments ignored).
 - `sec.env` (med): `env={...}` dict literal on a line without `os.environ` (replaces the whole environment).

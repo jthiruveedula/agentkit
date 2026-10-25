@@ -1,0 +1,28 @@
+[
+  {
+    "query": "Does a skill already exist for Terraform review before I write one?",
+    "files": [],
+    "expected_behavior": [
+      "Syncs awesome-agent-skills if external/awesome-agent-skills/ is missing",
+      "Runs grep -i on external/awesome-agent-skills/README.md",
+      "Verifies any candidate with gh api repos/<owner>/<repo> before recommending"
+    ]
+  },
+  {
+    "query": "Find an existing skill for PDF form filling.",
+    "files": [],
+    "expected_behavior": [
+      "Greps the local index rather than cloning candidate repos",
+      "Gives the URL or wires it like other ext-* skills"
+    ]
+  },
+  {
+    "query": "Search the index for a quantum-basket-weaving skill.",
+    "files": [],
+    "expected_behavior": [
+      "Reports nothing fits when the grep has no match",
+      "Suggests building one via skill-forge",
+      "Does not invent a repository"
+    ]
+  }
+]

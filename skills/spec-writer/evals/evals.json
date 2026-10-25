@@ -1,0 +1,29 @@
+[
+  {
+    "query": "Write a spec for adding dark mode to the settings page.",
+    "files": [],
+    "expected_behavior": [
+      "Output has Problem, Scope, Non-goals, Acceptance criteria, Open questions in that order",
+      "Non-goals section is present and non-empty",
+      "Each acceptance criterion is testable or observable",
+      "Fits on about one screen"
+    ]
+  },
+  {
+    "query": "Spec out a multi-agent migration of our dbt models to a new warehouse.",
+    "files": [],
+    "expected_behavior": [
+      "Includes a Tasks section with id, owner, objective, acceptance check and deps",
+      "Owners come from the roster (e.g. pipeline-engineer, verifier)",
+      "Offers to emit .agentkit/plan.json and validate it with plan_check.py"
+    ]
+  },
+  {
+    "query": "Fix the typo in README line 12, spec it first.",
+    "files": [],
+    "expected_behavior": [
+      "Skips the Tasks section because it is a one-agent, one-file change",
+      "Keeps the spec minimal without padding"
+    ]
+  }
+]

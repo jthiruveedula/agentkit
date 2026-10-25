@@ -46,6 +46,7 @@ Choose the lightest tool, set the budget, then build.
    during the animation), Lighthouse LCP/CLS, reduced-motion toggled on,
    WebGL disabled. For a browser check use `ego-browser`. Report the
    numbers; "looks smooth" is not evidence.
+   Check each number against the budget; if one misses, fix and re-measure until it passes.
 
 6. **Hand off** multi-file UI builds to the `frontend-engineer` subagent
    with the effect list, the chosen stack, and the budget from step 2.

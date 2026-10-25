@@ -1,0 +1,29 @@
+[
+  {
+    "query": "Here are notes: 'Sam: I'll send the contract by Friday. Priya: let's have someone update the roadmap. FYI Q3 revenue was up 10%.' Extract actions.",
+    "files": [],
+    "expected_behavior": [
+      "Outputs a flat list in the format - [ ] action \u2014 @owner \u2014 date",
+      "Sam item has @Sam and date Friday",
+      "Roadmap item is marked @unassigned",
+      "FYI revenue item is excluded"
+    ]
+  },
+  {
+    "query": "Notes: 'We talked about hiring. Nothing decided.' Pull out the action items.",
+    "files": [],
+    "expected_behavior": [
+      "Does not invent action items",
+      "Adds no summary paragraph"
+    ]
+  },
+  {
+    "query": "Pull actions from these notes and also give me a summary of the meeting.",
+    "files": [],
+    "expected_behavior": [
+      "Outputs the flat action list",
+      "Provides the summary since it was explicitly asked",
+      "Uses 'no date given' where no date is stated"
+    ]
+  }
+]

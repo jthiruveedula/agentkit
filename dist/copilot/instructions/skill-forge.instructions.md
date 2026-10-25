@@ -5,6 +5,8 @@ applyTo: **
 
 # Skill Forge
 
+## Procedure
+
 1. Get the skill's kebab-case name and one-line description+trigger from the
    user (ask if not given — this is the one case worth a quick check, a bad
    name means a rename later touches 4 emitted copies).
@@ -18,7 +20,7 @@ applyTo: **
 3. Fill in the body under 500 lines; push depth into `reference/`.
 4. Run `python3 scripts/validate.py` from the repo root before considering
    it done — new skill must pass frontmatter/link/secret checks like every
-   other skill.
+   other skill. If validate fails, fix the reported error and re-run until it passes.
 5. Run `python3 scripts/build.py` to regenerate the 4 tool adapters and
    `AGENTS.md` — never hand-edit `dist/`.
 

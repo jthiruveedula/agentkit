@@ -1,0 +1,29 @@
+[
+  {
+    "query": "test_parse_dates fails with KeyError 'tz' on CI. Find the root cause.",
+    "files": [],
+    "expected_behavior": [
+      "Searches memory for matching corrections before hypothesizing",
+      "Captures the exact failing command and output before changing code",
+      "States one falsifiable hypothesis per iteration and logs one line per result",
+      "Reports root cause in one sentence"
+    ]
+  },
+  {
+    "query": "This function is broken, just patch it so the test passes.",
+    "files": [],
+    "expected_behavior": [
+      "Reproduces first and does not apply a speculative fix",
+      "Greps every caller of the broken function before fixing",
+      "Re-runs the original repro plus the existing test suite after the fix"
+    ]
+  },
+  {
+    "query": "The bug has persisted through many attempts; keep going until it's fixed.",
+    "files": [],
+    "expected_behavior": [
+      "Stops after 6 loop iterations and asks the user for more context",
+      "Does not continue looping beyond the cap"
+    ]
+  }
+]

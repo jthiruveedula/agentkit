@@ -1,0 +1,28 @@
+[
+  {
+    "query": "Help me deploy a service to Cloud Run with Vertex AI calls; use Google's skills.",
+    "files": [],
+    "expected_behavior": [
+      "Runs sync-external.sh gcp-skills only if external/gcp-skills/ is missing",
+      "Greps external/gcp-skills/skills/*/SKILL.md before reading full files",
+      "Reads and follows the matching SKILL.md"
+    ]
+  },
+  {
+    "query": "Optimize my BigQuery query costs.",
+    "files": [],
+    "expected_behavior": [
+      "Uses gcloud/bq --format filtering and passes --project",
+      "Says so if no skill fits instead of forcing one"
+    ]
+  },
+  {
+    "query": "Set up an EKS cluster with IAM roles.",
+    "files": [],
+    "expected_behavior": [
+      "Does not route to the GCP collection",
+      "Indicates this belongs to AWS (ext-aws)",
+      "Does not sync gcp-skills"
+    ]
+  }
+]

@@ -59,6 +59,13 @@ GOOD_CTX = re.compile(
     re.I,
 )
 BAD_CTX = re.compile(r"read (the )?(entire|whole|all)\b|whole[- ]file|read every", re.I)
+# Feedback loop in the body: a check step that says to fix and repeat/re-run.
+LOOP = re.compile(
+    r"\b(validat|verif|lint|check|test|re-?run)\w*[^\n]{0,120}?\b(repeat|until|re-?run|again)\b",
+    re.I,
+)
+# A whole-file mention within 60 chars after a negation is guidance, not a leak.
+NEGATED = re.compile(r"\b(don't|do not|never|avoid|no|not|instead of)\b", re.I)
 MAX_BYTES = 512 * 1024
 CONFIRM = re.compile(
     r"confirm|approv|ask (the )?user|permission|consent|dry[- ]run|never|do not|don't|avoid|must not|refuse",
@@ -165,6 +172,13 @@ def read_units(rd):
         units.append(("skill", p.parent.name, p, p.parent))
     for p in sorted((root / "agents").glob("*.md")):
         units.append(("agent", p.stem, p, None))
+    # Repo-level tests that load a skill's scripts count as that skill's tests;
+    # `"skills" / "x" / "scripts"` is normalized to `skills/x/scripts`.
+    repo_tests = re.sub(
+        r'"\s*/\s*"',
+        "/",
+        "".join(rd.text(x) for x in sorted((root / "tests").glob("test_*.py"))),
+    )
     out = []
     for kind, name, p, d in units:
         text = rd.text(p)
@@ -177,6 +191,20 @@ def read_units(rd):
             for x in sorted((d / "scripts").iterdir()):
                 if x.suffix in (".py", ".sh") and x.is_file():
                     scripts.append((rd.rel(x), rd.text(x)))
+        evals = 0
+        if d and (d / "evals" / "evals.json").is_file():
+            try:
+                ev = json.loads(rd.text(d / "evals" / "evals.json") or "[]")
+            except ValueError:
+                ev = []
+            evals = sum(
+                1
+                for e in (ev if isinstance(ev, list) else [])
+                if isinstance(e, dict)
+                and str(e.get("query", "")).strip()
+                and isinstance(e.get("expected_behavior"), list)
+                and e["expected_behavior"]
+            )
         out.append(
             dict(
                 kind=kind,
@@ -186,6 +214,8 @@ def read_units(rd):
                 body=body,
                 dir=d,
                 scripts=scripts,
+                evals=evals,
+                repo_tested=bool(d) and ("skills/%s/scripts" % name) in repo_tests,
                 path=rd.rel(p),
             )
         )
@@ -478,7 +508,11 @@ def score_unit(u):
 
     # CRI
     cri = 70 + min(30, 5 * len(set(m.lower() for m in GOOD_CTX.findall(body))))
-    bad = len(BAD_CTX.findall(body))
+    bad = sum(
+        1
+        for m in BAD_CTX.finditer(body)
+        if not NEGATED.search(body[max(0, m.start() - 60) : m.start()])
+    )
     if bad:
         cri -= 15 * bad
         f.append(
@@ -500,9 +534,11 @@ def score_unit(u):
         parts = [
             (
                 30,
-                bool(d and (d / "tests").is_dir() and any((d / "tests").glob("test*"))),
+                bool(d and (d / "tests").is_dir() and any((d / "tests").glob("test*")))
+                or u.get("repo_tested", False)
+                or u.get("evals", 0) >= 3,
                 "srs.tests",
-                "no tests/",
+                "no tests/ or >=3 evals/evals.json scenarios",
             ),
             (
                 30,
@@ -512,9 +548,10 @@ def score_unit(u):
                     and any(
                         x for x in (d / "scripts").iterdir() if x.name != ".gitkeep"
                     )
-                ),
+                )
+                or bool(LOOP.search(body)),
                 "srs.scripts",
-                "no scripts/ for deterministic logic",
+                "no scripts/ or validate-fix-repeat loop",
             ),
         ]
     else:

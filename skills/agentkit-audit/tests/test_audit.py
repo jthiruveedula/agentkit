@@ -176,3 +176,31 @@ def test_fallback_parser_matches_repo_parser(monkeypatch):
         got, want = installed.parse(text)[0], audit.parse(text)[0]
         for k in ("name", "description", "version"):
             assert got.get(k) == want.get(k), (md, k)
+
+
+def test_evals_loop_and_negated_whole_file(tmp_path):
+    root = _mk(tmp_path, "## Procedure\n\n1. Read the whole file.\n")
+    assert {"srs.tests", "srs.scripts", "cri.whole_file"} <= _heur(audit.audit(root))
+    md = root / "skills" / "foo" / "SKILL.md"
+    md.write_text(
+        md.read_text().replace(
+            "1. Read the whole file.",
+            "1. Don't read the whole file; grep it.\n2. Verify: lint; fix and re-run until clean.",
+        )
+    )
+    ev = root / "skills" / "foo" / "evals"
+    ev.mkdir()
+    one = {"query": "q", "files": [], "expected_behavior": ["b"]}
+    (ev / "evals.json").write_text(json.dumps([one, one]))
+    assert "srs.tests" in _heur(audit.audit(root))  # 2 scenarios is not enough
+    (ev / "evals.json").write_text(json.dumps([one, one, {"query": "q"}, one]))
+    assert not {"srs.tests", "srs.scripts", "cri.whole_file"} & _heur(audit.audit(root))
+
+
+def test_repo_test_loading_skill_scripts_counts(tmp_path):
+    root = _mk(tmp_path, "# Foo\n")
+    (root / "tests").mkdir()
+    (root / "tests" / "test_foo.py").write_text(
+        'P = ROOT / "skills" / "foo" / "scripts" / "x.py"\n'
+    )
+    assert "srs.tests" not in _heur(audit.audit(root))
