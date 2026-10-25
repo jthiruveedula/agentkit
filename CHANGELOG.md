@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/jthiruveedula/agentkit/compare/v0.14.0...v0.15.0) (2026-10-25)
+
+
+### Features
+
+* **site:** slide plates over each other as 3D paper sheets ([#66](https://github.com/jthiruveedula/agentkit/issues/66)) ([80d9815](https://github.com/jthiruveedula/agentkit/commit/80d9815e243634f43e2f2d15265f8592f0672070))
+
 ## [0.14.0](https://github.com/jthiruveedula/agentkit/compare/v0.13.1...v0.14.0) (2026-10-25)
 
 
