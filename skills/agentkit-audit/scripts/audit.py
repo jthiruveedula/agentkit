@@ -219,7 +219,9 @@ def code_only(t):
                     s = out[r - 1].rstrip("\n")
                     lo = c0 if r == r0 else 0
                     hi = c1 if r == r1 else len(s)
-                    out[r - 1] = s[:lo] + "_" * (hi - lo) + s[hi:] + out[r - 1][len(s) :]
+                    out[r - 1] = (
+                        s[:lo] + "_" * (hi - lo) + s[hi:] + out[r - 1][len(s) :]
+                    )
         return "".join(out)
     except (tokenize.TokenError, SyntaxError, IndentationError):
         return t
@@ -599,9 +601,7 @@ def graph(units):
             continue
         n, body = u["name"], u["body"]
         if n == "orchestrator":
-            for lst in re.findall(
-                r"Agent\(([^)]*)\)", tools_s(u["meta"])
-            ):
+            for lst in re.findall(r"Agent\(([^)]*)\)", tools_s(u["meta"])):
                 for a in (x.strip() for x in lst.split(",")):
                     if a in agents:
                         edges.add((n, a, "delegates"))
@@ -740,7 +740,9 @@ def write_atomic(path, s):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--root", default=str(ROOT if (ROOT / "skills").is_dir() else Path.cwd()))
+    ap.add_argument(
+        "--root", default=str(ROOT if (ROOT / "skills").is_dir() else Path.cwd())
+    )
     ap.add_argument("--out")
     ap.add_argument("--baseline")
     ap.add_argument(

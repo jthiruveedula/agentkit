@@ -3,10 +3,13 @@ import stat
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import memory as mem  # noqa: E402
 
 
+@pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits")
 def test_db_and_dir_private(tmp_path):
     p = tmp_path / "sub" / "m.db"
     db, _ = mem.connect(str(p))

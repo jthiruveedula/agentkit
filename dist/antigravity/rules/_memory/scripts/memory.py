@@ -112,7 +112,9 @@ def connect(db_path):
     if not special:
         os.makedirs(os.path.dirname(os.path.abspath(path)), mode=0o700, exist_ok=True)
     try:
-        if not special and not os.path.exists(path):  # 0600 before sqlite's umask default
+        if not special and not os.path.exists(
+            path
+        ):  # 0600 before sqlite's umask default
             flags = os.O_CREAT | os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0)
             os.close(os.open(path, flags, 0o600))
         db = sqlite3.connect(path)

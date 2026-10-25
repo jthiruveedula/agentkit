@@ -700,9 +700,13 @@ def check_stale_pins(repo: Path, fix: bool = False) -> CheckResult:
     try:
         rows = json.loads(p.read_text(encoding="utf-8"))["sources"]
         stale = [
-            "%s (%s behind%s)" % (r["name"], r.get("behind_by"), ", archived" if r.get("archived") else "")
+            "%s (%s behind%s)"
+            % (r["name"], r.get("behind_by"), ", archived" if r.get("archived") else "")
             for r in rows
-            if (r.get("behind_by") or 0) > 0 or r.get("archived") or r.get("license_changed") or r.get("error")
+            if (r.get("behind_by") or 0) > 0
+            or r.get("archived")
+            or r.get("license_changed")
+            or r.get("error")
         ]
     except (OSError, ValueError, KeyError, TypeError) as e:
         return CheckResult(name, "warn", "cannot parse external/updates.json: %s" % e)

@@ -92,12 +92,12 @@ def test_rate_limited_exit_zero_unless_strict(lock, monkeypatch, capsys):
 
 
 def test_token_never_printed(lock, monkeypatch, capsys):
-    monkeypatch.setenv("GITHUB_TOKEN", "ghp_SECRET123")
+    monkeypatch.setenv("GITHUB_TOKEN", "fake-token-for-test")
     monkeypatch.setattr(cu, "fetch", lambda u, t=None: fake_get(u))
     cu.main(["--lock", str(lock), "--json"])
     cu.main(["--lock", str(lock)])
     out = capsys.readouterr()
-    assert "ghp_SECRET123" not in out.out + out.err
+    assert "fake-token-for-test" not in out.out + out.err
 
 
 def test_manual_pins(tmp_path):

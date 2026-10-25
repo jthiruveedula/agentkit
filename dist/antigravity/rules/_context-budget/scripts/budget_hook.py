@@ -127,7 +127,9 @@ def resume(hook):
     if not body:
         return None
     lines = body.splitlines()  # cap = checkpoint.py MAX_LINES
-    body = "\n".join(lines[:MAX_RESUME_LINES]) + ("\n[truncated]" if len(lines) > MAX_RESUME_LINES else "")
+    body = "\n".join(lines[:MAX_RESUME_LINES]) + (
+        "\n[truncated]" if len(lines) > MAX_RESUME_LINES else ""
+    )
     ctx = "Resuming from agentkit checkpoint (%s):\n\n%s" % (cp, body)
     return {
         "hookSpecificOutput": {
