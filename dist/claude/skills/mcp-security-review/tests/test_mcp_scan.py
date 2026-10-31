@@ -352,6 +352,22 @@ def test_secret_in_url_flagged_and_never_printed(tmp_path):
     assert "hunter2" not in json.dumps(findings)
 
 
+def test_secret_in_header_flagged_and_never_printed(tmp_path):
+    findings, _ = scan(
+        tmp_path,
+        {
+            "mcpServers": {
+                "s": {
+                    "url": "https://h.example",
+                    "headers": {"X-Key": "hunter2hunter2"},
+                }
+            }
+        },
+    )
+    assert "SECRET_IN_CONFIG" in codes(findings)
+    assert "hunter2" not in json.dumps(findings)
+
+
 def test_malformed_input_is_a_clean_error(tmp_path):
     bad = tmp_path / "bad.json"
     bad.write_text("{not json")

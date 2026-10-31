@@ -9,10 +9,8 @@ Desktop config. Parses `mcpServers` at the top level and nested under
 `projects.<path>.mcpServers` (the shape ~/.claude.json uses).
 
 Findings never include secret values -- only the key name that looks
-sensitive. Exit 0 when no HIGH-severity findings, 1 otherwise.
+sensitive. Exit 1 on any HIGH-severity finding or unreadable/malformed config, else 0.
 """
-
-from __future__ import annotations
 
 import argparse
 import json
