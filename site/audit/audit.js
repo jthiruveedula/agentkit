@@ -15,6 +15,7 @@ function fmt(n){return Number(n).toLocaleString('en-US')}
 function d1(n){return (Math.round(n*10)/10).toFixed(1)}
 
 function setPaused(p){document.body.classList.toggle('paused',p);document.querySelectorAll('.pausebtn').forEach(function(b){b.setAttribute('aria-pressed',p)})}
+$('gpause').hidden=false;
 $('gpause').onclick=function(){setPaused(!document.body.classList.contains('paused'))};
 $('retry').onclick=function(){location.reload()};
 if(RM){document.body.classList.add('paused');$('gpause').disabled=true;$('gpause').textContent='Animation off (reduced motion)'}
@@ -43,12 +44,6 @@ var io=new IntersectionObserver(function(es){es.forEach(function(e){
   if(e.target.id==='gwrap')e.target.classList.toggle('live',e.isIntersecting&&!RM)
 })},{threshold:.15});
 function reveal(n,run){n._run=run;io.observe(n)}
-
-/* build heavy sections only when scrolled near */
-var lio=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(!e.isIntersecting)return;lio.unobserve(e.target);var r=e.target._lazy;e.target._lazy=null;
-  if(r)try{r()}catch(x){fallback()}})},{rootMargin:'400px 0px'});
-function lazy(n,run){n._lazy=run;lio.observe(n)}
 
 function num(v){return typeof v==='number'&&isFinite(v)}
 function snap(s,full){
@@ -120,7 +115,8 @@ function render(D){
   else{tl.textContent=fmt(C.tokens.total)+' tokens';el('p',null,'Skills '+fmt(C.tokens.skills)+', agents '+fmt(C.tokens.agents)+'.',a3)}
   A.querySelectorAll('.rise').forEach(function(n){reveal(n)});
 
-  scoreTable(C);lazy($('graph'),function(){graph(C)});lazy($('gallery'),function(){gallery(C)});log(C);
+  /* graph nodes and filter chips are tab stops: build them up front so keyboard users reach them in order */
+  scoreTable(C);graph(C);gallery(C);log(C);
 
   var ft=$('foot');
   var l=el('a',null,'← agentkit',ft);l.href='../';
@@ -169,7 +165,7 @@ function graph(C){
     var u=U[n.id];tip.textContent='';el('b',null,n.label,tip);
     el('div',null,n.kind+(u?' · '+fmt(u.tokens)+' tok':''),tip);
     if(u)['PEI','OVS','CRI','SRS'].forEach(function(k){el('div',null,k+' '+Math.round(u.scores[k]),tip)});
-    if(u&&u.flags.length)el('div',null,'⚠ '+u.flags.join(', '),tip);
+    if(u&&u.flags.length)el('div',null,'flagged: '+u.flags.join(', '),tip);
     var w=wrap.clientWidth,px=x/600*w,py=y/600*w;
     tip.style.left=Math.min(Math.max(px+14,4),w-206)+'px';tip.style.top=Math.min(py+14,w-150)+'px';tip.classList.add('show');
   }
@@ -184,7 +180,7 @@ function graph(C){
   G.nodes.forEach(function(n){
     var p=pos[n.id];if(!p)return;
     var u=U[n.id],col=!deg[n.id]?'s-idle':(u&&u.flags.length?'s-flag':'s-ok');
-    var g=svg('g',{class:'node',tabindex:0,role:'img','aria-label':n.label+', '+n.kind+(u?', '+u.flags.length+' flags':''),'aria-describedby':'tip'},ng);els[n.id]=g;
+    var g=svg('g',{class:'node'+(n===hub?' hub':''),tabindex:0,role:'img','aria-label':n.label+', '+n.kind+(u?', '+u.flags.length+' flags':''),'aria-describedby':'tip'},ng);els[n.id]=g;
     var isH=n===hub,r=isH?13:n.kind==='agent'?9:5;
     svg('circle',{cx:p[0],cy:p[1],r:r+5,class:'ring'},g);
     if(n.kind==='agent')svg('rect',{x:p[0]-r,y:p[1]-r,width:2*r,height:2*r,rx:3,class:col},g);
@@ -219,11 +215,11 @@ function gallery(C){
   U.forEach(function(u,i){
     var c=el('article','card u rise',null,grid);c._u=u;c.style.setProperty('--i',i%8);
     var mo=motif(u),gl=el('div','glyph '+u.kind+' m-'+mo,null,c);gl.setAttribute('aria-hidden','true');for(var k=0;k<MOTIF_N[mo];k++)el('i',null,null,gl).style.setProperty('--k',k);
-    el('h4',null,u.name,c);el('div','meta',u.kind+' · '+fmt(u.tokens)+' tok',c);
+    el('h3',null,u.name,c);el('div','meta',u.kind+' · '+fmt(u.tokens)+' tok',c);
     var m=el('div','mini',null,c);
     ['PEI','OVS','CRI','SRS'].forEach(function(k){var v=u.scores[k];el('span',null,k,m);var b=el('div','bar'+(v<60?' w':''),null,m);var f=el('i',null,null,b);f.style.setProperty('--w',Math.min(v,100)/100);b.setAttribute('title',k+' '+Math.round(v))});
     m.setAttribute('aria-hidden','true');
-    if(u.flags.length)el('div','flag','⚠ '+u.flags.join(', '),c);
+    if(u.flags.length){var fl=el('div','flag',null,c);el('b',null,'flagged',fl);fl.append(document.createTextNode(u.flags.join(', ')))}
     cards.push(c);reveal(c);
   });
   tally();

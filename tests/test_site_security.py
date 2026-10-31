@@ -70,5 +70,5 @@ def test_catalog_baked_without_js():
     ]
     assert b.bake(skills, html) == html, "run site/scripts/build-catalog.py"
     body = b.BAKE_RE.search(html).group(0)
-    assert body.count("<li") == len(skills)
+    assert body.count('<span class="b">') == len(skills)
     assert all(s["name"] in body for s in skills)
