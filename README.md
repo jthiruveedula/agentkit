@@ -363,5 +363,5 @@ fill in the body (keep `SKILL.md` under 500 lines, push depth into
 `reference/`/`scripts/`/`tests/`), then `make build && make test`.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for branching and commit
-conventions, and [`MIGRATION.md`](MIGRATION.md) for restoring this
+conventions, and [`docs/MIGRATION.md`](docs/MIGRATION.md) for restoring this
 environment on a fresh machine.
