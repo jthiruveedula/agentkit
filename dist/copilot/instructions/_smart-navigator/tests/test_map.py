@@ -96,6 +96,38 @@ class TestMap(unittest.TestCase):
         self.assertIn("src/main.py", out)  # entry points unaffected
         self.assertIn("src/", out)
 
+    def test_common_heavy_dirs_ignored(self):
+        for d in ("venv", "build", ".next", ".cache"):
+            (self.root / d).mkdir()
+            (self.root / d / "heavy.bin").write_text("x")
+        out = self.run_map()
+        for d in ("venv/", "build/", ".next", ".cache", "heavy.bin"):
+            self.assertNotIn(d, out)  # "build" alone is a fixture script name
+
+    def test_long_listing_capped(self):
+        wide = self.root / "wide"
+        wide.mkdir()
+        for i in range(60):
+            (wide / ("f%02d.txt" % i)).write_text("x")
+        out = self.run_map()
+        self.assertIn("... 10 more", out)  # 60 entries, cap 50
+        self.assertNotIn("f59.txt", out)
+        self.assertIn("(60 files", out)  # stats still count the hidden ones
+        data = json.loads(self.run_map("--json"))
+        (w,) = [n for n in data["tree"] if n["name"] == "wide/"]
+        self.assertEqual(len(w["children"]), 51)
+        self.assertEqual(w["children"][-1]["count"], 10)
+
+    def test_dir_stats_roll_up_in_one_pass(self):
+        deep = self.root / "a" / "b" / "c"
+        deep.mkdir(parents=True)
+        for d in (self.root / "a", self.root / "a" / "b", deep):
+            (d / "f.txt").write_text("x" * 2048)
+        out = self.run_map("--depth", "3")
+        self.assertIn("a/ (3 files, 6 KB)", out)
+        self.assertIn("b/ (2 files, 4 KB)", out)
+        self.assertIn("c/ (1 files, 2 KB)", out)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
