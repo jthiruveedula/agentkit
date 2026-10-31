@@ -17,6 +17,21 @@ SINK = re.compile(
 )
 
 
+# Local css/js refs carry ?v=<content hash> so a returning visitor never pairs
+# fresh HTML with a cached stale stylesheet (Pages serves max-age=600).
+ASSET_RE = re.compile(
+    r'((?:href|src)=")((?:\.\./)?[\w./-]+\.(?:css|js))(?:\?v=\w+)?(")'
+)
+
+
+def stamp(page, src):
+    def one(m):
+        h = hashlib.sha256((page.parent / m.group(2)).read_bytes()).hexdigest()[:10]
+        return f"{m.group(1)}{m.group(2)}?v={h}{m.group(3)}"
+
+    return ASSET_RE.sub(one, src)
+
+
 class P(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -146,6 +161,8 @@ def check():
                 errs.append(f"{rel}: CSP lacks {must}")
         if re.search(r"https?:|//", p.csp):
             errs.append(f"{rel}: CSP names a third-party host")
+        if stamp(page, src) != src:
+            errs.append(f"{rel}: stale asset ?v= hash; run check_site.py --fix")
         errs += [f"{rel}: {e}" for e in check_fonts(page, src)]
         errs += [f"{rel}: {e}" for e in check_seo(src)]
     for js in SITE.rglob("*.js"):
@@ -158,6 +175,9 @@ def check():
 
 
 if __name__ == "__main__":
+    if "--fix" in sys.argv:
+        for pg in PAGES:
+            pg.write_text(stamp(pg, pg.read_text(encoding="utf-8")), encoding="utf-8")
     e = check()
     print("\n".join(e) if e else "site security check: ok")
     sys.exit(1 if e else 0)
