@@ -35,7 +35,13 @@ IGNORE = {
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
+    "venv",
+    "build",
+    ".next",
+    ".cache",
 }
+
+MAX_ENTRIES = 50  # per-directory listing cap in the tree
 
 ENTRY_NAME = re.compile(r"^(main|cli|index|app|server|run)(\.[a-z0-9]+)?$", re.I)
 MANIFEST_FILES = [
@@ -66,21 +72,31 @@ def list_entries(path):
     return out
 
 
-def dir_stats(path):
-    """Recursive (files, bytes) for a dir, honoring IGNORE."""
-    files, size = 0, 0
-    stack = [path]
+def all_dir_stats(root):
+    """One pass: {dir path: (files, bytes)} for root and every subdir."""
+    order, parent, own = [], {}, {}
+    stack = [(root, None)]
     while stack:
-        for e in list_entries(stack.pop()):
+        path, par = stack.pop()
+        order.append(path)
+        parent[path] = par
+        files = size = 0
+        for e in list_entries(path):
             if e.is_dir(follow_symlinks=False):
-                stack.append(e.path)
+                stack.append((e.path, path))
             else:
                 files += 1
                 try:
                     size += e.stat().st_size
                 except OSError:
                     pass
-    return files, size
+        own[path] = [files, size]
+    for path in reversed(order):  # children are visited after their parent
+        par = parent[path]
+        if par is not None:
+            own[par][0] += own[path][0]
+            own[par][1] += own[path][1]
+    return {p: tuple(v) for p, v in own.items()}
 
 
 def fmt_kb(size):
@@ -264,7 +280,15 @@ def find_entry_points(root, manifests):
 # ------------------------------------------------------------------ tree
 
 
-def build_tree(root, max_depth):
+def build_tree(root, max_depth, stats, max_entries=MAX_ENTRIES):
+    def kids(path, depth):
+        entries = list_entries(path)
+        out = [node(e.path, depth) for e in entries[:max_entries]]
+        if len(entries) > max_entries:
+            n = len(entries) - max_entries
+            out.append({"name": "... %d more" % n, "type": "more", "count": n})
+        return out
+
     def node(path, depth):
         name = os.path.basename(path)
         if not os.path.isdir(path):
@@ -273,16 +297,16 @@ def build_tree(root, max_depth):
             except OSError:
                 size = 0
             return {"name": name, "type": "file", "kb": fmt_kb(size)}
-        files, size = dir_stats(path)
+        files, size = stats[path]
         n = {"name": name + "/", "type": "dir", "files": files, "kb": fmt_kb(size)}
         if depth < max_depth:
-            n["children"] = [node(e.path, depth + 1) for e in list_entries(path)]
+            n["children"] = kids(path, depth + 1)
         return n
 
-    return [node(e.path, 1) for e in list_entries(root)]
+    return kids(root, 1)
 
 
-def render_markdown(root, manifests, entry_points, tree):
+def render_markdown(root, manifests, entry_points, tree, root_stats):
     lines = ["# map: %s" % os.path.basename(root.rstrip(os.sep) or root), ""]
     lines.append("## manifests")
     if manifests:
@@ -311,10 +335,10 @@ def render_markdown(root, manifests, entry_points, tree):
                 )
                 if "children" in n:
                     emit(n["children"], prefix + cont, out)
-            else:
+            else:  # file, or the "... N more" marker
                 out.append("%s%s%s" % (prefix, bar, n["name"]))
 
-    files, size = dir_stats(root)
+    files, size = root_stats
     lines.append(". (%d files, %s)" % (files, fmt_kb(size)))
     emit(tree, "", lines)
 
@@ -343,7 +367,8 @@ def main(argv=None):
 
     manifests = find_manifests(root)
     entry_points = find_entry_points(root, manifests)
-    tree = build_tree(root, max(1, args.depth))
+    stats = all_dir_stats(root)
+    tree = build_tree(root, max(1, args.depth), stats)
 
     if args.json:
         print(
@@ -358,7 +383,7 @@ def main(argv=None):
             )
         )
     else:
-        print(render_markdown(root, manifests, entry_points, tree))
+        print(render_markdown(root, manifests, entry_points, tree, stats[root]))
 
 
 if __name__ == "__main__":
