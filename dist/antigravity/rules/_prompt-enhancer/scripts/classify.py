@@ -10,6 +10,7 @@ JSON, and picks the rewrite pattern for the winning intent.
 
 Exit code is 0 on a classification, 2 on bad usage.
 """
+
 import argparse
 import json
 import re
@@ -20,7 +21,8 @@ from pathlib import Path
 # boundaries. Weight 3 = near-decisive jargon, 2 = strong, 1 = weak hint.
 SIGNALS = {
     "debug": [
-        (r"stack ?trace|traceback|core dump", 3), (r"\bregression\b|\bflaky\b", 3),
+        (r"stack ?trace|traceback|core dump", 3),
+        (r"\bregression\b|\bflaky\b", 3),
         (r"\bbug\b|\bcrash(es|ing|ed)?\b|\bhang(s|ing)?\b", 3),
         (r"\berror\b|\bexception\b|\bfail(s|ed|ing|ure)?\b", 2),
         (r"\bbroken\b|not working|doesn'?t work|won'?t \w+", 2),
@@ -44,7 +46,10 @@ SIGNALS = {
     ],
     "research": [
         (r"\bcompare\b|\bvs\.?\b|\bversus\b|\btrade[- ]?offs?\b", 3),
-        (r"\bpros and cons\b|\bevaluate\b|\bshould (i|we) use\b|\bwhich (one|should|is better)\b", 3),
+        (
+            r"\bpros and cons\b|\bevaluate\b|\bshould (i|we) use\b|\bwhich (one|should|is better)\b",
+            3,
+        ),
         (r"\bresearch\b|\bsurvey\b|\blandscape\b|\bstate of the art\b", 3),
         (r"\bbest practice(s)?\b|\bwhat are the options\b|\balternatives?\b", 2),
         (r"\bhow (do|does) \w+ (work|compare)\b|\bexplain the difference\b", 2),
@@ -52,7 +57,10 @@ SIGNALS = {
     "data-sql": [
         (r"\bsql\b|\bjoin\b|\bgroup by\b|\bwindow function\b", 3),
         (r"\bquery\b", 1),
-        (r"\bbigquery\b|\bsnowflake\b|\bredshift\b|\bdatabricks\b|\bdbt\b|\bathena\b", 3),
+        (
+            r"\bbigquery\b|\bsnowflake\b|\bredshift\b|\bdatabricks\b|\bdbt\b|\bathena\b",
+            3,
+        ),
         (r"\bwarehouse\b|\bdata ?(lake|mart|model)\b|\bmedallion\b", 2),
         (r"\betl\b|\belt\b|\bingest(ion)?\b|\bdata pipeline\b", 2),
         (r"\bpandas\b|\bdataframe\b|\bpyspark\b|\bparquet\b", 2),
@@ -62,8 +70,14 @@ SIGNALS = {
         (r"\bsystem design\b|\barchitect(ure|ing)?\b|\bhld\b|\blld\b", 3),
         (r"\bmicroservices?\b|\bevent[- ]driven\b|\bcqrs\b|\bsaga\b", 3),
         (r"\bshard(ing)?\b|\bcap theorem\b|\bconsistency model\b|\bquorum\b", 3),
-        (r"\bscal(e|ing|ability)\b|\bthroughput\b|\bcapacity\b|\bhigh availability\b", 2),
-        (r"\bdesign (a|an|the) (system|service|platform)\b|\bmillions? of (users|requests)\b", 3),
+        (
+            r"\bscal(e|ing|ability)\b|\bthroughput\b|\bcapacity\b|\bhigh availability\b",
+            2,
+        ),
+        (
+            r"\bdesign (a|an|the) (system|service|platform)\b|\bmillions? of (users|requests)\b",
+            3,
+        ),
         (r"\bp99\b|\bqps\b|\brps\b|\bload balanc", 2),
     ],
     "writing": [
@@ -112,8 +126,13 @@ def classify(text):
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1]["score"], kv[0]))
 
     if not ranked or total < MIN_EVIDENCE:
-        return _result("ambiguous", 0.2 if ranked else 0.0, ranked, total,
-                       "not enough signal in the prompt to pick an intent")
+        return _result(
+            "ambiguous",
+            0.2 if ranked else 0.0,
+            ranked,
+            total,
+            "not enough signal in the prompt to pick an intent",
+        )
 
     top_name, top = ranked[0]
     share = top["score"] / total
@@ -121,8 +140,13 @@ def classify(text):
     margin = (top["score"] - runner) / top["score"]
 
     if share < MIN_SHARE:
-        return _result("ambiguous", round(share, 2), ranked, total,
-                       "multiple intents scored comparably; ask before rewriting")
+        return _result(
+            "ambiguous",
+            round(share, 2),
+            ranked,
+            total,
+            "multiple intents scored comparably; ask before rewriting",
+        )
 
     # confidence blends "how much of the evidence points here" with "how far
     # clear of the runner-up" -- either alone mislabels short prompts.
@@ -152,11 +176,15 @@ def selftest():
     for c in cases:
         got = classify(c["prompt"])
         if got["intent"] != c["expect_intent"]:
-            bad.append("%-28s expected %-13s got %-13s (%.2f)"
-                       % (c["id"], c["expect_intent"], got["intent"], got["confidence"]))
+            bad.append(
+                "%-28s expected %-13s got %-13s (%.2f)"
+                % (c["id"], c["expect_intent"], got["intent"], got["confidence"])
+            )
         elif "expect_band" in c and got["band"] != c["expect_band"]:
-            bad.append("%-28s intent ok, expected band %s got %s (%.2f)"
-                       % (c["id"], c["expect_band"], got["band"], got["confidence"]))
+            bad.append(
+                "%-28s intent ok, expected band %s got %s (%.2f)"
+                % (c["id"], c["expect_band"], got["band"], got["confidence"])
+            )
     for line in bad:
         print("FAIL " + line, file=sys.stderr)
     print("%d/%d golden intent cases passed" % (len(cases) - len(bad), len(cases)))
@@ -167,7 +195,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("prompt", nargs="*", help="the raw prompt text")
     ap.add_argument("--stdin", action="store_true", help="read the prompt from stdin")
-    ap.add_argument("--selftest", action="store_true", help="run the golden intent cases")
+    ap.add_argument(
+        "--selftest", action="store_true", help="run the golden intent cases"
+    )
     args = ap.parse_args(argv)
 
     if args.selftest:

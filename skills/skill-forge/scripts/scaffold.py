@@ -5,6 +5,7 @@
 Creates skills/<name>/{SKILL.md,reference/,scripts/,tests/} plus a golden
 test stub at skills/<name>/tests/test_<name>.py.
 """
+
 import re
 import sys
 from pathlib import Path
@@ -59,7 +60,9 @@ def main(argv):
         print("error: description must be 40-500 chars", file=sys.stderr)
         return 2
     if "use when" not in description.lower():
-        print('error: description must state a trigger ("Use when ...")', file=sys.stderr)
+        print(
+            'error: description must state a trigger ("Use when ...")', file=sys.stderr
+        )
         return 2
 
     skill_dir = SKILLS_DIR / name

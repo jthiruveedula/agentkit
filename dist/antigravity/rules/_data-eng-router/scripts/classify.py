@@ -8,6 +8,7 @@ Lake vs. Synapse) more reliably than a model guessing from vibes alone.
     python3 classify.py "load this into bigquery and schedule with composer"
     python3 classify.py --selftest
 """
+
 import argparse
 import json
 import re
@@ -16,7 +17,8 @@ from pathlib import Path
 
 SIGNALS = {
     "gcp": [
-        (r"\bbigquery\b|\bbq\b", 3), (r"\bvertex ?ai\b", 3),
+        (r"\bbigquery\b|\bbq\b", 3),
+        (r"\bvertex ?ai\b", 3),
         (r"\bdataflow\b|\bdataproc\b|\bcloud composer\b|\bairflow\b.*\bgcp\b", 3),
         (r"\bpub/?sub\b|\bcloud storage\b|\bgcs\b|\bgke\b", 2),
         (r"\bgoogle cloud\b|\bgcp\b", 2),
@@ -70,8 +72,13 @@ def classify(text):
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1]["score"], kv[0]))
 
     if not ranked or total < MIN_EVIDENCE:
-        return _result("ambiguous", 0.2 if ranked else 0.0, ranked, total,
-                       "no platform-specific vocabulary found")
+        return _result(
+            "ambiguous",
+            0.2 if ranked else 0.0,
+            ranked,
+            total,
+            "no platform-specific vocabulary found",
+        )
 
     top_name, top = ranked[0]
     share = top["score"] / total
@@ -79,8 +86,13 @@ def classify(text):
     margin = (top["score"] - runner) / top["score"]
 
     if share < MIN_SHARE:
-        return _result("ambiguous", round(share, 2), ranked, total,
-                       "multiple platforms scored comparably; ask which one")
+        return _result(
+            "ambiguous",
+            round(share, 2),
+            ranked,
+            total,
+            "multiple platforms scored comparably; ask which one",
+        )
 
     confidence = round(min(0.97, 0.55 * share + 0.45 * margin + 0.10), 2)
     return _result(top_name, confidence, ranked, total, None)
@@ -109,8 +121,10 @@ def selftest():
     for c in cases:
         got = classify(c["prompt"])
         if got["platform"] != c["expect_platform"]:
-            bad.append("%-28s expected %-12s got %-12s (%.2f)"
-                       % (c["id"], c["expect_platform"], got["platform"], got["confidence"]))
+            bad.append(
+                "%-28s expected %-12s got %-12s (%.2f)"
+                % (c["id"], c["expect_platform"], got["platform"], got["confidence"])
+            )
     for line in bad:
         print("FAIL " + line, file=sys.stderr)
     print("%d/%d golden platform cases passed" % (len(cases) - len(bad), len(cases)))

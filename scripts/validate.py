@@ -9,6 +9,7 @@ tests/ dirs), and external/skills.lock.json conforms to
 external/skills.lock.schema.json (required fields and types per source).
 Exit 0 = clean, 1 = violations found (printed to stderr).
 """
+
 import json
 import re
 import sys
@@ -70,7 +71,10 @@ def find_skill_files():
 def check_disallowed_patterns(text, origin, errors):
     for pat, code in DISALLOWED_PATTERNS:
         if pat.search(text):
-            errors.append("%s: disallowed pattern [%s] -- remove before committing" % (origin, code))
+            errors.append(
+                "%s: disallowed pattern [%s] -- remove before committing"
+                % (origin, code)
+            )
 
 
 def check_skill_extra_files(skill_dir, errors):
@@ -149,7 +153,11 @@ def check_lock(lock_path=None):
         sha256 = entry.get("sha256")
         if isinstance(sha256, str) and sha256 and not LOCK_SHA256_RE.match(sha256):
             errors.append("%s: 'sha256' must be a 64-char hex digest" % where)
-    names = [e.get("name") for e in sources if isinstance(e, dict) and isinstance(e.get("name"), str)]
+    names = [
+        e.get("name")
+        for e in sources
+        if isinstance(e, dict) and isinstance(e.get("name"), str)
+    ]
     for name in sorted({n for n in names if names.count(n) > 1}):
         errors.append("%s: duplicate source name '%s'" % (origin, name))
     return errors
@@ -180,28 +188,43 @@ def validate():
 
         for key in REQUIRED_KEYS:
             if not meta.get(key):
-                errors.append("%s: missing required frontmatter key '%s'" % (origin, key))
+                errors.append(
+                    "%s: missing required frontmatter key '%s'" % (origin, key)
+                )
 
         name = meta.get("name", "")
         if name and not NAME_RE.match(name):
             errors.append("%s: name '%s' is not kebab-case" % (origin, name))
         if name and name != skill_dir.name:
-            errors.append("%s: frontmatter name '%s' != directory '%s'" % (origin, name, skill_dir.name))
+            errors.append(
+                "%s: frontmatter name '%s' != directory '%s'"
+                % (origin, name, skill_dir.name)
+            )
         if name:
             if name in seen_names:
-                errors.append("%s: duplicate skill name '%s' (also in %s)" % (origin, name, seen_names[name]))
+                errors.append(
+                    "%s: duplicate skill name '%s' (also in %s)"
+                    % (origin, name, seen_names[name])
+                )
             else:
                 seen_names[name] = origin
 
         desc = meta.get("description", "")
         if desc and not (40 <= len(desc) <= 500):
-            errors.append("%s: description is %d chars, must be 40-500" % (origin, len(desc)))
+            errors.append(
+                "%s: description is %d chars, must be 40-500" % (origin, len(desc))
+            )
         if desc and "use when" not in desc.lower():
-            errors.append("%s: description must state a trigger (\"Use when ...\")" % origin)
+            errors.append(
+                '%s: description must state a trigger ("Use when ...")' % origin
+            )
 
         body_lines = len(body.splitlines())
         if body_lines > 500:
-            errors.append("%s: body is %d lines, must be under 500 (push depth into reference/)" % (origin, body_lines))
+            errors.append(
+                "%s: body is %d lines, must be under 500 (push depth into reference/)"
+                % (origin, body_lines)
+            )
 
         check_links(body, skill_dir, origin, errors)
 

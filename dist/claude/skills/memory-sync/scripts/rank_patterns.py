@@ -13,17 +13,52 @@ script's job is just "surface what recurred," not "auto-write the fix."
     echo "..." | python3 rank_patterns.py --stdin
     python3 rank_patterns.py --selftest
 """
+
 import argparse
 import json
 import re
 import sys
-from collections import defaultdict
 
 STOPWORDS = {
-    "a", "an", "the", "is", "was", "were", "to", "of", "in", "on", "for",
-    "and", "or", "it", "this", "that", "with", "at", "as", "be", "by",
-    "not", "but", "then", "than", "so", "i", "we", "you", "again", "kept",
-    "keeps", "keep", "session", "agent", "did", "didn't", "does", "doesn't",
+    "a",
+    "an",
+    "the",
+    "is",
+    "was",
+    "were",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "and",
+    "or",
+    "it",
+    "this",
+    "that",
+    "with",
+    "at",
+    "as",
+    "be",
+    "by",
+    "not",
+    "but",
+    "then",
+    "than",
+    "so",
+    "i",
+    "we",
+    "you",
+    "again",
+    "kept",
+    "keeps",
+    "keep",
+    "session",
+    "agent",
+    "did",
+    "didn't",
+    "does",
+    "doesn't",
 }
 
 
@@ -75,7 +110,11 @@ def cluster(lines, min_shared=2, min_count=2):
     ranked = [c for c in clusters if len(c["lines"]) >= min_count]
     ranked.sort(key=lambda c: -len(c["lines"]))
     return [
-        {"count": len(c["lines"]), "examples": c["lines"], "shared_terms": sorted(c["tokens"])[:8]}
+        {
+            "count": len(c["lines"]),
+            "examples": c["lines"],
+            "shared_terms": sorted(c["tokens"])[:8],
+        }
         for c in ranked
     ]
 
@@ -103,8 +142,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("file", nargs="?", help="file with one incident per line")
     ap.add_argument("--stdin", action="store_true")
-    ap.add_argument("--min-shared", type=int, default=2, help="shared significant words to join a cluster")
-    ap.add_argument("--min-count", type=int, default=2, help="minimum cluster size to report")
+    ap.add_argument(
+        "--min-shared",
+        type=int,
+        default=2,
+        help="shared significant words to join a cluster",
+    )
+    ap.add_argument(
+        "--min-count", type=int, default=2, help="minimum cluster size to report"
+    )
     ap.add_argument("--selftest", action="store_true")
     args = ap.parse_args(argv)
 
@@ -119,7 +165,7 @@ def main(argv=None):
         ap.error("pass a file, or --stdin")
         return 2
 
-    lines = [l for l in text.splitlines() if l.strip()]
+    lines = [line for line in text.splitlines() if line.strip()]
     patterns = cluster(lines, min_shared=args.min_shared, min_count=args.min_count)
     print(json.dumps({"input_lines": len(lines), "patterns": patterns}, indent=2))
     return 0

@@ -149,7 +149,8 @@ class Reader:
         out = ""
         try:
             rp = p.resolve()
-            if not rp.is_relative_to(self.root):
+            # Path.is_relative_to is 3.9+; requires-python is >=3.8.
+            if self.root != rp and self.root not in rp.parents:
                 self.notes.append((self.rel(p), "symlink escapes --root, skipped"))
             elif not rp.is_file():
                 pass
