@@ -134,6 +134,46 @@ def test_missing_file_does_not_kill_valid_files():
     assert len(json.loads(out.stdout)["files"]) == 1
 
 
+# --- large files are streamed, not slurped ---
+
+
+def _load():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("estimate_mod", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_stream_matches_full_read_across_chunk_boundaries():
+    mod = _load()
+    d = tempfile.mkdtemp()
+    path = os.path.join(d, "f.txt")
+    for body in (b"", b"abc", b"a\nb\n", b"x\xc3\xa9\xe2\x82\xac\nz\xff\n" * 50 + b"t"):
+        with open(path, "wb") as fh:
+            fh.write(body)
+        want = mod._count_small(path)
+        for chunk in (1, 2, 3, 7, 1024):
+            mod.CHUNK = chunk  # tiny chunks split multibyte chars mid-sequence
+            assert mod._count_stream(path) == want, (body[:8], chunk)
+
+
+def test_huge_file_is_streamed_not_read_whole():
+    path = os.path.join(tempfile.mkdtemp(), "big.log")
+    size = 9 * 1024 * 1024  # over the 8 MB threshold
+    with open(path, "wb") as fh:
+        fh.truncate(size)  # sparse, all NUL bytes, no newline
+    mod = _load()
+
+    def boom(p):
+        raise AssertionError("whole file read into memory")
+
+    mod._count_small = boom
+    r = mod.estimate(path)
+    assert (r["bytes"], r["lines"], r["est_tokens"]) == (size, 1, size // 4)
+
+
 if __name__ == "__main__":
     tests = [
         v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)
