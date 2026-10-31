@@ -151,7 +151,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `orchestrate` | Lead-agent persona: validated plan, parallel waves to roster subagents, external verification, one synthesized result. |
 | `spec-writer` | Rough idea → problem, scope, non-goals, acceptance criteria, and a roster-owned task list. |
 | `debug-loop` | Hypothesize-test-narrow loop until root cause is found. |
-| `pr-review` | Correctness bugs and scope creep, posted as inline findings. |
+| `pr-review` | Correctness bugs and scope creep, posted as PR-level comments. |
 | `prompt-enhancer` | Classifies a rough prompt's intent (9 categories) and rewrites it with that intent's pattern. |
 | `skill-forge` | Scaffolds a new compliant skill from a one-line description. |
 | `daily-standup` | Commits/PRs/issues since last standup → did/doing/blocked. |

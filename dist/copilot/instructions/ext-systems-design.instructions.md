@@ -21,7 +21,7 @@ diagrams into a skill body or code (GPL-3.0 doesn't mix with this MIT repo).
 2. `anthropic-skills`: `ls external/anthropic-skills/skills/`, follow the matching `SKILL.md`.
 3. `systems-design-resources`: read the relevant README section, then answer in your own words.
 4. If the `system-design-resources` Claude Code skill is already loaded, prefer it.
-5. Check the answer is grounded in the matched section; if not, refine the topic grep and repeat.
+5. Check the answer is grounded in the matched section; if not, refine the topic grep and repeat (max 3 attempts, then report what still fails).
 
 ## Token economy
 
