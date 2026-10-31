@@ -72,3 +72,13 @@ def test_catalog_baked_without_js():
     body = b.BAKE_RE.search(html).group(0)
     assert body.count('<span class="b">') == len(skills)
     assert all(s["name"] in body for s in skills)
+
+
+def test_asset_refs_are_content_hashed(tmp_path):
+    (tmp_path / "a.css").write_text("x")
+    page = tmp_path / "i.html"
+    html = '<link rel="stylesheet" href="a.css"><script src="a.css?v=old"></script>'
+    out = m.stamp(page, html)
+    h = m.hashlib.sha256(b"x").hexdigest()[:10]
+    assert out.count(f"a.css?v={h}") == 2 and "?v=old" not in out
+    assert m.stamp(page, out) == out
