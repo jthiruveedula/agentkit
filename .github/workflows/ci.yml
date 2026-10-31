@@ -268,7 +268,7 @@ jobs:
       - name: Lint commit messages
         uses: wagoid/commitlint-github-action@b948419dd99f3fd78a6548d48f94e3df7f6bf3ed # v6.2.1
         with:
-          configFile: .commitlintrc.json
+          configFile: .github/commitlintrc.json
 
   # Branch-name lint on PRs. Bot branches (release-please, dependabot) are exempt.
   branch-name:
