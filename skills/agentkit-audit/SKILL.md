@@ -2,7 +2,7 @@
 name: agentkit-audit
 description: Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard.
 version: 0.1.0
-allowed-tools: Bash, Read, Edit
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/audit.py *), Bash(python3 scripts/audit.py *), Bash(python3 skills/agentkit-audit/scripts/audit.py *), Bash(python3 scripts/build.py), Bash(python3 scripts/validate.py), Read, Edit
 ---
 
 # Agentkit Audit

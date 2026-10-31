@@ -151,7 +151,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `orchestrate` | Lead-agent persona: validated plan, parallel waves to roster subagents, external verification, one synthesized result. |
 | `spec-writer` | Rough idea → problem, scope, non-goals, acceptance criteria, and a roster-owned task list. |
 | `debug-loop` | Hypothesize-test-narrow loop until root cause is found. |
-| `pr-review` | Correctness bugs and scope creep, posted as inline findings. |
+| `pr-review` | Correctness bugs and scope creep, posted as PR-level comments. |
 | `prompt-enhancer` | Classifies a rough prompt's intent (9 categories) and rewrites it with that intent's pattern. |
 | `skill-forge` | Scaffolds a new compliant skill from a one-line description. |
 | `daily-standup` | Commits/PRs/issues since last standup → did/doing/blocked. |
@@ -194,7 +194,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
-**External routers** — 14 thin skills that wire in the pinned
+**External routers** — 15 thin skills that wire in the pinned
 [external sources](#external-skills) on demand: `ext-diagrams`,
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
 `ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,

@@ -1,7 +1,7 @@
 ---
 name: ext-azure
 description: Route Azure tasks to pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills. Use when the user wants Azure-specific help (App Service, Functions, AKS, Entra ID) from Microsoft-authored skills.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 
@@ -21,7 +21,7 @@ Both nest skills under `skills/`.
 1. Sync what the task needs: `./scripts/sync-external.sh azure-skills agent-skills-ms`
 2. Find the skill: `grep -rl "<keyword>" external/azure-skills/skills external/agent-skills-ms/skills`
 3. Read the matching `SKILL.md`. Keep CC-BY-4.0 attribution if copying from `agent-skills-ms`.
-4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat.
+4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat (max 3 attempts, then report what still fails).
 
 ## Token economy
 

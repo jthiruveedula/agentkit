@@ -13,7 +13,7 @@ session act without re-reading history. The blank template lives in
 
 1. Render the blank: `python3 _context-compressor/scripts/checkpoint.py render > checkpoint.md`.
 2. Fill each section from current state (see anatomy below); cite paths, don't paste content.
-3. Lint: `python3 _context-compressor/scripts/checkpoint.py lint checkpoint.md`; fix and repeat until clean.
+3. Lint: `python3 _context-compressor/scripts/checkpoint.py lint checkpoint.md`; fix and repeat until clean (max 3 attempts, then report what still fails).
 4. Save under `proj.<name>.checkpoint`, replacing the previous one.
 
 ## When to checkpoint

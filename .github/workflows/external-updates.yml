@@ -16,6 +16,7 @@ jobs:
   update:
     name: check third-party pins
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write

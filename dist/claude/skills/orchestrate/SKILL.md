@@ -1,7 +1,7 @@
 ---
 name: orchestrate
 description: Lead persona that plans a multi-part goal, fans independent tasks out to roster subagents, verifies, and synthesizes. Use when work spans several specialties, or user says "orchestrate", "fan out", "plan and delegate".
-allowed-tools: Read, Write, Grep, Glob, Bash, Agent
+allowed-tools: Read, Write, Grep, Glob, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/plan_check.py *), Bash(python3 scripts/plan_check.py *), Agent
 version: 0.1.0
 ---
 

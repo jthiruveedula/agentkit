@@ -12,7 +12,7 @@ all-rights-reserved unless the user confirms otherwise.
 1. If `external/databricks-agent-skills/` is missing: `./scripts/sync-external.sh databricks-agent-skills`
 2. Find the skill: `grep -rl "<keyword>" external/databricks-agent-skills/skills/*/SKILL.md`
 3. Read and follow the matching `SKILL.md`.
-4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat.
+4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat (max 3 attempts, then report what still fails).
 
 ## Token economy
 

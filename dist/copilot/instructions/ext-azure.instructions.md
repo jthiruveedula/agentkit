@@ -18,7 +18,7 @@ Both nest skills under `skills/`.
 1. Sync what the task needs: `./scripts/sync-external.sh azure-skills agent-skills-ms`
 2. Find the skill: `grep -rl "<keyword>" external/azure-skills/skills external/agent-skills-ms/skills`
 3. Read the matching `SKILL.md`. Keep CC-BY-4.0 attribution if copying from `agent-skills-ms`.
-4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat.
+4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat (max 3 attempts, then report what still fails).
 
 ## Token economy
 

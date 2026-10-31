@@ -2,7 +2,7 @@
 name: ext-diagrams
 description: Route diagram requests to the pinned cathrynlavery/diagram-design skill. Use when the user wants an architecture diagram, flowchart, sequence or system diagram from the external diagram-design recipes.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(./scripts/sync-external.sh *), Read
 ---
 
 # External: diagram-design

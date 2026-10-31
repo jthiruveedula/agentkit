@@ -2,7 +2,7 @@
 name: genai-engineering
 description: Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.
 version: 0.1.0
-allowed-tools: Read, Edit, Write, Grep, Bash
+allowed-tools: Read, Edit, Write, Grep
 ---
 
 # GenAI Engineering
@@ -42,7 +42,7 @@ LLM apps fail in retrieval, missing evals, and unmeasured cost. Work in that ord
 
 6. **Hand off** implementation-heavy work to the `ml-engineer` subagent
    with the eval set, the broken layer, and the target metric named.
-7. **Verify:** re-run the eval set after each change; if the score drops, revert or fix and re-run until it recovers.
+7. **Verify:** re-run the eval set after each change; if the score drops, revert or fix and re-run until it recovers (max 3 attempts, then report what still fails).
 
 ## Reference
 

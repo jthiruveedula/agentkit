@@ -1,7 +1,7 @@
 ---
 name: pr-review
-description: Review a GitHub pull request for correctness bugs and scope creep, posting inline findings. Use when asked to review a PR, "look at PR #N", or check a branch before merge.
-allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(gh pr review:*), Bash(git diff:*), Read, Grep
+description: Review a GitHub pull request for correctness bugs and scope creep, posting PR-level comments. Use when asked to review a PR, "look at PR #N", or check a branch before merge.
+allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Read, Grep
 version: 0.1.0
 ---
 
@@ -17,9 +17,10 @@ Never include env/secret file contents (`.env`, keys, tokens) in comments.
 
 1. Load the `code-review` skill/command at effort `medium` against the PR
    number or branch given. It reports correctness findings, severity-tagged.
-2. Load `scope-creep-detector` (or the `cavecrew-reviewer` subagent if
-   available) against the same diff to flag anything outside the PR's
-   stated intent.
+2. If installed, load `scope-creep-detector` (or the `cavecrew-reviewer`
+   subagent) against the same diff to flag anything outside the PR's
+   stated intent; otherwise compare the diff to the PR's stated intent
+   yourself.
 3. If the diff touches a trust boundary (auth, input parsing, paths, shell,
    SQL, deserialization, secrets), load `ext-security-audit` in guidance
    mode against the same diff.
@@ -29,9 +30,9 @@ Never include env/secret file contents (`.env`, keys, tokens) in comments.
    show the exact text and get explicit user confirmation before each post.
    Never `--approve`/`--request-changes` without the user explicitly asking
    for that verdict.
-6. Verify each finding cites a real file:line in the diff; drop or fix any that do not, and check again until all do.
+6. Verify each finding cites a real file:line in the diff; drop or fix any that do not, and check again until all do (max 3 attempts, then report what still fails).
 
 ## Token economy
 
 - `git diff --stat` first; review the diff, not full files.
-- Inline findings only; don't re-quote the diff.
+- Findings only, each citing file:line; don't re-quote the diff.

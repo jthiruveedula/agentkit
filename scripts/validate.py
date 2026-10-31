@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Validate every skills/<name>/SKILL.md against the repo schema.
 
+Also validates agents/*.md (see check_agents).
+
 Checks: frontmatter parses, required keys present, name is kebab-case and
 matches its directory, description length 40-500 chars and states a
 trigger, no duplicate names, no broken relative links, no obvious secrets
@@ -20,6 +22,7 @@ from frontmatter import FrontmatterError, load  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILLS_DIR = REPO_ROOT / "skills"
+AGENTS_DIR = REPO_ROOT / "agents"
 NAME_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 LINK_RE = re.compile(r"\]\(([^)#]+)\)")
 
@@ -53,6 +56,11 @@ SCAN_SUFFIXES = (".md", ".py", ".sh", ".js", ".json", ".yml", ".yaml", ".toml")
 
 REQUIRED_KEYS = ("name", "description", "version")
 
+# Skills allowed a bare `Bash` in allowed-tools (it pre-approves every shell
+# command while the skill is active). Map skill name -> reason. Keep empty:
+# scope with Bash(<command> *) rules, or drop Bash and let the agent prompt.
+BARE_BASH_ALLOWLIST = {}
+
 # external/skills.lock.json validation -- mirrors
 # external/skills.lock.schema.json (stdlib only; kept in sync by hand).
 LOCK_FILE = REPO_ROOT / "external" / "skills.lock.json"
@@ -62,6 +70,27 @@ LOCK_OPTIONAL_KEYS = ("for", "sha256")
 LOCK_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 LOCK_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 LOCK_REPO_RE = re.compile(r"^[^/\s]+/[^/\s]+$")
+
+
+# agents/*.md validation.
+AGENT_TOOLS = (
+    "Agent",
+    "Bash",
+    "Edit",
+    "Glob",
+    "Grep",
+    "MultiEdit",
+    "NotebookEdit",
+    "Read",
+    "WebFetch",
+    "WebSearch",
+    "Write",
+)
+AGENT_MODELS = ("haiku", "inherit", "opus", "sonnet")
+WRITE_TOOLS = ("Edit", "MultiEdit", "NotebookEdit", "Write")
+READ_ONLY_RE = re.compile(r"read-only|never edits files", re.IGNORECASE)
+# One tool: a bare name, optionally with an argument list: Agent(a, b).
+TOOL_RE = re.compile(r"\s*([A-Za-z]+)\s*(?:\(([^)]*)\))?\s*(?:,|$)")
 
 
 def find_skill_files():
@@ -75,6 +104,14 @@ def check_disallowed_patterns(text, origin, errors):
                 "%s: disallowed pattern [%s] -- remove before committing"
                 % (origin, code)
             )
+
+
+def tool_rules(value):
+    """Split an allowed-tools value (comma/space separated string or list) into
+    rules, keeping parenthesised arguments such as `Bash(git log *)` whole."""
+    if isinstance(value, list):
+        value = " ".join(value)
+    return re.findall(r"[^\s,(]+(?:\([^)]*\))?", value or "")
 
 
 def check_skill_extra_files(skill_dir, errors):
@@ -163,6 +200,83 @@ def check_lock(lock_path=None):
     return errors
 
 
+def _parse_tools(raw):
+    """Split 'Read, Agent(a, b)' into [(name, [args])]; None if malformed."""
+    if isinstance(raw, list):
+        raw = ", ".join(raw)
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    tools, pos = [], 0
+    while pos < len(raw):
+        m = TOOL_RE.match(raw, pos)
+        if not m:
+            return None
+        args = [a.strip() for a in (m.group(2) or "").split(",") if a.strip()]
+        tools.append((m.group(1), args))
+        pos = m.end()
+    return tools
+
+
+def check_agents(agents_dir=None, skills_dir=None):
+    """Validate agents/*.md; returns a list of error strings (empty = valid)."""
+    errors = []
+    agents_dir = Path(agents_dir) if agents_dir is not None else AGENTS_DIR
+    skills_dir = Path(skills_dir) if skills_dir is not None else SKILLS_DIR
+    files = sorted(agents_dir.glob("*.md"))
+    agent_names = {p.stem for p in files}
+    for path in files:
+        try:
+            origin = str(path.relative_to(REPO_ROOT))
+        except ValueError:
+            origin = str(path)
+        try:
+            meta, _ = load(path)
+        except FrontmatterError as e:
+            errors.append(str(e))
+            continue
+        if meta.get("name") != path.stem:
+            errors.append(
+                "%s: frontmatter name '%s' != filename '%s'"
+                % (origin, meta.get("name", ""), path.stem)
+            )
+        desc = meta.get("description")
+        if not isinstance(desc, str) or not desc.strip():
+            errors.append("%s: missing or empty description" % origin)
+            desc = ""
+        tools = _parse_tools(meta.get("tools"))
+        if tools is None:
+            errors.append("%s: 'tools' missing or not a tool list" % origin)
+            tools = []
+        for name, args in tools:
+            if name not in AGENT_TOOLS:
+                errors.append("%s: unknown tool '%s'" % (origin, name))
+            for arg in args if name == "Agent" else ():
+                if arg not in agent_names:
+                    errors.append(
+                        "%s: Agent(...) names unknown agent '%s'" % (origin, arg)
+                    )
+        model = meta.get("model")
+        if model is not None and model not in AGENT_MODELS:
+            errors.append(
+                "%s: model '%s' not one of %s"
+                % (origin, model, ", ".join(AGENT_MODELS))
+            )
+        skills = meta.get("skills", [])
+        for skill in [skills] if isinstance(skills, str) else skills:
+            if not (skills_dir / skill / "SKILL.md").is_file():
+                errors.append(
+                    "%s: skills entry '%s' is not in skills/" % (origin, skill)
+                )
+        if READ_ONLY_RE.search(desc):
+            for name, _ in tools:
+                if name in WRITE_TOOLS:
+                    errors.append(
+                        "%s: description says read-only but tools include %s"
+                        % (origin, name)
+                    )
+    return errors
+
+
 def validate():
     errors = []
     seen_names = {}
@@ -213,6 +327,13 @@ def validate():
             isinstance(meta["globs"], str) and meta["globs"].strip()
         ):
             errors.append("%s: 'globs' must be a non-empty string" % origin)
+        if "Bash" in tool_rules(meta.get("allowed-tools")) and (
+            name not in BARE_BASH_ALLOWLIST
+        ):
+            errors.append(
+                "%s: bare 'Bash' in allowed-tools pre-approves every shell command;"
+                " use Bash(<command> *) rules or drop it" % origin
+            )
 
         desc = meta.get("description", "")
         if desc and not (40 <= len(desc) <= 500):
@@ -233,6 +354,7 @@ def validate():
 
         check_links(body, skill_dir, origin, errors)
 
+    errors.extend(check_agents())
     errors.extend(check_lock())
 
     return errors
