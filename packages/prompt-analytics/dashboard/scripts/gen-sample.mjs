@@ -32,15 +32,17 @@ for (let i = 0; i < days; i++) {
     const source = pick(SRC, w);
     const intent = pick(INT, [0.28, 0.24, 0.1, 0.12, 0.08, 0.05, 0.05, 0.05, 0.03]);
     const short = rnd() < 0.42;
-    const prompts = short ? 1 + Math.floor(rnd() * 3) : Math.min(70, Math.round(4 + Math.exp(rnd() * 3.1)));
+    const prompts0 = short ? 1 + Math.floor(rnd() * 3) : Math.min(70, Math.round(4 + Math.exp(rnd() * 3.1)));
     const project = pick(PROJECTS, PROJECTS.map((_, j) => 1 / (1 + j * 0.45)));
-    const reached = Math.max(1, Math.min(6, 1 + Math.floor((short ? 0.6 : 1) * (rnd() * 3.2 + (intent === "explain" ? 0 : 1.6)))));
-    const loops = short ? 0 : Math.min(8, Math.floor(-Math.log(1 - rnd() * 0.97) * (source === "antigravity" ? 1.8 : source === "copilot" ? 1.5 : 1.1)));
+    const empty = rnd() < 0.06;   // opened but never prompted: excluded from every rate denominator
+    const reached = empty ? 1 : Math.max(1, Math.min(6, 1 + Math.floor((short ? 0.7 : 1.15) * (rnd() * 3.4 + (intent === "explain" ? 0 : 1.9)))));
+    const prompts = empty ? 0 : prompts0;
+    const loops = short || empty ? 0 : Math.min(8, Math.floor(-Math.log(1 - rnd() * 0.97) * (source === "antigravity" ? 1.8 : source === "copilot" ? 1.5 : 1.1)));
     const tokens = source === "antigravity" ? 0 : Math.round(prompts * (3000 + rnd() * 5000));
-    const cost = costPer[source] ? r2(prompts * costPer[source] * (0.04 + rnd() * 0.09)) : null;
+    const cost = costPer[source] && !empty ? r2(prompts * costPer[source] * (0.04 + rnd() * 0.09)) : null;
     const cl = [0, 4, 7, 1, 6, 0, 5, 7, 0, 2, 6, 3];
     const pool = cl.map((x, j) => (INT[x] === intent ? j : -1)).filter((j) => j >= 0);
-    sessions.push({ id: `s${String(sessions.length + 1).padStart(4, "0")}`, source, date: iso(d), project, intent, prompts, tokens, cost_usd: cost, reached_stage: reached, applied: reached >= 5, loops, friction: r2(Math.min(1, loops * 0.13 + rnd() * 0.18), 3), cluster: rnd() < 0.08 || !pool.length ? -1 : pool[Math.floor(rnd() * pool.length)], title: `${pick(VERBS[intent])} ${pick(THINGS)} in ${project}` });
+    sessions.push({ id: `s${String(sessions.length + 1).padStart(4, "0")}`, source, date: iso(d), project, intent, prompts, tokens, cost_usd: cost, reached_stage: reached, applied: reached >= 5, loops, friction: empty ? 0 : r2(Math.min(1, loops * 0.13 + rnd() * 0.18), 3), cluster: rnd() < 0.08 || !pool.length ? -1 : pool[Math.floor(rnd() * pool.length)], title: `${pick(VERBS[intent])} ${pick(THINGS)} in ${project}` });
   }
 }
 // two outlier days: one moderate cost spike, one absurd z (real data produces these)
@@ -129,16 +131,28 @@ const what_works = feats.map((feature, i) => {
   return { cluster: i % labels.length, feature, effect, ci: [r2(effect - 0.05 - rnd() * 0.04, 3), r2(effect + 0.05 + rnd() * 0.04, 3)], n: Math.round(80 + rnd() * 500), direction: helps ? "helps" : "hurts" };
 }).sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect));
 
+const asked = sessions.filter((x) => x.prompts > 0);   // every rate uses sessions with a prompt
+const pct = (a, b) => Math.round((100 * a) / (b || 1));
+const appliedRate = pct(asked.filter((x) => x.applied).length, asked.length);
+const claudeShare = pct(sessions.filter((x) => x.source === "claude_code").length, totSessions);
+const morning = pct(sum(hour_week.filter((h) => h.hour >= 9 && h.hour <= 12), (h) => h.prompts), sum(hour_week, (h) => h.prompts));
+const spikeCost = sum([...new Map(anomalies.filter((a) => a.metric === "cost").map((a) => [a.date, a])).values()], (a) => a.value);
+const spikeShare = pct(spikeCost, totCost);
+const rephrase = (g) => g.filter((x) => x.loops > 0).length / (g.length || 1);
+const agRatio = r2(rephrase(asked.filter((x) => x.source === "antigravity")) / (rephrase(asked.filter((x) => x.source !== "antigravity")) || 1), 1);
+const topFric = friction.by_intent[0];
+const top = tool_switch[0] ?? { from: "cursor", to: "claude_code", count: 0 };
+const NAME = { claude_code: "Claude Code", copilot: "Copilot", cursor: "Cursor", opencode: "opencode", antigravity: "Antigravity" };
 const ev = (n, method = "bootstrap") => ({ n, ci: [0, 1], method });
 const insights = [
   { id: "i-fp-1", chapter: "footprint", rank: 1, claim: "You ship with AI almost every working day", metric: "active days", value: calendar.length, unit: "", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: {} } },
-  { id: "i-fp-2", chapter: "footprint", rank: 2, claim: "Claude Code carries half your sessions", metric: "session share", value: 52, unit: "%", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: { source: "claude_code" } } },
-  { id: "i-tm-1", chapter: "time", rank: 1, claim: "Late mornings are your deepest AI hours", metric: "peak hour share", value: 31, unit: "%", delta: 0.4, evidence: { n: totPrompts, method: "count" }, drill: { chapter: "time", filter: {} } },
-  { id: "i-tm-2", chapter: "time", rank: 2, claim: "Two cost spikes drove a fifth of spend", metric: "anomaly cost share", value: 21, unit: "%", delta: null, evidence: ev(3, "z-score"), drill: { chapter: "time", filter: {} } },
-  { id: "i-fn-1", chapter: "funnel", rank: 1, claim: "Fewer than four in ten sessions end in a commit", metric: "applied rate", value: 38, unit: "%", delta: null, evidence: { n: totSessions, method: "funnel" }, drill: { chapter: "funnel", filter: {} } },
-  { id: "i-fn-2", chapter: "funnel", rank: 2, claim: "Cursor to Claude Code is your busiest handoff", metric: "tool switches", value: 51, unit: "", delta: null, evidence: { n: 51, method: "count" }, drill: { chapter: "funnel", filter: { source: "cursor" } } },
-  { id: "i-fr-1", chapter: "friction", rank: 1, claim: "Antigravity prompts need rewording 1.7x more often", metric: "rephrase rate", value: 1.7, unit: "x", delta: 0.7, evidence: ev(210, "ratio"), drill: { chapter: "friction", filter: { source: "antigravity" } } },
-  { id: "i-fr-2", chapter: "friction", rank: 2, claim: "Bugfix sessions hit the most friction", metric: "friction", value: 42, unit: "%", delta: 0.3, evidence: ev(400), drill: { chapter: "friction", filter: { intent: "bugfix" } } },
+  { id: "i-fp-2", chapter: "footprint", rank: 2, claim: `Claude Code carries ${claudeShare}% of your sessions`, metric: "session share", value: claudeShare, unit: "%", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: { source: "claude_code" } } },
+  { id: "i-tm-1", chapter: "time", rank: 1, claim: "Late mornings are your deepest AI hours", metric: "9-12h prompt share", value: morning, unit: "%", delta: null, evidence: { n: totPrompts, method: "count" }, drill: { chapter: "time", filter: {} } },
+  { id: "i-tm-2", chapter: "time", rank: 2, claim: `Spike days drove ${spikeShare}% of spend`, metric: "anomaly cost share", value: spikeShare, unit: "%", delta: null, evidence: ev(anomalies.length, "z-score"), drill: { chapter: "time", filter: {} } },
+  { id: "i-fn-1", chapter: "funnel", rank: 1, claim: `${appliedRate}% of sessions with a prompt end applied`, metric: "applied rate", value: appliedRate, unit: "%", delta: null, evidence: { n: asked.length, method: "funnel" }, drill: { chapter: "funnel", filter: {} } },
+  { id: "i-fn-2", chapter: "funnel", rank: 2, claim: `${NAME[top.from]} to ${NAME[top.to]} is your busiest handoff`, metric: "tool switches", value: top.count, unit: "", delta: null, evidence: { n: top.count, method: "count" }, drill: { chapter: "funnel", filter: { source: top.from } } },
+  { id: "i-fr-1", chapter: "friction", rank: 1, claim: `Antigravity prompts need rewording ${agRatio}x as often`, metric: "rephrase ratio", value: agRatio, unit: "x", delta: null, evidence: ev(asked.filter((x) => x.source === "antigravity").length, "ratio"), drill: { chapter: "friction", filter: { source: "antigravity" } } },
+  { id: "i-fr-2", chapter: "friction", rank: 2, claim: `${topFric.intent[0].toUpperCase()}${topFric.intent.slice(1)} sessions hit the most friction`, metric: "mean friction", value: pct(topFric.friction, 1), unit: "%", delta: null, evidence: ev(topFric.n), drill: { chapter: "friction", filter: { intent: topFric.intent } } },
   { id: "i-wk-1", chapter: "works", rank: 1, claim: "Naming files lifts success by about 16 points", metric: "success lift", value: 16, unit: "%", delta: 0.16, evidence: { n: 520, ci: [0.1, 0.22], method: "bootstrap" }, drill: { chapter: "works", filter: { cluster: 0 } } },
   { id: "i-wk-2", chapter: "works", rank: 2, claim: "Short vague prompts cost you retries", metric: "success drop", value: 11, unit: "%", delta: -0.11, evidence: ev(310), drill: { chapter: "works", filter: {} } },
   { id: "i-rc-1", chapter: "recommend", rank: 1, claim: "Four small habits would remove most friction", metric: "recommendations", value: 4, unit: "", delta: null, evidence: { n: 4, method: "rules" }, drill: { chapter: "recommend", filter: {} } },
@@ -146,7 +160,7 @@ const insights = [
 const recommendations = [
   { id: "r1", title: "Name the files up front", action: "Add file refs to bugfix prompts.", impact: "+16 pts success", evidence_insight: "i-wk-1" },
   { id: "r2", title: "State constraints", action: "Say what must not change before you ask.", impact: "-20% rewording", evidence_insight: "i-fr-1" },
-  { id: "r3", title: "Close the loop", action: "Commit or discard each session before the next.", impact: "+9 pts commits", evidence_insight: "i-fn-1" },
+  { id: "r3", title: "Close the loop", action: "Commit or discard each session before the next.", impact: `lift the ${appliedRate}% applied rate`, evidence_insight: "i-fn-1" },
   { id: "r4", title: "Cap spikes", action: "Review sessions that cross 3 sigma in cost.", impact: "-15% spend", evidence_insight: "i-tm-2" },
 ];
 const sources = [

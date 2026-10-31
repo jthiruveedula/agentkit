@@ -4,3 +4,4 @@ g.matchMedia ??= (q: string) => ({ matches: false, media: q, addEventListener() 
 class Obs { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } }
 g.IntersectionObserver ??= Obs;
 g.ResizeObserver ??= Obs;
+HTMLCanvasElement.prototype.getContext = (() => null) as never;   // jsdom has no canvas; Caustic falls back to plain paper

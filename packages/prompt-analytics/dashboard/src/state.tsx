@@ -1,27 +1,50 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import type { Chapter, DashboardData } from "./data/types";
-import { isEmpty, patchFilter, same, views, type Filter, type FilterKey, type Views } from "./lib/filter";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import type { DashboardData } from "./data/types";
+import { chips, patchFilter, same, views, isEmpty, type Filter, type FilterKey, type Views } from "./lib/filter";
+import { priorViews, windowOf, type Cmp, type Prior, type Win } from "./lib/compare";
+import { fromHash, toHash, type Nav } from "./lib/hash";
 
-export const TABS: { id: Chapter; name: string }[] = [
-  { id: "footprint", name: "Footprint" }, { id: "time", name: "Time" }, { id: "funnel", name: "Funnel" },
-  { id: "friction", name: "Friction" }, { id: "works", name: "What works" }, { id: "recommend", name: "Recommend" },
-];
+export interface Crumb { id: string; label: string; keys: FilterKey[] | "sel" }
+type Cat = "all" | "secret" | "pii" | "phi";
+interface S { nav: Nav; order: string[] }
 
 export interface Store {
   d: DashboardData;
   f: Filter;
   v: Views;
+  win: Win;
+  /** Prior-period views, null for "All", cmp off, or a prior window outside the data. */
+  prior: Prior | null;
+  cmp: Cmp;
+  setCmp: (c: Cmp) => void;
   /** Session ids matching the filter (null when no filter is active). */
   ids: Set<string> | null;
-  tab: Chapter;
-  setTab: (t: Chapter) => void;
-  /** Change the filter without opening the drawer (filter bar). */
+  /** Sessions in view with an open exposure finding (from the review queue, newest 300). */
+  exposed: Set<string>;
+  sel?: string;
+  list: boolean;
+  panel: "none" | "list" | "detail";
+  crumbs: Crumb[];
+  section: string;
+  setSection: (id: string) => void;
+  goto: (id: string) => void;
+  /** Filter-bar edit: replaces the history entry so Back is not spammed. */
   set: (p: Filter) => void;
-  /** A chart mark was activated: toggle that selection and open the drawer on it. */
-  drill: (p: Filter, tab?: Chapter) => void;
+  /** A chart mark was activated: toggle that selection (pushes history). */
+  drill: (p: Filter, o?: { list?: boolean }) => void;
+  /** Like drill but never toggles off (attention rows, evidence links). */
+  apply: (p: Filter, o?: { list?: boolean }) => void;
+  /** Hash URL for a section anchor under the current state. */
+  href: (sec: string) => string;
   clear: (keys?: FilterKey[]) => void;
-  open: boolean;
-  setOpen: (o: boolean) => void;
+  /** Clear every crumb after index i (-1 = all). */
+  clearAfter: (i: number) => void;
+  openList: () => void;
+  openSession: (id: string) => void;
+  back: () => void;
+  closePanel: () => void;
+  exCat: Cat;
+  setExCat: (c: Cat) => void;
   clusterLabel: (id: number) => string;
 }
 
@@ -32,34 +55,97 @@ export const useStore = () => {
   return s;
 };
 
-const fromHash = (): Chapter => {
-  const h = typeof location === "undefined" ? "" : location.hash.slice(1);
-  return TABS.some((t) => t.id === h) ? (h as Chapter) : "footprint";
+const hasWin = typeof window !== "undefined";
+const readHash = () => (hasWin ? fromHash(location.hash) : fromHash(""));
+const labelOf = (f: Filter, cl: (n: number) => string) => chips(f, cl);
+/** Keep earlier crumbs in the order they were added, then append new ones. */
+const reorder = (prev: string[], ids: string[]) => [...prev.filter((x) => ids.includes(x)), ...ids.filter((x) => !prev.includes(x))];
+const toggle = (c: Filter, p: Filter): Filter => {
+  const keys = Object.keys(p) as FilterKey[];
+  const on = keys.length > 0 && same(Object.fromEntries(keys.map((k) => [k, c[k]])), p);
+  return patchFilter(c, Object.fromEntries(keys.map((k) => [k, on ? undefined : p[k]])));
 };
 
 export function StoreProvider({ d, children, initial }: { d: DashboardData; children: ReactNode; initial?: Filter }) {
-  const [f, setF] = useState<Filter>(initial ?? {});
-  const [open, setOpen] = useState(false);
-  const [tab, setTabState] = useState<Chapter>(fromHash);
-  const v = useMemo(() => views(d, f), [d, f]);
-  const ids = useMemo(() => (isEmpty(f) ? null : new Set(v.rows.map((r) => r.id))), [f, v.rows]);
+  const first = useMemo(() => readHash(), []);
   const labels = useMemo(() => new Map(d.galaxy.clusters.map((c) => [c.id, c.label])), [d]);
-  const setTab = useCallback((t: Chapter) => {
-    setTabState(t);
-    if (typeof history !== "undefined") history.replaceState(null, "", `#${t}`);
-  }, []);
-  const set = useCallback((p: Filter) => setF((c) => patchFilter(c, p)), []);
-  const drill = useCallback((p: Filter, t?: Chapter) => {
-    setF((c) => {
-      const keys = Object.keys(p) as FilterKey[];
-      const on = keys.length > 0 && same(Object.fromEntries(keys.map((k) => [k, c[k]])), p);
-      return on ? patchFilter(c, Object.fromEntries(keys.map((k) => [k, undefined]))) : patchFilter(c, p);
-    });
-    setOpen(true);
-    if (t) setTab(t);
-  }, [setTab]);
-  const clear = useCallback((keys?: FilterKey[]) => setF((c) => (keys ? patchFilter(c, Object.fromEntries(keys.map((k) => [k, undefined]))) : {})), []);
   const clusterLabel = useCallback((id: number) => labels.get(id) ?? `#${id}`, [labels]);
-  const store: Store = { d, f, v, ids, tab, setTab, set, drill, clear, open, setOpen, clusterLabel };
+  const boot = (): S => {
+    const nav = initial ? { ...first.nav, f: initial } : first.nav;
+    return { nav, order: reorder(typeof history !== "undefined" ? history.state?.order ?? [] : [], labelOf(nav.f, clusterLabel).map((c) => c.keys.join())) };
+  };
+  const [s, setS] = useState<S>(boot);
+  const sRef = useRef(s);
+  const secRef = useRef(first.sec);
+  const [section, setSec] = useState(first.sec);
+  const [exCat, setExCat] = useState<Cat>("all");
+  const { f, sel, list, cmp } = s.nav;
+
+  const write = useCallback((next: S, mode: "push" | "replace") => {
+    sRef.current = next; setS(next);
+    if (typeof history === "undefined") return;
+    history[mode === "push" ? "pushState" : "replaceState"]({ order: next.order }, "", toHash(next.nav, secRef.current));
+  }, []);
+  const commit = useCallback((nav: Nav, mode: "push" | "replace") => {
+    write({ nav, order: reorder(sRef.current.order, labelOf(nav.f, clusterLabel).map((c) => c.keys.join())) }, mode);
+  }, [write, clusterLabel]);
+
+  useEffect(() => {   // Back / Forward and pasted hashes re-read the URL
+    const on = () => {
+      const h = readHash(); secRef.current = h.sec; setSec(h.sec);
+      const next = { nav: h.nav, order: reorder(history.state?.order ?? [], labelOf(h.nav.f, clusterLabel).map((c) => c.keys.join())) };
+      sRef.current = next; setS(next);
+    };
+    window.addEventListener("popstate", on);
+    return () => window.removeEventListener("popstate", on);
+  }, [clusterLabel]);
+
+  const v = useMemo(() => views(d, f), [d, f]);
+  const prior = useMemo(() => priorViews(d, f, cmp), [d, f, cmp]);
+  const win = useMemo(() => windowOf(d, f), [d, f]);
+  const ids = useMemo(() => (isEmpty(f) ? null : new Set(v.rows.map((r) => r.id))), [f, v.rows]);
+  const openIds = useMemo(() => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string)), [d]);
+  const exposed = useMemo(() => new Set(v.rows.filter((r) => openIds.has(r.id)).map((r) => r.id)), [v.rows, openIds]);
+
+  const crumbs = useMemo<Crumb[]>(() => {
+    const cs: Crumb[] = labelOf(f, clusterLabel).map((c) => ({ id: c.keys.join(), label: c.label, keys: c.keys }));
+    if (sel) cs.push({ id: "sel", label: `Session ${sel}`, keys: "sel" });
+    return cs.sort((a, b) => (a.id === "sel" ? 1 : b.id === "sel" ? -1 : s.order.indexOf(a.id) - s.order.indexOf(b.id)));
+  }, [f, sel, s.order, clusterLabel]);
+
+  const nav = (p: Partial<Nav>): Nav => ({ ...sRef.current.nav, ...p });
+  const set = useCallback((p: Filter) => commit(nav({ f: patchFilter(sRef.current.nav.f, p) }), "replace"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const drill = useCallback((p: Filter, o?: { list?: boolean }) => commit(nav({ f: toggle(sRef.current.nav.f, p), list: o?.list ? true : sRef.current.nav.list }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const apply = useCallback((p: Filter, o?: { list?: boolean }) => commit(nav({ f: patchFilter(sRef.current.nav.f, p), list: o?.list ? true : sRef.current.nav.list }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const clear = useCallback((keys?: FilterKey[]) => commit(nav({ f: keys ? patchFilter(sRef.current.nav.f, Object.fromEntries(keys.map((k) => [k, undefined]))) : {}, ...(keys ? {} : { sel: undefined }) }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const clearAfter = useCallback((i: number) => {
+    const cur = sRef.current, drop = crumbs.slice(i + 1);
+    let nf = cur.nav.f, sl = cur.nav.sel;
+    for (const c of drop) { if (c.keys === "sel") sl = undefined; else nf = patchFilter(nf, Object.fromEntries(c.keys.map((k) => [k, undefined]))); }
+    commit({ ...cur.nav, f: nf, sel: sl }, "push");
+  }, [commit, crumbs]);
+  const openList = useCallback(() => commit(nav({ list: true, sel: undefined }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const openSession = useCallback((id: string) => commit(nav({ sel: id }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const back = useCallback(() => { const n = sRef.current.nav; commit(n.sel ? { ...n, sel: undefined } : { ...n, list: false }, "push"); }, [commit]);
+  const closePanel = useCallback(() => commit(nav({ sel: undefined, list: false }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const setCmp = useCallback((c: Cmp) => commit(nav({ cmp: c }), "replace"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const setSection = useCallback((id: string) => {
+    if (secRef.current === id) return;
+    secRef.current = id; setSec(id);
+    if (typeof history !== "undefined") history.replaceState(history.state, "", toHash(sRef.current.nav, id));
+  }, []);
+  const goto = useCallback((id: string) => {
+    setSection(id === "s-attention" ? "s-overview" : id);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView?.({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  }, [setSection]);
+
+  useEffect(() => {   // a pasted URL scrolls to its section once
+    if (first.sec !== "s-overview") requestAnimationFrame(() => document.getElementById(first.sec)?.scrollIntoView?.());
+  }, [first.sec]);
+
+  const href = (sec: string) => toHash(s.nav, sec);
+  const panel = sel ? "detail" : list ? "list" : "none";
+  const store: Store = { d, f, v, win, prior, cmp, setCmp, ids, exposed, sel, list, panel, crumbs, section, setSection, goto, set, drill, apply, href, clear, clearAfter, openList, openSession, back, closePanel, exCat, setExCat, clusterLabel };
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }

@@ -5368,7 +5368,7 @@
    ]
   }
  },
- "generated_at": "2026-10-31T19:25:33Z",
+ "generated_at": "2026-10-31T19:58:19Z",
  "hour_week": [
   {
    "dow": 0,
@@ -5927,7 +5927,7 @@
   },
   {
    "chapter": "friction",
-   "claim": "Health data pasted in 2 of your sessions, mostly phi_context",
+   "claim": "Health data pasted in 2 of your sessions, mostly health details",
    "delta": null,
    "drill": {
     "chapter": "friction",
@@ -5945,7 +5945,7 @@
   },
   {
    "chapter": "friction",
-   "claim": "Credential data pasted in 3 of your sessions, mostly aws",
+   "claim": "Credential data pasted in 3 of your sessions, mostly AWS keys",
    "delta": null,
    "drill": {
     "chapter": "friction",
@@ -5963,7 +5963,7 @@
   },
   {
    "chapter": "friction",
-   "claim": "Personal data pasted in 8 of your sessions, mostly email",
+   "claim": "Personal data pasted in 8 of your sessions, mostly emails",
    "delta": null,
    "drill": {
     "chapter": "friction",

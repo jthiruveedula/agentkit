@@ -1,120 +1,130 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "../state";
-import { addDays, capZ, weekStart } from "../lib/filter";
-import { fmtDate, fmtInt, fmtUSD } from "../lib/format";
+import { addDays, weekStart } from "../lib/filter";
+import { bucketSeries, buckets, cumulative, METRICS, monthProjection } from "../lib/compare";
+import { fmtCompact, fmtDate, fmtInt, fmtUSD } from "../lib/format";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
-import { BarList, Cols, DataTable, Empty, Panel } from "./ui";
+import { useRoving } from "../lib/hooks";
+import { Card, DataTable, Empty, Section, Segmented } from "./ui";
+import { LineChart, River } from "./charts";
 
-const WEEKS = 26;
+type M = "sessions" | "prompts" | "cost";
+const WEEKS = 27;
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const FMT: Record<M, (n: number) => string> = { sessions: fmtInt, prompts: fmtCompact, cost: fmtUSD };
 
-function Calendar() {
-  const { v, f, drill, d } = useStore();
-  const end = d.range.end || v.calendar.at(-1)?.date || "";
-  const days = useMemo(() => {
-    if (!end) return [];
-    const last = weekStart(end);
-    const first = addDays(last, -(WEEKS - 1) * 7);
-    const by = new Map(v.calendar.map((c) => [c.date, c]));
-    const peak = Math.max(...v.calendar.map((c) => c.sessions), 1);
-    return Array.from({ length: WEEKS * 7 }, (_, i) => {
-      const date = addDays(first, i);
-      return { date, c: by.get(date), inRange: date <= end, v: (by.get(date)?.sessions ?? 0) / peak };
-    });
-  }, [v.calendar, end]);
-  if (!days.length || v.calendar.length === 0) return <Empty />;
-  const sel = f.from && f.from === f.to ? f.from : null;
+function CalGrid() {
+  const { d, v, f, drill, apply } = useStore();
+  const [m, setM] = useState<M>("sessions");
+  const [anchor, setAnchor] = useState<string | null>(null);
+  const end = d.range.end;
+  const first = addDays(weekStart(end), -(WEEKS - 1) * 7);
+  const byDay = useMemo(() => new Map(v.calendar.map((c) => [c.date, c])), [v.calendar]);
+  const peak = Math.max(...v.calendar.filter((c) => c.date >= first).map((c) => c[m]), 1e-9);
+  const { group, mark } = useRoving(WEEKS * 7, 7, 1, 0);
+  const days = Array.from({ length: WEEKS * 7 }, (_, i) => ({ i, date: addDays(first, i) }));
+  const inSel = (dt: string) => f.from !== undefined && f.to !== undefined && dt >= f.from && dt <= f.to;
+  const pick = (dt: string, shift: boolean) => {
+    if (shift && anchor) { const [a, b] = anchor < dt ? [anchor, dt] : [dt, anchor]; apply({ from: a, to: b }); } else { setAnchor(dt); drill({ from: dt, to: dt }); }
+  };
+  const months = days.filter((x) => x.i % 7 === 0 && x.date.slice(8, 10) <= "07");
   return (
-    <>
-      <div className="cal" role="group" aria-label="Sessions per day, last 26 weeks. Each cell opens that day">
-        {days.map((x) => !x.inRange ? <span key={x.date} className="cell none" aria-hidden="true" /> : x.c ? (
-          <button key={x.date} type="button" className="cell" style={{ "--v": Math.max(0.15, x.v) } as React.CSSProperties} aria-pressed={sel === x.date}
-            aria-label={`${fmtDate(x.date)}: ${x.c.sessions} sessions, ${x.c.prompts} prompts. Open sessions`} title={`${fmtDate(x.date)}: ${x.c.sessions} sessions`}
-            onClick={() => drill({ from: x.date, to: x.date })} />
-        ) : <span key={x.date} className="cell none" aria-hidden="true" />)}
-      </div>
-      <DataTable caption="Sessions per active day" head={["Date", "Sessions", "Prompts"]} rows={v.calendar.map((c) => [c.date, c.sessions, c.prompts])} />
-    </>
+    <Card title="Activity calendar" meta="click a day, shift-click to extend" span={8}
+      actions={<Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, { id: "cost", text: "Cost" }]} />}>
+      {v.calendar.length === 0 ? <Empty /> : (
+        <>
+          <div className="cal-wrap">
+            <div className="cal-m" style={{ "--w": WEEKS } as React.CSSProperties}>{months.map((x) => <span key={x.date} style={{ gridColumn: x.i / 7 + 1 }}>{new Date(`${x.date}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })}</span>)}</div>
+            <div className="cal-d" aria-hidden="true">{DOW.map((x, i) => <span key={x}>{i % 2 === 0 ? x : ""}</span>)}</div>
+            <div className="cal" role="group" aria-label={`Daily ${m}, last ${WEEKS} weeks. Each day filters to that date`} style={{ "--w": WEEKS } as React.CSSProperties} {...group}>
+              {days.map((x) => {
+                if (x.date > end) return <span key={x.i} className="cell none" aria-hidden="true" />;
+                const c = byDay.get(x.date), val = c ? c[m] : 0;
+                return (
+                  <button key={x.i} type="button" className="cell" data-zero={!val || undefined} data-sel={inSel(x.date) || undefined} aria-pressed={inSel(x.date)} style={{ "--v": val / peak } as React.CSSProperties}
+                    aria-label={`${fmtDate(x.date)}: ${FMT[m](val)} ${m}. Filter to this day`} title={`${fmtDate(x.date)}: ${FMT[m](val)}`}
+                    onClick={(e) => pick(x.date, e.shiftKey)} {...mark(x.i)} />
+                );
+              })}
+            </div>
+          </div>
+          <DataTable caption={`Daily ${m}`} head={["Day", m]} rows={v.calendar.filter((c) => c.date >= first).map((c) => [c.date, +c[m].toFixed(2)])} />
+        </>
+      )}
+    </Card>
   );
 }
 
-function Weekly() {
-  const { v, f, drill } = useStore();
-  const weeks = v.weeks.slice(-WEEKS);
-  const priced = weeks.some((w) => w.cost > 0);
-  if (weeks.length === 0) return <Empty />;
-  const sel = f.from && f.to && f.to === addDays(f.from, 6) ? f.from : null;
-  return (
-    <>
-      <Cols label="Weekly cost, stacked by source. Each column opens that week" cols={weeks.map((w) => ({
-        key: w.week, label: w.week, active: sel === w.week,
-        segs: priced ? SOURCES.map((s) => ({ v: w.bySource[s] ?? 0, color: srcColor(s) })) : [{ v: w.sessions, color: "var(--accent)" }],
-        aria: `Week of ${fmtDate(w.week)}: ${priced ? fmtUSD(w.cost) : `${w.sessions} sessions`}. Open sessions`,
-        onClick: () => drill({ from: w.week, to: addDays(w.week, 6) }),
-      }))} />
-      <div className="axis"><span>{fmtDate(weeks[0].week)}</span><span>{priced ? "USD per week" : "sessions per week (no priced sources)"}</span><span>{fmtDate(weeks[weeks.length - 1].week)}</span></div>
-      {priced && <ul className="legend">{SOURCES.filter((s) => weeks.some((w) => (w.bySource[s] ?? 0) > 0)).map((s) => <li key={s} style={{ "--c": srcColor(s) } as React.CSSProperties}>{srcLabel(s)}</li>)}</ul>}
-      <DataTable caption="Weekly cost by source" head={["Week", "USD", "Sessions"]} rows={weeks.map((w) => [w.week, +w.cost.toFixed(2), w.sessions])} />
-    </>
-  );
+function Calendar() {
+  const { d } = useStore();
+  return d.range.end ? <CalGrid /> : <Card title="Activity calendar" span={8}><Empty /></Card>;
 }
 
 function HourWeek() {
   const { d } = useStore();
-  const hw = d.hour_week;
-  if (hw.length === 0) return <Empty />;
-  const peak = Math.max(...hw.map((x) => x.prompts), 1);
-  const at = new Map(hw.map((x) => [`${x.dow}.${x.hour}`, x.prompts]));
+  const grid = useMemo(() => { const g = Array.from({ length: 7 }, () => Array<number>(24).fill(0)); for (const h of d.hour_week) g[h.dow][h.hour] = h.prompts; return g; }, [d.hour_week]);
+  const peak = Math.max(...grid.flat(), 1);
+  const best = d.hour_week.reduce((a, b) => (b.prompts > a.prompts ? b : a), { dow: 0, hour: 0, prompts: 0 });
   return (
-    <>
-      <div className="hw" aria-hidden="true">
-        {DOW.map((n, dow) => (
-          <div key={n} style={{ display: "contents" }}>
-            <span>{n}</span>
-            {Array.from({ length: 24 }, (_, h) => <span key={h} className="cell" style={{ "--v": (at.get(`${dow}.${h}`) ?? 0) / peak } as React.CSSProperties} title={`${n} ${h}:00, ${at.get(`${dow}.${h}`) ?? 0} prompts`} />)}
+    <Card title="Hour by weekday" meta="prompts, all sessions" span={4}>
+      {d.hour_week.length === 0 ? <Empty /> : (
+        <>
+          <div className="hw" role="img" aria-label={`Prompts by hour and weekday. Busiest: ${DOW[best.dow]} ${best.hour}:00, ${best.prompts} prompts`}>
+            {grid.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((p, h) => <i key={h} className="cell" data-zero={!p || undefined} style={{ "--v": p / peak } as React.CSSProperties} title={`${DOW[r]} ${h}:00, ${p} prompts`} />)}</div>)}
+            <span /><span className="hw-x" style={{ gridColumn: "2 / -1" }}><b>0h</b><b>6h</b><b>12h</b><b>18h</b><b>23h</b></span>
           </div>
-        ))}
-      </div>
-      <div className="axis"><span>00:00</span><span>12:00</span><span>23:00</span></div>
-      <DataTable caption="Prompts by weekday and hour" head={["Weekday", "Hour", "Prompts"]} rows={hw.filter((x) => x.prompts > 0).map((x) => [DOW[x.dow] ?? x.dow, x.hour, x.prompts])} />
-    </>
+          <p className="note">Busiest: {DOW[best.dow]} {best.hour}:00 ({fmtInt(best.prompts)} prompts). Hover only; ignores filters.</p>
+          <DataTable caption="Prompts by weekday and hour" head={["Weekday", ...Array.from({ length: 24 }, (_, h) => `${h}h`)]} rows={grid.map((r, i) => [DOW[i], ...r])} />
+        </>
+      )}
+    </Card>
+  );
+}
+
+function Spend() {
+  const { v, f, drill } = useStore();
+  const unpriced = SOURCES.filter((s) => v.sources.some((t) => t.key === s && t.cost === null));
+  const weeks = v.weeks;
+  return (
+    <Card title="Cost by tool, weekly" meta="priced tools only" span={7}>
+      <River weeks={weeks} sel={f.source} label="Weekly cost by tool. Click a band to filter a tool, a column to filter a week" fmt={fmtUSD} height={200}
+        onBand={(s) => drill({ source: s as never })} onWeek={(i) => drill({ from: weeks[i].week, to: addDays(weeks[i].week, 6) })} activeWeek={(i) => f.from === weeks[i].week} />
+      <ul className="legend">
+        {SOURCES.filter((s) => weeks.some((w) => (w.bySource[s] ?? 0) > 0)).map((s) => <li key={s} style={{ "--c": srcColor(s) } as React.CSSProperties}>{srcLabel(s)}</li>)}
+        {unpriced.length > 0 && <li className="hatch">{unpriced.map(srcLabel).join(", ")}: not priced</li>}
+      </ul>
+      <DataTable caption="Weekly cost by tool" head={["Week", ...SOURCES.map(srcLabel)]} rows={weeks.map((w) => [w.week, ...SOURCES.map((s) => +(w.bySource[s] ?? 0).toFixed(2))])} />
+    </Card>
+  );
+}
+
+function Cumulative() {
+  const { v, prior, win, apply } = useStore();
+  const bks = useMemo(() => buckets(win, 1), [win]);
+  const cur = useMemo(() => cumulative(bucketSeries(v.rows, win, 1, METRICS.cost)), [v.rows, win]);
+  const prv = useMemo(() => (prior ? cumulative(bucketSeries(prior.v.rows, prior.win, 1, METRICS.cost)) : null), [prior]);
+  const proj = useMemo(() => monthProjection(v.rows, win.to), [v.rows, win.to]);
+  const labels = bks.map((b) => fmtDate(b.from));
+  const priced = cur.length > 0 && cur[cur.length - 1] > 0;
+  return (
+    <Card title="Cumulative cost" meta="this period against the previous one" span={5}>
+      {!priced ? <Empty>No priced sessions in this period.</Empty> : (
+        <>
+          <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
+            lines={[{ name: "This period", color: "var(--accent)", values: cur }, ...(prv ? [{ name: "Previous", color: "var(--prior)", values: prv, dashed: true }] : [])]} onPick={(i) => apply({ from: bks[i].from, to: bks[i].to })} />
+          <ul className="legend"><li style={{ "--c": "var(--accent)" } as React.CSSProperties}>This period</li>{prv && <li style={{ "--c": "var(--prior)" } as React.CSSProperties}>Previous period</li>}</ul>
+          {proj && <p className="note">Month to date {fmtUSD(proj.mtd)} over {proj.elapsed} of {proj.dim} days. At {fmtUSD(proj.perDay)} a day this lands near {fmtUSD(proj.projected)}. A straight-line run rate, not a forecast.</p>}
+          <DataTable caption="Cumulative cost" head={["Day", "This period", ...(prv ? ["Previous"] : [])]} rows={bks.map((_, i) => [labels[i], +cur[i].toFixed(2), ...(prv ? [+(prv[i] ?? 0).toFixed(2)] : [])])} />
+        </>
+      )}
+    </Card>
   );
 }
 
 export function Time() {
-  const { d, f, drill } = useStore();
-  const m = d.engine.methods.time;
-  const an = d.anomalies;
-  const ttr = d.ttr.filter((t) => (!f.source || t.source === f.source) && (!f.intent || t.intent === f.intent));
-  const byIntent = new Map<string, { n: number; w: number }>();
-  for (const t of ttr) { const x = byIntent.get(t.intent) ?? { n: 0, w: 0 }; x.n += t.n; x.w += t.n * t.median_min; byIntent.set(t.intent, x); }
-  const tr = [...byIntent].map(([k, x]) => ({ k, n: x.n, min: x.n ? x.w / x.n : 0 })).sort((a, b) => b.min - a.min);
   return (
-    <div className="grid">
-      <Panel title="Activity" meta="sessions per day, darker is busier" span={8}><Calendar /></Panel>
-      <Panel title="Anomalies" meta={m ?? "rolling median/MAD"} span={4}>
-        {an.length === 0 ? <Empty>No unusual days</Empty> : (
-          <ul className="rows cap">
-            {an.map((a) => (
-              <li key={`${a.date}${a.metric}`} className="rowb">
-                <button type="button" className="link" style={{ textAlign: "left", padding: 0 }} aria-label={`${fmtDate(a.date)} ${a.metric} spike, z ${capZ(a.z)}. Open sessions`} onClick={() => drill({ from: a.date, to: a.date })}>{fmtDate(a.date)} · {a.metric}</button>
-                <span className="tag">z {capZ(a.z)}</span>
-                <p>{a.metric === "cost" ? fmtUSD(a.value) : `${fmtInt(a.value)} prompts`}{a.z >= 10 ? ", far above your normal range" : ""}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
-      <Panel title="Cost by week" meta="USD, priced sources only" span={7}><Weekly /></Panel>
-      <Panel title="Time to resolution" meta="median minutes, weighted by n" span={5}>
-        {tr.length === 0 ? <Empty /> : (
-          <BarList label="Median minutes to resolution by intent" rows={tr.map((x) => ({
-            key: x.k, label: x.k, value: x.min, color: "var(--accent)", active: f.intent === x.k, text: `${x.min.toFixed(1)} min`, sub: `n=${fmtInt(x.n)}`,
-            aria: `${x.k}: ${x.min.toFixed(1)} minutes median, n=${x.n}. Open sessions`, onClick: () => drill({ intent: x.k as never }),
-          }))} />
-        )}
-      </Panel>
-      <Panel title="Hour of week" meta="prompts, all sources (not filtered)" span={12}><HourWeek /></Panel>
-    </div>
+    <Section id="s-time" title="Time" q="When and how much?">
+      <Calendar /><HourWeek /><Spend /><Cumulative />
+    </Section>
   );
 }

@@ -7,8 +7,11 @@ export interface Filter {
   source?: Source; intent?: Intent; project?: string; cluster?: number;
   from?: string; to?: string;          // ISO dates, inclusive
   stage?: number;                      // reached funnel stage >= n (1..6)
+  stageExact?: number;                 // reached funnel stage == n (drop-off: reached n, not n+1)
   loops?: number;                      // rephrase loops == n (8 means 8+)
   applied?: boolean;
+  frictionMin?: number;                // friction band [min, max); max >= 1 includes 1
+  frictionMax?: number;
 }
 export type FilterKey = keyof Filter;
 export const STAGES = ["Intent", "Prompt", "Response", "Iterate", "Applied", "Outcome"] as const;
@@ -28,8 +31,11 @@ export function match(r: SessionRow, f: Filter): boolean {
     && (f.from === undefined || r.date >= f.from)
     && (f.to === undefined || r.date <= f.to)
     && (f.stage === undefined || r.reached_stage >= f.stage)
+    && (f.stageExact === undefined || r.reached_stage === f.stageExact)
     && (f.loops === undefined || (f.loops >= MAX_LOOPS ? r.loops >= MAX_LOOPS : r.loops === f.loops))
-    && (f.applied === undefined || r.applied === f.applied);
+    && (f.applied === undefined || r.applied === f.applied)
+    && (f.frictionMin === undefined || r.friction >= f.frictionMin)
+    && (f.frictionMax === undefined || f.frictionMax >= 1 || r.friction < f.frictionMax);
 }
 export const applyFilter = (rows: SessionRow[], f: Filter) => (isEmpty(f) ? rows : rows.filter((r) => match(r, f)));
 
@@ -48,6 +54,8 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   if (f.stage) out.push({ keys: ["stage"], label: `Reached ${STAGES[f.stage - 1]?.toLowerCase()}` });
   if (f.loops !== undefined) out.push({ keys: ["loops"], label: `${f.loops >= MAX_LOOPS ? `${MAX_LOOPS}+` : f.loops} rephrase loops` });
   if (f.applied !== undefined) out.push({ keys: ["applied"], label: f.applied ? "Applied" : "Not applied" });
+  if (f.stageExact) out.push({ keys: ["stageExact"], label: `Stopped at ${STAGES[f.stageExact - 1]?.toLowerCase()}` });
+  if (f.frictionMin !== undefined || f.frictionMax !== undefined) out.push({ keys: ["frictionMin", "frictionMax"], label: `Friction ${(f.frictionMin ?? 0).toFixed(1)} to ${(f.frictionMax ?? 1).toFixed(1)}` });
   return out;
 }
 

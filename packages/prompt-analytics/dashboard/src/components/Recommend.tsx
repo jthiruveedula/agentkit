@@ -1,53 +1,34 @@
-import { useStore, TABS } from "../state";
-import { fmtValue } from "../lib/format";
-import { Empty, Panel } from "./ui";
-import type { Chapter, Insight } from "../data/types";
-
-const chName = (c: Chapter) => TABS.find((t) => t.id === c)?.name ?? c;
-
-function Evidence({ ins }: { ins: Insight }) {
-  const { drill } = useStore();
-  return (
-    <button type="button" className="btn" aria-label={`Evidence for: ${ins.claim}`} onClick={() => drill(ins.drill.filter, ins.drill.chapter)}>Evidence</button>
-  );
-}
+import { useStore } from "../state";
+import { fmtInt, fmtValue } from "../lib/format";
+import { Card, Empty, Section } from "./ui";
 
 export function Recommend() {
-  const { d } = useStore();
+  const { d, apply } = useStore();
   const byId = new Map(d.insights.map((i) => [i.id, i]));
-  const ins = [...d.insights].sort((a, b) => a.rank - b.rank || a.chapter.localeCompare(b.chapter));
   return (
-    <div className="grid">
-      <Panel title="Recommendations" meta="each cites an insight" span={6}>
+    <Section id="s-recs" title="Recommendations" q="What should you change?">
+      <Card title="Suggested changes" meta="each cites the insight behind it. Aggregates, ignore filters" span={12}>
         {d.recommendations.length === 0 ? <Empty>No recommendations yet</Empty> : (
-          <ul className="rows">
+          <ul className="recs">
             {d.recommendations.map((r) => {
               const e = byId.get(r.evidence_insight);
               return (
-                <li key={r.id} className="rowb">
-                  <strong>{r.title}</strong>
-                  {e ? <Evidence ins={e} /> : <span />}
+                <li key={r.id} className="rec" data-rec={r.id}>
+                  <h4>{r.title}</h4>
                   <p>{r.action}</p>
-                  <p>Impact: {r.impact}</p>
+                  <p className="impact"><b>Impact</b> {r.impact}</p>
+                  {e && (
+                    <>
+                      <p className="meta">{e.claim}. {e.metric}: {fmtValue(e.value, e.unit)} · n={fmtInt(e.evidence.n)}{e.evidence.ci ? ` · CI ${fmtValue(e.evidence.ci[0], e.unit)} to ${fmtValue(e.evidence.ci[1], e.unit)}` : ""} · {e.evidence.method}</p>
+                      <button type="button" className="btn" aria-label={`Show evidence for: ${r.title}`} onClick={() => apply(e.drill.filter, { list: true })}>Show evidence</button>
+                    </>
+                  )}
                 </li>
               );
             })}
           </ul>
         )}
-      </Panel>
-      <Panel title="Insights" meta="strongest first, with sample size" span={6}>
-        {ins.length === 0 ? <Empty>No insights yet</Empty> : (
-          <ul className="rows">
-            {ins.map((i) => (
-              <li key={i.id} className="rowb">
-                <span><span className="tag">{chName(i.chapter)}</span> {i.claim}</span>
-                <Evidence ins={i} />
-                <p>{i.metric}: {fmtValue(i.value, i.unit)} · n={i.evidence.n} · {i.evidence.method}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Panel>
-    </div>
+      </Card>
+    </Section>
   );
 }

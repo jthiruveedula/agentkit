@@ -44,6 +44,11 @@ FEATURE_PHRASE = {"specificity": "Specific prompts", "context": "Prompts with pa
 CAT_TITLE = {"secret": "Stop pasting credentials into prompts", "pii": "Use fake data instead of real personal data",
              "phi": "Keep patient data out of prompts"}
 CAT_NOUN = {"phi": "Health", "secret": "Credential", "pii": "Personal"}
+KIND_NOUN = {"assign": "key assignments", "urlcred": "URL credentials", "bearer": "bearer tokens", "jwt": "JWTs", "pem": "private keys",
+             "aws": "AWS keys", "github": "GitHub tokens", "openai": "OpenAI keys", "anthropic": "Anthropic keys", "google": "Google keys",
+             "slack": "Slack tokens", "stripe": "Stripe keys", "email": "emails", "phone": "phone numbers", "ssn": "SSNs", "card": "card numbers",
+             "iban": "IBANs", "dob": "birth dates", "gov_id": "ID numbers", "mrn": "record numbers", "npi": "NPI numbers",
+             "health_plan": "insurance IDs", "phi_context": "health details"}
 
 
 def _claim(s: str) -> str:
@@ -194,7 +199,7 @@ def _exposure(exp: dict) -> list[dict]:
         top = max(kinds[c["category"]], key=lambda k: (k["sessions"], k["kind"]))["kind"]
         sev = SEVERITY[c["category"]]
         out.append(_cand(f"friction.exposure.{c['category']}", "friction",
-                         f"{CAT_NOUN[c['category']]} data pasted in {c['sessions']} of your sessions, mostly {top}",
+                         f"{CAT_NOUN[c['category']]} data pasted in {c['sessions']} of your sessions, mostly {KIND_NOUN.get(top, top)}",
                          f"sessions with {c['category']} findings", c["sessions"], "", None, c["sessions"],
                          "count of sessions with >=1 finding", EXPOSURE_BONUS * sev, "exposure", {},
                          None, {"category": c["category"], "sessions": c["sessions"], "share": exp["share"]}))

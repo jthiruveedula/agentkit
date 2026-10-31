@@ -78,7 +78,7 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
 
   return (
     <li ref={li} className="rq-row" data-status={status}>
-      <div className="rq-kinds">{it.kinds.map((k) => <span key={k} className="chip" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="chip" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</div>
+      <div className="rq-kinds">{it.kinds.map((k, i) => <span key={`${i}-${k}`} className="chip" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="chip" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</div>
       {found ? (
         <div className="rq-box" role="group" aria-label="Sensitive original, revealed">
           {found.map((f, i) => <p key={i}>{f.before}<mark>{f.value}</mark>{f.after}</p>)}
@@ -111,9 +111,9 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
   );
 }
 
-export function ReviewQueue({ items }: { items: ExposureItem[] }) {
+export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat: "all" | Cat; onCat: (c: "all" | Cat) => void }) {
   const api = useMemo(() => getApi(), []);
-  const [cat, setCat] = useState<"all" | Cat>("all");
+  const setCat = onCat;
   const [src, setSrc] = useState<"all" | Source>("all");
   const [st, setSt] = useState<"all" | Status>("all");
   const [page, setPage] = useState(0);

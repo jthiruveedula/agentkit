@@ -3,15 +3,20 @@ import type { DashboardData } from "./data/types";
 import { loadData, normalize, readInline } from "./data/load";
 import { StoreProvider, useStore } from "./state";
 import type { Filter } from "./lib/filter";
-import { EnginePill } from "./components/Engine";
-import { Drawer, FilterBar, Kpis, Tabs } from "./components/Shell";
-import { Footprint } from "./components/Footprint";
+import { SECTIONS } from "./lib/hash";
+import { useTheme } from "./lib/theme";
+import { Header, Nav } from "./components/Shell";
+import { Overview } from "./components/Overview";
+import { Tools } from "./components/Tools";
 import { Time } from "./components/Time";
 import { Funnel } from "./components/Funnel";
 import { Friction } from "./components/Friction";
 import { Works } from "./components/Works";
+import { Exposure } from "./components/Exposure";
 import { Recommend } from "./components/Recommend";
-import { fmtDate } from "./lib/format";
+import { Sessions } from "./components/Sessions";
+import { Panel } from "./components/Detail";
+import { Caustic } from "./components/Caustic";
 
 type State = { kind: "loading" } | { kind: "empty" } | { kind: "error"; msg: string } | { kind: "ready"; d: DashboardData };
 
@@ -25,26 +30,41 @@ function initial(): State {
   }
 }
 
-const VIEWS = { footprint: Footprint, time: Time, funnel: Funnel, friction: Friction, works: Works, recommend: Recommend } as const;
-
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
-  const { d, tab, open } = useStore();
-  const View = VIEWS[tab];
+  const { d, panel, crumbs, closePanel, clearAfter, setSection } = useStore();
+  const [theme, toggleTheme] = useTheme();
+
+  useEffect(() => {   // Esc: close the panel first, else drop the last selection
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const t = e.target as Element | null;
+      if (t?.closest?.("select, input, .pop") || document.querySelector(".rq-box")) return;
+      if (panel !== "none") closePanel(); else if (crumbs.length) clearAfter(crumbs.length - 2);
+    };
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, [panel, crumbs.length, closePanel, clearAfter]);
+
+  useEffect(() => {   // the nav highlights the section under the header
+    if (typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) setSection(e.target.id); }, { rootMargin: "-25% 0px -65% 0px" });
+    SECTIONS.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
+    return () => io.disconnect();
+  }, [setSection]);
+
   return (
-    <div className="app" data-drawer={open ? "open" : "closed"}>
+    <div className="app" data-panel={panel}>
+      <Caustic />
       <a className="skip" href="#main">Skip to content</a>
-      <header className="top">
-        <h1>Prompt Analytics</h1>
-        <span className="range">{d.range.start && d.range.end ? `${fmtDate(d.range.start)} to ${fmtDate(d.range.end)}` : ""}</span>
-        <span className="grow" />
-        <EnginePill d={d} onData={onData} />
-      </header>
+      <Header d={d} onData={onData} theme={theme} toggleTheme={toggleTheme} />
       {d.engine.mode === "basic" && <div className="banner" role="status">Basic mode: topics are grouped by keywords. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to cluster by meaning.</> : null}</div>}
-      <FilterBar />
-      <Kpis />
-      <Tabs />
-      <main id="main" role="tabpanel" aria-labelledby={`tab-${tab}`} tabIndex={-1}><div id="panel"><View /></div></main>
-      <Drawer />
+      <div className="frame">
+        <Nav />
+        <main id="main" tabIndex={-1}>
+          <Overview /><Tools /><Time /><Funnel /><Friction /><Works /><Exposure /><Recommend /><Sessions />
+        </main>
+      </div>
+      <Panel />
     </div>
   );
 }

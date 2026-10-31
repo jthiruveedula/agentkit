@@ -23,7 +23,7 @@ describe("engine tiers", () => {
     expect(pillText(ml.engine)).toMatch(/ML .* scikit-learn 1\.9\.1/);
     expect(pillText({ ...ml.engine, mode: "deep", accel: "mps" })).toMatch(/Semantic .* mps/);
   });
-  it("basic renders the topic treemap, not the galaxy", () => {
+  it("basic renders keyword topics, not the galaxy", () => {
     const html = renderToStaticMarkup(<StoreProvider d={basic}><Works /></StoreProvider>);
     expect(html).toMatch(/Topics, grouped by keywords/);
     expect(html).not.toMatch(/Topic galaxy/);

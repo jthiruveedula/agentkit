@@ -1,60 +1,102 @@
+import { useState } from "react";
 import { useStore } from "../state";
 import { STAGES } from "../lib/filter";
-import { fmtInt, fmtPct } from "../lib/format";
-import { srcColor, srcLabel } from "../lib/palette";
-import { BarList, Cols, DataTable, Empty, Panel, pct } from "./ui";
+import { fmtInt } from "../lib/format";
+import { intentColor, SOURCES, srcColor, srcLabel } from "../lib/palette";
+import { useRoving } from "../lib/hooks";
+import { BarList, Card, Cols, DataTable, Empty, Section, Segmented, pct } from "./ui";
+
+type By = "all" | "tool" | "intent";
+
+function Stages() {
+  const { v, f, drill } = useStore();
+  const top = v.funnel[0] ?? 0;
+  return top === 0 ? <Empty /> : (
+    <>
+      <BarList label="Sessions reaching each funnel stage" rows={STAGES.map((s, i) => {
+        const n = v.funnel[i] ?? 0, prev = i ? v.funnel[i - 1] ?? 0 : n;
+        return { key: s, label: s, value: n, color: "var(--accent)", active: f.stage === i + 1, text: `${fmtInt(n)} · ${pct(n, top)}`, sub: i ? `${pct(n, prev)} of ${STAGES[i - 1].toLowerCase()}` : undefined,
+          aria: `${s}: ${n} sessions, ${pct(n, top)} of all. Filter to sessions that reached ${s.toLowerCase()}`, onClick: () => drill({ stage: i + 1 }) };
+      })} />
+      <ul className="drops" aria-label="Where sessions stop">
+        {STAGES.slice(0, -1).map((s, i) => {
+          const lost = (v.funnel[i] ?? 0) - (v.funnel[i + 1] ?? 0);
+          return (
+            <li key={s}><button type="button" className="chip" aria-pressed={f.stageExact === i + 1} disabled={lost <= 0} onClick={() => drill({ stageExact: i + 1 })}
+              aria-label={`${fmtInt(lost)} sessions stopped after ${s.toLowerCase()}. Filter to them`}>{s} to {STAGES[i + 1]}: -{fmtInt(lost)}</button></li>
+          );
+        })}
+      </ul>
+    </>
+  );
+}
+
+function Minis({ by }: { by: By }) {
+  const { v, f, drill } = useStore();
+  const rows = by === "tool" ? v.funnelBySource : v.funnelByIntent;
+  if (rows.length === 0) return <Empty />;
+  return (
+    <div className="minis">
+      {rows.map((x) => {
+        const t = x.counts[0] ?? 0, color = by === "tool" ? srcColor(x.key) : intentColor(x.key), label = by === "tool" ? srcLabel(x.key) : x.key;
+        const on = by === "tool" ? f.source === x.key : f.intent === x.key;
+        return (
+          <div key={x.key} className="mini" data-on={on || undefined}>
+            <button type="button" className="mini-h" aria-pressed={on} onClick={() => drill(by === "tool" ? { source: x.key as never } : { intent: x.key as never })}
+              aria-label={`${label}: ${t} sessions, ${pct(x.counts[4] ?? 0, t)} applied. Filter`}><span className="sw" style={{ "--c": color } as React.CSSProperties} />{label}</button>
+            <Cols label={`${label} funnel`} height={44} cols={STAGES.map((s, i) => ({ key: s, label: s, segs: [{ v: t ? (x.counts[i] ?? 0) / t : 0, color }], aria: `${s}: ${x.counts[i] ?? 0}` }))} />
+            <span className="meta">{fmtInt(t)} sessions · {pct(x.counts[4] ?? 0, t)} applied</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Switches() {
+  const { d, drill, f } = useStore();
+  const srcs = SOURCES.filter((s) => d.tool_switch.some((t) => t.from === s || t.to === s));
+  const get = (a: string, b: string) => d.tool_switch.find((t) => t.from === a && t.to === b)?.count ?? 0;
+  const peak = Math.max(...d.tool_switch.map((t) => t.count), 1);
+  const { group, mark } = useRoving(srcs.length * srcs.length, 1, Math.max(1, srcs.length));
+  return (
+    <Card title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
+      {srcs.length === 0 ? <Empty>No switches</Empty> : (
+        <>
+          <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
+            <span className="mx-h" />{srcs.map((s) => <span key={s} className="mx-h" title={`to ${srcLabel(s)}`}>{srcLabel(s).split(" ")[0]}</span>)}
+            {srcs.map((a, r) => (
+              <div key={a} style={{ display: "contents" }}>
+                <span className="mx-l" title={`from ${srcLabel(a)}`}>{srcLabel(a).split(" ")[0]}</span>
+                {srcs.map((b, c) => {
+                  const n = get(a, b);
+                  return n === 0 ? <span key={b} className="cell none" aria-hidden="true" /> : (
+                    <button key={b} type="button" className="cell" aria-pressed={f.source === a} style={{ "--v": n / peak } as React.CSSProperties} title={`${srcLabel(a)} to ${srcLabel(b)}: ${n}`}
+                      aria-label={`${srcLabel(a)} to ${srcLabel(b)}: ${n} switches. Filter to sessions that started in ${srcLabel(a)}`} onClick={() => drill({ source: a })} {...mark(r * srcs.length + c)}>{n}</button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <p className="note">Rows are the tool left, columns the tool moved to. A click filters by the origin tool only.</p>
+          <DataTable caption="Tool switches" head={["From", "To", "Count"]} rows={d.tool_switch.map((t) => [srcLabel(t.from), srcLabel(t.to), t.count])} />
+        </>
+      )}
+    </Card>
+  );
+}
 
 export function Funnel() {
-  const { d, v, f, drill } = useStore();
-  const m = d.engine.methods.funnel;
-  const top = v.funnel[0] ?? 0;
-  const sw = d.tool_switch.filter((t) => !f.source || t.from === f.source || t.to === f.source);
+  const { d, v } = useStore();
+  const [by, setBy] = useState<By>("all");
   return (
-    <div className="grid">
-      <Panel title="Funnel" meta={m ?? "sessions reaching each stage"} span={6}>
-        {top === 0 ? <Empty /> : (
-          <BarList label="Sessions reaching each funnel stage" rows={STAGES.map((s, i) => {
-            const n = v.funnel[i] ?? 0, prev = i ? v.funnel[i - 1] ?? 0 : n;
-            return {
-              key: s, label: s, value: n, color: "var(--accent)", active: f.stage === i + 1, text: `${fmtInt(n)} · ${pct(n, top)}`,
-              sub: i ? `${pct(n, prev)} of ${STAGES[i - 1].toLowerCase()}` : undefined,
-              aria: `${s}: ${n} sessions, ${pct(n, top)} of all. Open sessions that reached ${s.toLowerCase()}`, onClick: () => drill({ stage: i + 1 }),
-            };
-          })} />
-        )}
+    <Section id="s-funnel" title="Funnel" q="Where do sessions stop?">
+      <Card title="Stages" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={6}
+        actions={<Segmented label="Break funnel down by" value={by} onChange={setBy} options={[{ id: "all", text: "All" }, { id: "tool", text: "Tool" }, { id: "intent", text: "Intent" }]} />}>
+        {by === "all" ? <Stages /> : <Minis by={by} />}
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />
-      </Panel>
-      <Panel title="Applied rate by intent" meta="sessions that reached Applied" span={6}>
-        {v.funnelByIntent.length === 0 ? <Empty /> : (
-          <BarList label="Applied rate by intent" max={1} rows={v.funnelByIntent.map((x) => {
-            const r = (x.counts[0] ?? 0) > 0 ? (x.counts[4] ?? 0) / (x.counts[0] ?? 1) : 0;
-            return { key: x.key, label: x.key, value: r, color: "var(--accent)", active: f.intent === x.key, text: fmtPct(r), sub: `n=${fmtInt(x.counts[0] ?? 0)}`,
-              aria: `${x.key}: ${fmtPct(r)} applied, n=${x.counts[0]}. Open sessions`, onClick: () => drill({ intent: x.key as never }) };
-          })} />
-        )}
-      </Panel>
-      <Panel title="Funnel by source" meta="one column per stage, relative to Intent" span={8}>
-        {v.funnelBySource.length === 0 ? <Empty /> : (
-          <div className="minis">
-            {v.funnelBySource.map((x) => {
-              const t = x.counts[0] ?? 0;
-              return (
-                <button key={x.key} type="button" className="mini" aria-pressed={f.source === x.key} onClick={() => drill({ source: x.key as never })}
-                  aria-label={`${srcLabel(x.key)}: ${t} sessions, ${pct(x.counts[4] ?? 0, t)} applied. Open sessions`}>
-                  <b><span className="sw" style={{ "--c": srcColor(x.key) } as React.CSSProperties} />{srcLabel(x.key)}</b>
-                  <Cols label={`${srcLabel(x.key)} funnel`} height={40} cols={STAGES.map((s, i) => ({ key: s, label: s, segs: [{ v: t ? (x.counts[i] ?? 0) / t : 0, color: srcColor(x.key) }], aria: `${s}: ${x.counts[i] ?? 0}` }))} />
-                  <span className="meta">{fmtInt(t)} sessions · {pct(x.counts[4] ?? 0, t)} applied</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </Panel>
-      <Panel title="Tool switches" meta="consecutive, same project, < 24h" span={4}>
-        {sw.length === 0 ? <Empty>No switches</Empty> : (
-          <BarList label="Tool switches" rows={sw.slice(0, 6).map((t) => ({ key: `${t.from}${t.to}`, label: `${srcLabel(t.from)} to ${srcLabel(t.to)}`, value: t.count, color: "var(--accent)", text: fmtInt(t.count), aria: `${srcLabel(t.from)} to ${srcLabel(t.to)}: ${t.count}` }))} />
-        )}
-      </Panel>
-    </div>
+      </Card>
+      <Switches />
+    </Section>
   );
 }
