@@ -66,7 +66,7 @@
   }
   function set(p) {
     paused = p;
-    if (btn) { btn.setAttribute('aria-pressed', p); btn.textContent = p ? 'Play background' : 'Pause background'; }
+    if (btn) { btn.setAttribute('aria-pressed', p); btn.textContent = p ? 'Play motion' : 'Pause motion'; }
     run();
   }
   addEventListener('resize', () => { size(); frame(); });

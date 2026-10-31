@@ -136,8 +136,8 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px 28px}
 footer a{color:var(--ink);text-underline-offset:4px;text-decoration-color:var(--reg);text-decoration-thickness:2px}
 @keyframes up{from{opacity:0;transform:translateY(18px)}}
 .hero>*{animation:up .9s var(--ease) both}.hero>*:nth-child(2){animation-delay:.12s}
-@media (max-width:860px){.hero,.split,.proof{grid-template-columns:1fr}#top{min-height:0;padding-top:104px}.nav .hide-s{display:none}}
-@media (max-width:480px){.nav a,.nav button{padding:0 10px}.cmdbox{max-width:100%}.facts>div,.facts>li{grid-template-columns:1fr;gap:6px}.rows li{grid-template-columns:52px 1fr 48px}}
+@media (max-width:860px){.hero,.split,.proof{grid-template-columns:minmax(0,1fr)}#top{min-height:0;padding-top:104px}.nav .hide-s{display:none}}
+@media (max-width:480px){.nav{font-size:.75rem}.nav a,.nav button{padding:0 9px}.cmdbox{max-width:100%}.facts>div,.facts>li{grid-template-columns:1fr;gap:6px}.rows li{grid-template-columns:52px 1fr 48px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{#fx,.nav,#readout,.skip{display:none}}
 main:focus{outline:none}
