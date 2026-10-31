@@ -15,6 +15,7 @@ function fmt(n){return Number(n).toLocaleString('en-US')}
 function d1(n){return (Math.round(n*10)/10).toFixed(1)}
 
 function setPaused(p){document.body.classList.toggle('paused',p);document.querySelectorAll('.pausebtn').forEach(function(b){b.setAttribute('aria-pressed',p)})}
+$('gpause').hidden=false;
 $('gpause').onclick=function(){setPaused(!document.body.classList.contains('paused'))};
 $('retry').onclick=function(){location.reload()};
 if(RM){document.body.classList.add('paused');$('gpause').disabled=true;$('gpause').textContent='Animation off (reduced motion)'}
@@ -43,12 +44,6 @@ var io=new IntersectionObserver(function(es){es.forEach(function(e){
   if(e.target.id==='gwrap')e.target.classList.toggle('live',e.isIntersecting&&!RM)
 })},{threshold:.15});
 function reveal(n,run){n._run=run;io.observe(n)}
-
-/* build heavy sections only when scrolled near */
-var lio=new IntersectionObserver(function(es){es.forEach(function(e){
-  if(!e.isIntersecting)return;lio.unobserve(e.target);var r=e.target._lazy;e.target._lazy=null;
-  if(r)try{r()}catch(x){fallback()}})},{rootMargin:'400px 0px'});
-function lazy(n,run){n._lazy=run;lio.observe(n)}
 
 function num(v){return typeof v==='number'&&isFinite(v)}
 function snap(s,full){
@@ -120,7 +115,8 @@ function render(D){
   else{tl.textContent=fmt(C.tokens.total)+' tokens';el('p',null,'Skills '+fmt(C.tokens.skills)+', agents '+fmt(C.tokens.agents)+'.',a3)}
   A.querySelectorAll('.rise').forEach(function(n){reveal(n)});
 
-  scoreTable(C);lazy($('graph'),function(){graph(C)});lazy($('gallery'),function(){gallery(C)});log(C);
+  /* graph nodes and filter chips are tab stops: build them up front so keyboard users reach them in order */
+  scoreTable(C);graph(C);gallery(C);log(C);
 
   var ft=$('foot');
   var l=el('a',null,'← agentkit',ft);l.href='../';
