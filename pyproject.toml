@@ -1,6 +1,6 @@
 [project]
 name = "agentkit"
-version = "0.17.0"
+version = "0.17.1"
 description = "Portable, vendor-neutral agent foundation for Claude Code, Copilot, Cursor, and Antigravity."
 requires-python = ">=3.8"
 license = { text = "MIT" }

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/jthiruveedula/agentkit/compare/v0.17.0...v0.17.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **site:** hash-stamp css and js refs to defeat stale caches ([#91](https://github.com/jthiruveedula/agentkit/issues/91)) ([a7bd221](https://github.com/jthiruveedula/agentkit/commit/a7bd221e23ef7565b7b478071d995ff315c693e3))
+
 ## [0.17.0](https://github.com/jthiruveedula/agentkit/compare/v0.16.0...v0.17.0) (2026-10-31)
 
 
