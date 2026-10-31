@@ -15,7 +15,7 @@
 | Scroll-through 3D world | — | — | `scroll-world` |
 | 3D charts / data viz | — | — | `3dviz-pro-max` |
 | Rendered video, motion graphics | — | — | `hyperframes` |
-| Visual direction, type, color, layout | — | — | `hallmark` |
+| Visual direction, type, color, layout | — | — | `ext-hallmark` |
 
 ## three.js / React Three Fiber rules
 
