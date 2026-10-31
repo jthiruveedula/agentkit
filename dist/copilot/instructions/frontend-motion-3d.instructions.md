@@ -1,6 +1,5 @@
 ---
 description: Pick the lightest stack for UI animation and 3D (CSS/Motion, GSAP+ScrollTrigger, three.js/R3F, HyperFrames) within a perf and a11y budget. Use when asked for animations, scroll effects, 3D/WebGL, motion design, interactive heroes.
-applyTo: **
 ---
 
 # Frontend Motion & 3D

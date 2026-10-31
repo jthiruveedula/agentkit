@@ -1,6 +1,5 @@
 ---
 description: Apply a consistent professional house style (palette, type, tables/charts, layout) to Word, Excel, PDF or PowerPoint files. Use when creating, formatting or polishing a docx/xlsx/pdf/pptx or when asked to "look professional".
-applyTo: **
 ---
 
 # Doc Standards

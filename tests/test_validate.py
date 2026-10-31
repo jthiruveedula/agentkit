@@ -50,6 +50,22 @@ def test_frontmatter_rejects_unterminated_block():
         raise AssertionError("expected FrontmatterError")
 
 
+def test_globs_must_be_a_string(tmp_path):
+    skill_dir = tmp_path / "skills" / "globby"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: globby\ndescription: "
+        + "x" * 45
+        + " use when testing.\nversion: 0.1.0\nglobs: [a, b]\n---\n\nbody\n"
+    )
+    validate.SKILLS_DIR = tmp_path / "skills"
+    try:
+        errors = validate.validate()
+        assert any("'globs' must be" in e for e in errors), errors
+    finally:
+        validate.SKILLS_DIR = REPO_ROOT / "skills"
+
+
 def test_kebab_case_name_required(tmp_path):
     skill_dir = tmp_path / "skills" / "Bad_Name"
     skill_dir.mkdir(parents=True)

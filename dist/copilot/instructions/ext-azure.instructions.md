@@ -1,6 +1,5 @@
 ---
 description: Route Azure tasks to pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills. Use when the user wants Azure-specific help (App Service, Functions, AKS, Entra ID) from Microsoft-authored skills.
-applyTo: **
 ---
 
 # External: azure

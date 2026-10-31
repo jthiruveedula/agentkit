@@ -1,6 +1,5 @@
 ---
 description: Run an ML project from framing and leakage-safe splits through tracking, evaluation, registry, serving and drift monitoring. Use when training or evaluating a model, setting up MLflow/W&B, deploying a model, or when performance dropped.
-applyTo: **
 ---
 
 # ML Lifecycle

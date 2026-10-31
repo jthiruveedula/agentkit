@@ -1,6 +1,5 @@
 ---
 description: Wire Meta Muse image generation (generate, edit, iterate) into the agent via the pinned muse-image-mcp server. Use when the user asks for Meta Muse or AI-generated images/assets (hero art, textures, mockups).
-applyTo: **
 ---
 
 # External: Meta Muse

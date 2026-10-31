@@ -1,6 +1,5 @@
 ---
 description: Route Google Cloud tasks to the pinned google/skills collection. Use when the user wants GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM) from vendor skills.
-applyTo: **
 ---
 
 # External: gcp (google/skills)

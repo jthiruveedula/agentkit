@@ -1,6 +1,5 @@
 ---
 description: Search the pinned VoltAgent/awesome-agent-skills index for an existing skill. Use when the user wants a capability this repo lacks and asks what already exists before authoring a new skill.
-applyTo: **
 ---
 
 # External: gap discovery

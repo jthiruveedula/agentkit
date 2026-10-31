@@ -1,6 +1,5 @@
 ---
 description: Review a GitHub pull request for correctness bugs and scope creep, posting PR-level comments. Use when asked to review a PR, "look at PR #N", or check a branch before merge.
-applyTo: **
 ---
 
 # PR Review

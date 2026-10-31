@@ -1,6 +1,5 @@
 ---
 description: Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.
-applyTo: **
 ---
 
 # Smart Navigator

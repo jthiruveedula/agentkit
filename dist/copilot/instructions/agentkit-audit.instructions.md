@@ -1,6 +1,5 @@
 ---
 description: Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard.
-applyTo: **
 ---
 
 # Agentkit Audit

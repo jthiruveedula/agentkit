@@ -1,6 +1,5 @@
 ---
 description: Summarize commits, closed issues/PRs and open threads since the last standup into 3 lines (did/doing/blocked). Use when the user asks for a standup update, status report, or "what did I do yesterday".
-applyTo: **
 ---
 
 # Daily Standup

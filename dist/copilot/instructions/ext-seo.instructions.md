@@ -1,6 +1,5 @@
 ---
 description: Route SEO setup and audits to the pinned AgriciDaniel/claude-seo collection. Use when building or changing any website, landing page or frontend that serves public pages, or when asked for an SEO audit, schema markup, sitemap, Core Web Vitals or GEO/AI-search readiness.
-applyTo: **
 ---
 
 # External: seo (claude-seo)

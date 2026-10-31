@@ -1,6 +1,5 @@
 ---
 description: Mine recent session history for recurring agent mistakes, rank repeated patterns, and write durable corrections. Use when the user asks for a retro on recent sessions, recurring agent errors, or to make agents faster.
-applyTo: **
 ---
 
 # Memory Sync

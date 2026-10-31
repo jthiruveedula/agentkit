@@ -323,6 +323,10 @@ def validate():
             else:
                 seen_names[name] = origin
 
+        if "globs" in meta and not (
+            isinstance(meta["globs"], str) and meta["globs"].strip()
+        ):
+            errors.append("%s: 'globs' must be a non-empty string" % origin)
         if "Bash" in tool_rules(meta.get("allowed-tools")) and (
             name not in BARE_BASH_ALLOWLIST
         ):

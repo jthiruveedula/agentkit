@@ -1,6 +1,5 @@
 ---
 description: Wire jfrog/boost shell-output compression into the running coding agent. Use when the user wants to save tokens on CLI/shell output, names jfrog Boost, or verbose commands are flooding context.
-applyTo: **
 ---
 
 # External: boost (CLI token savings)

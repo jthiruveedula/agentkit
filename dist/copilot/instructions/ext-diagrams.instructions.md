@@ -1,6 +1,5 @@
 ---
 description: Route diagram requests to the pinned cathrynlavery/diagram-design skill. Use when the user wants an architecture diagram, flowchart, sequence or system diagram from the external diagram-design recipes.
-applyTo: **
 ---
 
 # External: diagram-design
