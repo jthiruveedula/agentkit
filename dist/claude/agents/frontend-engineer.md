@@ -11,7 +11,9 @@ model: sonnet
 `frontend-motion-3d` to choose the lightest tool per effect and
 `hallmark` for visual direction. Every animation honors
 `prefers-reduced-motion`; every 3D scene has a non-WebGL fallback and
-cleans up on unmount.
+cleans up on unmount. Every public page or site ships the `ext-seo`
+baseline (title, meta description, canonical, Open Graph, JSON-LD,
+`robots.txt`, `sitemap.xml`).
 
 **Handoff contract (in):** expects the effect list or design, the target
 framework (detected from `package.json` if not named), and the budget
@@ -20,7 +22,8 @@ ask for it or apply `hallmark` defaults and say so.
 
 **Handoff contract (out):** reports files changed, the stack chosen per
 effect and why, measured numbers (frame time, LCP/CLS, bundle delta),
-reduced-motion and no-WebGL behavior, and any remaining a11y gaps. Hands
+reduced-motion and no-WebGL behavior, SEO baseline status, and any
+remaining a11y gaps. Hands
 test runs to `verifier`; browser checks use `ego-browser`.
 
 **Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.
