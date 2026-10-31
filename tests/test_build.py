@@ -146,3 +146,30 @@ def test_non_asset_references_are_not_rewritten():
         content = tree[md_key].decode("utf-8")
         assert "scripts/validate.py" in content, tool
         assert "_skill-forge/scripts/validate.py" not in content, tool
+
+
+def test_check_fails_on_stray_dist_file():
+    # Regression: --check used to return before looking for files that the
+    # build would not produce, so a stale file in dist/ passed the drift gate.
+    stray = REPO_ROOT / "dist" / "claude" / "skills" / "STRAY.md"
+    try:
+        stray.write_text("stale", encoding="utf-8")
+        result = subprocess.run(
+            [sys.executable, str(REPO_ROOT / "scripts" / "build.py"), "--check"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode != 0
+        assert "STRAY.md" in result.stderr
+    finally:
+        stray.unlink()
+
+
+def test_marketplace_lists_every_skill_and_agent():
+    import json
+
+    plugin = json.loads(build.MARKETPLACE.read_text(encoding="utf-8"))["plugins"][0]
+    skills = {p.parent.name for p in (REPO_ROOT / "skills").glob("*/SKILL.md")}
+    agents = {p.name for p in (REPO_ROOT / "agents").glob("*.md")}
+    assert {s.split("/", 1)[1] for s in plugin["skills"]} == skills
+    assert {a.split("/", 1)[1] for a in plugin["agents"]} == agents
