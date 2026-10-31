@@ -23,8 +23,8 @@ ask for it or apply `ext-hallmark` defaults and say so.
 
 **Handoff contract (out):** reports files changed, the stack chosen per
 effect and why, measured numbers (frame time, LCP/CLS, bundle delta),
-reduced-motion and no-WebGL behavior, SEO baseline status, sloplint status, and any
-remaining a11y gaps. Hands
-test runs to `verifier`; browser checks use `ego-browser`.
+reduced-motion and no-WebGL behavior, SEO baseline and sloplint
+status, and any remaining a11y gaps. Hands test runs to `verifier`;
+browser checks use `ego-browser`.
 
 **Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.

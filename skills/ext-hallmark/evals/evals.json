@@ -14,7 +14,15 @@
     "expected_behavior": [
       "Does not run the full Hallmark flow or impose a theme; keeps the project's design system",
       "Applies The Floor to the touched lines (colour via tokens, :focus-visible, no transition: all)",
-      "Lints the changed files with sloplint.mjs before handoff"
+      "Runs sloplint.mjs --tier floor --json on the touched files before and after, fixing only new findings and reporting pre-existing ones (e.g. gate 20 stamp)"
+    ]
+  },
+  {
+    "query": "Redesign src/pages/Home.tsx so it looks better.",
+    "files": [],
+    "expected_behavior": [
+      "Does not run Hallmark redesign or the full flow because the user did not name Hallmark",
+      "Keeps the project's design system and applies Floor rules 1-11 to the touched lines"
     ]
   },
   {
