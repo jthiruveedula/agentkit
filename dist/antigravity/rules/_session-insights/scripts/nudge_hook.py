@@ -5,7 +5,7 @@ When a submitted prompt is a task (code-gen / debug / refactor) that names
 no file, symbol or error and states no done-condition, it adds one line of
 context telling the agent to state its assumed target and done-condition
 before editing, and shows the user a short tip. Advisory only: it never
-blocks a prompt, and any error exits 0 silently.
+blocks a prompt, and any error exits 0 after one line on stderr.
 
     python3 nudge_hook.py install             # ~/.claude/settings.json
     python3 nudge_hook.py install --dry-run
@@ -16,15 +16,21 @@ Env: AGENTKIT_NUDGE=off disables it; AGENTKIT_NUDGE=model hides the user tip.
 Stdlib only.
 """
 
-import argparse
-import importlib.util
 import json
 import os
-import shutil
 import sys
-from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+# Only cheap stdlib at import time: this runs on every prompt. The installer
+# imports its heavier modules lazily.
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)  # prompt_signals sits beside this script
+from prompt_signals import (  # noqa: E402
+    ACCEPTANCE_RE,
+    ANCHOR_RE,
+    CORRECTION_RE,
+    load_classifier,
+)
+
 MARK = "nudge_hook.py"
 TASK_INTENTS = {"code-gen", "debug", "refactor"}
 CONTEXT = (
@@ -36,29 +42,21 @@ CONTEXT = (
 TIP = "tip: name the file/function and the done-condition to skip a round-trip"
 
 
-def _insights():
-    spec = importlib.util.spec_from_file_location("ak_insights", HERE / "insights.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-def verdict(prompt, ins=None):
+def verdict(prompt):
     """Return the hook output dict for a prompt, or None to stay silent."""
     mode = os.environ.get("AGENTKIT_NUDGE", "on").lower()
     text = (prompt or "").strip()
     if mode == "off" or not text or text.startswith(("/", "!", "#")):
         return None
-    ins = ins or _insights()
     words = len(text.split())
     if (
         words >= 25
-        or ins.ANCHOR_RE.search(text)
-        or ins.ACCEPTANCE_RE.search(text)
-        or ins.CORRECTION_RE.search(text)
+        or ANCHOR_RE.search(text)
+        or ACCEPTANCE_RE.search(text)
+        or CORRECTION_RE.search(text)
     ):
         return None
-    if ins._load_classifier()(text) not in TASK_INTENTS:
+    if load_classifier()(text) not in TASK_INTENTS:
         return None
     out = {
         "hookSpecificOutput": {
@@ -75,7 +73,8 @@ def check(stdin=None):
     try:
         data = json.load(stdin or sys.stdin)
         out = verdict(data.get("prompt", "") if isinstance(data, dict) else "")
-    except Exception:
+    except Exception as e:  # noqa: BLE001 -- a hook must never break the session
+        print("agentkit nudge_hook: %s: %s" % (type(e).__name__, e), file=sys.stderr)
         return 0
     if out:
         print(json.dumps(out))
@@ -83,6 +82,8 @@ def check(stdin=None):
 
 
 def apply(settings, uninstall=False):
+    import shlex
+
     hooks = settings.setdefault("hooks", {})
     groups = []
     for g in hooks.get("UserPromptSubmit", []):
@@ -90,7 +91,7 @@ def apply(settings, uninstall=False):
         if kept:
             groups.append(dict(g, hooks=kept))
     if not uninstall:
-        cmd = 'python3 "%s" check' % (HERE / MARK)
+        cmd = "python3 %s check" % shlex.quote(os.path.join(HERE, MARK))
         groups.append({"hooks": [{"type": "command", "command": cmd, "timeout": 5}]})
     if groups:
         hooks["UserPromptSubmit"] = groups
@@ -101,7 +102,32 @@ def apply(settings, uninstall=False):
     return settings
 
 
+def write_settings(path, text):
+    """Keep one .bak (before the first change), then replace the file atomically."""
+    import shutil
+    import tempfile
+
+    path = os.path.realpath(path)  # write through a symlinked settings.json
+    if os.path.exists(path) and not os.path.exists(path + ".bak"):
+        shutil.copy2(path, path + ".bak")
+    d = os.path.dirname(path)
+    os.makedirs(d, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".settings-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        if os.path.exists(path):
+            shutil.copymode(path, tmp)
+        os.replace(tmp, path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
+
+
 def install(argv):
+    import argparse
+
     ap = argparse.ArgumentParser(prog="nudge_hook.py install")
     ap.add_argument("--settings", default=os.path.expanduser("~/.claude/settings.json"))
     ap.add_argument("--uninstall", action="store_true")
@@ -116,11 +142,7 @@ def install(argv):
     if a.dry_run:
         print(text)
         return 0
-    if os.path.exists(a.settings):
-        shutil.copy2(a.settings, a.settings + ".bak")
-    os.makedirs(os.path.dirname(os.path.abspath(a.settings)), exist_ok=True)
-    with open(a.settings, "w", encoding="utf-8") as fh:
-        fh.write(text)
+    write_settings(a.settings, text)
     print(
         "%s prompt nudge hook in %s"
         % ("removed" if a.uninstall else "installed", a.settings)

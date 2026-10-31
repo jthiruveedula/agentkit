@@ -2,7 +2,7 @@
 name: smart-navigator
 description: Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/map.py *), Bash(python3 scripts/map.py *), Read
 ---
 
 # Smart Navigator
@@ -11,7 +11,9 @@ Map first, read later. A repo's manifests and skeleton answer
 "where does X live" and "what calls it" faster than reading code.
 See `reference/recon-playbook.md` for the full protocol with a
 worked example. No source, only a shipped build, binary or
-bundle? Use `ext-rea` instead.
+bundle? Use `ext-rea` instead. Repo already indexed by CodeGraph
+(`.codegraph/` exists)? Prefer `ext-codegraph` for symbol and call-path
+questions.
 
 ## Procedure
 

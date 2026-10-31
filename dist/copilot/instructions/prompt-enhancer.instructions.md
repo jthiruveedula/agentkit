@@ -1,6 +1,5 @@
 ---
 description: Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up.
-applyTo: **
 ---
 
 # Prompt Enhancer

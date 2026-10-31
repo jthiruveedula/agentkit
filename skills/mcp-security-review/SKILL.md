@@ -2,7 +2,7 @@
 name: mcp-security-review
 description: Audit MCP server config for security risks: unpinned packages, secrets, broad filesystem access, unauthenticated remotes, shell wrappers. Use when adding an MCP server or reviewing .mcp.json or claude_desktop_config.json.
 version: 0.1.0
-allowed-tools: Read, Bash, Grep, Glob
+allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/mcp_scan.py *), Bash(python3 scripts/mcp_scan.py *), Bash(python3 skills/mcp-security-review/scripts/mcp_scan.py *), Grep, Glob
 ---
 
 # MCP Security Review
@@ -12,6 +12,8 @@ and outputs are untrusted input (tool poisoning, indirect prompt injection).
 Review before trusting.
 
 ## Procedure
+
+Script paths resolve relative to this SKILL.md.
 
 1. **Locate configs.** Check, in order: `.mcp.json` in the repo root,
    `~/.claude.json` (`mcpServers` at top level, plus nested
@@ -23,7 +25,7 @@ Review before trusting.
 2. **Run the scanner.**
 
    ```
-   python3 skills/mcp-security-review/scripts/mcp_scan.py
+   python3 scripts/mcp_scan.py
    ```
 
    No arguments scans the default locations above that exist; pass paths
@@ -31,7 +33,8 @@ Review before trusting.
    `UNPINNED` (medium), `SECRET_IN_CONFIG` (high), `BROAD_FS` (high),
    `REMOTE_NO_AUTH` (medium), `SHELL_WRAPPER` (low). The scanner never
    prints a secret value, only the flagged key name. Exit code is 1 if
-   any high-severity finding exists, 0 otherwise.
+   any high-severity finding exists or any config is unreadable or
+   malformed, 0 otherwise.
 
 3. **Manually review tool descriptions for every flagged (or new)
    server.** The scanner only checks the config shape — it can't read

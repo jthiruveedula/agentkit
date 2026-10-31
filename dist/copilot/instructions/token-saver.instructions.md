@@ -1,6 +1,5 @@
 ---
 description: Cuts input-token burn: search before read, line ranges, diff-first, batched calls, no re-reads, terse output. Use when a session burns context, reads feel wasteful, or a task spans many files/logs/shell output.
-applyTo: **
 ---
 
 # Token Saver

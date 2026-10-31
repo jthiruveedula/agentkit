@@ -5,6 +5,10 @@
 #
 # Usage: ./scripts/sync-external.sh [name ...]   # default: all sources
 #
+# The commit SHA in external/skills.lock.json is the integrity pin: GitHub's
+# archive/<sha>.tar.gz is content-addressed by that commit. The optional
+# "sha256" field additionally pins the tarball bytes.
+#
 # Each download is retried up to 3 times with backoff. When a lock entry
 # carries a "sha256" field, the downloaded tarball's SHA-256 is verified
 # before extraction (needs sha256sum or shasum -a 256 on PATH; when neither
@@ -56,7 +60,7 @@ fetch_one() {
   _attempt=1
   _downloaded=0
   while [ "$_attempt" -le 3 ]; do
-    if curl -fsSL -o "$_archive" "https://github.com/$_repo/archive/$_sha.tar.gz"; then
+    if curl --proto '=https' --proto-redir '=https' -fsSL -o "$_archive" "https://github.com/$_repo/archive/$_sha.tar.gz"; then
       _downloaded=1
       break
     fi
@@ -90,8 +94,17 @@ fetch_one() {
     rm -rf "$_dest.tmp"
     return 1
   fi
-  rm -rf "$_dest"
-  mv "$_dest.tmp" "$_dest"
+  # Swap in without a window where $_dest is missing: move the old checkout
+  # aside, move the new one in, then delete the old one.
+  rm -rf "$_dest.old"
+  if [ -e "$_dest" ]; then mv "$_dest" "$_dest.old"; fi
+  if ! mv "$_dest.tmp" "$_dest"; then
+    [ ! -e "$_dest.old" ] || mv "$_dest.old" "$_dest"
+    echo "error: $_name: could not move new checkout into place -- skipped" >&2
+    rm -rf "$_dest.tmp"
+    return 1
+  fi
+  rm -rf "$_dest.old"
   return 0
 }
 

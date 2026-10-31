@@ -74,6 +74,19 @@ if (-not (Test-Path $Manifest)) { New-Item -ItemType File -Path $Manifest -Force
 function Write-Log($msg) { Write-Host $msg }
 function Write-Warn($msg) { Write-Warning $msg }
 
+# Get-ClaudeBase -- mirrors install.sh: $env:CLAUDE_HOME, else ~/.claude.
+function Get-ClaudeBase {
+    if ($env:CLAUDE_HOME) { return $env:CLAUDE_HOME }
+    return Join-Path $env:USERPROFILE ".claude"
+}
+
+# Remove-Managed -- delete $Path. A symlink/junction is unlinked with
+# .Delete() so Remove-Item -Recurse never descends into its target.
+function Remove-Managed([string]$Path) {
+    $item = Get-Item $Path -Force
+    if ($item.LinkType) { $item.Delete() } else { Remove-Item -Recurse -Force $Path }
+}
+
 function Install-One([string]$SourcePath, [string]$DestPath) {
     if (-not (Test-Path $SourcePath)) { return }
 
@@ -92,7 +105,7 @@ function Install-One([string]$SourcePath, [string]$DestPath) {
             Write-Warn "$DestPath exists and is not managed by agentkit -- backing up to $bak"
             if (-not $DryRun) { Move-Item -Force $DestPath $bak }
         } else {
-            if (-not $DryRun) { Remove-Item -Recurse -Force $DestPath }
+            if (-not $DryRun) { Remove-Managed $DestPath }
         }
     }
 
@@ -117,7 +130,7 @@ function Install-One([string]$SourcePath, [string]$DestPath) {
 
 function Install-Claude {
     Write-Log "claude:"
-    $base = Join-Path $env:USERPROFILE ".claude"
+    $base = Get-ClaudeBase
     Get-ChildItem -Directory (Join-Path $Dist "claude\skills") -ErrorAction SilentlyContinue | ForEach-Object {
         Install-One $_.FullName (Join-Path $base "skills\$($_.Name)")
     }
@@ -175,8 +188,18 @@ function Uninstall-All {
     Get-Content $Manifest | ForEach-Object {
         $path = $_
         if (-not (Test-Path $path)) { return }
+        # The manifest is plain text: only remove what an Install-* function
+        # could have written (a recognized layout, no ".." escape).
+        if ($path -match '(^|[\\/])\.\.([\\/]|$)') {
+            Write-Warn "skipping manifest entry with '..': $path"
+            return
+        }
+        if (-not (Get-DistSourceForCopy $path)) {
+            Write-Warn "skipping manifest entry outside the agentkit install locations: $path"
+            return
+        }
         if ($DryRun) { Write-Log "  would remove: $path"; return }
-        Remove-Item -Recurse -Force $path
+        Remove-Managed $path
         $bak = Get-ChildItem -Path (Split-Path $path -Parent) -Filter "$(Split-Path $path -Leaf).bak.*" -ErrorAction SilentlyContinue |
             Sort-Object Name -Descending | Select-Object -First 1
         if ($bak) {
@@ -195,7 +218,7 @@ function Uninstall-All {
 # known install layout. Mirrors the dest layouts in Install-Claude/Copilot/
 # Cursor/Antigravity above; keep in sync when those change.
 function Get-DistSourceForCopy([string]$DestPath) {
-    $claudeBase = Join-Path $env:USERPROFILE ".claude"
+    $claudeBase = Get-ClaudeBase
     $copilotBase = Join-Path $env:APPDATA "Code\User"
     $cursorBase = if ($env:CURSOR_HOME) { $env:CURSOR_HOME } else { Join-Path $env:USERPROFILE ".cursor" }
     $agBase = if ($env:ANTIGRAVITY_HOME) { $env:ANTIGRAVITY_HOME } else { Join-Path $env:USERPROFILE ".antigravity" }
@@ -231,7 +254,7 @@ function Remove-StaleEntries {
         $stale = $false
         if (Test-Path $path) {
             $item = Get-Item $path -Force -ErrorAction SilentlyContinue
-            if ($item -and $item.LinkType -eq "SymbolicLink" -and $item.Target -like "$Dist*" -and -not (Test-Path $item.Target)) {
+            if ($item -and $item.LinkType -eq "SymbolicLink" -and "$($item.Target)".StartsWith($Dist + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase) -and -not (Test-Path $item.Target)) {
                 $stale = $true
             } elseif ($item -and $item.LinkType -ne "SymbolicLink") {
                 $src = Get-DistSourceForCopy $path
@@ -239,7 +262,7 @@ function Remove-StaleEntries {
             }
         }
         if ($stale) {
-            if (-not $DryRun) { Remove-Item -Recurse -Force $path }
+            if (-not $DryRun) { Remove-Managed $path }
             Write-Log "  pruned (removed upstream): $path"
         } else {
             $kept += $path
