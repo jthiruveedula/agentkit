@@ -11,6 +11,8 @@ Review before trusting.
 
 ## Procedure
 
+Script paths resolve relative to this SKILL.md.
+
 1. **Locate configs.** Check, in order: `.mcp.json` in the repo root,
    `~/.claude.json` (`mcpServers` at top level, plus nested
    `projects.<path>.mcpServers` per project), `~/.cursor/mcp.json`, and
@@ -21,7 +23,7 @@ Review before trusting.
 2. **Run the scanner.**
 
    ```
-   python3 skills/mcp-security-review/_mcp-security-review/scripts/mcp_scan.py
+   python3 _mcp-security-review/scripts/mcp_scan.py
    ```
 
    No arguments scans the default locations above that exist; pass paths

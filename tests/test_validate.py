@@ -275,3 +275,72 @@ def test_lock_schema_is_valid_json():
         "sha",
         "license",
     }
+
+
+def _agent(tmp_path, name="a", extra="", **over):
+    fm = {
+        "name": name,
+        "description": "Does a thing. Use when needed.",
+        "tools": "Read, Grep",
+        "model": "sonnet",
+    }
+    fm.update(over)
+    agents = tmp_path / "agents"
+    agents.mkdir(exist_ok=True)
+    text = "---\n%s\n---\n\nbody\n" % "\n".join("%s: %s" % kv for kv in fm.items())
+    (agents / (name + ".md")).write_text(text + extra)
+    return agents
+
+
+def _check(tmp_path, agents):
+    (tmp_path / "skills" / "real").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "skills" / "real" / "SKILL.md").write_text("x")
+    return validate.check_agents(agents, tmp_path / "skills")
+
+
+def test_real_agents_validate_clean():
+    assert validate.check_agents() == []
+
+
+def test_agent_good_passes(tmp_path):
+    agents = _agent(tmp_path, skills="[real]")
+    assert _check(tmp_path, agents) == []
+
+
+def test_agent_name_must_match_filename(tmp_path):
+    agents = _agent(tmp_path, name="a")
+    (agents / "a.md").write_text(
+        (agents / "a.md").read_text().replace("name: a", "name: b")
+    )
+    assert any("!= filename" in e for e in _check(tmp_path, agents))
+
+
+def test_agent_rejects_unknown_tool_model_and_skill(tmp_path):
+    agents = _agent(tmp_path, tools="Read, Frobnicate", model="gpt", skills="[nope]")
+    errors = "\n".join(_check(tmp_path, agents))
+    assert "unknown tool 'Frobnicate'" in errors
+    assert "model 'gpt'" in errors
+    assert "skills entry 'nope'" in errors
+
+
+def test_agent_empty_description_and_missing_tools(tmp_path):
+    agents = _agent(tmp_path, description="''", tools="''")
+    errors = "\n".join(_check(tmp_path, agents))
+    assert "empty description" in errors
+    assert "'tools' missing" in errors
+
+
+def test_agent_read_only_claim_forbids_write_tools(tmp_path):
+    desc = "Read-only scout. Use when needed."
+    agents = _agent(tmp_path, description=desc)
+    assert _check(tmp_path, agents) == []
+    agents = _agent(tmp_path, description=desc, tools="Read, Edit")
+    assert any("read-only" in e for e in _check(tmp_path, agents))
+
+
+def test_agent_roster_must_name_existing_agents(tmp_path):
+    agents = _agent(tmp_path, name="a", tools="Read, Agent(b, ghost)")
+    _agent(tmp_path, name="b")
+    errors = _check(tmp_path, agents)
+    assert any("unknown agent 'ghost'" in e for e in errors), errors
+    assert not any("'b'" in e for e in errors), errors

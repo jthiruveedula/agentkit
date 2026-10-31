@@ -3,6 +3,7 @@ name: frontend-engineer
 description: Builds UI, motion (CSS, Motion, GSAP), and 3D (three.js/R3F) within a performance and a11y budget. Use for animation, scroll effects, WebGL, or interactive UI work.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
+skills: [frontend-motion-3d, ext-hallmark, ext-seo]
 ---
 
 # Frontend Engineer
