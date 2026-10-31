@@ -8,6 +8,7 @@ Deterministic: same inputs always produce byte-identical output, so
     python3 scripts/build.py --check    # fail (exit 1) if dist/ would change
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -15,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 from frontmatter import load  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+MARKETPLACE = REPO_ROOT / ".claude-plugin" / "marketplace.json"
 SKILLS_DIR = REPO_ROOT / "skills"
 AGENTS_DIR = REPO_ROOT / "agents"
 DIST = REPO_ROOT / "dist"
@@ -199,6 +201,18 @@ def render_agents_md(skills, agents):
     return "\n".join(lines).encode("utf-8")
 
 
+def render_marketplace(skills, agents):
+    """marketplace.json with its skills/agents arrays derived from the sources.
+
+    Every other field is preserved from the committed file.
+    """
+    data = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
+    plugin = data["plugins"][0]
+    plugin["skills"] = ["skills/%s" % s["dir"].name for s in skills]
+    plugin["agents"] = ["agents/%s" % a["path"].name for a in agents]
+    return (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+
 def build():
     skills = read_skills()
     agents = read_agents()
@@ -207,6 +221,7 @@ def build():
         for rel, content in emitter(skills, agents).items():
             tree["%s/%s" % (tool, rel)] = content
     tree["../AGENTS.md"] = render_agents_md(skills, agents)  # repo root, not dist/
+    tree["../.claude-plugin/marketplace.json"] = render_marketplace(skills, agents)
     return tree
 
 
@@ -225,15 +240,19 @@ def write_tree(tree, check=False):
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_bytes(content)
 
-    if check:
-        return changed
-
-    # prune stale files: anything under dist/ not in this build's tree
+    # stale files: anything under dist/ not in this build's tree
     live = {(DIST / rel).resolve() for rel in tree if not rel.startswith("../")}
+    stale = (
+        [f for f in sorted(DIST.rglob("*")) if f.is_file() and f.resolve() not in live]
+        if DIST.is_dir()
+        else []
+    )
+    if check:
+        return changed + [str(f.relative_to(REPO_ROOT)) + " (stray)" for f in stale]
+
+    for f in stale:
+        f.unlink()
     if DIST.is_dir():
-        for f in list(DIST.rglob("*")):
-            if f.is_file() and f.resolve() not in live:
-                f.unlink()
         for d in sorted(DIST.rglob("*"), reverse=True):
             if d.is_dir() and not any(d.iterdir()):
                 d.rmdir()
@@ -247,7 +266,8 @@ def main(argv=None):
     if check:
         if changed:
             print(
-                "dist/ is stale (%d file(s) differ from source):" % len(changed),
+                "dist/ is stale (%d file(s) differ from source or are stray):"
+                % len(changed),
                 file=sys.stderr,
             )
             for c in changed:

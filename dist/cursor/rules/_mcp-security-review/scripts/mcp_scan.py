@@ -9,7 +9,7 @@ Desktop config. Parses `mcpServers` at the top level and nested under
 `projects.<path>.mcpServers` (the shape ~/.claude.json uses).
 
 Findings never include secret values -- only the key name that looks
-sensitive. Exit 0 when no HIGH-severity findings, 1 otherwise.
+sensitive. Exit 1 on any HIGH-severity finding or unreadable/malformed config, else 0.
 """
 
 import argparse
@@ -18,11 +18,12 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import parse_qsl, urlsplit
 
 # Finding codes -- meaning documented here, never embedded in output that
 # could leak into logs alongside a secret value.
 #   UNPINNED        (medium): npx/uvx/bunx/pipx package arg has no pinned
-#                    version, or is pinned to @latest
+#                    version (@x or ==x), or is pinned to @latest
 #   SECRET_IN_CONFIG (high):  env/args value looks like a live secret
 #   BROAD_FS        (high):  filesystem server rooted at /, ~, $HOME, or an expanded home dir
 #   REMOTE_NO_AUTH  (medium): remote server on plain http (non-localhost)
@@ -46,6 +47,7 @@ SECRET_KEY_RE_PARTS = ("TOKEN", "KEY", "SECRET", "PASSWORD", "AUTHORIZATION")
 SECRET_VALUE_RE = re.compile(
     r"sk-[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{36,}|xox[baprs]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}"
 )
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
 PLACEHOLDER_MARKERS = ("<", ">", "${", "$env:", "your-", "xxx", "changeme", "example")
 
 DEFAULT_CONFIG_PATHS = [
@@ -65,15 +67,32 @@ def default_configs():
     return [p for p in DEFAULT_CONFIG_PATHS if p.is_file()]
 
 
+def _as_dict(value):
+    return value if isinstance(value, dict) else {}
+
+
 def iter_servers(config):
     """Yield (server_name, server_dict) for top-level and nested projects.*.mcpServers."""
-    for name, server in (config.get("mcpServers") or {}).items():
+    config = _as_dict(config)
+    for name, server in _as_dict(config.get("mcpServers")).items():
         yield name, server
-    for proj_path, proj in (config.get("projects") or {}).items():
-        if not isinstance(proj, dict):
-            continue
-        for name, server in (proj.get("mcpServers") or {}).items():
+    for proj_path, proj in _as_dict(config.get("projects")).items():
+        for name, server in _as_dict(_as_dict(proj).get("mcpServers")).items():
             yield "%s (project: %s)" % (name, proj_path), server
+
+
+def split_url(url):
+    """urlsplit that tolerates a missing scheme and malformed URLs (None)."""
+    try:
+        return urlsplit(url if "//" in url else "//" + url)
+    except ValueError:
+        return None
+
+
+def is_localhost(url):
+    parts = split_url(url)
+    host = (parts.hostname or "") if parts else ""
+    return host in LOCAL_HOSTS or host.endswith(".localhost")
 
 
 def looks_like_placeholder(value):
@@ -113,8 +132,12 @@ def check_unpinned(command, args, file, server_name, findings):
     base = os.path.basename(command or "")
     if base not in PACKAGE_RUNNERS:
         return
+    skip_run = base == "pipx"
     for arg in args or []:
         if not isinstance(arg, str) or arg.startswith("-"):
+            continue
+        if skip_run and arg == "run":
+            skip_run = False  # `pipx run <pkg>`: "run" is the subcommand
             continue
         if arg.endswith("@latest"):
             findings.append(
@@ -126,7 +149,7 @@ def check_unpinned(command, args, file, server_name, findings):
                     "detail": "'%s' pinned to @latest" % arg,
                 }
             )
-        elif "@" not in arg.lstrip("@"):
+        elif "@" not in arg.lstrip("@") and "==" not in arg:
             # first non-flag package-like arg with no version pin
             findings.append(
                 {
@@ -181,21 +204,24 @@ def check_remote_no_auth(server, file, server_name, findings):
     url = server.get("url") or server.get("http") or server.get("sse")
     if not isinstance(url, str):
         return
-    is_localhost = any(h in url for h in ("localhost", "127.0.0.1", "::1"))
-    if url.startswith("http://") and not is_localhost:
+    local = is_localhost(url)
+    parts = split_url(url)
+    # never echo the full url: it may carry userinfo or a token in the query
+    shown = "%s://%s" % (url.partition("://")[0], (parts and parts.hostname) or "?")
+    if url.startswith("http://") and not local:
         findings.append(
             {
                 "server": server_name,
                 "file": file,
                 "code": "REMOTE_NO_AUTH",
                 "severity": SEVERITY["REMOTE_NO_AUTH"],
-                "detail": "remote server uses plain http:// (%s)" % url,
+                "detail": "remote server uses plain http:// (%s)" % shown,
             }
         )
         return
     headers = server.get("headers")
-    has_auth = bool(headers) and any("auth" in k.lower() for k in headers)
-    if not is_localhost and not has_auth:
+    has_auth = isinstance(headers, dict) and any("auth" in k.lower() for k in headers)
+    if not local and not has_auth:
         findings.append(
             {
                 "server": server_name,
@@ -209,18 +235,39 @@ def check_remote_no_auth(server, file, server_name, findings):
         )
 
 
+def check_url_secret(server, file, server_name, findings):
+    url = server.get("url") or server.get("http") or server.get("sse")
+    if not isinstance(url, str):
+        return
+    before = len(findings)
+    check_secret("url", None, url, file, server_name, findings)
+    parts = split_url(url)
+    if len(findings) > before or not parts:
+        return
+    try:
+        password = parts.password
+    except ValueError:
+        password = None
+    check_secret("url userinfo", "password", password, file, server_name, findings)
+    for key, value in parse_qsl(parts.query):
+        check_secret("url query %s" % key, key, value, file, server_name, findings)
+
+
 def scan_server(server_name, server, file, findings):
     if not isinstance(server, dict):
         return
     command = server.get("command")
-    args = server.get("args") or []
+    command = command if isinstance(command, str) else None
+    args = server.get("args")
+    args = args if isinstance(args, list) else []
 
     check_unpinned(command, args, file, server_name, findings)
     check_broad_fs(command, args, server, file, server_name, findings)
     check_shell_wrapper(command, args, file, server_name, findings)
     check_remote_no_auth(server, file, server_name, findings)
+    check_url_secret(server, file, server_name, findings)
 
-    for env_name, env_value in (server.get("env") or {}).items():
+    for env_name, env_value in _as_dict(server.get("env")).items():
         check_secret(
             "env %s" % env_name, env_name, env_value, file, server_name, findings
         )
@@ -263,8 +310,11 @@ def scan_server(server_name, server, file, findings):
 def scan_file(path, findings, errors):
     try:
         config = json.loads(Path(path).read_text())
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError) as exc:  # ValueError: bad JSON or bad encoding
         errors.append("%s: %s" % (path, exc))
+        return
+    if not isinstance(config, dict):
+        errors.append("%s: top-level JSON value is not an object" % path)
         return
     for server_name, server in iter_servers(config):
         scan_server(server_name, server, str(path), findings)
@@ -311,7 +361,7 @@ def main(argv=None):
         print(format_table(findings))
 
     has_high = any(f["severity"] == "high" for f in findings)
-    return 1 if has_high else 0
+    return 1 if has_high or errors else 0  # an unreadable config is not a pass
 
 
 if __name__ == "__main__":

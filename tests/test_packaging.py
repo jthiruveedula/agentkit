@@ -8,6 +8,7 @@ be missing something the install paths need:
 """
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,3 +40,22 @@ def test_package_json_files():
 def test_package_json_publish_config():
     pkg = _package_json()
     assert pkg["publishConfig"]["registry"] == "https://npm.pkg.github.com"
+
+
+def test_versions_in_sync():
+    # release-please bumps package.json and the manifest; extra-files in
+    # release-please-config.json carry pyproject and marketplace along.
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    py_ver = re.search(r'^version = "([^"]+)"', pyproject, re.M).group(1)
+    market = json.loads(
+        (ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8")
+    )
+    manifest = json.loads(
+        (ROOT / ".github" / "release-please-manifest.json").read_text(encoding="utf-8")
+    )
+    assert (
+        _package_json()["version"]
+        == py_ver
+        == market["plugins"][0]["version"]
+        == manifest["."]
+    )
