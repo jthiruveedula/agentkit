@@ -4,7 +4,7 @@
 /* agentkit field manual, plate series. Two inks and one registration colour (--reg):
    --reg is only the baton, the plate-0 ghost, the spotlight circle, BELOW TARGET marks and the one stamp.
    Motion: JS writes --p (0..1) per stage; everything below is CSS maths on it. */
-:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#1D4ED8;
+:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#1A44C2;
 --f1:"Big Shoulders Display","Roboto Condensed","Arial Narrow",ui-sans-serif,sans-serif;--f2:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 --serif:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,serif;--pl:max(5vw,64px);--cs:clamp(14px,2.2vw,30px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#6B8BFF}}
@@ -20,6 +20,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .skip{position:fixed;left:8px;top:-60px;z-index:99;background:var(--ink);color:var(--paper);padding:8px 12px;text-decoration:none}
 .skip:focus{top:8px}
 [hidden]{display:none!important}
+.err{position:relative;z-index:2;margin:14px 0;padding:10px 14px;border-left:4px solid var(--reg);background:color-mix(in srgb,var(--ink) 9%,var(--paper));font-size:.875rem}
+.err .cp{margin-left:12px}
 
 /* fixed furniture */
 #plates{position:fixed;z-index:40;left:14px;top:calc(50% - 80px);display:flex;flex-direction:column;gap:2px}

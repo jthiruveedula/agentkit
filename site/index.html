@@ -74,6 +74,7 @@
     <h2 class="cap"><small>PLATE 01</small>One folder. Every skill.</h2>
     <div class="ctr" id="cnt" aria-hidden="true">&mdash;</div>
     <ul class="slips" id="slips"></ul>
+    <div class="err" id="skerr" role="alert" hidden>Skill catalog could not be loaded. <button class="cp" type="button">Retry</button></div>
   </div></div>
 </section>
 
@@ -137,13 +138,14 @@ version: 0.1.0
         <i style="left:0%">0</i><i style="left:10%">10</i><i style="left:20%">20</i><i style="left:30%">30</i><i style="left:40%">40</i><i style="left:50%">50</i><i style="left:60%">60</i><i style="left:70%">70</i><i style="left:80%">80</i><i style="left:100%" class="e">100</i>
         <u class="vn" style="left:90%"><s>TARGET 90</s></u><u class="b0" id="b0"><s>START</s></u><u class="nd" id="nd" hidden></u>
       </div>
-      <ul class="rows">
+      <ul class="rows" id="rows" aria-hidden="true">
         <li data-k="PEI"><b>PEI</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="OVS"><b>OVS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="CRI"><b>CRI</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="MNSS"><b>MNSS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="SRS"><b>SRS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
       </ul>
+      <div class="err" id="auerr" role="alert" hidden>Audit scores could not be loaded. <button class="cp" type="button">Retry</button></div>
       <p class="tk">TOKENS <i id="ptk">&mdash;</i> / SHA <i id="psh">&mdash;</i> <a href="audit/">FULL AUDIT SHEET -&gt;</a></p>
     </div>
   </div></div>

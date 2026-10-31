@@ -146,7 +146,16 @@ addEventListener('scroll', kick, { passive: true });
 addEventListener('resize', () => film() !== mo && innerWidth !== w0 ? location.reload() : requestAnimationFrame(layout));
 addEventListener('load', layout);
 document.fonts.ready.then(layout);
-fetch('assets/skills.json').then(r => r.json()).then(d => {
+// Failed fetch: show a visible role=alert box with a retry button (shared by both loaders).
+const fail = (id, run) => {
+  const box = $(id);
+  box.hidden = false;
+  box.querySelector('button').onclick = () => { box.hidden = true; run(); };
+  layout();
+};
+function loadSkills() {
+fetch('assets/skills.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(d => {
+  slips.textContent = '';
   const list = d.skills.sort((a, b) => a.name < b.name ? -1 : 1);
   S.total = d.count;
   ['g38', 'n38', 'tsk'].forEach(id => txt($(id), S.total));
@@ -160,17 +169,12 @@ fetch('assets/skills.json').then(r => r.json()).then(d => {
   });
   if (!mo) spin(cnt, S.total);
   layout();
-}).catch(() => {
-  txt($('tsk'), 'n/a');
-  txt(ro.children[0], 'Skill catalog unavailable.');
-  ro.dataset.e = 1;
-  ro.classList.add('on');
-});
+}).catch(() => { txt($('tsk'), 'n/a'); fail('skerr', loadSkills); });
+}
+loadSkills();
 txt($('tag'), all('.ag').length);
-new IntersectionObserver((es, o) => {
-  if (!es[0].isIntersecting) return;
-  o.disconnect();
-  fetch('assets/audit.json').then(r => r.json()).then(d => {
+function loadAudit() {
+  fetch('assets/audit.json').then(r => { if (!r.ok) throw 0; return r.json(); }).then(d => {
     S.au = d;
     const cu = d.current, aps = $('aps');
     aps.textContent = '';
@@ -191,8 +195,27 @@ new IntersectionObserver((es, o) => {
     txt($('ptk'), cu.tokens.total.toLocaleString('en-US'));
     ['psh', 'trv'].forEach(id => txt($(id), d.sha));
     txt($('tag'), cu.counts.agents);
+    scoreTable(cu, d.baseline.scores, d.sha);
     layout();
-  }).catch(() => {});
+  }).catch(() => fail('auerr', loadAudit));
+}
+// Visually hidden table: text alternative for the bars (the visual rows are aria-hidden).
+function scoreTable(cu, base, sha) {
+  const t = mk('table', $('proof'), null, 'vh');
+  mk('caption', t, 'Agent Productivity Score by axis, at ' + sha);
+  const h = mk('tr', mk('thead', t));
+  ['Axis', 'Score', 'Target', 'Baseline'].forEach(x => mk('th', h, x).scope = 'col');
+  const b = mk('tbody', t);
+  ['APS', 'PEI', 'OVS', 'CRI', 'MNSS', 'SRS'].forEach(k => {
+    const r = mk('tr', b);
+    mk('th', r, k).scope = 'row';
+    [cu.scores[k], cu.targets[k], base[k]].forEach(v => mk('td', r, v));
+  });
+}
+new IntersectionObserver((es, o) => {
+  if (!es[0].isIntersecting) return;
+  o.disconnect();
+  loadAudit();
 }, { rootMargin: '150%' }).observe($('proof'));
 function paint(g) {
   const cu = S.au.current, b = S.au.baseline.scores.APS, gr = Math.min(g, 1);
@@ -219,17 +242,19 @@ function climb() {
 }
 const mn = document.querySelector('main');
 let rt = 0;
-function hide() { clearTimeout(rt); if (ro.dataset.e) return; all('main .on').forEach(b => b.classList.remove('on')); ro.classList.remove('on'); }
+function hide() { clearTimeout(rt); all('main .on').forEach(b => b.classList.remove('on')); ro.classList.remove('on'); }
 function show(t) {
   const b = t.closest('[data-d]');
   hide();
-  if (!b || ro.dataset.e) return;
+  if (!b) return;
   b.classList.add('on');
   [b.textContent.toLowerCase(), b.dataset.d, b.dataset.t ? 'tools: ' + b.dataset.t : ''].forEach((v, i) => txt(ro.children[i], v));
   ro.classList.add('on');
 }
 ['pointerover', 'focusin', 'click'].forEach(ev => mn.addEventListener(ev, e => { hide(); if (ev === 'pointerover') rt = setTimeout(show, 250, e.target); else show(e.target); }));
 ['pointerleave', 'focusout'].forEach(ev => mn.addEventListener(ev, hide));
+// WCAG 1.4.13: Esc dismisses the readout without moving focus or pointer.
+addEventListener('keydown', e => e.key === 'Escape' && hide());
 addEventListener('beforeprint', () => { spin(cnt, S.total); if (S.au) paint(1); });
 function type(cmd) {
   cancelAnimationFrame(ty);
