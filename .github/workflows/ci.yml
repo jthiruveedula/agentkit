@@ -143,7 +143,7 @@ jobs:
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           # Fails the job on broken links (including #fragment anchors).
-          args: --no-progress --verbose README.md CONTRIBUTING.md 'site/**/*.html'
+          args: --no-progress --verbose README.md .github/CONTRIBUTING.md 'site/**/*.html'
 
   # One job per language so the two analyses run in parallel; both languages
   # are interpreted, so there is nothing to build.

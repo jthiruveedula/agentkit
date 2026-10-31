@@ -47,7 +47,7 @@ release-please version bumps; the rest don't cut a release on their own.
 ### Lifecycle
 
 1. Branch from `main` using the naming standard above.
-2. Open a PR — the [template checklist](.github/pull_request_template.md)
+2. Open a PR — the [template checklist](pull_request_template.md)
    applies: linked issue, tests, `make` targets, docs.
 3. Automated checks must pass: the `test` OS × Python matrix, `lint`
    (ruff, shellcheck, PowerShell syntax, lychee link check),
