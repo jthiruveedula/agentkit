@@ -282,3 +282,88 @@ def test_broad_fs_expanded_home_dirs(tmp_path):
     findings, errors = [], []
     mcp_scan.scan_file(cfg, findings, errors)
     assert "BROAD_FS" not in codes(findings)
+
+
+def scan(tmp_path, data):
+    findings, errors = [], []
+    mcp_scan.scan_file(write_config(tmp_path, data), findings, errors)
+    return findings, errors
+
+
+def test_lookalike_localhost_host_is_remote(tmp_path):
+    for url in (
+        "http://localhost.attacker.example/mcp",
+        "http://127.0.0.1.evil.example/mcp",
+        "http://evil.example/?next=localhost",
+    ):
+        findings, _ = scan(tmp_path, {"mcpServers": {"s": {"url": url}}})
+        assert "REMOTE_NO_AUTH" in codes(findings), url
+
+
+def test_real_localhost_forms_are_local(tmp_path):
+    for url in (
+        "http://localhost:3000/mcp",
+        "http://[::1]:3000/mcp",
+        "http://127.0.0.1/mcp",
+        "http://app.localhost/mcp",
+        "localhost:3000/mcp",
+    ):
+        findings, _ = scan(tmp_path, {"mcpServers": {"s": {"url": url}}})
+        assert "REMOTE_NO_AUTH" not in codes(findings), url
+
+
+def test_double_equals_pin_is_pinned(tmp_path):
+    findings, _ = scan(
+        tmp_path, {"mcpServers": {"s": {"command": "uvx", "args": ["pkg==1.2.3"]}}}
+    )
+    assert "UNPINNED" not in codes(findings)
+
+
+def test_pipx_run_subcommand_is_not_the_package(tmp_path):
+    findings, _ = scan(
+        tmp_path, {"mcpServers": {"s": {"command": "pipx", "args": ["run", "pkg"]}}}
+    )
+    (f,) = [f for f in findings if f["code"] == "UNPINNED"]
+    assert "'pkg'" in f["detail"]
+    findings, _ = scan(
+        tmp_path,
+        {"mcpServers": {"s": {"command": "pipx", "args": ["run", "pkg==1.0"]}}},
+    )
+    assert "UNPINNED" not in codes(findings)
+
+
+def test_secret_in_url_flagged_and_never_printed(tmp_path):
+    token = "sk-" + "abcdefghijklmnopqrstuvwxyz1234567890"
+    urls = (
+        "https://host.example/mcp?api_key=hunter2hunter2",
+        "https://user:hunter2hunter2@host.example/mcp",
+        "https://host.example/mcp/%s" % token,
+    )
+    for url in urls:
+        findings, _ = scan(tmp_path, {"mcpServers": {"s": {"url": url}}})
+        assert "SECRET_IN_CONFIG" in codes(findings), url
+        dumped = json.dumps(findings)
+        assert "hunter2" not in dumped and token not in dumped
+    # plain-http finding must not echo the url either
+    findings, _ = scan(
+        tmp_path,
+        {"mcpServers": {"s": {"url": "http://h.example/?api_key=hunter2hunter2"}}},
+    )
+    assert "hunter2" not in json.dumps(findings)
+
+
+def test_malformed_input_is_a_clean_error(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    findings, errors = [], []
+    mcp_scan.scan_file(bad, findings, errors)
+    assert errors and not findings
+    assert mcp_scan.main([str(bad)]) == 1
+    for data in (
+        [],
+        {"mcpServers": []},
+        {"mcpServers": {"s": "nope", "t": {"command": 5, "args": "x", "env": []}}},
+        {"projects": {"p": {"mcpServers": 3}}},
+        {"mcpServers": {"s": {"url": "https://h.example", "headers": ["a"]}}},
+    ):
+        scan(tmp_path, data)  # must not raise
