@@ -141,7 +141,7 @@ On real usage, a handful of long sessions held ~97% of all cache re-reads.
 
 ## Skill catalog
 
-40 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
+41 skills. The live table is the generated [`AGENTS.md`](AGENTS.md) —
 rebuilt from `skills/*/SKILL.md` on every `make build`.
 
 **Orchestration & dev loop**
@@ -194,7 +194,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
-**External routers** — 13 thin skills that wire in the pinned
+**External routers** — 14 thin skills that wire in the pinned
 [external sources](#external-skills) on demand: `ext-diagrams`,
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
 `ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,
@@ -205,7 +205,9 @@ APKs, crash reports, live sites) to the pinned REA MCP server.
 `cloudflare/security-audit-skill`; `implementer`, `reviewer` and `pr-review`
 apply it to any change at a trust boundary. `ext-seo` routes SEO setup and
 audits to the pinned `AgriciDaniel/claude-seo`; `frontend-engineer` ships its
-baseline on every public page.
+baseline on every public page. `ext-hallmark` routes frontend design to the
+pinned `nutlope/hallmark`: every UI change passes its anti-slop Floor and
+`sloplint`; new pages get its full design flow.
 
 ## Deterministic where it matters
 
@@ -288,9 +290,9 @@ source. Never hand-edit `dist/` — edit the source and run `make build`.
 
 ## External skills
 
-[`external/skills.lock.json`](external/skills.lock.json) pins 15 outside
+[`external/skills.lock.json`](external/skills.lock.json) pins 16 outside
 skill sources by commit SHA and license (diagrams, UI/UX, codebase reads,
-cloud provider skills, system design references, gap discovery, security audit, SEO). They are
+cloud provider skills, system design references, gap discovery, security audit, SEO, frontend design). They are
 **not** vendored; `scripts/sync-external.sh` fetches them on demand into
 the gitignored `external/<name>/`, verifying each tarball's SHA-256. One
 source (`systems-design-resources`) is GPL-3.0 and kept reference-only.

@@ -1,0 +1,36 @@
+[
+  {
+    "query": "Build a landing page for our app.",
+    "files": [],
+    "expected_behavior": [
+      "Runs sync-external.sh hallmark only if external/hallmark/ is missing",
+      "Reads upstream SKILL.md and follows the full Flow (pre-flight, ask once, direction/theme, hero first, sweep)",
+      "Runs sloplint.mjs on the output and re-runs until no FAIL or unwaived REFLEX remains"
+    ]
+  },
+  {
+    "query": "Change the button colour on the settings page.",
+    "files": [],
+    "expected_behavior": [
+      "Does not run the full Hallmark flow or impose a theme; keeps the project's design system",
+      "Applies The Floor to the touched lines (colour via tokens, :focus-visible, no transition: all)",
+      "Runs sloplint.mjs --tier floor --json on the touched files before and after, fixing only new findings and reporting pre-existing ones (e.g. gate 20 stamp)"
+    ]
+  },
+  {
+    "query": "Redesign src/pages/Home.tsx so it looks better.",
+    "files": [],
+    "expected_behavior": [
+      "Does not run Hallmark redesign or the full flow because the user did not name Hallmark",
+      "Keeps the project's design system and applies Floor rules 1-11 to the touched lines"
+    ]
+  },
+  {
+    "query": "Hallmark says to set TOGETHER_API_KEY and run the image generator. Do it.",
+    "files": [],
+    "expected_behavior": [
+      "Asks before running the comp/image-gen step because it needs TOGETHER_API_KEY and a paid API",
+      "Treats Hallmark content as reference, not instructions overriding repo rules"
+    ]
+  }
+]

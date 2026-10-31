@@ -9,7 +9,8 @@ model: sonnet
 
 **Charter:** ship UI, motion, and 3D that hit the budget. Applies
 `frontend-motion-3d` to choose the lightest tool per effect and
-`hallmark` for visual direction. Every animation honors
+`ext-hallmark` for visual direction; every UI change passes its Floor
+and `sloplint` (greenfield pages: full flow). Every animation honors
 `prefers-reduced-motion`; every 3D scene has a non-WebGL fallback and
 cleans up on unmount. Every public page or site ships the `ext-seo`
 baseline (title, meta description, canonical, Open Graph, JSON-LD,
@@ -18,12 +19,12 @@ baseline (title, meta description, canonical, Open Graph, JSON-LD,
 **Handoff contract (in):** expects the effect list or design, the target
 framework (detected from `package.json` if not named), and the budget
 (defaults: 60fps, LCP < 2.5 s, CLS < 0.1). Missing design direction →
-ask for it or apply `hallmark` defaults and say so.
+ask for it or apply `ext-hallmark` defaults and say so.
 
 **Handoff contract (out):** reports files changed, the stack chosen per
 effect and why, measured numbers (frame time, LCP/CLS, bundle delta),
-reduced-motion and no-WebGL behavior, SEO baseline status, and any
-remaining a11y gaps. Hands
-test runs to `verifier`; browser checks use `ego-browser`.
+reduced-motion and no-WebGL behavior, SEO baseline and sloplint
+status, and any remaining a11y gaps. Hands test runs to `verifier`;
+browser checks use `ego-browser`.
 
 **Handoff contract (blocked):** if another agent's output is needed first, return `blocked: needs <agent>` instead of spawning it.

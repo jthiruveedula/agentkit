@@ -13,7 +13,7 @@
     "files": [],
     "expected_behavior": [
       "Does not use ui-ux-pro-max without an explicit request",
-      "Uses hallmark instead"
+      "Uses ext-hallmark instead"
     ]
   },
   {

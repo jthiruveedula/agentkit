@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 40,
+  "count": 41,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -207,6 +207,12 @@
       "kind": "router"
     },
     {
+      "name": "ext-hallmark",
+      "description": "Route frontend design and anti-slop checks to the pinned nutlope/hallmark. Use when building or changing any website, page, app UI or frontend component, or when the user names Hallmark or asks to redesign or audit a UI.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
       "name": "ext-meta-muse",
       "description": "Wire Meta Muse image generation (generate, edit, iterate) into the agent via the pinned muse-image-mcp server. Use when the user asks for Meta Muse or AI-generated images/assets (hero art, textures, mockups).",
       "version": "0.1.0",
@@ -238,7 +244,7 @@
     },
     {
       "name": "ext-ui-ux",
-      "description": "Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill. Use when the user names the ui-ux-pro-max toolkit explicitly; otherwise prefer this repo's hallmark design work.",
+      "description": "Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill. Use when the user names the ui-ux-pro-max toolkit explicitly; otherwise prefer ext-hallmark.",
       "version": "0.1.0",
       "kind": "router"
     }
