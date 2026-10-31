@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <!-- style-src keeps 'unsafe-inline' because pages use inline <style> and style="" attributes; script-src is strict 'self' (no inline JS). Ceiling: CSS injection is not blocked. -->
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="color-scheme" content="light dark">
@@ -11,20 +11,31 @@
 <meta name="theme-color" content="#11120F" media="(prefers-color-scheme: dark)">
 <title>agentkit audit — Agent Productivity Score</title>
 <meta name="description" content="Live audit dashboard for agentkit: productivity score, token surface, orchestration graph and findings.">
+<link rel="canonical" href="https://jthiruveedula.github.io/agentkit/audit/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="agentkit">
+<meta property="og:title" content="agentkit audit — Agent Productivity Score">
+<meta property="og:description" content="Live audit dashboard for agentkit: productivity score, token surface, orchestration graph and findings.">
+<meta property="og:url" content="https://jthiruveedula.github.io/agentkit/audit/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="agentkit audit — Agent Productivity Score">
+<meta name="twitter:description" content="Live audit dashboard for agentkit: productivity score, token surface, orchestration graph and findings.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='7' fill='%231D4ED8'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preload" href="../assets/fonts/big-shoulders-display-900.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#1D4ED8;
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:900;font-display:swap;src:url(../assets/fonts/big-shoulders-display-900.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../assets/fonts/ibm-plex-mono-400.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../assets/fonts/ibm-plex-mono-500.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--ui:#646A64;--reg:#1A44C2;
 --f1:"Big Shoulders Display","Roboto Condensed","Arial Narrow",ui-sans-serif,sans-serif;--f2:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 --serif:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,serif;--tint:color-mix(in srgb,var(--ink) 7%,transparent);--ease:cubic-bezier(.16,1,.3,1)}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#6B8BFF}}
-:root[data-theme=dark]{--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#6B8BFF}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--ui:#7D857A;--reg:#6B8BFF}}
+:root[data-theme=dark]{--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--ui:#7D857A;--reg:#6B8BFF}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;background:var(--paper);color:var(--ink);-webkit-text-size-adjust:100%}
 body{margin:0;font:400 .9375rem/1.5 var(--f2);overflow-x:clip;min-height:100vh}
 a{color:inherit}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 ::selection{background:var(--reg);color:var(--paper)}
 :focus-visible{outline:2px solid var(--reg);outline-offset:3px}
 h1,h2,h3,h4{font-family:var(--f1);margin:0}
@@ -38,6 +49,8 @@ h2{font-weight:900;font-size:clamp(44px,8vw,96px);line-height:.9;text-transform:
 .top .brand{margin-right:auto}
 #notice{margin:56px auto -50px;max-width:1072px;padding:10px 16px;background:var(--tint);border-left:4px solid var(--ink);font-size:.8125rem}
 #notice[hidden]{display:none}
+#notice button{font:inherit;margin-left:12px;padding:2px 10px;color:var(--ink);background:none;border:0;border-bottom:2px solid var(--reg);cursor:pointer}
+.count{margin:0 0 16px;color:var(--ink2);font-size:.8125rem}
 /* hero */
 #hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;padding-top:110px}
 #hero h1{font:700 clamp(18px,2.4vw,28px)/1 var(--f1);text-transform:lowercase;letter-spacing:.04em}
@@ -51,7 +64,7 @@ h2{font-weight:900;font-size:clamp(44px,8vw,96px);line-height:.9;text-transform:
 /* kpi */
 #kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
 .card{background:var(--tint);border-top:3px solid var(--ink);padding:20px;transition:transform .35s var(--ease),border-color .35s}
-.kpi:hover,.kpi:focus-visible{border-top-color:var(--reg)}
+.kpi:hover{border-top-color:var(--reg)}
 .kpi .k{font-size:.8125rem;color:var(--ink2);text-transform:lowercase}
 .kpi .v{font:900 64px/1 var(--f1);margin:8px 0 14px;font-variant-numeric:tabular-nums}
 .bar{position:relative;height:4px;background:color-mix(in srgb,var(--ink) 16%,transparent)}
@@ -70,13 +83,14 @@ h2{font-weight:900;font-size:clamp(44px,8vw,96px);line-height:.9;text-transform:
 /* graph */
 #gwrap{position:relative;max-width:760px;margin:0 auto;aspect-ratio:1;background:var(--tint);border-top:3px solid var(--ink)}
 #gsvg{width:100%;height:100%;display:block}
-.edge{fill:none;stroke:var(--rule);stroke-width:1;transition:stroke .25s,opacity .25s}
+.edge{fill:none;stroke:var(--ui);stroke-width:1;transition:stroke .25s,opacity .25s}
 .pulse{fill:none;stroke:var(--reg);stroke-width:1.6;stroke-linecap:round;stroke-dasharray:4 40;opacity:.7;animation:dash 3s linear infinite;animation-play-state:paused}
 .live .pulse{animation-play-state:running}
+body.paused .pulse{animation-play-state:paused}
 @keyframes dash{to{stroke-dashoffset:-176}}
 .node{cursor:pointer;outline:none}
 .node circle,.node rect{stroke:var(--paper);stroke-width:1.5}
-.node .s-ok{fill:var(--reg)}.node .s-flag{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}.node .s-idle{fill:var(--rule)}
+.node .s-ok{fill:var(--reg)}.node .s-flag{fill:var(--paper);stroke:var(--ink);stroke-width:2.5}.node .s-idle{fill:var(--ui)}
 .node:hover circle,.node:focus-visible circle,.node:hover rect,.node:focus-visible rect{stroke:var(--ink);stroke-width:2.5}
 .node:focus-visible .ring{opacity:1}
 .ring{fill:none;stroke:var(--reg);stroke-width:1.5;opacity:0}
@@ -90,13 +104,13 @@ h2{font-weight:900;font-size:clamp(44px,8vw,96px);line-height:.9;text-transform:
 #tip b{display:block;color:var(--reg);margin-bottom:4px;word-break:break-all}
 .legend{display:flex;gap:16px;justify-content:center;margin-top:14px;color:var(--ink2);font-size:.8125rem;flex-wrap:wrap}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:2px solid var(--paper)}
-.legend .s-ok{background:var(--reg)}.legend .s-flag{background:var(--paper);border-color:var(--ink)}.legend .s-idle{background:var(--rule)}
+.legend .s-ok{background:var(--reg)}.legend .s-flag{background:var(--paper);border-color:var(--ink)}.legend .s-idle{background:var(--ui)}
 /* gallery */
 .bar-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}
 .fchip{font:inherit;font-size:.8125rem;text-transform:lowercase;color:var(--ink);background:var(--tint);border:0;border-bottom:2px solid var(--ink);padding:7px 14px;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
 .fchip:hover{border-bottom-color:var(--reg)}
 .fchip[aria-pressed=true]{background:var(--reg);color:var(--paper);border-bottom-color:var(--reg);font-weight:500}
-.fchip span{opacity:.7;margin-left:4px}
+.fchip span{margin-left:4px}
 .fchip:disabled{color:var(--ink2);cursor:default}
 #pausebtn{margin-left:auto}
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
@@ -158,7 +172,7 @@ summary span{color:var(--reg);font-family:var(--f2);font-size:.9375rem;font-weig
 .sev{display:inline-block;padding:1px 8px;font-size:.75rem;font-weight:500;margin-right:8px;text-transform:lowercase;border:2px solid transparent}
 .sev.high{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .sev.med{border-color:var(--reg);color:var(--ink)}
-.sev.low{border-color:var(--rule);color:var(--ink2)}
+.sev.low{border-color:var(--ui);color:var(--ink2)}
 .f a{text-decoration:underline;text-decoration-color:var(--reg);text-decoration-thickness:2px;text-underline-offset:4px;word-break:break-all}.f a:hover{color:var(--reg)}
 .f p{margin:0;color:var(--ink2)}
 footer{max-width:1120px;margin:0 auto;padding:40px 24px 80px;display:flex;flex-wrap:wrap;gap:16px 28px;color:var(--ink2);font:italic .875rem var(--serif);border-top:1px solid var(--rule)}
@@ -182,7 +196,7 @@ footer a:hover{color:var(--reg)}
   <a href="#log">log</a>
   <a href="https://github.com/jthiruveedula/agentkit/tree/main/skills/agentkit-audit" target="_blank" rel="noopener noreferrer">SKILL ↗</a>
 </nav>
-<div id="notice" role="status" hidden>Could not load ../assets/audit.json (are you on file://?). Showing a small embedded sample.</div>
+<div id="notice" role="status" hidden>Could not load ../assets/audit.json (are you on file://?). Showing a small embedded sample. <button type="button" id="retry">Retry</button></div>
 <main>
   <section id="hero" aria-labelledby="h-aps">
     <p class="eyebrow rise">Prompt-Motion audit</p>
@@ -211,14 +225,16 @@ footer a:hover{color:var(--reg)}
       <svg id="gsvg" viewBox="0 0 600 600" role="group" aria-label="Agent and skill relationship graph"></svg>
       <div id="tip" role="tooltip"></div>
     </div>
-    <div class="legend"><span><i class="s-ok"></i>healthy</span><span><i class="s-flag"></i>flagged</span><span><i class="s-idle"></i>idle</span><span>square = agent, circle = skill</span></div>
+    <div class="legend"><span><i class="s-ok"></i>healthy</span><span><i class="s-flag"></i>flagged</span><span><i class="s-idle"></i>idle</span><span>square = agent, circle = skill</span><button class="fchip pausebtn" id="gpause" type="button" aria-pressed="false">Pause animation</button></div>
   </section>
 
   <section id="gallery" aria-labelledby="h-gal">
     <p class="eyebrow">Every unit</p>
     <h2 id="h-gal">Gallery</h2>
     <div class="bar-row" id="chips" role="group" aria-label="Filter by tag"></div>
+    <p id="count" class="count" role="status" aria-live="polite"></p>
     <div id="grid"></div>
+    <div id="scoretbl" class="vh"></div>
   </section>
 
   <section id="log" aria-labelledby="h-log">

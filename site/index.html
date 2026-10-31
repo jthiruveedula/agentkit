@@ -3,17 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#DADCD3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#11120F" media="(prefers-color-scheme: dark)">
 <title>agentkit - field manual, plate series</title>
 <meta name="description" content="Install the same skills and subagents into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed.">
+<link rel="canonical" href="https://jthiruveedula.github.io/agentkit/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="agentkit">
+<meta property="og:title" content="agentkit - field manual, plate series">
+<meta property="og:description" content="Install the same skills and subagents into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed.">
+<meta property="og:url" content="https://jthiruveedula.github.io/agentkit/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="agentkit - field manual, plate series">
+<meta name="twitter:description" content="Install the same skills and subagents into Claude Code, Copilot, Cursor, and Antigravity from one clone. MIT licensed.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='7' fill='%231D4ED8'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preload" href="assets/fonts/big-shoulders-display-900.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site.css">
 <script src="app.js" defer></script>
 </head>
@@ -75,7 +82,52 @@
     <span class="n" data-n="01" aria-hidden="true">01</span>
     <h2 class="cap"><small>PLATE 01</small>One folder. Every skill.</h2>
     <div class="ctr" id="cnt" aria-hidden="true">&mdash;</div>
-    <ul class="slips" id="slips"></ul>
+    <ul class="slips" id="slips">
+<!-- slips:start -->
+<li class=""><span class="b">agentkit-audit</span></li>
+<li class=""><span class="b">context-budget</span></li>
+<li class=""><span class="b">context-compressor</span></li>
+<li class=""><span class="b">daily-standup</span></li>
+<li class=""><span class="b">data-architect</span></li>
+<li class=""><span class="b">data-eng-router</span></li>
+<li class=""><span class="b">data-quality-standards</span></li>
+<li class=""><span class="b">debug-loop</span></li>
+<li class=""><span class="b">doc-standards</span></li>
+<li class="x"><span class="b">ext-aws</span></li>
+<li class="x"><span class="b">ext-azure</span></li>
+<li class="x"><span class="b">ext-cli-ops</span></li>
+<li class="x"><span class="b">ext-codegraph</span></li>
+<li class="x"><span class="b">ext-databricks</span></li>
+<li class="x"><span class="b">ext-diagrams</span></li>
+<li class="x"><span class="b">ext-gap-discovery</span></li>
+<li class="x"><span class="b">ext-gcp</span></li>
+<li class="x"><span class="b">ext-hallmark</span></li>
+<li class="x"><span class="b">ext-meta-muse</span></li>
+<li class="x"><span class="b">ext-rea</span></li>
+<li class="x"><span class="b">ext-security-audit</span></li>
+<li class="x"><span class="b">ext-seo</span></li>
+<li class="x"><span class="b">ext-systems-design</span></li>
+<li class="x"><span class="b">ext-ui-ux</span></li>
+<li class=""><span class="b">frontend-motion-3d</span></li>
+<li class=""><span class="b">genai-engineering</span></li>
+<li class=""><span class="b">mcp-security-review</span></li>
+<li class=""><span class="b">meeting-to-actions</span></li>
+<li class=""><span class="b">memory</span></li>
+<li class=""><span class="b">memory-sync</span></li>
+<li class=""><span class="b">ml-lifecycle</span></li>
+<li class=""><span class="b">orchestrate</span></li>
+<li class=""><span class="b">pipeline-scaffold</span></li>
+<li class=""><span class="b">pr-review</span></li>
+<li class=""><span class="b">prompt-enhancer</span></li>
+<li class=""><span class="b">session-insights</span></li>
+<li class=""><span class="b">setup-guardian</span></li>
+<li class=""><span class="b">skill-forge</span></li>
+<li class=""><span class="b">smart-navigator</span></li>
+<li class=""><span class="b">spec-writer</span></li>
+<li class=""><span class="b">token-saver</span></li>
+<!-- slips:end -->
+</ul>
+    <div class="err" id="skerr" role="alert" hidden>Skill catalog could not be loaded. <button class="cp" type="button">Retry</button></div>
   </div></div>
 </section>
 
@@ -139,13 +191,14 @@ version: 0.1.0
         <i style="left:0%">0</i><i style="left:10%">10</i><i style="left:20%">20</i><i style="left:30%">30</i><i style="left:40%">40</i><i style="left:50%">50</i><i style="left:60%">60</i><i style="left:70%">70</i><i style="left:80%">80</i><i style="left:100%" class="e">100</i>
         <u class="vn" style="left:90%"><s>TARGET 90</s></u><u class="b0" id="b0"><s>START</s></u><u class="nd" id="nd" hidden></u>
       </div>
-      <ul class="rows">
+      <ul class="rows" id="rows" aria-hidden="true">
         <li data-k="PEI"><b>PEI</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="OVS"><b>OVS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="CRI"><b>CRI</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="MNSS"><b>MNSS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
         <li data-k="SRS"><b>SRS</b><span class="bar"><i></i><u></u></span><span class="v">&mdash;</span><em class="bt" hidden>BELOW TARGET</em></li>
       </ul>
+      <div class="err" id="auerr" role="alert" hidden>Audit scores could not be loaded. <button class="cp" type="button">Retry</button></div>
       <p class="tk">TOKENS <i id="ptk">&mdash;</i> / SHA <i id="psh">&mdash;</i> <a href="audit/">FULL AUDIT SHEET -&gt;</a></p>
     </div>
   </div></div>

@@ -1,7 +1,10 @@
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:900;font-display:swap;src:url(assets/fonts/big-shoulders-display-900.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/ibm-plex-mono-400.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(assets/fonts/ibm-plex-mono-500.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 /* agentkit field manual, plate series. Two inks and one registration colour (--reg):
    --reg is only the baton, the plate-0 ghost, the spotlight circle, BELOW TARGET marks and the one stamp.
    Motion: JS writes --p (0..1) per stage; everything below is CSS maths on it. */
-:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#1D4ED8;
+:root{--paper:#DADCD3;--ink:#14171A;--ink2:#4A4E49;--rule:#8E948E;--reg:#1A44C2;
 --f1:"Big Shoulders Display","Roboto Condensed","Arial Narrow",ui-sans-serif,sans-serif;--f2:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 --serif:ui-serif,"Iowan Old Style","Palatino Linotype",Georgia,serif;--pl:max(5vw,64px);--cs:clamp(14px,2.2vw,30px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#11120F;--ink:#DADCD3;--ink2:#9A9F96;--rule:#5B6259;--reg:#6B8BFF}}
@@ -17,6 +20,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .skip{position:fixed;left:8px;top:-60px;z-index:99;background:var(--ink);color:var(--paper);padding:8px 12px;text-decoration:none}
 .skip:focus{top:8px}
 [hidden]{display:none!important}
+.err{position:relative;z-index:2;margin:14px 0;padding:10px 14px;border-left:4px solid var(--reg);background:color-mix(in srgb,var(--ink) 9%,var(--paper));font-size:.875rem}
+.err .cp{margin-left:12px}
 
 /* fixed furniture */
 #plates{position:fixed;z-index:40;left:14px;top:calc(50% - 80px);display:flex;flex-direction:column;gap:2px}
@@ -31,7 +36,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* title block: quiet, one blue rule */
 #tb{position:fixed;z-index:50;right:40px;bottom:40px;width:280px;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border-top:3px solid var(--reg);font-size:.8125rem;white-space:nowrap;text-transform:lowercase}
 #tb>*{padding:2px 8px 2px 0;line-height:19px}
-#tb b{font-weight:700}
+#tb b{font-weight:500}
 #tb i{font-style:normal;font-weight:500}
 #tb u{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--reg);margin-right:6px;text-decoration:none}
 #fin{font-weight:500}
@@ -129,8 +134,8 @@ transition:translate .18s,rotate .18s}
 .slips li:focus-within{--l:1;z-index:2}
 html.mo .slips:not(.live) li:not(:focus-within){pointer-events:none}
 .slips li:has(:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
-.slips button{display:block;width:100%;padding:6px 9px;text-align:left;overflow:hidden;text-overflow:ellipsis;outline:0}
-.slips li.x button{padding-right:22px}
+.slips button,.slips .b{display:block;width:100%;padding:6px 9px;text-align:left;overflow:hidden;text-overflow:ellipsis;outline:0}
+.slips li.x button,.slips li.x .b{padding-right:22px}
 .slips li.x::before{content:"";position:absolute;right:6px;top:50%;width:8px;height:8px;margin-top:-4px;border:1.5px solid var(--ink);border-radius:50%}
 .ci{position:absolute;left:-14px;top:-10px;width:calc(100% + 28px);height:calc(100% + 20px);overflow:visible;fill:none;stroke:var(--reg);stroke-width:2;stroke-linecap:round;pointer-events:none}
 .ci path{stroke-dasharray:1;stroke-dashoffset:calc((1 - var(--l))*1px)}
