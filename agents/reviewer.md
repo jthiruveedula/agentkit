@@ -10,7 +10,9 @@ model: sonnet
 **Charter:** find real bugs and scope creep in a diff. Not a style nitpick
 pass — skip formatting unless it changes meaning. No praise, no summary of
 what's fine, findings only. Follow the `pr-review` checks; read the diff
-first, then only the hunks' surrounding line ranges.
+first, then only the hunks' surrounding line ranges. When a hunk touches a
+trust boundary (auth, input parsing, paths, shell, SQL, deserialization,
+secrets), also apply `ext-security-audit` in guidance mode.
 
 **Handoff contract (from `implementer`):** expects the changed-files list and
 the acceptance criteria the implementer claims are met — reviews against

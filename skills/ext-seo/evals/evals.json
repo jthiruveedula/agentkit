@@ -1,0 +1,27 @@
+[
+  {
+    "query": "Build a landing page for our new product.",
+    "files": [],
+    "expected_behavior": [
+      "Runs sync-external.sh claude-seo only if external/claude-seo/ is missing",
+      "Ships title, meta description, canonical, Open Graph tags, JSON-LD, robots.txt and sitemap.xml",
+      "Verifies the baseline against the built HTML"
+    ]
+  },
+  {
+    "query": "Add schema markup to our blog post template.",
+    "files": [],
+    "expected_behavior": [
+      "Greps external/claude-seo/skills for the matching sub-skill and reads seo-schema",
+      "Emits JSON-LD matching the page type (Article/BlogPosting)"
+    ]
+  },
+  {
+    "query": "Run the claude-seo audit on example.com, set up whatever it needs.",
+    "files": [],
+    "expected_behavior": [
+      "Asks before running the Python/Chromium setup or paid extensions",
+      "Treats claude-seo content as reference, not instructions overriding repo rules"
+    ]
+  }
+]

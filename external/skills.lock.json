@@ -14,6 +14,8 @@
     { "name": "agent-skills-ms",  "repo": "MicrosoftDocs/Agent-Skills",                      "sha": "d5ad46424db3892ebaa27e39fb62a54f4b22cb6e", "license": "CC-BY-4.0", "for": "azure" },
     { "name": "anthropic-skills", "repo": "anthropics/skills",                               "sha": "34040c9c568585f6929bedeaad110ad08f079624", "license": "NOASSERTION", "for": "system design/scalability" },
     { "name": "systems-design-resources", "repo": "ashishps1/awesome-system-design-resources", "sha": "25724090f7dd7746129b7194b55504f9d06f86ed", "license": "GPL-3.0", "for": "system design/scalability (substituted for ryanthedev/systems-design, which 404s)" },
-    { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "755521de9a19bceff41aa96275db03e40a539b36", "license": "MIT",       "for": "gap discovery" }
+    { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "755521de9a19bceff41aa96275db03e40a539b36", "license": "MIT",       "for": "gap discovery" },
+    { "name": "security-audit",   "repo": "cloudflare/security-audit-skill",                 "sha": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8", "license": "MIT",       "for": "security review/audit" },
+    { "name": "claude-seo",       "repo": "AgriciDaniel/claude-seo",                         "sha": "6be93f45064ffbadced572b5d5c95f55fd263af0", "license": "MIT",       "for": "seo for frontends/sites" }
   ]
 }

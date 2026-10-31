@@ -18,13 +18,16 @@ Never include env/secret file contents (`.env`, keys, tokens) in comments.
 2. Load `scope-creep-detector` (or the `cavecrew-reviewer` subagent if
    available) against the same diff to flag anything outside the PR's
    stated intent.
-3. Merge both outputs into one list, most-severe first. Do not duplicate a
-   finding both tools raised.
-4. If asked to post comments, use `gh pr review <N> --comment` per finding —
+3. If the diff touches a trust boundary (auth, input parsing, paths, shell,
+   SQL, deserialization, secrets), load `ext-security-audit` in guidance
+   mode against the same diff.
+4. Merge all outputs into one list, most-severe first. Do not duplicate a
+   finding more than one tool raised.
+5. If asked to post comments, use `gh pr review <N> --comment` per finding —
    show the exact text and get explicit user confirmation before each post.
    Never `--approve`/`--request-changes` without the user explicitly asking
    for that verdict.
-5. Verify each finding cites a real file:line in the diff; drop or fix any that do not, and check again until all do.
+6. Verify each finding cites a real file:line in the diff; drop or fix any that do not, and check again until all do.
 
 ## Token economy
 

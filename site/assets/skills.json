@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 38,
+  "count": 40,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -124,7 +124,7 @@
     },
     {
       "name": "session-insights",
-      "description": "Prompt analytics and friction report over past Claude Code sessions — vague prompts, corrections, interrupts, tool errors, denials, re-reads, outcomes, cost per intent, subagent spend, and repeated prompts/commands — with ranked suggestions, a weekly trend, an HTML dashboard, drafted slash commands, and a live vague-prompt nudge hook. Use when the user asks how to be more productive with agents, wants prompt analytics, a session retro, or \"what am I doing wrong / what should I automate\".",
+      "description": "Prompt analytics and friction report over past Claude Code sessions (vague prompts, corrections, tool errors, cost per intent, repeated prompts) with ranked fixes, an HTML dashboard and drafted slash commands. Use when the user wants prompt analytics, a session retro, or to know what to automate.",
       "version": "0.2.0",
       "kind": "native"
     },
@@ -215,6 +215,18 @@
     {
       "name": "ext-rea",
       "description": "Route reverse-engineering of shipped artifacts (binaries, Electron/JS bundles, APKs, .NET, model files, crash reports, live sites) to the pinned REA MCP server. Use when a question depends on a build, package or runtime with no source available.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-security-audit",
+      "description": "Route security reviews and audits to the pinned cloudflare/security-audit-skill. Use when reviewing code or a diff for vulnerabilities, auditing or pen-testing a codebase, or checking that new code at a trust boundary is not vulnerable.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-seo",
+      "description": "Route SEO setup and audits to the pinned AgriciDaniel/claude-seo collection. Use when building or changing any website, landing page or frontend that serves public pages, or when asked for an SEO audit, schema markup, sitemap, Core Web Vitals or GEO/AI-search readiness.",
       "version": "0.1.0",
       "kind": "router"
     },
