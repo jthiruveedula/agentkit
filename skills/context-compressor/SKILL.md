@@ -2,7 +2,7 @@
 name: context-compressor
 description: Write short summarization checkpoints (goal, decisions+reasons, state, open threads, memory keys) to survive context pressure. Use when a session is long, before compaction or risky multi-step runs, at task boundaries, or before handoff.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/checkpoint.py *), Bash(python3 scripts/checkpoint.py *), Read
 ---
 
 # Context Compressor

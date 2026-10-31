@@ -2,7 +2,7 @@
 name: debug-loop
 description: Run a capped hypothesize-test-narrow loop on a failing test or reproducible bug to find root cause, not patch it. Use when the user has a failing test, stack trace, or reproducible crash.
 version: 0.1.0
-allowed-tools: Bash, Read, Grep, Edit
+allowed-tools: Bash(python3 skills/memory/scripts/memory.py search *), Bash(python3 ../memory/scripts/memory.py search *), Read, Grep, Edit
 ---
 
 # Debug Loop

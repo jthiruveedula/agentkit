@@ -2,7 +2,7 @@
 name: ext-databricks
 description: Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user wants Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake) from vendor skills.
 version: 0.1.0
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 ---
 
 # External: databricks

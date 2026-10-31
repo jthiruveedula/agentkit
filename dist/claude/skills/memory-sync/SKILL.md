@@ -1,7 +1,7 @@
 ---
 name: memory-sync
 description: Mine recent session history for recurring agent mistakes, rank repeated patterns, and write durable corrections. Use when the user asks for a retro on recent sessions, recurring agent errors, or to make agents faster.
-allowed-tools: Bash, Read, Edit, Write, Grep
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/rank_patterns.py *), Bash(python3 scripts/rank_patterns.py *), Bash(python3 ../memory/scripts/memory.py *), Read, Edit, Write, Grep
 version: 0.1.0
 ---
 

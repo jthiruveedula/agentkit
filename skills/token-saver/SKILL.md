@@ -2,7 +2,7 @@
 name: token-saver
 description: Cuts input-token burn: search before read, line ranges, diff-first, batched calls, no re-reads, terse output. Use when a session burns context, reads feel wasteful, or a task spans many files/logs/shell output.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/estimate.py *), Bash(python3 scripts/estimate.py *), Bash(git diff *), Read
 ---
 
 # Token Saver

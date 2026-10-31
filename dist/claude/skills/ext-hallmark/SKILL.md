@@ -1,7 +1,7 @@
 ---
 name: ext-hallmark
 description: Route frontend design and anti-slop checks to the pinned nutlope/hallmark. Use when building or changing any website, page, app UI or frontend component, or when the user names Hallmark or asks to redesign or audit a UI.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

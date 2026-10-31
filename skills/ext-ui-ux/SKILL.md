@@ -2,7 +2,7 @@
 name: ext-ui-ux
 description: Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill. Use when the user names the ui-ux-pro-max toolkit explicitly; otherwise prefer ext-hallmark.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(./scripts/sync-external.sh *), Read
 ---
 
 # External: ui-ux-pro-max

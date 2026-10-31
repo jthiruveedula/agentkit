@@ -1,7 +1,7 @@
 ---
 name: daily-standup
 description: Summarize commits, closed issues/PRs and open threads since the last standup into 3 lines (did/doing/blocked). Use when the user asks for a standup update, status report, or "what did I do yesterday".
-allowed-tools: Bash
+allowed-tools: Bash(git log *), Bash(git config user.email), Bash(gh pr list *), Bash(gh issue list *)
 version: 0.1.0
 ---
 

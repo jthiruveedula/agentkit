@@ -1,7 +1,7 @@
 ---
 name: ext-aws
 description: Route AWS tasks to pinned aws-samples/sample-agent-skills and zxkane/aws-skills. Use when the user wants AWS-specific help (Lambda, S3, IAM, CDK) from vendor or community skills.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: prompt-enhancer
 description: Classifies a raw prompt's intent and rewrites it with that intent's pattern. Use when the user pastes a rough or underspecified prompt and asks to enhance, improve, tighten, or spec it up.
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/classify.py *), Bash(python3 scripts/classify.py *), Read
 version: 0.1.0
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: ext-security-audit
 description: Route security reviews and audits to the pinned cloudflare/security-audit-skill. Use when reviewing code or a diff for vulnerabilities, auditing or pen-testing a codebase, or checking that new code at a trust boundary is not vulnerable.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

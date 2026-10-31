@@ -66,6 +66,33 @@ def test_kebab_case_name_required(tmp_path):
         validate.SKILLS_DIR = REPO_ROOT / "skills"
 
 
+def _bash_errors(tmp_path, tools):
+    skill_dir = tmp_path / "skills" / "bashy"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: bashy\ndescription: "
+        + "x" * 45
+        + " use when testing.\nversion: 0.1.0\nallowed-tools: %s\n---\n\nbody\n" % tools
+    )
+    validate.SKILLS_DIR = tmp_path / "skills"
+    try:
+        return [e for e in validate.validate() if "bare 'Bash'" in e]
+    finally:
+        validate.SKILLS_DIR = REPO_ROOT / "skills"
+
+
+def test_bare_bash_in_allowed_tools_is_rejected(tmp_path):
+    assert _bash_errors(tmp_path, "Read, Bash")
+    assert _bash_errors(tmp_path, "Bash")
+    assert _bash_errors(tmp_path, "[Read, Bash]")
+    assert _bash_errors(tmp_path, "Bash(git log *), Bash, Read")
+
+
+def test_scoped_bash_in_allowed_tools_is_accepted(tmp_path):
+    assert not _bash_errors(tmp_path, "Bash(git log *), Bash(gh pr view:*), Read")
+    assert not _bash_errors(tmp_path, "Read, Grep")
+
+
 def test_description_too_short_is_rejected(tmp_path):
     skill_dir = tmp_path / "skills" / "short-desc"
     skill_dir.mkdir(parents=True)

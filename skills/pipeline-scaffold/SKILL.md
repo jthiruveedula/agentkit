@@ -2,7 +2,7 @@
 name: pipeline-scaffold
 description: Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub. Use when asked to create a new pipeline, model, DAG, asset, or Spark job boilerplate.
 version: 0.1.0
-allowed-tools: Bash, Read, Edit
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold_pipeline.py *), Bash(python3 scripts/scaffold_pipeline.py *), Read, Edit
 ---
 
 # Pipeline Scaffold

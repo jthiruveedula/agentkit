@@ -1,7 +1,7 @@
 ---
 name: ext-codegraph
 description: Bootstrap the pinned colbymchenry/codegraph CLI for symbol search, call paths and blast radius. Use when the user wants to understand or navigate a codebase and CodeGraph isn't installed.
-allowed-tools: Bash, Read
+allowed-tools: Bash(./scripts/sync-external.sh *), Bash(codegraph explore *), Read
 version: 0.1.0
 ---
 
