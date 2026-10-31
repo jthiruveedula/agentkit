@@ -106,6 +106,7 @@ SEV_BY_H = {
     "pin.stale": "low",
 }
 SEC_PENALTY = {"high": 20, "med": 10, "low": 5}
+EVALS_CREDIT = 10  # of the 30 tests points: evals are shape-checked, not run
 STALE_DAYS = 90
 ROUTERS = ("ext-", "data-eng-router")
 
@@ -536,10 +537,9 @@ def score_unit(u):
             (
                 30,
                 bool(d and (d / "tests").is_dir() and any((d / "tests").glob("test*")))
-                or u.get("repo_tested", False)
-                or u.get("evals", 0) >= 3,
+                or u.get("repo_tested", False),
                 "srs.tests",
-                "no tests/ or >=3 evals/evals.json scenarios",
+                "no tests/ or repo test exercising scripts (evals are never run)",
             ),
             (
                 30,
@@ -570,6 +570,9 @@ def score_unit(u):
             srs += w
         else:
             f.append(("Guardrail Gap", h, msg))
+            # Evals defined but never run: partial credit, under half of real tests.
+            if h == "srs.tests" and u.get("evals", 0) >= 3:
+                srs += EVALS_CREDIT
     sec = security(u)
     f += sec
     srs += max(0, 40 - sum(SEC_PENALTY[t[3] or SEV_BY_H[t[1]]] for t in sec))
