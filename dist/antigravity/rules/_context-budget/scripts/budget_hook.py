@@ -112,8 +112,10 @@ def _read_state(sf):
 
 def _write_state(sf, state):
     os.makedirs(os.path.dirname(sf), exist_ok=True)
-    with open(sf, "w", encoding="utf-8") as fh:
+    tmp = "%s.%d.tmp" % (sf, os.getpid())
+    with open(tmp, "w", encoding="utf-8") as fh:
         json.dump(state, fh)
+    os.replace(tmp, sf)  # atomic: parallel hooks never read a truncated file
 
 
 def check(hook):
