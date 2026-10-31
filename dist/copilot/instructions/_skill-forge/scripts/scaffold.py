@@ -48,11 +48,27 @@ def test_golden_cases():
 '''
 
 
+def yaml_scalar(text):
+    """One-line YAML-safe scalar: whitespace/newlines collapsed (so the
+    description can never open a new line or a '---' fence), quoted
+    only when a plain scalar would misparse. Inline copy: skill scripts
+    ship standalone and must not import scripts/lib."""
+    s = " ".join(text.split())
+    risky = s[:1] in tuple("[]{}#&*!|>'\"%@`-?:,") or ": " in s or " #" in s
+    if risky or s.endswith(":"):
+        # the repo's frontmatter reader doesn't unescape, so prefer a quote
+        # char that needs no escaping
+        q = '"' if "'" in s and not set('"\\') & set(s) else "'"
+        s = q + s.replace(q, q * 2) + q
+    return s
+
+
 def main(argv):
     if len(argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
     name, description = argv
+    description = " ".join(description.split())
     if not NAME_RE.match(name):
         print("error: name must be kebab-case (e.g. my-new-skill)", file=sys.stderr)
         return 2
@@ -80,7 +96,8 @@ def main(argv):
         "version: 0.1.0\n"
         "---\n\n"
         "# %s\n\n"
-        "TODO: procedure.\n" % (name, description, name.replace("-", " ").title()),
+        "TODO: procedure.\n"
+        % (name, yaml_scalar(description), name.replace("-", " ").title()),
         encoding="utf-8",
     )
     (skill_dir / "reference" / ".gitkeep").touch()

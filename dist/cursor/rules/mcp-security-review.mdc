@@ -31,7 +31,8 @@ Script paths resolve relative to this SKILL.md.
    `UNPINNED` (medium), `SECRET_IN_CONFIG` (high), `BROAD_FS` (high),
    `REMOTE_NO_AUTH` (medium), `SHELL_WRAPPER` (low). The scanner never
    prints a secret value, only the flagged key name. Exit code is 1 if
-   any high-severity finding exists, 0 otherwise.
+   any high-severity finding exists or any config is unreadable or
+   malformed, 0 otherwise.
 
 3. **Manually review tool descriptions for every flagged (or new)
    server.** The scanner only checks the config shape — it can't read

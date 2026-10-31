@@ -11,16 +11,19 @@ concurrency:
   group: release-please
   cancel-in-progress: false
 
-# release-please pushes release commits/tags and opens/updates the release PR;
-# the publish trigger below needs to dispatch the publish workflow.
 permissions:
-  contents: write
-  pull-requests: write
-  actions: write
+  contents: read
 
 jobs:
   release-please:
+    # release-please pushes release commits/tags and opens/updates the release
+    # PR; the publish trigger below needs to dispatch the publish workflow.
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       # Repo policy blocks Actions from opening PRs, so release-please fails at
       # its last step (PR create) after pushing the release branch. Tolerate
@@ -52,7 +55,9 @@ jobs:
         if: steps.release-please.outputs.release_created
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.release-please.outputs.tag_name }}
         run: |
-          for wf in publish.yml pages.yml; do
-            gh workflow run "$wf" --ref main --repo "${{ github.repository }}"
-          done
+          # publish ships exactly the tagged code; the github-pages
+          # environment only allows main, so the site deploys from main.
+          gh workflow run publish.yml --ref "$TAG_NAME" --repo "${{ github.repository }}"
+          gh workflow run pages.yml --ref main --repo "${{ github.repository }}"
