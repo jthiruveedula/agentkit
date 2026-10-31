@@ -47,3 +47,28 @@ def test_check_fonts_flags_remote_url(tmp_path):
     page = m.SITE / "index.html"
     errs = m.check_fonts(page, "@font-face{src:url(https://x.test/a.woff2)}")
     assert any("remote font url" in e for e in errs)
+
+
+def test_seo_meta_robots_sitemap():
+    assert m.check_seo_files() == []
+    for page in m.PAGES:
+        assert m.check_seo(page.read_text(encoding="utf-8")) == [], page
+    assert "og:title" in "".join(m.check_seo("<title>x</title>"))
+
+
+def test_catalog_baked_without_js():
+    import json
+
+    bc = importlib.util.spec_from_file_location(
+        "bc", m.SITE / "scripts" / "build-catalog.py"
+    )
+    b = importlib.util.module_from_spec(bc)
+    bc.loader.exec_module(b)
+    html = (m.SITE / "index.html").read_text(encoding="utf-8")
+    skills = json.loads((m.SITE / "assets" / "skills.json").read_text("utf-8"))[
+        "skills"
+    ]
+    assert b.bake(skills, html) == html, "run site/scripts/build-catalog.py"
+    body = b.BAKE_RE.search(html).group(0)
+    assert body.count("<li") == len(skills)
+    assert all(s["name"] in body for s in skills)

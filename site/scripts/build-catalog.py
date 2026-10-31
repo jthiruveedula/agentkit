@@ -21,10 +21,13 @@ from __future__ import annotations
 import json
 import re
 import sys
+from html import escape
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]  # repo root (site/scripts/ -> repo)
 OUT = REPO / "site" / "assets" / "skills.json"
+INDEX = REPO / "site" / "index.html"
+BAKE_RE = re.compile(r"(<!-- slips:start -->\n).*?(<!-- slips:end -->)", re.DOTALL)
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*", re.DOTALL)
 
 
@@ -40,6 +43,20 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
         key, _, value = line.partition(":")
         fields[key.strip()] = value.strip()
     return fields
+
+
+def bake(skills: list, html: str) -> str:
+    """Return html with the skill list baked between the slips markers.
+
+    Gives the catalog a no-JS rendering; app.js clears and rebuilds it
+    (progressive enhancement). Sorted by name, like app.js.
+    """
+    items = "".join(
+        '<li class="%s"><span class="b">%s</span></li>\n'
+        % ("" if s["kind"] == "native" else "x", escape(s["name"]))
+        for s in sorted(skills, key=lambda s: s["name"])
+    )
+    return BAKE_RE.sub(lambda m: m.group(1) + items + m.group(2), html, count=1)
 
 
 def main() -> int:
@@ -78,6 +95,8 @@ def main() -> int:
     OUT.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
     )
+
+    INDEX.write_text(bake(skills, INDEX.read_text(encoding="utf-8")), encoding="utf-8")
 
     native = sum(1 for s in skills if s["kind"] == "native")
     router = len(skills) - native

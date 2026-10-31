@@ -134,8 +134,8 @@ transition:translate .18s,rotate .18s}
 .slips li:focus-within{--l:1;z-index:2}
 html.mo .slips:not(.live) li:not(:focus-within){pointer-events:none}
 .slips li:has(:focus-visible){outline:2px solid var(--ink);outline-offset:2px}
-.slips button{display:block;width:100%;padding:6px 9px;text-align:left;overflow:hidden;text-overflow:ellipsis;outline:0}
-.slips li.x button{padding-right:22px}
+.slips button,.slips .b{display:block;width:100%;padding:6px 9px;text-align:left;overflow:hidden;text-overflow:ellipsis;outline:0}
+.slips li.x button,.slips li.x .b{padding-right:22px}
 .slips li.x::before{content:"";position:absolute;right:6px;top:50%;width:8px;height:8px;margin-top:-4px;border:1.5px solid var(--ink);border-radius:50%}
 .ci{position:absolute;left:-14px;top:-10px;width:calc(100% + 28px);height:calc(100% + 20px);overflow:visible;fill:none;stroke:var(--reg);stroke-width:2;stroke-linecap:round;pointer-events:none}
 .ci path{stroke-dasharray:1;stroke-dashoffset:calc((1 - var(--l))*1px)}

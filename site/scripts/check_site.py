@@ -78,6 +78,33 @@ def check_fonts(page, src):
     return errs
 
 
+SEO = ("og:title", "og:description", "og:url", "twitter:card", "twitter:title")
+
+
+def check_seo(src):
+    """Canonical + og:* + twitter:* present; robots.txt and sitemap.xml ship."""
+    errs = []
+    if not re.search(r'<link rel="canonical" href="https://[^"]+">', src):
+        errs.append("missing canonical link")
+    for k in SEO:
+        if not re.search(r'<meta (?:property|name)="%s" content="[^"]+"' % k, src):
+            errs.append(f"missing meta {k}")
+    return errs
+
+
+def check_seo_files():
+    errs = [
+        f"missing {n}"
+        for n in ("robots.txt", "sitemap.xml")
+        if not (SITE / n).is_file()
+    ]
+    if not errs and "sitemap.xml" not in (SITE / "robots.txt").read_text(
+        encoding="utf-8"
+    ):
+        errs.append("robots.txt does not reference sitemap.xml")
+    return errs
+
+
 def check():
     errs = []
     for page in PAGES:
@@ -109,6 +136,7 @@ def check():
         if re.search(r"https?:|//", p.csp):
             errs.append(f"{rel}: CSP names a third-party host")
         errs += [f"{rel}: {e}" for e in check_fonts(page, src)]
+        errs += [f"{rel}: {e}" for e in check_seo(src)]
     for js in SITE.rglob("*.js"):
         for n, line in enumerate(js.read_text(encoding="utf-8").splitlines(), 1):
             if SINK.search(line):
