@@ -2,11 +2,17 @@
 
 import os
 import subprocess
+import sys
 from pathlib import Path
+
+import pytest
 
 INSTALL = Path(__file__).resolve().parent.parent / "install.sh"
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="POSIX sh installer; manifest holds native paths"
+)
 def test_uninstall_skips_paths_outside_install_roots(tmp_path):
     home = tmp_path / "home"
     state = home / ".local" / "state" / "agentkit"
