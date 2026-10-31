@@ -1,6 +1,5 @@
 ---
 description: Detect the cloud/platform of a data engineering task (GCP, AWS, Azure, Databricks) and route to its ext-* skill. Use when asked for help with a data pipeline, ETL/ELT, warehouse, or data lake.
-applyTo: **
 ---
 
 # Data Engineering Router

@@ -64,7 +64,10 @@ def emit_copilot(skills, agents):
     out = {}
     for s in skills:
         meta = s["meta"]
-        fm = {"description": meta["description"], "applyTo": "**"}
+        # No applyTo = not auto-attached; Copilot loads it on demand by description.
+        fm = {"description": meta["description"]}
+        if meta.get("globs"):
+            fm["applyTo"] = meta["globs"]
         assets = _copy_assets_into(s["dir"], out, "instructions/_%s" % meta["name"])
         body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
         out["instructions/%s.instructions.md" % meta["name"]] = _render(
@@ -78,10 +81,12 @@ def emit_cursor(skills, agents):
     for s in skills:
         meta = s["meta"]
         fm = {"description": meta["description"], "alwaysApply": False}
+        if meta.get("globs"):
+            fm["globs"] = meta["globs"]
         assets = _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
         body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
         out["rules/%s.mdc" % meta["name"]] = _render(
-            fm, body, order=("description", "alwaysApply")
+            fm, body, order=("description", "globs", "alwaysApply")
         )
     return out
 

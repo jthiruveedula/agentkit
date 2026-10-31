@@ -1,6 +1,5 @@
 ---
 description: Run a capped hypothesize-test-narrow loop on a failing test or reproducible bug to find root cause, not patch it. Use when the user has a failing test, stack trace, or reproducible crash.
-applyTo: **
 ---
 
 # Debug Loop

@@ -146,3 +146,27 @@ def test_non_asset_references_are_not_rewritten():
         content = tree[md_key].decode("utf-8")
         assert "scripts/validate.py" in content, tool
         assert "_skill-forge/scripts/validate.py" not in content, tool
+
+
+def _fake_skill(tmp_path, **extra):
+    meta = {"name": "demo", "description": "Demo skill. Use when testing."}
+    meta.update(extra)
+    return [{"dir": tmp_path, "meta": meta, "body": "body\n"}]
+
+
+def test_copilot_instructions_are_on_demand_by_default(tmp_path):
+    # Regression: applyTo "**" attached every skill body to every Copilot request.
+    out = build.emit_copilot(_fake_skill(tmp_path), [])
+    text = out["instructions/demo.instructions.md"].decode()
+    assert "applyTo" not in text
+    assert "description: Demo skill." in text
+
+
+def test_globs_map_to_copilot_applyto_and_cursor_globs(tmp_path):
+    skills = _fake_skill(tmp_path, globs="**/*.py")
+    cop = build.emit_copilot(skills, [])["instructions/demo.instructions.md"].decode()
+    cur = build.emit_cursor(skills, [])["rules/demo.mdc"].decode()
+    assert "applyTo: **/*.py" in cop
+    assert "globs: **/*.py" in cur and "alwaysApply: false" in cur
+    plain = build.emit_cursor(_fake_skill(tmp_path), [])["rules/demo.mdc"].decode()
+    assert "globs" not in plain

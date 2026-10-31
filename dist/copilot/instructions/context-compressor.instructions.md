@@ -1,6 +1,5 @@
 ---
 description: Write short summarization checkpoints (goal, decisions+reasons, state, open threads, memory keys) to survive context pressure. Use when a session is long, before compaction or risky multi-step runs, at task boundaries, or before handoff.
-applyTo: **
 ---
 
 # Context Compressor

@@ -1,6 +1,5 @@
 ---
 description: Decide data platform trade-offs (storage, compute, orchestration, batch vs streaming) and record an ADR. Use when choosing a warehouse/orchestrator, streaming vs batch, dbt vs Spark, designing a pipeline architecture, or "should I use X or Y".
-applyTo: **
 ---
 
 # Data Architect

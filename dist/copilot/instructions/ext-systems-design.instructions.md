@@ -1,6 +1,5 @@
 ---
 description: Route system design questions to pinned anthropics/skills and awesome-system-design-resources. Use when making an architecture, scaling, DB/cache/queue, CAP or sharding decision and wanting deeper references.
-applyTo: **
 ---
 
 # External: system design / scalability

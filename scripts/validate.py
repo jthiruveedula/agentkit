@@ -209,6 +209,11 @@ def validate():
             else:
                 seen_names[name] = origin
 
+        if "globs" in meta and not (
+            isinstance(meta["globs"], str) and meta["globs"].strip()
+        ):
+            errors.append("%s: 'globs' must be a non-empty string" % origin)
+
         desc = meta.get("description", "")
         if desc and not (40 <= len(desc) <= 500):
             errors.append(

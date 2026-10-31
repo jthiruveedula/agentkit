@@ -1,6 +1,5 @@
 ---
 description: Scaffolds a dbt model, Airflow DAG, Dagster asset, or PySpark job with medallion naming and a test stub. Use when asked to create a new pipeline, model, DAG, asset, or Spark job boilerplate.
-applyTo: **
 ---
 
 # Pipeline Scaffold

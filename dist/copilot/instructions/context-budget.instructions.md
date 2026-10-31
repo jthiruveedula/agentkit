@@ -1,6 +1,5 @@
 ---
 description: Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs.
-applyTo: **
 ---
 
 # Context Budget

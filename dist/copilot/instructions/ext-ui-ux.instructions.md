@@ -1,6 +1,5 @@
 ---
 description: Route UI/UX design requests to the pinned nextlevelbuilder/ui-ux-pro-max-skill. Use when the user names the ui-ux-pro-max toolkit explicitly; otherwise prefer ext-hallmark.
-applyTo: **
 ---
 
 # External: ui-ux-pro-max

@@ -1,6 +1,5 @@
 ---
 description: Apply schema, freshness, volume, idempotency and PII checks to a data pipeline before it ships. Use when writing tests for a dbt model/pipeline, reviewing a pipeline PR, or asked "what checks should this have".
-applyTo: **
 ---
 
 # Data Quality Standards

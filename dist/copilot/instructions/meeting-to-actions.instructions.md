@@ -1,6 +1,5 @@
 ---
 description: Convert meeting notes or a transcript into action items with owners and dates. Use when the user pastes meeting notes, a transcript or call summary and wants action items extracted.
-applyTo: **
 ---
 
 # Meeting to Actions

@@ -1,6 +1,5 @@
 ---
 description: Scaffolds a compliant new skill (SKILL.md, reference/scripts/tests, golden test stub) from a one-line description. Use when asked to create, scaffold, or add a new skill to this repo.
-applyTo: **
 ---
 
 # Skill Forge

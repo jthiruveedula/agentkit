@@ -1,6 +1,5 @@
 ---
 description: Bootstrap the pinned colbymchenry/codegraph CLI for symbol search, call paths and blast radius. Use when the user wants to understand or navigate a codebase and CodeGraph isn't installed.
-applyTo: **
 ---
 
 # External: codegraph

@@ -1,6 +1,5 @@
 ---
 description: Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user wants Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake) from vendor skills.
-applyTo: **
 ---
 
 # External: databricks

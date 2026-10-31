@@ -272,7 +272,7 @@ re-link after `git pull`, and prune links whose source was removed.
 ## How it works: author once, run on four
 
 Each skill is authored once as `skills/<name>/SKILL.md` (frontmatter:
-`name`, `description`, `version`, optional `allowed-tools`). Each agent
+`name`, `description`, `version`, optional `allowed-tools` and `globs`). Each agent
 is `agents/<name>.md`. `scripts/build.py` emits the four tool adapters
 into `dist/`, resolving each skill's `scripts/` and `reference/` assets to
 real paths in every layout:
@@ -287,6 +287,10 @@ skills/prompt-enhancer/SKILL.md  ──build.py──┬─▶ dist/claude/skill
 `AGENTS.md` is generated the same way. `dist/` is committed so install
 never needs Python; CI's `build.py --check` fails if `dist/` drifts from
 source. Never hand-edit `dist/` — edit the source and run `make build`.
+
+Copilot instruction files carry only a `description` (no `applyTo`), so VS Code loads them
+on demand instead of attaching every skill to every request. An optional `globs:` in
+`SKILL.md` becomes Copilot `applyTo` and Cursor `globs` for file-type-specific skills.
 
 ## External skills
 

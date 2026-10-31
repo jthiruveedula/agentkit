@@ -1,6 +1,5 @@
 ---
 description: Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.
-applyTo: **
 ---
 
 # Setup Guardian

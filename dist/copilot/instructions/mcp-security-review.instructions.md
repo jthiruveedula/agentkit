@@ -1,6 +1,5 @@
 ---
 description: Audit MCP server config for security risks: unpinned packages, secrets, broad filesystem access, unauthenticated remotes, shell wrappers. Use when adding an MCP server or reviewing .mcp.json or claude_desktop_config.json.
-applyTo: **
 ---
 
 # MCP Security Review
