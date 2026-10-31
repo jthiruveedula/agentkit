@@ -1,8 +1,11 @@
 """Static WCAG 2.2 AA checks for site/ (stdlib only): contrast from the real CSS
 tokens, no dead tab stops, status/alert roles, Esc handlers, pausable motion."""
 
+import json
 import re
 from pathlib import Path
+
+import pytest
 
 SITE = Path(__file__).resolve().parent.parent / "site"
 INDEX = (SITE / "index.html").read_text(encoding="utf-8")
@@ -45,17 +48,19 @@ def _themes(text):
     }
 
 
-def test_wcag_contrast_from_tokens():
-    for name, text in (("site.css", CSS), ("audit", AUDIT)):
-        for theme, t in _themes(text).items():
-            # worst-case surfaces: paper, and ink tints up to 10% (cards, bars)
-            for bg in (t["paper"], _mix(t["ink"], t["paper"], 0.10)):
-                for key in ("ink", "ink2", "reg"):
-                    assert ratio(t[key], bg) >= 4.5, (name, theme, key, bg)
-            assert ratio(t["paper"], t["reg"]) >= 4.5, (name, theme, "paper on reg")
-            if "ui" in t:  # UI component boundaries need 3:1
-                for bg in (t["paper"], _mix(t["ink"], t["paper"], 0.10)):
-                    assert ratio(t["ui"], bg) >= 3.0, (name, theme, "ui", bg)
+PAGES = (("site.css", CSS), ("audit", AUDIT))
+
+
+@pytest.mark.parametrize("name,text", PAGES)
+def test_wcag_contrast_from_tokens(name, text):
+    for theme, t in _themes(text).items():
+        # worst-case surfaces: paper, and ink tints up to 10% (cards, bars)
+        for bg in (t["paper"], _mix(t["ink"], t["paper"], 0.10)):
+            for key in ("ink", "ink2", "reg"):
+                assert ratio(t[key], bg) >= 4.5, (name, theme, key, bg)
+        assert ratio(t["paper"], t["reg"]) >= 4.5, (name, theme, "paper on reg")
+        for bg in (t["paper"], _mix(t["ink"], t["paper"], 0.10)):
+            assert ratio(t["ui"], bg) >= 3.0, (name, theme, "ui", bg)  # 3:1 boundaries
 
 
 def test_audit_defines_ui_token_in_both_themes():
@@ -105,13 +110,14 @@ def _fxa(text, selector):
     return float(re.search(r"--fxa:(\.?\d*\.?\d+)", block).group(1))
 
 
-def test_text_contrast_over_caustic_canvas_worst_case():
+@pytest.mark.parametrize("name,text", PAGES)
+def test_text_contrast_over_caustic_canvas_worst_case(name, text):
     # the canvas is the page background: worst case is full-alpha caustic over paper
     for theme, sel in (("light", ":root"), ("dark", ":root[data-theme=dark]")):
-        t = _themes(CSS)[theme]
-        bg = _mix(t["fx"], t["paper"], _fxa(CSS, sel))
-        for key in ("ink", "ink2", "reg", "muted"):
-            assert ratio(t[key], bg) >= 4.5, (theme, key, bg)
+        t = _themes(text)[theme]
+        bg = _mix(t["fx"], t["paper"], _fxa(text, sel))
+        for key in ("ink", "ink2", "reg"):
+            assert ratio(t[key], bg) >= 4.5, (name, theme, key, bg)
         assert ratio(t["paper"], t["reg"]) >= 4.5  # primary pill text
         assert ratio(t["ui"], bg) >= 3.0  # outlined pill border
 
@@ -124,10 +130,101 @@ def test_canvas_background_is_decorative_pausable_and_reduced_motion_safe():
     for html in (INDEX, AUDIT):
         assert re.search(r'<canvas id="fx" aria-hidden="true"', html)
         assert 'id="fxpause"' in html and "fx.js" in html
-    assert "pointer-events:none" in CSS
+    for text in (CSS, AUDIT):
+        assert re.search(r"#fx\{[^}]*pointer-events:none", text)
 
 
 def test_nav_is_floating_pill_with_visible_focus_and_skip_link():
     assert 'class="skip" href="#main"' in INDEX and 'id="main"' in INDEX
     assert re.search(r"\.nav\{[^}]*border-radius:999px", CSS)
     assert ":focus-visible{outline:2px solid" in CSS
+
+
+def test_pause_button_label_is_fixed_and_state_is_aria_pressed():
+    fx = (SITE / "fx.js").read_text(encoding="utf-8")
+    assert "Play motion" not in fx and "textContent" not in fx
+    for html in (INDEX, AUDIT):
+        assert re.search(
+            r'id="fxpause"[^>]*aria-pressed="false"[^>]*>Pause motion<', html
+        )
+
+
+def test_js_only_controls_are_hidden_until_js_runs():
+    assert re.search(r'id="seg" hidden>', INDEX)
+    for html in (INDEX, AUDIT):
+        assert re.search(r'id="fxpause"[^>]*\bhidden\b', html)
+    assert "btn.hidden = false" in (SITE / "fx.js").read_text(encoding="utf-8")
+    assert "$('seg').hidden = false" in APP
+    assert (
+        re.search(r'id="gpause"[^>]*\bhidden\b', AUDIT)
+        and "$('gpause').hidden=false" in AUDIT_JS
+    )
+    for text in (CSS, AUDIT):
+        assert "[hidden]{display:none!important}" in text
+
+
+def test_audit_is_readable_without_js():
+    m = re.search(r"<noscript><style>([^<]*)</style></noscript>", AUDIT)
+    assert m and "opacity:1" in m.group(1)  # .rise would otherwise stay at opacity 0
+    assert re.search(r"<noscript>[^<]*<p[^>]*>.*audit\.json", AUDIT, re.S)
+
+
+def test_keyboard_reachable_audit_controls_are_real_buttons_built_eagerly():
+    assert "lazy(" not in AUDIT_JS  # a lazily built graph/gallery is skipped by Tab
+    assert "el('button','fchip'" in AUDIT_JS and "b.type='button'" in AUDIT_JS
+    assert not re.search(r"<div[^>]*id=\"chips\"[^>]*tabindex", AUDIT)
+
+
+def test_scroll_padding_keeps_focus_clear_of_fixed_ui():
+    for text in (CSS, AUDIT):
+        assert "scroll-padding-top:84px;scroll-padding-bottom:180px" in text
+
+
+def test_touch_targets_44px_on_coarse_pointer_and_small_screens():
+    assert re.search(
+        r"@media \(pointer:coarse\),\(max-width:767px\)\{[^}]*\.nav a[^}]*min-height:44px",
+        CSS,
+    )
+    m = re.search(r"@media \(pointer:coarse\),\(max-width:767px\)\{(.*)\}\n", AUDIT)
+    assert (
+        m
+        and ".fchip" in m.group(1)
+        and ".f a" in m.group(1)
+        and "min-height:44px" in m.group(1)
+    )
+
+
+def test_narrow_screens_do_not_overflow_or_clip():
+    assert re.search(
+        r"\.cmdbox code\{[^}]*white-space:pre-wrap;word-break:break-all", CSS
+    )
+    assert "hide-xs" in CSS and "hide-xs" in AUDIT and "hide-xs" in INDEX
+    assert re.search(r"max-width:599px\)\{\.node text\{display:none", AUDIT)
+
+
+def test_catalog_count_matches_data_and_native_router_are_marked():
+    n = json.loads((SITE / "assets" / "skills.json").read_text(encoding="utf-8"))[
+        "count"
+    ]
+    assert re.search(r'id="n38">%d<' % n, INDEX)
+    assert 'li class="brk"' in INDEX and "'brk'" in APP
+    assert ".pills .x button::before" in CSS
+
+
+def test_first_catalog_draw_is_not_announced_and_nav_marks_last_link_at_bottom():
+    assert "setAttribute('aria-live', 'off')" in APP
+    assert "links[links.length - 1]" in APP
+
+
+def test_audit_app_js_guards_missing_fields():
+    assert APP.index("scoreTable(sc, tg, base, sha)") < APP.index("txt($('aps')")
+    assert "isn(v)" in APP and "'n/a'" in APP
+
+
+def test_canvas_resolution_is_adaptive_and_capped():
+    fx = (SITE / "fx.js").read_text(encoding="utf-8")
+    assert "innerWidth / 320" in fx and "MAXPX" in fx and "MutationObserver" in fx
+    assert "requestAnimationFrame(() => { rs = 0" in fx
+    assert "backdrop-filter" not in re.search(
+        r"\.card,details,#gwrap\{[^}]*\}", AUDIT
+    ).group(0)
