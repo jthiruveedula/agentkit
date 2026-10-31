@@ -2,7 +2,7 @@
 name: ext-rea
 description: Route reverse-engineering of shipped artifacts (binaries, Electron/JS bundles, APKs, .NET, model files, crash reports, live sites) to the pinned REA MCP server. Use when a question depends on a build, package or runtime with no source available.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Read
 ---
 
 # External: REA (Reverse Engineer Anything)

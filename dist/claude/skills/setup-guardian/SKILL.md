@@ -1,7 +1,7 @@
 ---
 name: setup-guardian
 description: Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/doctor.py *), Bash(python3 scripts/doctor.py *), Bash(python3 skills/setup-guardian/scripts/doctor.py *), Bash(make build), Bash(make validate), Read
 version: 0.1.0
 ---
 

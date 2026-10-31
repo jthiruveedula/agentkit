@@ -2,7 +2,7 @@
 name: session-insights
 description: Prompt analytics and friction report over past Claude Code sessions (vague prompts, corrections, tool errors, cost per intent, repeated prompts) with ranked fixes, an HTML dashboard and drafted slash commands. Use when the user wants prompt analytics, a session retro, or to know what to automate.
 version: 0.2.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/insights.py *), Bash(python3 scripts/insights.py *), Bash(python3 ../memory-sync/scripts/rank_patterns.py *), Read
 ---
 
 # Session Insights

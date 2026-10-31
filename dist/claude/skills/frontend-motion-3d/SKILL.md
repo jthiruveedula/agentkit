@@ -1,7 +1,7 @@
 ---
 name: frontend-motion-3d
 description: Pick the lightest stack for UI animation and 3D (CSS/Motion, GSAP+ScrollTrigger, three.js/R3F, HyperFrames) within a perf and a11y budget. Use when asked for animations, scroll effects, 3D/WebGL, motion design, interactive heroes.
-allowed-tools: Read, Edit, Write, Grep, Bash
+allowed-tools: Read, Edit, Write, Grep
 version: 0.1.0
 ---
 

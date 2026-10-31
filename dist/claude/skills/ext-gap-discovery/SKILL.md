@@ -1,7 +1,7 @@
 ---
 name: ext-gap-discovery
 description: Search the pinned VoltAgent/awesome-agent-skills index for an existing skill. Use when the user wants a capability this repo lacks and asks what already exists before authoring a new skill.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

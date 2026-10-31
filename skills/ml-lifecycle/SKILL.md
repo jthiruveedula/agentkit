@@ -2,7 +2,7 @@
 name: ml-lifecycle
 description: Run an ML project from framing and leakage-safe splits through tracking, evaluation, registry, serving and drift monitoring. Use when training or evaluating a model, setting up MLflow/W&B, deploying a model, or when performance dropped.
 version: 0.1.0
-allowed-tools: Read, Edit, Write, Grep, Bash
+allowed-tools: Read, Edit, Write, Grep
 ---
 
 # ML Lifecycle

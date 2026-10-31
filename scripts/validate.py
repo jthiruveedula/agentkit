@@ -56,6 +56,11 @@ SCAN_SUFFIXES = (".md", ".py", ".sh", ".js", ".json", ".yml", ".yaml", ".toml")
 
 REQUIRED_KEYS = ("name", "description", "version")
 
+# Skills allowed a bare `Bash` in allowed-tools (it pre-approves every shell
+# command while the skill is active). Map skill name -> reason. Keep empty:
+# scope with Bash(<command> *) rules, or drop Bash and let the agent prompt.
+BARE_BASH_ALLOWLIST = {}
+
 # external/skills.lock.json validation -- mirrors
 # external/skills.lock.schema.json (stdlib only; kept in sync by hand).
 LOCK_FILE = REPO_ROOT / "external" / "skills.lock.json"
@@ -99,6 +104,14 @@ def check_disallowed_patterns(text, origin, errors):
                 "%s: disallowed pattern [%s] -- remove before committing"
                 % (origin, code)
             )
+
+
+def tool_rules(value):
+    """Split an allowed-tools value (comma/space separated string or list) into
+    rules, keeping parenthesised arguments such as `Bash(git log *)` whole."""
+    if isinstance(value, list):
+        value = " ".join(value)
+    return re.findall(r"[^\s,(]+(?:\([^)]*\))?", value or "")
 
 
 def check_skill_extra_files(skill_dir, errors):
@@ -309,6 +322,14 @@ def validate():
                 )
             else:
                 seen_names[name] = origin
+
+        if "Bash" in tool_rules(meta.get("allowed-tools")) and (
+            name not in BARE_BASH_ALLOWLIST
+        ):
+            errors.append(
+                "%s: bare 'Bash' in allowed-tools pre-approves every shell command;"
+                " use Bash(<command> *) rules or drop it" % origin
+            )
 
         desc = meta.get("description", "")
         if desc and not (40 <= len(desc) <= 500):

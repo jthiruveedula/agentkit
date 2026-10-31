@@ -1,7 +1,7 @@
 ---
 name: ext-gcp
 description: Route Google Cloud tasks to the pinned google/skills collection. Use when the user wants GCP-specific help (Vertex AI, BigQuery, Cloud Run, IAM) from vendor skills.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

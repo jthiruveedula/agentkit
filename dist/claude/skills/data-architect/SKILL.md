@@ -1,7 +1,7 @@
 ---
 name: data-architect
 description: Decide data platform trade-offs (storage, compute, orchestration, batch vs streaming) and record an ADR. Use when choosing a warehouse/orchestrator, streaming vs batch, dbt vs Spark, designing a pipeline architecture, or "should I use X or Y".
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/adr.py *), Bash(python3 scripts/adr.py *), Read, Write
 version: 0.1.0
 ---
 

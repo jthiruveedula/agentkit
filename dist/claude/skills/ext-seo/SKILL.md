@@ -1,7 +1,7 @@
 ---
 name: ext-seo
 description: Route SEO setup and audits to the pinned AgriciDaniel/claude-seo collection. Use when building or changing any website, landing page or frontend that serves public pages, or when asked for an SEO audit, schema markup, sitemap, Core Web Vitals or GEO/AI-search readiness.
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 version: 0.1.0
 ---
 

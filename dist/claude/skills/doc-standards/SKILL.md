@@ -1,7 +1,7 @@
 ---
 name: doc-standards
 description: Apply a consistent professional house style (palette, type, tables/charts, layout) to Word, Excel, PDF or PowerPoint files. Use when creating, formatting or polishing a docx/xlsx/pdf/pptx or when asked to "look professional".
-allowed-tools: Bash, Read
+allowed-tools: Read
 version: 0.1.0
 ---
 

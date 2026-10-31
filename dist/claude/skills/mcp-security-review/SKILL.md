@@ -1,7 +1,7 @@
 ---
 name: mcp-security-review
 description: Audit MCP server config for security risks: unpinned packages, secrets, broad filesystem access, unauthenticated remotes, shell wrappers. Use when adding an MCP server or reviewing .mcp.json or claude_desktop_config.json.
-allowed-tools: Read, Bash, Grep, Glob
+allowed-tools: Read, Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/mcp_scan.py *), Bash(python3 scripts/mcp_scan.py *), Bash(python3 skills/mcp-security-review/scripts/mcp_scan.py *), Grep, Glob
 version: 0.1.0
 ---
 

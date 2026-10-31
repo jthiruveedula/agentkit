@@ -1,7 +1,7 @@
 ---
 name: ext-cli-ops
 description: Wire jfrog/boost shell-output compression into the running coding agent. Use when the user wants to save tokens on CLI/shell output, names jfrog Boost, or verbose commands are flooding context.
-allowed-tools: Bash, Read
+allowed-tools: Bash(command -v boost), Bash(boost version), Bash(boost report *), Bash(boost init --claude --dry-run), Read
 version: 0.1.0
 ---
 

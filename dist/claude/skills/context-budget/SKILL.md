@@ -1,7 +1,7 @@
 ---
 name: context-budget
 description: Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs.
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/budget_hook.py *), Bash(python3 scripts/budget_hook.py *), Bash(python3 ../context-compressor/scripts/checkpoint.py lint *), Read, Write
 version: 0.1.0
 ---
 

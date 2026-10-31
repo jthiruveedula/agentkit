@@ -2,7 +2,7 @@
 name: ext-azure
 description: Route Azure tasks to pinned microsoft/azure-skills and MicrosoftDocs/Agent-Skills. Use when the user wants Azure-specific help (App Service, Functions, AKS, Entra ID) from Microsoft-authored skills.
 version: 0.1.0
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 ---
 
 # External: azure
