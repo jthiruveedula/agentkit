@@ -98,3 +98,36 @@ def test_pulse_is_pausable_and_reduced_motion_stops_it():
 def test_hidden_score_tables_exist():
     assert 'id="scoretbl" class="vh"' in AUDIT and "function scoreTable" in AUDIT_JS
     assert "function scoreTable" in APP and 'id="rows" aria-hidden="true"' in INDEX
+
+
+def _fxa(text, selector):
+    block = re.search(re.escape(selector) + r"\{([^}]*)\}", text).group(1)
+    return float(re.search(r"--fxa:(\.?\d*\.?\d+)", block).group(1))
+
+
+def test_text_contrast_over_caustic_canvas_worst_case():
+    # the canvas is the page background: worst case is full-alpha caustic over paper
+    for theme, sel in (("light", ":root"), ("dark", ":root[data-theme=dark]")):
+        t = _themes(CSS)[theme]
+        bg = _mix(t["fx"], t["paper"], _fxa(CSS, sel))
+        for key in ("ink", "ink2", "reg", "muted"):
+            assert ratio(t[key], bg) >= 4.5, (theme, key, bg)
+        assert ratio(t["paper"], t["reg"]) >= 4.5  # primary pill text
+        assert ratio(t["ui"], bg) >= 3.0  # outlined pill border
+
+
+def test_canvas_background_is_decorative_pausable_and_reduced_motion_safe():
+    fx = (SITE / "fx.js").read_text(encoding="utf-8")
+    assert "prefers-reduced-motion: reduce" in fx
+    assert "fxpause" in fx and "aria-pressed" in fx
+    assert "document.hidden" in fx
+    for html in (INDEX, AUDIT):
+        assert re.search(r'<canvas id="fx" aria-hidden="true"', html)
+        assert 'id="fxpause"' in html and "fx.js" in html
+    assert "pointer-events:none" in CSS
+
+
+def test_nav_is_floating_pill_with_visible_focus_and_skip_link():
+    assert 'class="skip" href="#main"' in INDEX and 'id="main"' in INDEX
+    assert re.search(r"\.nav\{[^}]*border-radius:999px", CSS)
+    assert ":focus-visible{outline:2px solid" in CSS
