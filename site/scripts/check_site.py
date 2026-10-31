@@ -3,6 +3,7 @@
 
 import base64
 import hashlib
+import json
 import re
 import sys
 from html.parser import HTMLParser
@@ -23,6 +24,8 @@ class P(HTMLParser):
         self.inline = []
         self.errs = []
         self._in = False
+        self._ld = False
+        self.ld = []
         self._buf = ""
 
     def handle_starttag(self, tag, attrs):
@@ -33,6 +36,8 @@ class P(HTMLParser):
         ):
             self.csp = a.get("content", "")
         if tag == "script":
+            if a.get("type") == "application/ld+json":
+                self._ld = True  # data block: never executed, so outside script-src
             if "src" not in a:
                 self._in = True
                 self._buf = ""
@@ -52,7 +57,8 @@ class P(HTMLParser):
     def handle_endtag(self, tag):
         if tag == "script" and self._in:
             self._in = False
-            self.inline.append(self._buf)
+            (self.ld if self._ld else self.inline).append(self._buf)
+            self._ld = False
 
 
 def check_fonts(page, src):
@@ -120,6 +126,11 @@ def check():
             errs.append(f"{rel}: CSP has unsafe-eval")
         m = re.search(r"script-src([^;]*)", p.csp)
         ss = m.group(1) if m else ""
+        for body in p.ld:
+            try:
+                json.loads(body)
+            except ValueError:
+                errs.append(f"{rel}: JSON-LD is not valid JSON")
         for body in p.inline:
             h = (
                 "'sha256-"
