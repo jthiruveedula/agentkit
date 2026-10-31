@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tarfile
 from pathlib import Path
 
@@ -35,6 +36,10 @@ def test_bad_lock_entry_skipped(tmp_path, name, repo, sha):
 
 
 @pytest.mark.skipif(shutil.which("jq") is None, reason="jq required")
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="fake curl is a POSIX sh script on a ':'-joined PATH",
+)
 def test_sync_forces_https_and_swaps_checkout(tmp_path):
     (tmp_path / "scripts").mkdir()
     (tmp_path / "external" / "demo").mkdir(parents=True)

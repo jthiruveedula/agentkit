@@ -198,7 +198,11 @@ def test_nudge_install_one_backup_atomic_and_quoted(tmp_path):
     ]
     nh.HERE = "/tmp/my dir"
     cmd = nh.apply({})["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
-    assert shlex.split(cmd) == ["python3", "/tmp/my dir/nudge_hook.py", "check"]
+    assert shlex.split(cmd) == [
+        "python3",
+        os.path.join("/tmp/my dir", "nudge_hook.py"),
+        "check",
+    ]
     assert json.loads(settings.read_text())["model"] == "opus"
 
 
