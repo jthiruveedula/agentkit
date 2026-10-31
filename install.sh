@@ -22,7 +22,8 @@
 # token savings -- never raw output or file contents). Pass it only once you
 # already agree to those terms; it is never on by default.
 #
-# Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir),
+# Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir; the hooks'
+# data dir is AGENTKIT_DATA_DIR, a different thing),
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
 set -eu
 
