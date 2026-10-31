@@ -10,6 +10,8 @@ Next action) to be present and non-empty, and the whole file to be
 <= 60 lines. Exit 0 on pass; non-zero with specific complaints on fail.
 """
 
+from __future__ import annotations
+
 import json
 import re
 import sys

@@ -1,4 +1,5 @@
 """Unit tests for scripts/validate.py -- run: python3 -m pytest tests/ -q"""
+
 import json
 import subprocess
 import sys
@@ -9,7 +10,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "lib"))
 
 import validate  # noqa: E402
-from frontmatter import FrontmatterError, dump, load, parse  # noqa: E402
+from frontmatter import FrontmatterError, dump, parse  # noqa: E402
 
 
 def test_real_skills_validate_clean():
@@ -17,8 +18,14 @@ def test_real_skills_validate_clean():
 
 
 def test_frontmatter_roundtrip():
-    meta, body = parse("---\nname: x\ndescription: 'a, b'\nallowed-tools: [Read, Bash]\n---\n\nhello\n")
-    assert meta == {"name": "x", "description": "a, b", "allowed-tools": ["Read", "Bash"]}
+    meta, body = parse(
+        "---\nname: x\ndescription: 'a, b'\nallowed-tools: [Read, Bash]\n---\n\nhello\n"
+    )
+    assert meta == {
+        "name": "x",
+        "description": "a, b",
+        "allowed-tools": ["Read", "Bash"],
+    }
     assert body == "hello\n"
     rendered = dump(meta)
     reparsed, _ = parse(rendered + "\nbody\n")
@@ -47,7 +54,9 @@ def test_kebab_case_name_required(tmp_path):
     skill_dir = tmp_path / "skills" / "Bad_Name"
     skill_dir.mkdir(parents=True)
     (skill_dir / "SKILL.md").write_text(
-        "---\nname: Bad_Name\ndescription: " + "x" * 45 + " use when testing.\nversion: 0.1.0\n---\n\nbody\n"
+        "---\nname: Bad_Name\ndescription: "
+        + "x" * 45
+        + " use when testing.\nversion: 0.1.0\n---\n\nbody\n"
     )
     validate.SKILLS_DIR = tmp_path / "skills"
     try:
@@ -82,9 +91,9 @@ def test_secret_pattern_detected(tmp_path):
     validate.SKILLS_DIR = tmp_path / "skills"
     try:
         errors = validate.validate()
-        assert any(
-            "disallowed pattern" in e and "[github]" in e for e in errors
-        ), errors
+        assert any("disallowed pattern" in e and "[github]" in e for e in errors), (
+            errors
+        )
         assert not any("ghp_" + "a" * 36 in e for e in errors), errors
     finally:
         validate.SKILLS_DIR = REPO_ROOT / "skills"
@@ -93,7 +102,8 @@ def test_secret_pattern_detected(tmp_path):
 def test_cli_exit_code_clean_repo():
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "validate.py")],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, result.stderr
 
@@ -103,7 +113,8 @@ def test_secret_in_skill_scripts_dir_is_caught(tmp_path):
     (skill_dir / "scripts").mkdir(parents=True)
     desc = "x" * 45 + " use when testing."
     (skill_dir / "SKILL.md").write_text(
-        "---\nname: leaky-scripts\ndescription: %s\nversion: 0.1.0\n---\n\nbody\n" % desc
+        "---\nname: leaky-scripts\ndescription: %s\nversion: 0.1.0\n---\n\nbody\n"
+        % desc
     )
     (skill_dir / "scripts" / "helper.sh").write_text(
         "#!/bin/sh\nTOKEN=ghp_%s\n" % ("b" * 36)
@@ -171,17 +182,22 @@ def test_secret_value_never_echoed_in_cli_output(tmp_path):
         "import validate\n"
         "validate.SKILLS_DIR = Path(%r)\n"
         "sys.exit(validate.main())\n"
-        % (str(REPO_ROOT / "scripts"), str(REPO_ROOT / "scripts" / "lib"),
-           str(tmp_path / "skills"))
+        % (
+            str(REPO_ROOT / "scripts"),
+            str(REPO_ROOT / "scripts" / "lib"),
+            str(tmp_path / "skills"),
+        )
     )
     result = subprocess.run(
-        [sys.executable, str(driver)], capture_output=True, text=True,
+        [sys.executable, str(driver)],
+        capture_output=True,
+        text=True,
     )
     combined = result.stdout + result.stderr
     assert result.returncode != 0, combined
-    assert "leaky-cli" in combined, combined          # file is named
-    assert "[github]" in combined, combined           # finding code reported
-    assert fake_token not in combined, combined       # value never echoed
+    assert "leaky-cli" in combined, combined  # file is named
+    assert "[github]" in combined, combined  # finding code reported
+    assert fake_token not in combined, combined  # value never echoed
 
 
 def _write_lock(tmp_path, data):
@@ -193,10 +209,20 @@ def _write_lock(tmp_path, data):
 def _good_lock():
     return {
         "sources": [
-            {"name": "x", "repo": "o/r", "sha": "a" * 40,
-             "license": "MIT", "for": "testing"},
-            {"name": "y", "repo": "o/r2", "sha": "b" * 40,
-             "license": "Apache-2.0", "sha256": "c" * 64},
+            {
+                "name": "x",
+                "repo": "o/r",
+                "sha": "a" * 40,
+                "license": "MIT",
+                "for": "testing",
+            },
+            {
+                "name": "y",
+                "repo": "o/r2",
+                "sha": "b" * 40,
+                "license": "Apache-2.0",
+                "sha256": "c" * 64,
+            },
         ]
     }
 
@@ -244,5 +270,8 @@ def test_lock_schema_is_valid_json():
     assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
     assert "sources" in schema["properties"]
     assert set(schema["properties"]["sources"]["items"]["required"]) == {
-        "name", "repo", "sha", "license",
+        "name",
+        "repo",
+        "sha",
+        "license",
     }

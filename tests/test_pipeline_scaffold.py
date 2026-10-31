@@ -1,4 +1,5 @@
 """Exercises pipeline-scaffold's generator for all 4 kinds in a temp dir."""
+
 import subprocess
 import sys
 from pathlib import Path
@@ -10,7 +11,8 @@ SCRIPT = REPO_ROOT / "skills" / "pipeline-scaffold" / "scripts" / "scaffold_pipe
 def run(tmp_path, *args):
     return subprocess.run(
         [sys.executable, str(SCRIPT), "--out", str(tmp_path), *args],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
 
 
@@ -30,7 +32,9 @@ def test_airflow_scaffold(tmp_path):
 
 
 def test_dagster_scaffold(tmp_path):
-    result = run(tmp_path, "--kind", "dagster", "--layer", "gold", "--name", "revenue_mart")
+    result = run(
+        tmp_path, "--kind", "dagster", "--layer", "gold", "--name", "revenue_mart"
+    )
     assert result.returncode == 0, result.stderr
     content = (tmp_path / "assets" / "revenue_mart_asset.py").read_text()
     assert "@asset" in content and "revenue_mart" in content

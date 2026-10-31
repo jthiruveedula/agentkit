@@ -15,6 +15,7 @@ without this script.
     python3 adr.py list                 # all ADRs, newest first
     python3 adr.py search "warehouse"   # grep titles + context
 """
+
 import argparse
 import datetime
 import re
@@ -113,7 +114,9 @@ def main(argv=None):
     p_new.add_argument("--context", default="")
     p_new.add_argument("--decision", default="")
     p_new.add_argument("--consequences", default="")
-    p_new.add_argument("--status", default="accepted", choices=["proposed", "accepted", "superseded"])
+    p_new.add_argument(
+        "--status", default="accepted", choices=["proposed", "accepted", "superseded"]
+    )
     p_new.set_defaults(func=cmd_new)
 
     p_list = sub.add_parser("list", help="list all ADRs, newest first")

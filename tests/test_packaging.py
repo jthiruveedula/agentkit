@@ -6,6 +6,7 @@ be missing something the install paths need:
 - package.json must ship install.ps1, scripts/, external/skills.lock.json
   and publish to the GitHub Packages registry under the scoped name
 """
+
 import json
 from pathlib import Path
 

@@ -75,11 +75,15 @@ def main() -> int:
         "skills": skills,
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    OUT.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
 
     native = sum(1 for s in skills if s["kind"] == "native")
     router = len(skills) - native
-    print(f"build-catalog: wrote {OUT.relative_to(REPO)} ({len(skills)} skills: {native} native, {router} router)")
+    print(
+        f"build-catalog: wrote {OUT.relative_to(REPO)} ({len(skills)} skills: {native} native, {router} router)"
+    )
     return 0
 
 

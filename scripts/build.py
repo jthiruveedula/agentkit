@@ -7,8 +7,7 @@ Deterministic: same inputs always produce byte-identical output, so
     python3 scripts/build.py            # write dist/
     python3 scripts/build.py --check    # fail (exit 1) if dist/ would change
 """
-import filecmp
-import shutil
+
 import sys
 from pathlib import Path
 
@@ -40,12 +39,21 @@ def read_agents():
 # ---- per-tool emitters -----------------------------------------------------
 # Each returns {relative_path: bytes} to write under dist/<tool>/.
 
+
 def emit_claude(skills, agents):
     out = {}
     for s in skills:
         meta, dirp = s["meta"], s["dir"]
-        fm = {k: meta[k] for k in ("name", "description", "allowed-tools", "model", "version") if k in meta}
-        out["skills/%s/SKILL.md" % meta["name"]] = _render(fm, s["body"], order=("name", "description", "allowed-tools", "model", "version"))
+        fm = {
+            k: meta[k]
+            for k in ("name", "description", "allowed-tools", "model", "version")
+            if k in meta
+        }
+        out["skills/%s/SKILL.md" % meta["name"]] = _render(
+            fm,
+            s["body"],
+            order=("name", "description", "allowed-tools", "model", "version"),
+        )
         _copy_assets_into(dirp, out, "skills/%s" % meta["name"])
     for a in agents:
         out["agents/%s.md" % a["meta"]["name"]] = _render(a["meta"], a["body"])
@@ -59,7 +67,9 @@ def emit_copilot(skills, agents):
         fm = {"description": meta["description"], "applyTo": "**"}
         assets = _copy_assets_into(s["dir"], out, "instructions/_%s" % meta["name"])
         body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
-        out["instructions/%s.instructions.md" % meta["name"]] = _render(fm, body, order=("description", "applyTo"))
+        out["instructions/%s.instructions.md" % meta["name"]] = _render(
+            fm, body, order=("description", "applyTo")
+        )
     return out
 
 
@@ -70,7 +80,9 @@ def emit_cursor(skills, agents):
         fm = {"description": meta["description"], "alwaysApply": False}
         assets = _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
         body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
-        out["rules/%s.mdc" % meta["name"]] = _render(fm, body, order=("description", "alwaysApply"))
+        out["rules/%s.mdc" % meta["name"]] = _render(
+            fm, body, order=("description", "alwaysApply")
+        )
     return out
 
 
@@ -81,7 +93,9 @@ def emit_antigravity(skills, agents):
         fm = {"description": meta["description"], "trigger": "model_decision"}
         assets = _copy_assets_into(s["dir"], out, "rules/_%s" % meta["name"])
         body = _rewrite_asset_refs(s["body"], assets, "_%s" % meta["name"])
-        out["rules/%s.md" % meta["name"]] = _render(fm, body, order=("description", "trigger"))
+        out["rules/%s.md" % meta["name"]] = _render(
+            fm, body, order=("description", "trigger")
+        )
     for a in agents:
         out["workflows/%s.md" % a["meta"]["name"]] = _render(a["meta"], a["body"])
     return out
@@ -106,7 +120,11 @@ def _copy_assets_into(src_dir, out, prefix):
             # They are local residue -- e.g. __pycache__ created when pytest
             # imports a skill script mid-run -- and their presence poisons
             # the --check drift gate depending on what ran before the build.
-            if "__pycache__" in f.parts or f.suffix in (".pyc", ".pyo") or f.name.startswith("."):
+            if (
+                "__pycache__" in f.parts
+                or f.suffix in (".pyc", ".pyo")
+                or f.name.startswith(".")
+            ):
                 continue
             rel = f.relative_to(src_dir).as_posix()
             out["%s/%s" % (prefix, rel)] = f.read_bytes()
@@ -130,6 +148,7 @@ def _rewrite_asset_refs(body, assets, assets_dir):
 
 def _render(meta, body, order=None):
     from frontmatter import dump
+
     text = dump(meta, order=order) + "\n" + body
     return text.encode("utf-8")
 
@@ -160,7 +179,9 @@ def render_agents_md(skills, agents):
     ]
     for s in skills:
         m = s["meta"]
-        lines.append("| `%s` | %s | %s |" % (m["name"], m.get("version", "-"), m["description"]))
+        lines.append(
+            "| `%s` | %s | %s |" % (m["name"], m.get("version", "-"), m["description"])
+        )
     lines += ["", "## Subagents", "", "| Agent | Charter |", "|---|---|"]
     for a in agents:
         m = a["meta"]
@@ -192,7 +213,11 @@ def build():
 def write_tree(tree, check=False):
     changed = []
     for rel, content in tree.items():
-        dest = (DIST / rel).resolve() if not rel.startswith("../") else (REPO_ROOT / rel[3:]).resolve()
+        dest = (
+            (DIST / rel).resolve()
+            if not rel.startswith("../")
+            else (REPO_ROOT / rel[3:]).resolve()
+        )
         if check:
             if not dest.exists() or dest.read_bytes() != content:
                 changed.append(str(dest.relative_to(REPO_ROOT)))
@@ -221,7 +246,10 @@ def main(argv=None):
     changed = write_tree(tree, check=check)
     if check:
         if changed:
-            print("dist/ is stale (%d file(s) differ from source):" % len(changed), file=sys.stderr)
+            print(
+                "dist/ is stale (%d file(s) differ from source):" % len(changed),
+                file=sys.stderr,
+            )
             for c in changed:
                 print("  " + c, file=sys.stderr)
             print("run: python3 scripts/build.py", file=sys.stderr)

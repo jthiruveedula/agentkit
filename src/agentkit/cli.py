@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """uvx/pip entry point. Delegates straight to install.sh -- see its
 docstring for the actual install logic and flags."""
+
 import subprocess
 import sys
 from pathlib import Path
@@ -35,7 +36,10 @@ def _find_install_sh():
 def main():
     script = _find_install_sh()
     if not Path(script).exists():
-        print("error: install.sh not found -- run this from a full agentkit clone", file=sys.stderr)
+        print(
+            "error: install.sh not found -- run this from a full agentkit clone",
+            file=sys.stderr,
+        )
         return 1
     return subprocess.call(["sh", script] + sys.argv[1:])
 

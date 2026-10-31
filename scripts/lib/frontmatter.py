@@ -5,6 +5,7 @@ nothing but a stock interpreter. Supported subset is all the skill schema
 needs -- `key: scalar` and `key: [a, b]`, no nesting, no anchors, no
 multi-line scalars.
 """
+
 import re
 from pathlib import Path
 
@@ -32,7 +33,9 @@ def parse(text, origin="<string>"):
     """Return (meta: dict, body: str). Raises FrontmatterError if malformed."""
     lines = text.splitlines()
     if not lines or lines[0].strip() != DELIM:
-        raise FrontmatterError("%s: missing opening '---' frontmatter delimiter" % origin)
+        raise FrontmatterError(
+            "%s: missing opening '---' frontmatter delimiter" % origin
+        )
     try:
         end = next(i for i in range(1, len(lines)) if lines[i].strip() == DELIM)
     except StopIteration:
@@ -44,12 +47,14 @@ def parse(text, origin="<string>"):
             continue
         m = _KV.match(line)
         if not m:
-            raise FrontmatterError("%s:%d: not a 'key: value' pair: %r" % (origin, n, line))
+            raise FrontmatterError(
+                "%s:%d: not a 'key: value' pair: %r" % (origin, n, line)
+            )
         key, val = m.group(1), _scalar(m.group(2))
         if key in meta:
             raise FrontmatterError("%s:%d: duplicate key %r" % (origin, n, key))
         meta[key] = val
-    body = "\n".join(lines[end + 1:]).lstrip("\n")
+    body = "\n".join(lines[end + 1 :]).lstrip("\n")
     return meta, (body.rstrip("\n") + "\n") if body.strip() else ""
 
 
@@ -60,7 +65,9 @@ def load(path):
 
 def dump(meta, order=None):
     """Render a frontmatter block (including delimiters, trailing newline)."""
-    keys = [k for k in (order or []) if k in meta] + [k for k in meta if k not in (order or [])]
+    keys = [k for k in (order or []) if k in meta] + [
+        k for k in meta if k not in (order or [])
+    ]
     out = [DELIM]
     for k in keys:
         v = meta[k]
@@ -79,8 +86,14 @@ def dump(meta, order=None):
 
 
 def demo():
-    meta, body = parse("---\nname: x\ndescription: 'a, b'\nallowed-tools: [Read, Bash]\n---\n\nhello\n")
-    assert meta == {"name": "x", "description": "a, b", "allowed-tools": ["Read", "Bash"]}, meta
+    meta, body = parse(
+        "---\nname: x\ndescription: 'a, b'\nallowed-tools: [Read, Bash]\n---\n\nhello\n"
+    )
+    assert meta == {
+        "name": "x",
+        "description": "a, b",
+        "allowed-tools": ["Read", "Bash"],
+    }, meta
     assert body == "hello\n", repr(body)
     assert "allowed-tools: [Read, Bash]" in dump(meta)
     for bad in ("no frontmatter", "---\nname: x\n", "---\nnot a pair\n---\n"):

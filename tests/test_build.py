@@ -1,5 +1,6 @@
 """Unit tests for scripts/build.py -- determinism, --check drift gate, and
 per-tool asset path rewriting."""
+
 import posixpath
 import subprocess
 import sys
@@ -47,7 +48,8 @@ def test_build_ignores_pycache_residue():
 def test_check_passes_on_committed_dist():
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "build.py"), "--check"],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     assert result.returncode == 0, result.stderr + result.stdout
 
@@ -108,7 +110,11 @@ def test_asset_references_resolve_in_every_tool():
 
             rewritten_refs = []
             for asset in assets:
-                rewritten = asset if prefix_tmpl is None else "%s/%s" % (prefix_tmpl % skill, asset)
+                rewritten = (
+                    asset
+                    if prefix_tmpl is None
+                    else "%s/%s" % (prefix_tmpl % skill, asset)
+                )
                 rewritten_refs.append(rewritten)
                 # Every body mention of the asset must survive as the
                 # tool-correct path ...

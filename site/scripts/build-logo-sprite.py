@@ -5,6 +5,7 @@ updating/adding a raw logo -- e.g. when a tool ships a new mark.
 
     python3 site/scripts/build-logo-sprite.py
 """
+
 import re
 import sys
 from pathlib import Path
@@ -30,7 +31,9 @@ def build():
         viewbox = re.search(r'viewBox="([^"]+)"', text).group(1)
         paths = re.findall(r'<path[^>]*\bd="([^"]+)"[^>]*/?>', text)
         path_tags = "".join(f'<path d="{d}" fill="currentColor"/>' for d in paths)
-        symbols.append(f'<symbol id="logo-{name}" viewBox="{viewbox}"><title>{title}</title>{path_tags}</symbol>')
+        symbols.append(
+            f'<symbol id="logo-{name}" viewBox="{viewbox}"><title>{title}</title>{path_tags}</symbol>'
+        )
 
     svg = (
         '<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">\n  '

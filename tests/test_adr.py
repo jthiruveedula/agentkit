@@ -1,5 +1,6 @@
 """Exercises data-architect's ADR log script end to end in a throwaway
 git repo, so `pytest` catches a regression in new/list/search."""
+
 import subprocess
 import sys
 from pathlib import Path
@@ -11,18 +12,27 @@ ADR_SCRIPT = REPO_ROOT / "skills" / "data-architect" / "scripts" / "adr.py"
 def run(cwd, *args):
     return subprocess.run(
         [sys.executable, str(ADR_SCRIPT), *args],
-        cwd=cwd, capture_output=True, text=True,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
     )
 
 
 def test_adr_new_list_search_roundtrip(tmp_path):
-    (tmp_path / ".git").mkdir()  # marks tmp_path as the repo root the script walks up to
+    (
+        tmp_path / ".git"
+    ).mkdir()  # marks tmp_path as the repo root the script walks up to
 
     result = run(
-        tmp_path, "new", "Use BigQuery for the analytics warehouse",
-        "--context", "team already on GCP",
-        "--decision", "BigQuery, partitioned by event_date",
-        "--consequences", "GCP lock-in",
+        tmp_path,
+        "new",
+        "Use BigQuery for the analytics warehouse",
+        "--context",
+        "team already on GCP",
+        "--decision",
+        "BigQuery, partitioned by event_date",
+        "--consequences",
+        "GCP lock-in",
     )
     assert result.returncode == 0, result.stderr
     adr_dir = tmp_path / "docs" / "adr"

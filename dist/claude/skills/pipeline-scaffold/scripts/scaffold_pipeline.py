@@ -9,6 +9,7 @@ agent (or you) fills in the actual transform logic, not the ceremony.
     python3 scaffold_pipeline.py --kind dagster --layer gold --name revenue_mart
     python3 scaffold_pipeline.py --kind spark --name event_dedup
 """
+
 import argparse
 import re
 import sys
@@ -47,10 +48,10 @@ def scaffold_dbt(name, layer, out, force):
         "version: 2\n\n"
         "models:\n"
         "  - name: %s\n"
-        "    description: \"TODO: one-line description\"\n"
+        '    description: "TODO: one-line description"\n'
         "    columns:\n"
         "      - name: CHANGE_ME_primary_key\n"
-        "        description: \"TODO\"\n"
+        '        description: "TODO"\n'
         "        tests:\n"
         "          - unique\n"
         "          - not_null\n" % name
@@ -81,7 +82,8 @@ def scaffold_airflow(name, out, force):
         "    def run():\n"
         "        # TODO: implement\n"
         "        raise NotImplementedError\n\n"
-        "    task = PythonOperator(task_id=\"%s\", python_callable=run)\n" % (name, name, name)
+        '    task = PythonOperator(task_id="%s", python_callable=run)\n'
+        % (name, name, name)
     )
     write(out / "dags" / f"{name}_dag.py", py, force)
 
@@ -108,9 +110,9 @@ def scaffold_spark(name, out, force):
         "from pyspark.sql import SparkSession\n\n\n"
         "def main(input_path: str, output_path: str) -> None:\n"
         '    spark = SparkSession.builder.appName("%s").getOrCreate()\n'
-        "    df = spark.read.format(\"parquet\").load(input_path)\n"
+        '    df = spark.read.format("parquet").load(input_path)\n'
         "    # TODO: transform\n"
-        "    df.write.mode(\"overwrite\").format(\"parquet\").save(output_path)\n"
+        '    df.write.mode("overwrite").format("parquet").save(output_path)\n'
         "    spark.stop()\n\n\n"
         'if __name__ == "__main__":\n'
         "    parser = argparse.ArgumentParser()\n"
@@ -120,7 +122,7 @@ def scaffold_spark(name, out, force):
         "    main(args.input, args.output)\n" % (name, name, name)
     )
     test_py = (
-        "\"\"\"TODO: replace with a real transform test once %s_job.py is implemented.\"\"\"\n\n\n"
+        '"""TODO: replace with a real transform test once %s_job.py is implemented."""\n\n\n'
         "def test_placeholder():\n"
         "    assert True  # TODO: assert on the actual transform output\n" % name
     )
@@ -130,10 +132,16 @@ def scaffold_spark(name, out, force):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--kind", required=True, choices=["dbt", "airflow", "dagster", "spark"])
-    ap.add_argument("--name", required=True, help="snake_case name for the model/DAG/asset/job")
+    ap.add_argument(
+        "--kind", required=True, choices=["dbt", "airflow", "dagster", "spark"]
+    )
+    ap.add_argument(
+        "--name", required=True, help="snake_case name for the model/DAG/asset/job"
+    )
     ap.add_argument("--layer", choices=LAYERS, help="medallion layer (dbt, dagster)")
-    ap.add_argument("--out", default=".", help="project root to scaffold into (default: cwd)")
+    ap.add_argument(
+        "--out", default=".", help="project root to scaffold into (default: cwd)"
+    )
     ap.add_argument("--force", action="store_true", help="overwrite existing files")
     args = ap.parse_args(argv)
     if not re.fullmatch(r"[a-z][a-z0-9_]*", args.name):
