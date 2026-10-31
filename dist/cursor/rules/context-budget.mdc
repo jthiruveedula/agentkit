@@ -9,15 +9,18 @@ Every turn re-reads the whole context, so cost grows with session length. This s
 
 ## Procedure
 
-1. **Install the hooks once** (idempotent, backs up settings first):
+1. **Install the hooks once** (idempotent; keeps one `.bak` of settings and replaces the file atomically):
    `python3 _context-budget/scripts/install_hooks.py` — adds `budget_hook.py check` on
    UserPromptSubmit and PostToolUse, and `budget_hook.py resume` on
    SessionStart for `compact|clear|resume`. `--uninstall` removes them.
 
 2. **Set the budget** (optional): `AGENTKIT_BUDGET_TOKENS` (default
    200000) and `AGENTKIT_BUDGET_STEP` (default 50000, re-warn interval) in
-   the `env` block of settings. Pick a budget below `autoCompactWindow` so
-   your checkpoint beats the generic auto-compaction summary.
+   the `env` block of settings (an invalid value warns on stderr and uses
+   the default). Pick a budget below `autoCompactWindow` so your checkpoint
+   beats the generic auto-compaction summary. State and checkpoints live in
+   `AGENTKIT_DATA_DIR` (default `~/.agentkit`; `AGENTKIT_HOME` is still read
+   as a fallback, but `install.sh` uses that name for the repo clone).
 
 3. **When the pause notice arrives**, finish the current step — don't
    abandon a half-applied edit — then write the checkpoint to the path the

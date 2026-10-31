@@ -44,7 +44,9 @@ by hand. Deterministic script first, model judgment second.
    (missing deps, CLI, env var) goes into a SessionStart hook.
 
 5. **Track the trend.** `--save` stores a dated snapshot in
-   `~/.agentkit/insights/` (keeps 12) and prints what moved since the
+   `~/.agentkit/insights/` (keeps 12; base dir is `AGENTKIT_DATA_DIR`, with
+   `AGENTKIT_HOME` as a fallback; files are 0600, dirs 0700, and prompt text
+   is secret-redacted before it is stored) and prints what moved since the
    last one; `--html` writes a static dashboard. Schedule it weekly:
    ```
    # crontab -e

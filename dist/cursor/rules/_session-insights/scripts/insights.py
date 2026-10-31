@@ -17,7 +17,9 @@ errors to setup fixes. Ends with ranked, evidence-backed suggestions.
     python3 insights.py --draft-commands .claude/commands
     python3 insights.py --selftest
 
-Snapshots live in $AGENTKIT_HOME/insights/ (default ~/.agentkit/insights).
+Snapshots live in $AGENTKIT_DATA_DIR/insights/ (default ~/.agentkit/insights;
+$AGENTKIT_HOME is still read as a fallback). Prompt text is secret-redacted before it
+is stored, and snapshot/draft/HTML output is written 0600 in 0700 dirs.
 
 Local only: reads transcripts, prints a report, sends nothing anywhere.
 Prompt text is truncated in output. Exit 0 always (it's a report). Stdlib only.
@@ -25,7 +27,6 @@ Prompt text is truncated in output. Exit 0 always (it's a report). Stdlib only.
 
 import argparse
 import glob
-import importlib.util
 import json
 import os
 import html
@@ -36,26 +37,18 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CLASSIFY = HERE.parents[1] / "prompt-enhancer" / "scripts" / "classify.py"
-
-CORRECTION_RE = re.compile(
-    r"^\s*(no\b|nope\b|wrong\b|that'?s (not|wrong)|not what i|actually\b|instead\b|"
-    r"undo\b|revert\b|roll ?back\b|stop\b|don'?t\b|you (forgot|missed|broke)|"
-    r"still (not|broken|fail|wrong|doesn'?t)|again\b|i said\b|why did you\b)",
-    re.IGNORECASE,
+sys.path.insert(0, str(HERE))  # prompt_signals sits beside this script
+from prompt_signals import (  # noqa: E402
+    ACCEPTANCE_RE,
+    ANCHOR_RE,
+    CORRECTION_RE,
+    load_classifier as _load_classifier,
+    redact,
 )
+
 INTERRUPT = "[Request interrupted by user"
 DENIAL_RE = re.compile(
     r"doesn'?t want to proceed|user (rejected|denied)|permission denied by user",
-    re.IGNORECASE,
-)
-# A prompt with any of these anchors names something concrete.
-ANCHOR_RE = re.compile(
-    r"[\w./-]+\.\w{1,5}\b|`[^`]+`|#\d+|\b[a-z_]+\(|https?://|\b(line|test|error)\b",
-    re.IGNORECASE,
-)
-ACCEPTANCE_RE = re.compile(
-    r"\b(should|must|expect(ed)?|done when|so that|acceptance|pass(es)?|until)\b",
     re.IGNORECASE,
 )
 COMMIT_RE = re.compile(r"\bgit (commit|push)\b|\bgh pr (create|merge)\b")
@@ -122,15 +115,6 @@ NOISE_PREFIXES = (
     "<system-reminder",
     "<bash-",
 )
-
-
-def _load_classifier():
-    if not CLASSIFY.exists():
-        return lambda text: "unclassified"
-    spec = importlib.util.spec_from_file_location("ak_classify", CLASSIFY)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return lambda text: mod.classify(text)["intent"]
 
 
 def _text_of(content):
@@ -265,7 +249,7 @@ def parse_session(path, classify):
                 words = len(text.split())
                 s["prompts"].append(
                     {
-                        "text": text,
+                        "text": redact(text),  # stored text never carries secrets
                         "words": words,
                         "intent": classify(text),
                         "correction": bool(CORRECTION_RE.search(text))
@@ -637,9 +621,21 @@ TREND_KEYS = (
 
 
 def _insights_home():
-    return os.path.join(
-        os.environ.get("AGENTKIT_HOME") or os.path.expanduser("~/.agentkit"), "insights"
+    # AGENTKIT_HOME is the pre-AGENTKIT_DATA_DIR name; install.sh uses it for the repo clone.
+    base = (
+        os.environ.get("AGENTKIT_DATA_DIR")
+        or os.environ.get("AGENTKIT_HOME")
+        or os.path.expanduser("~/.agentkit")
     )
+    return os.path.join(base, "insights")
+
+
+def _write_private(path, text):
+    """Write text to path as 0600 (the dir is made 0700 by the caller)."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    os.chmod(path, 0o600)  # O_CREAT keeps the mode of a file that already existed
 
 
 def history(home=None):
@@ -657,11 +653,10 @@ def history(home=None):
 def save(m, home=None, keep=12):
     """Write today's snapshot (one per UTC day) and prune to the newest `keep`."""
     home = home or _insights_home()
-    os.makedirs(home, exist_ok=True)
+    os.makedirs(home, mode=0o700, exist_ok=True)
     m = dict(m, date=time.strftime("%Y-%m-%d", time.gmtime()))
     path = os.path.join(home, m["date"] + ".json")
-    with open(path, "w", encoding="utf-8") as fh:
-        json.dump(m, fh, indent=2)
+    _write_private(path, json.dumps(m, indent=2))
     for old in sorted(glob.glob(os.path.join(home, "*.json")))[:-keep]:
         os.remove(old)
     return path
@@ -701,7 +696,7 @@ def draft_commands(sessions, out_dir, min_sessions=3):
         if os.path.exists(path):
             continue
         fullest = sorted(examples.values(), key=len, reverse=True)[:3]
-        os.makedirs(out_dir, exist_ok=True)
+        os.makedirs(out_dir, mode=0o700, exist_ok=True)
         body = [
             "---",
             f"description: {key} … (drafted by session-insights; edit before use)",
@@ -719,8 +714,7 @@ def draft_commands(sessions, out_dir, min_sessions=3):
             "-->",
             "",
         ]
-        with open(path, "w", encoding="utf-8") as fh:
-            fh.write("\n".join(body))
+        _write_private(path, "\n".join(body))
         written.append(path)
     return written
 
@@ -891,8 +885,7 @@ def main(argv=None):
         print("\nsaved", save(m))
         past = history()
     if a.html:
-        with open(a.html, "w", encoding="utf-8") as fh:
-            fh.write(render_html(m, past))
+        _write_private(a.html, render_html(m, past))
         print("wrote", a.html)
     return 0
 
