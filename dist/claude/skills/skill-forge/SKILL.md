@@ -1,7 +1,7 @@
 ---
 name: skill-forge
 description: Scaffolds a compliant new skill (SKILL.md, reference/scripts/tests, golden test stub) from a one-line description. Use when asked to create, scaffold, or add a new skill to this repo.
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold.py *), Bash(python3 scripts/scaffold.py *), Bash(python3 scripts/validate.py), Bash(python3 scripts/build.py), Read, Write
 version: 0.1.0
 ---
 
@@ -22,7 +22,7 @@ version: 0.1.0
 3. Fill in the body under 500 lines; push depth into `reference/`.
 4. Run `python3 scripts/validate.py` from the repo root before considering
    it done — new skill must pass frontmatter/link/secret checks like every
-   other skill. If validate fails, fix the reported error and re-run until it passes.
+   other skill. If validate fails, fix the reported error and re-run until it passes (max 3 attempts, then report what still fails).
 5. Run `python3 scripts/build.py` to regenerate the 4 tool adapters and
    `AGENTS.md` — never hand-edit `dist/`.
 

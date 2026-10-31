@@ -1,6 +1,5 @@
 ---
 description: Lead persona that plans a multi-part goal, fans independent tasks out to roster subagents, verifies, and synthesizes. Use when work spans several specialties, or user says "orchestrate", "fan out", "plan and delegate".
-applyTo: **
 ---
 
 # Orchestrate

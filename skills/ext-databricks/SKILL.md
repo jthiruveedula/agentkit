@@ -2,7 +2,7 @@
 name: ext-databricks
 description: Route Databricks tasks to the pinned databricks/databricks-agent-skills collection. Use when the user wants Databricks-specific help (notebooks, jobs, Unity Catalog, Delta Lake) from vendor skills.
 version: 0.1.0
-allowed-tools: Bash, Read, Grep
+allowed-tools: Bash(./scripts/sync-external.sh *), Read, Grep
 ---
 
 # External: databricks
@@ -15,7 +15,7 @@ all-rights-reserved unless the user confirms otherwise.
 1. If `external/databricks-agent-skills/` is missing: `./scripts/sync-external.sh databricks-agent-skills`
 2. Find the skill: `grep -rl "<keyword>" external/databricks-agent-skills/skills/*/SKILL.md`
 3. Read and follow the matching `SKILL.md`.
-4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat.
+4. Check the matched SKILL.md covers the task; if not, refine the grep keyword and repeat (max 3 attempts, then report what still fails).
 
 ## Token economy
 

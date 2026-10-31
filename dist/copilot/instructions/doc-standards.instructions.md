@@ -1,6 +1,5 @@
 ---
 description: Apply a consistent professional house style (palette, type, tables/charts, layout) to Word, Excel, PDF or PowerPoint files. Use when creating, formatting or polishing a docx/xlsx/pdf/pptx or when asked to "look professional".
-applyTo: **
 ---
 
 # Doc Standards
@@ -30,7 +29,7 @@ A styling layer, not a document builder: it defines "professional" for the forma
    applied — not a design essay. Example: *"Applied house style: Aptos +
    steel-blue accent, hairline table borders, freeze header row."*
 
-5. **Verify the file:** open or render it and check fonts, palette, and table borders match `_doc-standards/reference/house-style.md`; if not, fix and re-check until they do.
+5. **Verify the file:** open or render it and check fonts, palette, and table borders match `_doc-standards/reference/house-style.md`; if not, fix and re-check until they do (max 3 attempts, then report what still fails).
 
 ## Reference
 

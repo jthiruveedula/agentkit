@@ -1,6 +1,5 @@
 ---
 description: Apply schema, freshness, volume, idempotency and PII checks to a data pipeline before it ships. Use when writing tests for a dbt model/pipeline, reviewing a pipeline PR, or asked "what checks should this have".
-applyTo: **
 ---
 
 # Data Quality Standards
@@ -34,7 +33,7 @@ Apply checks selectively; review only the diff (`git diff`), and only checks rel
    directly**, check whether it needs a dbt contract — see "Data
    contracts" in `_data-quality-standards/reference/checks.md`.
 
-6. **Verify the checks run:** execute them (e.g. `dbt test --select <model>`); if any fail or error, fix and re-run until they pass.
+6. **Verify the checks run:** execute them (e.g. `dbt test --select <model>`); if any fail or error, fix and re-run until they pass (max 3 attempts, then report what still fails).
 
 ## Reference
 

@@ -1,7 +1,7 @@
 ---
 name: context-budget
 description: Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs.
-allowed-tools: Bash, Read, Write
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/budget_hook.py *), Bash(python3 scripts/budget_hook.py *), Bash(python3 ../context-compressor/scripts/checkpoint.py lint *), Read, Write
 version: 0.1.0
 ---
 
@@ -28,7 +28,7 @@ Every turn re-reads the whole context, so cost grows with session length. This s
    abandon a half-applied edit — then write the checkpoint to the path the
    notice names, using the `context-compressor` template (Goal, Decisions
    with reasons, State, Open threads / Next action; under 60 lines). Lint
-   it with `context-compressor/scripts/checkpoint.py lint <path>`.
+   it with `../context-compressor/scripts/checkpoint.py lint <path>` (relative to this SKILL.md).
 
 4. **Ask the user to** `/compact` (same task continues) or `/clear` (next
    task). On the next session start of either kind the checkpoint is
