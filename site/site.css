@@ -1,3 +1,6 @@
+@font-face{font-family:"Big Shoulders Display";font-style:normal;font-weight:900;font-display:swap;src:url(assets/fonts/big-shoulders-display-900.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(assets/fonts/ibm-plex-mono-400.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(assets/fonts/ibm-plex-mono-500.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 /* agentkit field manual, plate series. Two inks and one registration colour (--reg):
    --reg is only the baton, the plate-0 ghost, the spotlight circle, BELOW TARGET marks and the one stamp.
    Motion: JS writes --p (0..1) per stage; everything below is CSS maths on it. */
@@ -31,7 +34,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 /* title block: quiet, one blue rule */
 #tb{position:fixed;z-index:50;right:40px;bottom:40px;width:280px;display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border-top:3px solid var(--reg);font-size:.8125rem;white-space:nowrap;text-transform:lowercase}
 #tb>*{padding:2px 8px 2px 0;line-height:19px}
-#tb b{font-weight:700}
+#tb b{font-weight:500}
 #tb i{font-style:normal;font-weight:500}
 #tb u{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--reg);margin-right:6px;text-decoration:none}
 #fin{font-weight:500}
