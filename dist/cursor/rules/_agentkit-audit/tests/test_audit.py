@@ -194,7 +194,29 @@ def test_evals_loop_and_negated_whole_file(tmp_path):
     (ev / "evals.json").write_text(json.dumps([one, one]))
     assert "srs.tests" in _heur(audit.audit(root))  # 2 scenarios is not enough
     (ev / "evals.json").write_text(json.dumps([one, one, {"query": "q"}, one]))
-    assert not {"srs.tests", "srs.scripts", "cri.whole_file"} & _heur(audit.audit(root))
+    r = audit.audit(root)
+    assert not {"srs.scripts", "cri.whole_file"} & _heur(r)
+    assert "srs.tests" in _heur(r)  # evals alone are never run: still flagged
+
+
+def test_evals_defined_score_below_half_of_real_tests(tmp_path):
+    root = _mk(tmp_path, "# Foo\n")
+
+    def srs():
+        return next(u for u in audit.audit(root)["units"] if u["name"] == "foo")[
+            "scores"
+        ]["SRS"]
+
+    none = srs()
+    ev = root / "skills" / "foo" / "evals"
+    ev.mkdir()
+    one = {"query": "q", "files": [], "expected_behavior": ["b"]}
+    (ev / "evals.json").write_text(json.dumps([one] * 3))
+    evals = srs()
+    (root / "tests").mkdir()
+    (root / "tests" / "test_foo.py").write_text('P = "skills" / "foo" / "scripts"\n')
+    real = srs()
+    assert 0 < evals - none < (real - none) / 2
 
 
 def test_repo_test_loading_skill_scripts_counts(tmp_path):
