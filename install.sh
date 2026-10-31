@@ -22,7 +22,8 @@
 # token savings -- never raw output or file contents). Pass it only once you
 # already agree to those terms; it is never on by default.
 #
-# Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir),
+# Env overrides: AGENTKIT_HOME (repo clone, default: this script's dir; the hooks'
+# data dir is AGENTKIT_DATA_DIR, a different thing),
 # CURSOR_HOME (default ~/.cursor), ANTIGRAVITY_HOME (default ~/.antigravity).
 set -eu
 
@@ -66,7 +67,7 @@ err()  { printf 'error: %s\n' "$*" >&2; }
 fetch_url() {
   _url=$1; _dest=$2; _attempt=1
   while [ "$_attempt" -le 3 ]; do
-    if curl -fsSL -o "$_dest" "$_url"; then
+    if curl --proto '=https' --proto-redir '=https' -fsSL -o "$_dest" "$_url"; then
       return 0
     fi
     warn "download failed (attempt $_attempt/3): $_url"
@@ -313,6 +314,15 @@ do_uninstall() {
   [ -s "$MANIFEST" ] || { log "nothing to uninstall (no manifest at $MANIFEST)"; return 0; }
   while IFS= read -r path; do
     [ -e "$path" ] || [ -L "$path" ] || continue
+    # The manifest is plain text: only remove what an install_* function
+    # could have written (a recognized layout, no ".." escape).
+    case "/$path/" in
+      */../*) warn "skipping manifest entry with '..': $path"; continue ;;
+    esac
+    if [ -z "$(dist_source_for_copy "$path")" ]; then
+      warn "skipping manifest entry outside the agentkit install locations: $path"
+      continue
+    fi
     [ "$DRY_RUN" = 1 ] && { log "  would remove: $path"; continue; }
     rm -rf "$path"
     # Backups are named "$path.bak.YYYYMMDDHHMMSS", so the newest is the

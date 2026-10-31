@@ -2,7 +2,7 @@
 name: ext-cli-ops
 description: Wire jfrog/boost shell-output compression into the running coding agent. Use when the user wants to save tokens on CLI/shell output, names jfrog Boost, or verbose commands are flooding context.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(command -v boost), Bash(boost version), Bash(boost report *), Bash(boost init --claude --dry-run), Read
 ---
 
 # External: boost (CLI token savings)
@@ -38,7 +38,7 @@ contents). Never install silently.
    boost init --claude --accept-terms   # only with explicit user OK
    ```
    Takes effect next session/reload; don't claim it's live now.
-4. Verify: `boost version`, `boost report -t`; if either fails, fix the wiring and re-run until both pass.
+4. Verify: `boost version`, `boost report -t`; if either fails, fix the wiring and re-run until both pass (max 3 attempts, then report what still fails).
 5. Rollback if asked: `boost init --claude --uninstall`
 
 `./install.sh --with-boost` runs steps 2-3 for Claude Code and needs the

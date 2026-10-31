@@ -1,6 +1,5 @@
 ---
 description: Durable local SQLite memory: store and search episodes, facts and corrections. Use when the user says "remember this", when you need a past decision, preference or fix, or before debugging (check corrections first).
-applyTo: **
 ---
 
 # Memory

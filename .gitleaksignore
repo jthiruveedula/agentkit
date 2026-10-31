@@ -1,2 +1,8 @@
 # Fake token in an offline test fixture (replaced in a later commit); history-only finding.
 d29f5283970009b1fa657da1395870ba7930f059:tests/test_check_external_updates.py:generic-api-key:95
+# Fake token in an offline test fixture (split in a later commit); history-only findings.
+2231ea0b44d5af3f9c2ff4ece4467fc9956e5409:dist/antigravity/rules/_session-insights/tests/test_session_insights.py:generic-api-key:238
+2231ea0b44d5af3f9c2ff4ece4467fc9956e5409:dist/claude/skills/session-insights/tests/test_session_insights.py:generic-api-key:238
+2231ea0b44d5af3f9c2ff4ece4467fc9956e5409:dist/copilot/instructions/_session-insights/tests/test_session_insights.py:generic-api-key:238
+2231ea0b44d5af3f9c2ff4ece4467fc9956e5409:dist/cursor/rules/_session-insights/tests/test_session_insights.py:generic-api-key:238
+2231ea0b44d5af3f9c2ff4ece4467fc9956e5409:skills/session-insights/tests/test_session_insights.py:generic-api-key:238

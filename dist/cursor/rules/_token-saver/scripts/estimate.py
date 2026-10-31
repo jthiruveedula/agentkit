@@ -14,11 +14,14 @@ Exit 0 unless a file is missing (exit 2) or a budget is exceeded
 """
 
 import argparse
+import codecs
 import json
 import os
 import sys
 
 TOKENS_PER_CHAR = 4  # 1 token ~= 4 chars
+STREAM_ABOVE = 8 * 1024 * 1024  # bytes; larger files are streamed, not slurped
+CHUNK = 1024 * 1024
 
 # (max_lines_exclusive, strategy)
 _STRATEGIES = [
@@ -40,16 +43,42 @@ def recommend(lines: int, path: str) -> str:
     return "grep-first"  # pragma: no cover
 
 
-def estimate(path: str) -> dict:
+def _count_small(path: str):
     with open(path, "rb") as fh:
         data = fh.read()
     text = data.decode("utf-8", errors="replace")
     lines = text.count("\n") + (1 if text and not text.endswith("\n") else 0)
-    chars = len(text)
+    return lines, len(data), len(text)
+
+
+def _count_stream(path: str):
+    """Same counts as _count_small in constant memory (1 MiB chunks)."""
+    dec = codecs.getincrementaldecoder("utf-8")(errors="replace")
+    lines = nbytes = chars = 0
+    last = ""
+    with open(path, "rb") as fh:
+        while True:
+            chunk = fh.read(CHUNK)
+            text = dec.decode(chunk, final=not chunk)
+            if text:
+                lines += text.count("\n")
+                chars += len(text)
+                last = text[-1]
+            if not chunk:
+                break
+            nbytes += len(chunk)
+    if last and last != "\n":
+        lines += 1
+    return lines, nbytes, chars
+
+
+def estimate(path: str) -> dict:
+    count = _count_stream if os.path.getsize(path) > STREAM_ABOVE else _count_small
+    lines, nbytes, chars = count(path)
     return {
         "path": path,
         "lines": lines,
-        "bytes": len(data),
+        "bytes": nbytes,
         "est_tokens": chars // TOKENS_PER_CHAR,
         "strategy": recommend(lines, path),
     }

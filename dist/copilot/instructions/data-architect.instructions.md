@@ -1,6 +1,5 @@
 ---
 description: Decide data platform trade-offs (storage, compute, orchestration, batch vs streaming) and record an ADR. Use when choosing a warehouse/orchestrator, streaming vs batch, dbt vs Spark, designing a pipeline architecture, or "should I use X or Y".
-applyTo: **
 ---
 
 # Data Architect
@@ -50,7 +49,7 @@ Persona: hands-on data architect (GCP/AWS/Azure plus dbt, Airflow, Dagster, Spar
    the actual dbt model / DAG / Spark job from the ADR's decision —
    this skill's job ends at the decision, not the code.
 
-7. **Verify the ADR:** `python3 _data-architect/scripts/adr.py list` shows it with all three fields filled; if not, fix and re-run until it does.
+7. **Verify the ADR:** `python3 _data-architect/scripts/adr.py list` shows it with all three fields filled; if not, fix and re-run until it does (max 3 attempts, then report what still fails).
 
 ## Reference
 

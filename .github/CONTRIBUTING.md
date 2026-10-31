@@ -3,7 +3,9 @@
 1. New skill: `python3 skills/skill-forge/scripts/scaffold.py <name> "<description. Use when X.>"`.
    Existing skill: edit `skills/<name>/SKILL.md` directly. Never hand-edit
    anything under `dist/` — it's generated and CI rejects drift.
-2. Keep `SKILL.md` under 500 lines; push depth into `reference/`, `recipes/`,
+2. Optional `globs:` frontmatter (string) becomes Copilot `applyTo` / Cursor `globs`; without
+   it Copilot instructions have no `applyTo` and load on demand by description.
+   Keep `SKILL.md` under 500 lines; push depth into `reference/`, `recipes/`,
    or `scripts/`, loaded on demand. Deterministic logic goes in a script,
    not prose (see `skills/prompt-enhancer/scripts/classify.py` for the
    pattern).

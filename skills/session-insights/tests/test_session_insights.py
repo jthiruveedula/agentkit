@@ -1,6 +1,7 @@
 """Golden tests for session-insights: the fixture transcript pins each
 friction signal, and the CLI must report on an empty root without crashing."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -179,3 +180,91 @@ def test_nudge_install_idempotent(tmp_path):
     nh.main(["install", "--settings", str(fresh), "--uninstall"])
     assert json.loads(fresh.read_text()) == {}
     assert nh.main([]) == 2
+
+
+def test_nudge_install_one_backup_atomic_and_quoted(tmp_path):
+    import json
+    import shlex
+
+    nh = _load("nudge_hook")
+    settings = tmp_path / "settings.json"
+    settings.write_text('{"model": "opus"}\n')
+    for _ in range(2):
+        assert nh.main(["install", "--settings", str(settings)]) == 0
+    assert (tmp_path / "settings.json.bak").read_text() == '{"model": "opus"}\n'
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "settings.json",
+        "settings.json.bak",
+    ]
+    nh.HERE = "/tmp/my dir"
+    cmd = nh.apply({})["hooks"]["UserPromptSubmit"][0]["hooks"][0]["command"]
+    assert shlex.split(cmd) == ["python3", "/tmp/my dir/nudge_hook.py", "check"]
+    assert json.loads(settings.read_text())["model"] == "opus"
+
+
+def test_nudge_check_logs_error_to_stderr_and_exits_zero(capsys):
+    import io
+
+    nh = _load("nudge_hook")
+    assert nh.check(io.StringIO("not json")) == 0
+    assert "nudge_hook" in capsys.readouterr().err
+
+
+def test_nudge_runs_without_insights_py(tmp_path):
+    import shutil
+
+    skills = SCRIPT.parents[2]
+    dst = tmp_path / "skills" / "session-insights" / "scripts"
+    dst.mkdir(parents=True)
+    for name in ("nudge_hook.py", "prompt_signals.py"):
+        shutil.copy(SCRIPT.parent / name, dst / name)
+    cls = tmp_path / "skills" / "prompt-enhancer" / "scripts"
+    cls.mkdir(parents=True)
+    shutil.copy(skills / "prompt-enhancer" / "scripts" / "classify.py", cls)
+    r = subprocess.run(
+        [sys.executable, str(dst / "nudge_hook.py"), "check"],
+        input='{"prompt": "fix the bug"}',
+        capture_output=True,
+        text=True,
+    )
+    assert r.returncode == 0 and "UserPromptSubmit" in r.stdout, r.stderr
+
+
+def test_redact_in_snapshot_drafts_and_html(tmp_path, monkeypatch):
+    import json
+    import stat
+
+    ins = _load("insights")
+    secret = "sk-" + "abcdef1234567890"  # split so scanners ignore the fake
+    prompt = f"deploy the staging stack using token={secret} then smoke test it"
+    root = tmp_path / "projects" / "p"
+    root.mkdir(parents=True)
+    for i in range(3):
+        (root / f"s{i}.jsonl").write_text(
+            json.dumps({"type": "user", "message": {"role": "user", "content": prompt}})
+            + "\n"
+        )
+    data = tmp_path / "data"
+    monkeypatch.setenv("AGENTKIT_DATA_DIR", str(data))
+    cmds, page = tmp_path / "cmds", tmp_path / "r.html"
+    argv = ["--root", str(root.parent), "--save", "--html", str(page)]
+    assert ins.main(argv + ["--draft-commands", str(cmds)]) == 0
+    assert ins.main(argv) == 0
+    files = list(cmds.glob("*.md")) + [page] + list((data / "insights").glob("*.json"))
+    assert len(files) == 3
+    for f in files:
+        assert secret not in f.read_text(), f
+    assert "[REDACTED]" in next(cmds.glob("*.md")).read_text()
+    if os.name == "posix":
+        for f in files:
+            assert stat.S_IMODE(f.stat().st_mode) == 0o600, f
+        for d in (cmds, data / "insights"):
+            assert stat.S_IMODE(d.stat().st_mode) == 0o700, d
+
+
+def test_insights_data_dir_beats_home(tmp_path, monkeypatch):
+    ins = _load("insights")
+    monkeypatch.setenv("AGENTKIT_HOME", str(tmp_path / "old"))
+    assert ins._insights_home() == str(tmp_path / "old" / "insights")
+    monkeypatch.setenv("AGENTKIT_DATA_DIR", str(tmp_path / "new"))
+    assert ins._insights_home() == str(tmp_path / "new" / "insights")

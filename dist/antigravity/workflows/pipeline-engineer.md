@@ -3,6 +3,7 @@ name: pipeline-engineer
 description: Implements a dbt model, Airflow DAG, Dagster asset, or PySpark job from an already-decided architecture. Use when the ADR exists and transform logic is needed.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
+skills: [pipeline-scaffold]
 ---
 
 # Pipeline Engineer

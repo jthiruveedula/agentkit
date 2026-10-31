@@ -3,6 +3,7 @@ name: ml-engineer
 description: Implements ML and GenAI work (training/eval, RAG, LLM calls, eval harnesses) against a named metric. Use for model, RAG, agent, or LLM-cost tasks.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
+skills: [ml-lifecycle, genai-engineering]
 ---
 
 # ML Engineer

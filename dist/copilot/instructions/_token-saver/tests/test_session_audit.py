@@ -54,6 +54,28 @@ def test_sums_usage_and_flags_long_sessions():
     assert row["long"] is True
 
 
+def test_null_usage_fields_count_as_zero():
+    root = tempfile.mkdtemp()
+    proj = os.path.join(root, "proj-n")
+    os.makedirs(proj)
+    usage = {
+        "input_tokens": None,
+        "cache_creation_input_tokens": None,
+        "cache_read_input_tokens": None,
+        "output_tokens": 7,
+    }
+    with open(os.path.join(proj, "s.jsonl"), "w", encoding="utf-8") as fh:
+        fh.write(json.dumps({"message": {"usage": usage}}) + "\n")
+    r = subprocess.run(
+        [sys.executable, SCRIPT, "--root", root, "--json"],
+        capture_output=True,
+        text=True,
+    )
+    assert r.returncode == 0, r.stderr
+    (row,) = json.loads(r.stdout)
+    assert (row["fresh_in"], row["cache_read"], row["output"]) == (0, 0, 7)
+
+
 def test_empty_root_is_not_an_error():
     r = subprocess.run(
         [sys.executable, SCRIPT, "--root", tempfile.mkdtemp()],

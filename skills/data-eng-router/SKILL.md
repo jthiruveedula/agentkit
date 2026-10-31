@@ -2,7 +2,7 @@
 name: data-eng-router
 description: Detect the cloud/platform of a data engineering task (GCP, AWS, Azure, Databricks) and route to its ext-* skill. Use when asked for help with a data pipeline, ETL/ELT, warehouse, or data lake.
 version: 0.1.0
-allowed-tools: Bash, Read
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/classify.py *), Bash(python3 scripts/classify.py *), Read
 ---
 
 # Data Engineering Router

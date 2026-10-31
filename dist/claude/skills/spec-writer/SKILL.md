@@ -24,8 +24,8 @@ Produce, in this order, nothing more:
    ml-engineer), `objective`, `acceptance check` (how to tell it's done),
    `deps`. See `reference/spec-template.md`. For a multi-agent run, emit
    this section as `.agentkit/plan.json` and validate it with
-   `skills/orchestrate/scripts/plan_check.py` before delegating.
-7. **Verify** every acceptance criterion is testable and has a task; if any is vague or orphaned, rewrite it and check again until none is.
+   `../orchestrate/scripts/plan_check.py` (relative to this SKILL.md) before delegating.
+7. **Verify** every acceptance criterion is testable and has a task; if any is vague or orphaned, rewrite it and check again until none is (max 3 attempts, then report what still fails).
 
 Keep it to what fits on one screen unless the feature genuinely needs more.
 A spec that needs scrolling to find the acceptance criteria has failed its

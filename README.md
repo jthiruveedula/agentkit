@@ -151,7 +151,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `orchestrate` | Lead-agent persona: validated plan, parallel waves to roster subagents, external verification, one synthesized result. |
 | `spec-writer` | Rough idea → problem, scope, non-goals, acceptance criteria, and a roster-owned task list. |
 | `debug-loop` | Hypothesize-test-narrow loop until root cause is found. |
-| `pr-review` | Correctness bugs and scope creep, posted as inline findings. |
+| `pr-review` | Correctness bugs and scope creep, posted as PR-level comments. |
 | `prompt-enhancer` | Classifies a rough prompt's intent (9 categories) and rewrites it with that intent's pattern. |
 | `skill-forge` | Scaffolds a new compliant skill from a one-line description. |
 | `daily-standup` | Commits/PRs/issues since last standup → did/doing/blocked. |
@@ -194,7 +194,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
-**External routers** — 14 thin skills that wire in the pinned
+**External routers** — 15 thin skills that wire in the pinned
 [external sources](#external-skills) on demand: `ext-diagrams`,
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
 `ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,
@@ -272,7 +272,7 @@ re-link after `git pull`, and prune links whose source was removed.
 ## How it works: author once, run on four
 
 Each skill is authored once as `skills/<name>/SKILL.md` (frontmatter:
-`name`, `description`, `version`, optional `allowed-tools`). Each agent
+`name`, `description`, `version`, optional `allowed-tools` and `globs`). Each agent
 is `agents/<name>.md`. `scripts/build.py` emits the four tool adapters
 into `dist/`, resolving each skill's `scripts/` and `reference/` assets to
 real paths in every layout:
@@ -287,6 +287,10 @@ skills/prompt-enhancer/SKILL.md  ──build.py──┬─▶ dist/claude/skill
 `AGENTS.md` is generated the same way. `dist/` is committed so install
 never needs Python; CI's `build.py --check` fails if `dist/` drifts from
 source. Never hand-edit `dist/` — edit the source and run `make build`.
+
+Copilot instruction files carry only a `description` (no `applyTo`), so VS Code loads them
+on demand instead of attaching every skill to every request. An optional `globs:` in
+`SKILL.md` becomes Copilot `applyTo` and Cursor `globs` for file-type-specific skills.
 
 ## External skills
 

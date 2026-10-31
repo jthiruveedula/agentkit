@@ -2,7 +2,7 @@
 name: frontend-motion-3d
 description: Pick the lightest stack for UI animation and 3D (CSS/Motion, GSAP+ScrollTrigger, three.js/R3F, HyperFrames) within a perf and a11y budget. Use when asked for animations, scroll effects, 3D/WebGL, motion design, interactive heroes.
 version: 0.1.0
-allowed-tools: Read, Edit, Write, Grep, Bash
+allowed-tools: Read, Edit, Write, Grep
 ---
 
 # Frontend Motion & 3D
@@ -12,7 +12,8 @@ Choose the lightest tool, set the budget, then build.
 ## Procedure
 
 1. **Match the effect to the lightest tool** (`reference/stack.md` has the
-   full table):
+   full table). Named skills other than `ext-*` are optional; if one is not
+   installed, follow this file and `reference/stack.md` directly:
    - hover, enter/exit, layout shifts → CSS transitions or `motion-dev`
    - sequenced timelines, text splits, SVG morphs → `gsap-core`, `gsap-timeline`, `gsap-plugins`
    - scroll-driven storytelling, pinning, scrub → `gsap-scrolltrigger` (or CSS scroll-driven animations for simple cases)
@@ -49,7 +50,7 @@ Choose the lightest tool, set the budget, then build.
    during the animation), Lighthouse LCP/CLS, reduced-motion toggled on,
    WebGL disabled. For a browser check use `ego-browser`. Report the
    numbers; "looks smooth" is not evidence.
-   Check each number against the budget; if one misses, fix and re-measure until it passes.
+   Check each number against the budget; if one misses, fix and re-measure until it passes (max 3 attempts, then report what still fails).
 
 6. **Hand off** multi-file UI builds to the `frontend-engineer` subagent
    with the effect list, the chosen stack, and the budget from step 2.

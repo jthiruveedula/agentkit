@@ -32,16 +32,17 @@ def session_stats(path):
             usage = msg.get("usage") if isinstance(msg, dict) else None
             if not usage:
                 continue
-            inp = usage.get("input_tokens", 0) + usage.get(
-                "cache_creation_input_tokens", 0
+            # JSON null usage fields are possible: treat as 0
+            inp = int(usage.get("input_tokens") or 0) + int(
+                usage.get("cache_creation_input_tokens") or 0
             )
-            cr = usage.get("cache_read_input_tokens", 0)
+            cr = int(usage.get("cache_read_input_tokens") or 0)
             if turns == 0:
                 base = inp + cr
             turns += 1
             fresh += inp
             cache_read += cr
-            out += usage.get("output_tokens", 0)
+            out += int(usage.get("output_tokens") or 0)
     return {
         "session": os.path.basename(path)[:8],
         "project": os.path.basename(os.path.dirname(path))[-32:],
