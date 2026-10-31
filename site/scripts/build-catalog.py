@@ -28,6 +28,7 @@ REPO = Path(__file__).resolve().parents[2]  # repo root (site/scripts/ -> repo)
 OUT = REPO / "site" / "assets" / "skills.json"
 INDEX = REPO / "site" / "index.html"
 BAKE_RE = re.compile(r"(<!-- slips:start -->\n).*?(<!-- slips:end -->)", re.DOTALL)
+N38_RE = re.compile(r'(id="n38">)\d+(</span>)')
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*", re.DOTALL)
 
 
@@ -49,12 +50,20 @@ def bake(skills: list, html: str) -> str:
     """Return html with the skill list baked between the slips markers.
 
     Gives the catalog a no-JS rendering; app.js clears and rebuilds it
-    (progressive enhancement). Sorted by name, like app.js.
+    (progressive enhancement). Native first, then router; sorted by name inside each group, like app.js.
     """
-    items = "".join(
-        '<li class="%s"><span class="b">%s</span></li>\n'
-        % ("" if s["kind"] == "native" else "x", escape(s["name"]))
-        for s in sorted(skills, key=lambda s: s["name"])
+    items = ""
+    prev = None
+    for s in sorted(skills, key=lambda s: (s["kind"] != "native", s["name"])):
+        if prev == "native" and s["kind"] != "native":
+            items += '<li class="brk" aria-hidden="true"></li>\n'
+        prev = s["kind"]
+        items += '<li class="%s"><span class="b">%s</span></li>\n' % (
+            "" if s["kind"] == "native" else "x",
+            escape(s["name"]),
+        )
+    html = N38_RE.sub(
+        lambda m: m.group(1) + str(len(skills)) + m.group(2), html, count=1
     )
     return BAKE_RE.sub(lambda m: m.group(1) + items + m.group(2), html, count=1)
 

@@ -7,7 +7,8 @@
   if (!ctx) return; // no canvas: the paper background stands alone
   const btn = document.getElementById('fxpause');
   const mq = matchMedia('(prefers-reduced-motion: reduce)');
-  const SCALE = 6, ripples = [];
+  const MAXPX = 40000, ripples = [];
+  let SCALE = 6;
   let w, h, img, rgb, maxA, raf = 0, paused = mq.matches, t = 0, last = 0;
 
   function theme() {
@@ -17,6 +18,10 @@
     maxA = (parseFloat(cs.getPropertyValue('--fxa')) || .15) * 255;
   }
   function size() {
+    // adaptive: coarser on narrow/touch screens, and never more than MAXPX canvas pixels
+    SCALE = Math.max(6, Math.ceil(innerWidth / 320));
+    if (innerWidth < 768 || matchMedia('(pointer: coarse)').matches) SCALE = Math.max(SCALE, 8);
+    while (Math.ceil(innerWidth / SCALE) * Math.ceil(innerHeight / SCALE) > MAXPX) SCALE++;
     w = Math.max(24, Math.ceil(innerWidth / SCALE));
     h = Math.max(24, Math.ceil(innerHeight / SCALE));
     cv.width = w; cv.height = h;
@@ -66,14 +71,18 @@
   }
   function set(p) {
     paused = p;
-    if (btn) { btn.setAttribute('aria-pressed', p); btn.textContent = p ? 'Play motion' : 'Pause motion'; }
+    if (btn) btn.setAttribute('aria-pressed', p); // fixed label; aria-pressed carries the state
     run();
   }
-  addEventListener('resize', () => { size(); frame(); });
+  let rs = 0;
+  addEventListener('resize', () => { // one resize per frame
+    if (!rs) rs = requestAnimationFrame(() => { rs = 0; size(); frame(); });
+  });
+  new MutationObserver(() => { theme(); frame(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   document.addEventListener('visibilitychange', run);
   mq.addEventListener('change', e => set(e.matches));
   addEventListener('pointerdown', e => { if (!paused && ripples.length < 4) ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() / 1000 }); });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { theme(); frame(); });
-  if (btn) btn.addEventListener('click', () => set(!paused));
+  if (btn) { btn.hidden = false; btn.addEventListener('click', () => set(!paused)); }
   theme(); size(); set(paused);
 })();
