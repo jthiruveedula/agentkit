@@ -20,6 +20,7 @@ from .privacy import Redactor, harden_tree, write_private
 from .sensitive import ADVICE
 
 MAX_ANOMALIES = 6  # per metric
+MAX_SESSIONS = 5000  # newest first; per-session rows for dashboard drilldowns
 
 SCHEMA = "1.0"
 MAX_POINTS = 20000
@@ -186,9 +187,37 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
         "quality": {"axes": ["specificity", "context", "constraints", "length"], "you": list(qs.get("you", zero)), "top": list(qs.get("top", zero)),
                     "by_source": [{"source": s, "values": list(qs[f"src:{s}"])} for s in mx.SOURCES if f"src:{s}" in qs],
                     "validation": {"spearman": float(rho) if rho not in (None, "") else None, "n": int(float(meta.get("spearman_n", 0)))}},
-        "what_works": ww, "exposure": {**sec["exposure"], "items": _exposure_items(b, sess, red)}, "insights": ins, "recommendations": recs,
+        "what_works": ww, "sessions": _sessions(con, b, sess, sm, red), "exposure": {**sec["exposure"], "items": _exposure_items(b, sess, red)}, "insights": ins, "recommendations": recs,
     }
     return _clean(data)
+
+
+def _sessions(con: duckdb.DuckDBPyConnection, b: mx.Base, sess: pl.DataFrame, sm: pl.DataFrame, red: Redactor) -> list[dict[str, Any]]:
+    """One row per non-subagent session, newest first, capped. Titles are redacted snippets; no prompt text.
+    cost_usd is null for sources that never record a price (so the UI says "not priced" instead of plotting $0)."""
+    human = sess.filter(~pl.col("is_subagent"))
+    priced = {r["source"] for r in human.group_by("source").agg(pl.col("cost").sum().alias("c")).iter_rows(named=True) if (r["c"] or 0) > 0}
+    names = {r[0]: r[1] for r in con.execute("SELECT project_id, name FROM projects").fetchall()}
+    titles = dict(b.titles.iter_rows())
+    pf = mx.fetch(con, "SELECT turn_id, cluster_id FROM prompt_features WHERE cluster_id IS NOT NULL", {"turn_id": pl.Utf8, "cluster_id": pl.Int64})
+    top = (b.turns.select("turn_id", "session_id").join(pf, on="turn_id", how="inner").group_by("session_id", "cluster_id").agg(pl.len().alias("n"))
+           .sort(["session_id", "n", "cluster_id"], descending=[False, True, False]).group_by("session_id", maintain_order=True).first())
+    cl = dict(zip(top["session_id"].to_list(), top["cluster_id"].to_list()))
+    m = {r["session_id"]: r for r in sm.iter_rows(named=True)}
+    rows = human.sort(["date", "session_id"], descending=[True, True], nulls_last=True).head(MAX_SESSIONS)
+    out = []
+    for r in rows.iter_rows(named=True):
+        x = m.get(r["session_id"], {})
+        t = titles.get(r["session_id"])
+        name = names.get(r["project_id"])
+        out.append({"id": r["session_id"], "source": r["source"], "date": r["date"].isoformat() if r["date"] else "",
+                    "project": (red.redact(name) or "")[:60] if name else "", "intent": x.get("intent") or "other",
+                    "prompts": int(x.get("n_user") or 0), "tokens": int(r["tokens"] or 0),
+                    "cost_usd": float(r["cost"] or 0.0) if r["source"] in priced else None,
+                    "reached_stage": int(x.get("reached_stage") or 0), "applied": bool(x.get("has_applied")),
+                    "loops": int(x.get("loops") or 0), "friction": float(x.get("friction") or 0.0),
+                    "cluster": int(cl.get(r["session_id"], -1)), "title": (red.redact(" ".join(t.split())) or "")[:SNIPPET] if t else ""})
+    return out
 
 
 def _engine(meta: dict[str, str]) -> dict[str, Any]:
@@ -202,7 +231,7 @@ def _exposure_items(b: mx.Base, sess: pl.DataFrame, red: Redactor) -> list[dict[
     out = []
     for r in mx.exposure_items(b, sess)[:300]:
         title = (red.redact(r["title"]) or "")[:SNIPPET] if r["title"] else None
-        out.append({"id": r["turn_id"], "source": r["source"], "date": r["date"].isoformat() if r["date"] else "", "session_title": title,
+        out.append({"id": r["turn_id"], "session": r["session_id"], "source": r["source"], "date": r["date"].isoformat() if r["date"] else "", "session_title": title,
                     "category": r["category"], "kinds": r["kinds"], "preview": _snippet(red, r["preview"]), "status": r["status"]})
     return out
 

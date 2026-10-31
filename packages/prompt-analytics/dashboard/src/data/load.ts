@@ -89,13 +89,20 @@ export function normalize(raw: unknown): DashboardData {
       by_kind: arr<DashboardData["exposure"]["by_kind"][number]>(ex.by_kind).map((k) => ({ ...k, by_source: obj(k.by_source) as never })),
       weekly: arr(ex.weekly),
       items: arr<DashboardData["exposure"]["items"][number]>(ex.items).map((i) => ({
-        ...i, id: String(i.id), kinds: Array.isArray(i.kinds) ? i.kinds.map(String) : [],
+        ...i, id: String(i.id), session: typeof i.session === "string" ? i.session : undefined, kinds: Array.isArray(i.kinds) ? i.kinds.map(String) : [],
         preview: typeof i.preview === "string" ? i.preview : null,
         session_title: typeof i.session_title === "string" ? i.session_title : null,
         status: i.status === "reviewed" || i.status === "false_positive" ? i.status : "open",
       })),
     },
     what_works: arr(raw.what_works),
+    sessions: arr<DashboardData["sessions"][number]>(raw.sessions).map((r) => ({
+      id: String(r.id), source: r.source, date: String(r.date ?? "").slice(0, 10), project: String(r.project ?? ""),
+      intent: (typeof r.intent === "string" ? r.intent : "other") as never,
+      prompts: num(r.prompts), tokens: num(r.tokens), cost_usd: typeof r.cost_usd === "number" && Number.isFinite(r.cost_usd) ? r.cost_usd : null,
+      reached_stage: num(r.reached_stage), applied: !!r.applied, loops: num(r.loops), friction: num(r.friction),
+      cluster: num(r.cluster, -1), title: String(r.title ?? "").slice(0, 160),
+    })),
     insights: arr(raw.insights),
     recommendations: arr(raw.recommendations),
   };

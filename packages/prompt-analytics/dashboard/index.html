@@ -3,16 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content="Local-first analytics over your AI coding-assistant sessions." />
     <meta name="robots" content="noindex" />
-    <meta name="theme-color" content="#0b0d12" />
-    <title>Prompt Analytics - your AI footprint</title>
+    <meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1219" media="(prefers-color-scheme: dark)" />
+    <title>Prompt Analytics</title>
     <link rel="icon" href="data:," />
-    <style>html,body{background:#0b0d12;margin:0}</style>
+    <style>html,body{margin:0;background:#f6f8fc;color:#1b2231}@media(prefers-color-scheme:dark){html,body{background:#0f1219;color:#e9ecf3}}</style>
   </head>
   <body>
-    <div id="root"><main style="font:600 1.4rem/1.3 system-ui,sans-serif;color:#e8eaf0;padding:2rem 1.25rem"><h1 style="font:inherit;margin:0">Prompt Analytics</h1><p style="font:400 1rem/1.5 system-ui,sans-serif;color:#9aa1b2;margin:.5rem 0 0">Reading your sessions...</p></main></div>
+    <div id="root"><main style="font:600 15px/1.4 system-ui,sans-serif;padding:24px 16px"><h1 style="font:inherit;margin:0">Prompt Analytics</h1><p style="font:400 13px/1.5 system-ui,sans-serif;opacity:.7;margin:8px 0 0">Reading your sessions...</p></main></div>
     <script type="application/json" id="pa-data">null</script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

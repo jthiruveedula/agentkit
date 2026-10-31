@@ -21,6 +21,13 @@ export interface Insight {
   drill: { chapter: Chapter; filter: Partial<{ source: Source; intent: Intent; project: string; cluster: number }> };
 }
 
+export interface SessionRow {
+  id: string; source: Source; date: string; project: string; intent: Intent;
+  prompts: number; tokens: number; cost_usd: number | null;
+  reached_stage: number; applied: boolean; loops: number; friction: number;
+  cluster: number; title: string;
+}
+
 export interface DashboardData {
   schema: "1.0";
   generated_at: string;                         // ISO UTC
@@ -68,6 +75,12 @@ export interface DashboardData {
   };
   what_works: { cluster: number; feature: string; effect: number; ci: [number, number]; n: number; direction: "helps" | "hurts" }[];
 
+  // Per-session rows for drilldowns and client-side cross-filtering. Non-subagent sessions only, newest first,
+  // capped at 5000. `title` is a redacted snippet (<= 160 chars), "" when the session has none. `cost_usd` is null
+  // for sources that never record a price (shown as "not priced", never plotted as $0). `cluster` -1 = none.
+  // `reached_stage` 0..6 (funnel stages reached, cumulative); `friction` 0..1.
+  sessions: SessionRow[];
+
   // Chapter 4 panel · Sensitive data you pasted (counts only; no values ever leave the store)
   exposure: {
     sessions: number;                               // non-subagent sessions with >= 1 finding
@@ -78,7 +91,7 @@ export interface DashboardData {
     weekly: { date: string; secret: number; pii: number; phi: number }[]; // sessions per week
     // Review queue, newest first, capped at 300. `preview` is masked (findings shown as ⟦kind⟧)
     // and safe to render; the raw value is never in this file. Counts above exclude false_positive.
-    items: { id: string; source: Source; date: string; session_title: string | null; category: "secret" | "pii" | "phi";
+    items: { id: string; session?: string; source: Source; date: string; session_title: string | null; category: "secret" | "pii" | "phi";
              kinds: string[]; preview: string | null; status: "open" | "reviewed" | "false_positive" }[];
   };
 

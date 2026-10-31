@@ -3,11 +3,11 @@ import { getApi } from "../data/api";
 import type { ExposureItem, RevealFinding, Source } from "../data/types";
 import { fmtDate, fmtInt } from "../lib/format";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
-import { Segmented } from "./Chart";
+import { Segmented } from "./ui";
 
 type Status = ExposureItem["status"];
 type Cat = ExposureItem["category"];
-const PAGE = 20;
+const PAGE = 8; // sessions per page
 const REVEAL_MS = 30_000;
 const CAT_NAME: Record<Cat, string> = { secret: "Secrets", pii: "PII", phi: "PHI" };
 const STATUS_NAME: Record<Status, string> = { open: "Open", reviewed: "Reviewed", false_positive: "Not sensitive" };
@@ -17,6 +17,18 @@ const name = (s: string) => s.replace(/_/g, " ");
 function Masked({ text }: { text: string }) {
   const parts = text.split(/⟦([^⟧]*)⟧/);
   return <>{parts.map((p, i) => (i % 2 ? <span key={i} className="chip">{name(p)}</span> : <Fragment key={i}>{p}</Fragment>))}</>;
+}
+
+export interface Group { key: string; source: Source; date: string; title: string | null; items: ExposureItem[] }
+/** One group per session (items without a session id stand alone). Order follows the first item of each group. */
+export function groupBySession(items: ExposureItem[]): Group[] {
+  const m = new Map<string, Group>();
+  for (const it of items) {
+    const key = it.session ?? it.id;
+    const g = m.get(key);
+    if (g) g.items.push(it); else m.set(key, { key, source: it.source, date: it.date, title: it.session_title, items: [it] });
+  }
+  return [...m.values()];
 }
 
 type Api = NonNullable<ReturnType<typeof getApi>>;
@@ -54,13 +66,8 @@ function Row({ it, api, status, onReview }: { it: ExposureItem; api: Api | null;
   };
 
   return (
-    <li ref={li} className="rq-row" data-status={status} style={{ "--c": srcColor(it.source) } as React.CSSProperties}>
-      <div className="rq-meta">
-        <span className="rq-src"><span className="sw" aria-hidden="true" />{srcLabel(it.source)}</span>
-        <time dateTime={it.date}>{when}</time>
-        <span className="rq-title">{it.session_title ?? "Untitled session"}</span>
-        <span className="rq-kinds">{it.kinds.map((k) => <span key={k} className="chip" data-cat={it.category}>{name(k)}</span>)}</span>
-      </div>
+    <li ref={li} className="rq-row" data-status={status}>
+      <div className="rq-kinds">{it.kinds.map((k) => <span key={k} className="chip" data-cat={it.category}>{name(k)}</span>)}</div>
       {found ? (
         <div className="rq-box" role="group" aria-label="Sensitive original, revealed">
           {found.map((f, i) => <p key={i}>{f.before}<mark>{f.value}</mark>{f.after}</p>)}
@@ -105,9 +112,10 @@ export function ReviewQueue({ items }: { items: ExposureItem[] }) {
   const present = SOURCES.filter((s) => items.some((i) => i.source === s));
   // Filter on the server snapshot status so a row doesn't vanish under its own Undo button.
   const list = items.filter((i) => (cat === "all" || i.category === cat) && (src === "all" || i.source === src) && (st === "all" || i.status === st));
-  const pages = Math.max(1, Math.ceil(list.length / PAGE));
+  const groups = useMemo(() => groupBySession(list), [list]);
+  const pages = Math.max(1, Math.ceil(groups.length / PAGE));
   const cur = Math.min(page, pages - 1);
-  const slice = list.slice(cur * PAGE, cur * PAGE + PAGE);
+  const slice = groups.slice(cur * PAGE, cur * PAGE + PAGE);
   const f = <T,>(set: (v: T) => void) => (v: T) => { set(v); setPage(0); };
 
   const review = async (id: string, status: Status) => {
@@ -118,9 +126,10 @@ export function ReviewQueue({ items }: { items: ExposureItem[] }) {
     catch { setOver((o) => ({ ...o, [id]: prev })); setMsg("Could not save. Change reverted."); }
   };
 
+  const markAll = (g: Group, status: Status) => g.items.forEach((i) => { if ((over[i.id] ?? i.status) === "open") void review(i.id, status); });
+
   return (
     <div className="rq">
-      <h4 className="rq-h">Review queue</h4>
       <div className="rq-filters">
         <Segmented label="Category" value={cat} onChange={f(setCat)} options={[{ id: "all", text: "All kinds" }, ...(["secret", "pii", "phi"] as Cat[]).map((c) => ({ id: c, text: CAT_NAME[c] }))]} />
         <Segmented label="Source" value={src} onChange={f(setSrc)} options={[{ id: "all", text: "All sources" }, ...present.map((s) => ({ id: s, text: srcLabel(s) }))]} />
@@ -129,12 +138,26 @@ export function ReviewQueue({ items }: { items: ExposureItem[] }) {
       {!api && <p className="rq-note">Viewing a static export. Reveal and review need <code>prompt-analytics serve</code>.</p>}
       <p className="sr-only" role="status">{msg}</p>
       {slice.length === 0 ? <p className="empty">Nothing matches these filters</p> : (
-        <ul className="rq-list">{slice.map((it) => <Row key={it.id} it={it} api={api} status={over[it.id] ?? it.status} onReview={review} />)}</ul>
+        <ul className="rq-list rows">{slice.map((g) => {
+          const open = g.items.filter((i) => (over[i.id] ?? i.status) === "open").length;
+          return (
+            <li key={g.key} className="rq-group">
+              <div className="rq-gh">
+                <span className="tag"><span className="sw" style={{ "--c": srcColor(g.source) } as React.CSSProperties} />{srcLabel(g.source)}</span>
+                <time dateTime={g.date}>{fmtDate(g.date)}</time>
+                <span className="grow" title={g.title ?? undefined}>{g.title ?? "Untitled session"}</span>
+                <span className="meta">{g.items.length} {g.items.length === 1 ? "finding" : "findings"}</span>
+                {open > 1 && api ? <button type="button" className="btn" aria-label={`Mark all ${open} open findings in ${g.title ?? "this session"} as reviewed`} onClick={() => markAll(g, "reviewed")}>Reviewed all</button> : null}
+              </div>
+              <ul>{g.items.map((it) => <Row key={it.id} it={it} api={api} status={over[it.id] ?? it.status} onReview={review} />)}</ul>
+            </li>
+          );
+        })}</ul>
       )}
       {list.length > PAGE && (
         <nav className="rq-pages" aria-label="Review queue pages">
           <button type="button" className="btn" disabled={cur === 0} onClick={() => setPage(cur - 1)}>Previous</button>
-          <span aria-live="polite">Page {cur + 1} of {pages}, {fmtInt(list.length)} findings</span>
+          <span aria-live="polite">Page {cur + 1} of {pages}, {fmtInt(groups.length)} sessions, {fmtInt(list.length)} findings</span>
           <button type="button" className="btn" disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}>Next</button>
         </nav>
       )}

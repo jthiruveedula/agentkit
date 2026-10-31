@@ -1,51 +1,53 @@
-import type { DashboardData } from "../data/types";
-import { fmtInt } from "../lib/format";
-import { Recap } from "./Narrative";
-import { CHAPTERS } from "./Section";
-import { InsightTrace } from "./Trace";
+import { useStore, TABS } from "../state";
+import { fmtValue } from "../lib/format";
+import { Empty, Panel } from "./ui";
+import type { Chapter, Insight } from "../data/types";
 
-/** Three habit cards from recommendations, then the sensitive-data hygiene card, then the recap. */
-export function Recommend({ d }: { d: DashboardData }) {
-  const recs = d.recommendations.slice(0, 3);
-  const byId = new Map(d.insights.map((i) => [i.id, i]));
-  const ex = d.exposure;
-  const worst = [...ex.by_category].sort((a, b) => b.sessions - a.sessions)[0];
+const chName = (c: Chapter) => TABS.find((t) => t.id === c)?.name ?? c;
+
+function Evidence({ ins }: { ins: Insight }) {
+  const { drill } = useStore();
   return (
-    <>
-      {recs.length === 0 ? <p className="empty">No recommendations yet. Keep working and check back.</p> : null}
-      <ol className="recs" data-stagger>
-        {recs.map((r, i) => {
-          const ev = byId.get(r.evidence_insight);
-          const ch = ev ? CHAPTERS.find((c) => c.id === ev.drill.chapter) : undefined;
-          return (
-            <li key={r.id}>
-              <span className="rec-n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <h3 className="rec-t">{r.title}</h3>
-                {d.engine.mode === "deep" && r.evidence_insight === "works.dupes" && <span className="rec-tag">Near-duplicate prompts</span>}
-                <p className="rec-a">{r.action}</p>
-                <span className="rec-i">{r.impact}</span>
-              </div>
-              {ev && (
-                <p className="rec-e">
-                  {ev.claim}<InsightTrace i={ev} />
-                  {ch && <><br /><a href={`#${ch.id}`}>See evidence in {ch.name.toLowerCase()}</a></>}
-                </p>
-              )}
-            </li>
-          );
-        })}
-        <li className="hygiene">
-          <span className="rec-n" aria-hidden="true">+</span>
-          <div>
-            <h3 className="rec-t">Sensitive-data hygiene</h3>
-            <p className="rec-a">{ex.sessions > 0 && worst?.advice ? worst.advice : "Nothing sensitive was found in your prompts. Keep it that way."}</p>
-            <span className="rec-i">{ex.sessions > 0 ? `${fmtInt(ex.sessions)} sessions flagged` : "0 sessions flagged"}</span>
-          </div>
-          {ex.sessions > 0 && <p className="rec-e"><a href="#friction">Review the findings in friction hotspots</a></p>}
-        </li>
-      </ol>
-      <Recap d={d} />
-    </>
+    <button type="button" className="btn" aria-label={`Evidence for: ${ins.claim}`} onClick={() => drill(ins.drill.filter, ins.drill.chapter)}>Evidence</button>
+  );
+}
+
+export function Recommend() {
+  const { d } = useStore();
+  const byId = new Map(d.insights.map((i) => [i.id, i]));
+  const ins = [...d.insights].sort((a, b) => a.rank - b.rank || a.chapter.localeCompare(b.chapter));
+  return (
+    <div className="grid">
+      <Panel title="Recommendations" meta="each cites an insight" span={6}>
+        {d.recommendations.length === 0 ? <Empty>No recommendations yet</Empty> : (
+          <ul className="rows">
+            {d.recommendations.map((r) => {
+              const e = byId.get(r.evidence_insight);
+              return (
+                <li key={r.id} className="rowb">
+                  <strong>{r.title}</strong>
+                  {e ? <Evidence ins={e} /> : <span />}
+                  <p>{r.action}</p>
+                  <p>Impact: {r.impact}</p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Panel>
+      <Panel title="Insights" meta="strongest first, with sample size" span={6}>
+        {ins.length === 0 ? <Empty>No insights yet</Empty> : (
+          <ul className="rows">
+            {ins.map((i) => (
+              <li key={i.id} className="rowb">
+                <span><span className="tag">{chName(i.chapter)}</span> {i.claim}</span>
+                <Evidence ins={i} />
+                <p>{i.metric}: {fmtValue(i.value, i.unit)} · n={i.evidence.n} · {i.evidence.method}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Panel>
+    </div>
   );
 }

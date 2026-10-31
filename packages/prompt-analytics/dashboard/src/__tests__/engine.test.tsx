@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
 import { Works } from "../components/Works";
+import { StoreProvider } from "../state";
 import { EnginePill, pillText } from "../components/Engine";
 
 const clusters = [
@@ -23,7 +24,7 @@ describe("engine tiers", () => {
     expect(pillText({ ...ml.engine, mode: "deep", accel: "mps" })).toMatch(/Semantic .* mps/);
   });
   it("basic renders the topic treemap, not the galaxy", () => {
-    const html = renderToStaticMarkup(<Works d={basic} />);
+    const html = renderToStaticMarkup(<StoreProvider d={basic}><Works /></StoreProvider>);
     expect(html).toMatch(/Topics, grouped by keywords/);
     expect(html).not.toMatch(/Topic galaxy/);
   });

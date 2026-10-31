@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
 
 export interface Size { w: number; h: number }
 
@@ -22,35 +22,15 @@ export function useSize(ref: RefObject<HTMLElement | null>): Size {
   return size;
 }
 
-export function useReducedMotion(): boolean {
-  const [r, setR] = useState(() => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches);
+/** Re-renders when the user flips light/dark so canvas code can re-read CSS variables. */
+export function useScheme(): string {
+  const [s, setS] = useState(() => (typeof matchMedia === "function" && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
   useEffect(() => {
     if (typeof matchMedia !== "function") return;
-    const m = matchMedia("(prefers-reduced-motion: reduce)");
-    const on = () => setR(m.matches);
+    const m = matchMedia("(prefers-color-scheme: dark)");
+    const on = () => setS(m.matches ? "dark" : "light");
     m.addEventListener("change", on);
     return () => m.removeEventListener("change", on);
   }, []);
-  return r;
-}
-
-/** Runs `loop(t)` via rAF only while the element is on screen and the tab is visible. */
-export function useVisibleLoop(ref: RefObject<HTMLElement | null>, loop: (t: number) => void, enabled: boolean) {
-  const fn = useRef(loop);
-  fn.current = loop;
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !enabled) return;
-    let raf = 0, inView = false;
-    const tick = (t: number) => { fn.current(t); raf = requestAnimationFrame(tick); };
-    const sync = () => {
-      const run = inView && !document.hidden;
-      if (run && !raf) raf = requestAnimationFrame(tick);
-      if (!run && raf) { cancelAnimationFrame(raf); raf = 0; }
-    };
-    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); });
-    io.observe(el);
-    document.addEventListener("visibilitychange", sync);
-    return () => { io.disconnect(); document.removeEventListener("visibilitychange", sync); cancelAnimationFrame(raf); };
-  }, [ref, enabled]);
+  return s;
 }

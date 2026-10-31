@@ -253,6 +253,6 @@ def exposure_items(b: Base, sess: pl.DataFrame) -> list[dict[str, Any]]:
         cat = max((r["category"] for r in rows), key=lambda c: _SEV.get(c, 0))
         ts = rows[0]["ts"]
         prev = next((r["preview"] for r in rows if r["preview"]), None)
-        items.append({"turn_id": tid, "source": rows[0]["source"], "ts": ts, "date": ts.date() if ts else rows[0]["date"], "title": titles.get(rows[0]["session_id"]),
+        items.append({"turn_id": tid, "session_id": rows[0]["session_id"], "source": rows[0]["source"], "ts": ts, "date": ts.date() if ts else rows[0]["date"], "title": titles.get(rows[0]["session_id"]),
                       "category": cat, "kinds": [r["kind"] for r in rows], "preview": prev, "status": st.get(tid) if st.get(tid) in ("reviewed", "false_positive") else "open"})
     return sorted(items, key=lambda i: (i["ts"] is not None, i["ts"] or datetime.min, i["turn_id"]), reverse=True)

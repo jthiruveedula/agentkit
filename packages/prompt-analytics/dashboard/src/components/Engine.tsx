@@ -66,10 +66,9 @@ export function EnginePill({ d, onData }: { d: DashboardData; onData: (d: Dashbo
       <button ref={btn} type="button" className="pill" aria-expanded={open} aria-controls="eng-pop" onClick={() => setOpen((o) => !o)}>
         <span className="pill-dot" data-mode={e.mode} aria-hidden="true" />{pillText(e)}
       </button>
-      <p className="tone">{TONE[e.mode]}</p>
       {open && (
         <div id="eng-pop" className="pop" role="group" aria-label="Analysis engine">
-          <p className="pop-reason">{e.reason || `Ran at the ${e.mode} tier.`}</p>
+          <p className="pop-reason">{e.reason || `Ran at the ${e.mode} tier.`} {TONE[e.mode]}</p>
           <div className="seg" role="group" aria-label="Analysis tier">
             {TIERS.map((t) => {
               const ok = canSwitch && avail(t.id) && !busy;

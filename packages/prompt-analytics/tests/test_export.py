@@ -12,7 +12,7 @@ from prompt_analytics.config import Config
 from prompt_analytics.schema import DDL
 
 KEYS = {"schema", "generated_at", "range", "engine", "sources", "totals", "by_source", "calendar", "hour_week", "cost_river", "anomalies", "ttr",
-        "funnel", "tool_switch", "friction", "galaxy", "quality", "what_works", "exposure", "insights", "recommendations"}
+        "funnel", "tool_switch", "friction", "galaxy", "quality", "what_works", "sessions", "exposure", "insights", "recommendations"}
 
 
 @pytest.fixture(scope="module")
@@ -41,6 +41,8 @@ def test_exposure_items_and_exclusions(built):
     assert {i["category"] for i in items} == {"phi", "secret", "pii"}
     assert all(i["kinds"] == sorted(i["kinds"]) and len(i["preview"]) <= 160 for i in items)
     assert any("⟦" in i["preview"] for i in items)
+    ids = {r["id"] for r in d["sessions"]}
+    assert all(i["session"] in ids for i in items)  # the UI groups the queue per session
     assert sum(c["sessions"] for c in ex["by_category"] if c["category"] == "phi") == 2
 
 
@@ -83,3 +85,18 @@ def test_export_has_no_raw_session_text(built):
     _, d = built
     blob = json.dumps(d)
     assert "@" not in blob and "jane" not in blob  # only redaction placeholders survive
+
+
+def test_sessions_rows(built):
+    _, d = built
+    rows, tot = d["sessions"], d["totals"]["sessions"]
+    assert len(rows) == min(tot, export.MAX_SESSIONS) and len({r["id"] for r in rows}) == len(rows)
+    assert [r["date"] for r in rows] == sorted((r["date"] for r in rows), reverse=True)
+    keys = {"id", "source", "date", "project", "intent", "prompts", "tokens", "cost_usd", "reached_stage", "applied", "loops", "friction", "cluster", "title"}
+    assert all(set(r) == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS for r in rows)
+    assert sum(r["prompts"] for r in rows) <= d["totals"]["prompts"] + 1 and all("@" not in r["title"] for r in rows)
+    # unpriced sources get null cost, never 0
+    by = {s["source"]: s["cost_usd"] for s in d["by_source"]}
+    for r in rows:
+        if by[r["source"]] == 0:
+            assert r["cost_usd"] is None
