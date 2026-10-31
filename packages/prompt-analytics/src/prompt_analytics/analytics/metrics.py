@@ -93,17 +93,18 @@ def session_frame(b: Base) -> pl.DataFrame:
     """One row per session: resolved start/end, tokens, cost, UTC date."""
     t = b.turns.group_by("session_id").agg(
         pl.col("tokens_in").sum().alias("t_in"), pl.col("tokens_out").sum().alias("t_out"),
-        pl.col("cost_usd").sum().alias("t_cost"), pl.col("ts").min().alias("t_first"), pl.col("ts").max().alias("t_last"),
+        pl.col("cost_usd").sum().alias("t_cost"), pl.col("cost_usd").is_not_null().any().alias("t_priced"), pl.col("ts").min().alias("t_first"), pl.col("ts").max().alias("t_last"),
     )
     s = b.sessions.join(t, on="session_id", how="left").with_columns(
         pl.coalesce("started_at", "t_first").alias("started"),
         pl.coalesce("ended_at", "t_last", "started_at", "t_first").alias("ended"),
         (pl.coalesce("tokens_in", "t_in", pl.lit(0)) + pl.coalesce("tokens_out", "t_out", pl.lit(0))).alias("tokens"),
         pl.coalesce("cost_usd", "t_cost", pl.lit(0.0)).alias("cost"),
+        (pl.col("cost_usd").is_not_null() | pl.col("t_priced").fill_null(False)).alias("priced"),
     )
     return s.with_columns(pl.col("started").dt.date().alias("date")).select(
         "session_id", "source", "project_id", "is_subagent", "model", "started", "ended", "date", "tokens", "cost",
-        "cost_is_estimate",
+        "cost_is_estimate", "priced",
     ).sort("session_id")
 
 

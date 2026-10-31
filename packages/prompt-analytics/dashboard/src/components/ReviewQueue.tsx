@@ -20,6 +20,15 @@ function Masked({ text }: { text: string }) {
 }
 
 export interface Group { key: string; source: Source; date: string; title: string | null; items: ExposureItem[] }
+/** Items of one session with an identical masked preview (e.g. the same output every turn) collapse into one row. */
+export function collapse(items: ExposureItem[]): ExposureItem[][] {
+  const m = new Map<string, ExposureItem[]>();
+  for (const it of items) {
+    const k = it.preview === null ? `id:${it.id}` : `${it.kinds.join()}|${it.preview}`;
+    m.set(k, [...(m.get(k) ?? []), it]);
+  }
+  return [...m.values()];
+}
 /** One group per session (items without a session id stand alone). Order follows the first item of each group. */
 export function groupBySession(items: ExposureItem[]): Group[] {
   const m = new Map<string, Group>();
@@ -33,7 +42,9 @@ export function groupBySession(items: ExposureItem[]): Group[] {
 
 type Api = NonNullable<ReturnType<typeof getApi>>;
 
-function Row({ it, api, status, onReview }: { it: ExposureItem; api: Api | null; status: Status; onReview: (id: string, s: Status) => void }) {
+function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | null; status: Status; onReview: (id: string, s: Status) => void }) {
+  const it = its[0];
+  const review = (s: Status) => its.forEach((x) => onReview(x.id, s));
   // Revealed text lives only here and is dropped on hide/unmount.
   const [found, setFound] = useState<RevealFinding[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -67,7 +78,7 @@ function Row({ it, api, status, onReview }: { it: ExposureItem; api: Api | null;
 
   return (
     <li ref={li} className="rq-row" data-status={status}>
-      <div className="rq-kinds">{it.kinds.map((k) => <span key={k} className="chip" data-cat={it.category}>{name(k)}</span>)}</div>
+      <div className="rq-kinds">{it.kinds.map((k) => <span key={k} className="chip" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="chip" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</div>
       {found ? (
         <div className="rq-box" role="group" aria-label="Sensitive original, revealed">
           {found.map((f, i) => <p key={i}>{f.before}<mark>{f.value}</mark>{f.after}</p>)}
@@ -86,13 +97,13 @@ function Row({ it, api, status, onReview }: { it: ExposureItem; api: Api | null;
           aria-label={`${shown ? "Hide" : "Reveal"} sensitive prompt from ${when}`} onClick={toggle}>{busy ? "Loading" : shown ? "Hide" : "Reveal"}</button>
         {status === "open" ? (
           <>
-            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as reviewed`} onClick={() => onReview(it.id, "reviewed")}>Reviewed</button>
-            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as not sensitive`} onClick={() => onReview(it.id, "false_positive")}>Not sensitive</button>
+            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as reviewed`} onClick={() => review("reviewed")}>Reviewed</button>
+            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as not sensitive`} onClick={() => review("false_positive")}>Not sensitive</button>
           </>
         ) : (
           <>
             <span className="chip status">{STATUS_NAME[status]}</span>
-            <button type="button" className="btn" disabled={!api} aria-label={`Undo, reopen prompt from ${when}`} onClick={() => onReview(it.id, "open")}>Undo</button>
+            <button type="button" className="btn" disabled={!api} aria-label={`Undo, reopen prompt from ${when}`} onClick={() => review("open")}>Undo</button>
           </>
         )}
       </div>
@@ -149,7 +160,10 @@ export function ReviewQueue({ items }: { items: ExposureItem[] }) {
                 <span className="meta">{g.items.length} {g.items.length === 1 ? "finding" : "findings"}</span>
                 {open > 1 && api ? <button type="button" className="btn" aria-label={`Mark all ${open} open findings in ${g.title ?? "this session"} as reviewed`} onClick={() => markAll(g, "reviewed")}>Reviewed all</button> : null}
               </div>
-              <ul>{g.items.map((it) => <Row key={it.id} it={it} api={api} status={over[it.id] ?? it.status} onReview={review} />)}</ul>
+              <ul>{collapse(g.items).map((its) => {
+                const sts = its.map((i) => over[i.id] ?? i.status);
+                return <Row key={its[0].id} its={its} api={api} status={sts.includes("open") ? "open" : sts[0]} onReview={review} />;
+              })}</ul>
             </li>
           );
         })}</ul>

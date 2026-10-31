@@ -92,6 +92,21 @@ def test_detect_needs_history_and_flags_spike():
     assert [r["date"] for r in anomaly.flagged(rows)] == [dates[-1]]
 
 
+def test_spike_needs_materiality():
+    d0 = date(2026, 1, 1)
+    dates = [d0 + timedelta(days=i) for i in range(20)]
+    # mostly-$0 history: z is huge for $0.90 but it is not a material spike; $12 is
+    vals = [0.0] * 8 + [0.1, 0.0, 0.2] + [0.0] * 8 + [0.9]
+    rows = anomaly.detect(dates, vals)
+    assert dates[-1] in [r["date"] for r in anomaly.flagged(rows)]  # passes z and p75 alone
+    assert anomaly.flagged(rows, min_value=5.0) == []  # absolute floor drops it
+    rows = anomaly.detect(dates, vals[:-1] + [12.0])
+    assert [r["date"] for r in anomaly.flagged(rows, min_value=5.0)] == [dates[-1]]
+    # below the nonzero p75 of its own history: never flagged
+    rows = anomaly.detect(dates, [0.0] * 8 + [50.0, 60, 70] + [0.0] * 8 + [10.0])
+    assert dates[-1] not in [r["date"] for r in anomaly.flagged(rows)]
+
+
 def test_bh_fdr_and_cliffs():
     assert whatworks.bh_fdr([0.001, 0.009, 0.2, 0.5]) == [True, True, False, False]
     assert whatworks.bh_fdr([0.5, 0.6]) == [False, False]

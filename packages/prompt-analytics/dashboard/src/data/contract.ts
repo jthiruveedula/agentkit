@@ -74,6 +74,7 @@ export interface DashboardData {
     validation: { spearman: number | null; n: number };
   };
   what_works: { cluster: number; feature: string; effect: number; ci: [number, number]; n: number; direction: "helps" | "hurts" }[];
+  what_works_tested: number;                        // effect tests run (0 = none ran); what_works holds only those that passed the gates
 
   // Per-session rows for drilldowns and client-side cross-filtering. Non-subagent sessions only, newest first,
   // capped at 5000. `title` is a redacted snippet (<= 160 chars), "" when the session has none. `cost_usd` is null

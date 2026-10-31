@@ -51,9 +51,10 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   return out;
 }
 
-export interface Tally { key: string; sessions: number; prompts: number; tokens: number; cost: number | null; applied: number; friction: number }
+/** Rates (applied, friction, loops) use sessions with >= 1 prompt as the denominator: empty chats can't apply or struggle. */
+export interface Tally { key: string; sessions: number; asked: number; prompts: number; tokens: number; cost: number | null; applied: number; friction: number }
 export interface Totals {
-  sessions: number; prompts: number; tokens: number; cost: number | null; unpriced: number; projects: number;
+  sessions: number; asked: number; prompts: number; tokens: number; cost: number | null; unpriced: number; projects: number;
   activeDays: number; longest: number; current: number; applied: number; looped: number; friction: number;
 }
 export interface Week { week: string; sessions: number; cost: number; bySource: Partial<Record<Source, number>> }
@@ -95,12 +96,13 @@ function tally(rows: SessionRow[], key: (r: SessionRow) => string): Tally[] {
   const m = new Map<string, Tally & { priced: boolean }>();
   for (const r of rows) {
     const k = key(r);
-    const t = m.get(k) ?? { key: k, sessions: 0, prompts: 0, tokens: 0, cost: 0, applied: 0, friction: 0, priced: false };
-    t.sessions++; t.prompts += r.prompts; t.tokens += r.tokens; t.applied += r.applied ? 1 : 0; t.friction += r.friction;
+    const t = m.get(k) ?? { key: k, sessions: 0, asked: 0, prompts: 0, tokens: 0, cost: 0, applied: 0, friction: 0, priced: false };
+    t.sessions++; t.prompts += r.prompts; t.tokens += r.tokens; t.applied += r.applied ? 1 : 0;
+    if (r.prompts > 0) { t.asked++; t.friction += r.friction; }
     if (r.cost_usd !== null) { t.cost = (t.cost ?? 0) + r.cost_usd; t.priced = true; }
     m.set(k, t);
   }
-  return [...m.values()].map(({ priced, ...t }) => ({ ...t, cost: priced ? t.cost : null, friction: t.friction / t.sessions })).sort((a, b) => b.sessions - a.sessions || a.key.localeCompare(b.key));
+  return [...m.values()].map(({ priced, ...t }) => ({ ...t, cost: priced ? t.cost : null, friction: t.asked ? t.friction / t.asked : 0 })).sort((a, b) => b.sessions - a.sessions || a.key.localeCompare(b.key));
 }
 
 export function views(d: DashboardData, f: Filter): Views {
@@ -122,25 +124,26 @@ export function views(d: DashboardData, f: Filter): Views {
     cc.set(r.cluster, (cc.get(r.cluster) ?? 0) + 1);
   }
   const n = rows.length;
+  const asked = rows.filter((r) => r.prompts > 0);
   const intents = tally(rows, (r) => r.intent);
   return {
     totals: {
-      sessions: n, prompts: rows.reduce((a, r) => a + r.prompts, 0), tokens: rows.reduce((a, r) => a + r.tokens, 0),
+      sessions: n, asked: asked.length, prompts: rows.reduce((a, r) => a + r.prompts, 0), tokens: rows.reduce((a, r) => a + r.tokens, 0),
       cost: priced.length ? priced.reduce((a, r) => a + (r.cost_usd ?? 0), 0) : null, unpriced: n - priced.length,
       projects: new Set(rows.map((r) => r.project).filter(Boolean)).size,
       activeDays: st.days, longest: st.longest, current: st.current,
-      applied: rows.reduce((a, r) => a + (r.applied ? 1 : 0), 0), looped: rows.reduce((a, r) => a + (r.loops > 0 ? 1 : 0), 0),
-      friction: n ? rows.reduce((a, r) => a + r.friction, 0) / n : 0,
+      applied: rows.reduce((a, r) => a + (r.applied ? 1 : 0), 0), looped: asked.reduce((a, r) => a + (r.loops > 0 ? 1 : 0), 0),
+      friction: asked.length ? asked.reduce((a, r) => a + r.friction, 0) / asked.length : 0,
     },
     sources: tally(rows, (r) => r.source).filter((t) => t.prompts > 0 || t.sessions > 0),
     intents, projects: tally(rows, (r) => r.project || "(no project)"),
     calendar: [...cal.values()].sort((a, b) => a.date.localeCompare(b.date)),
     weeks: [...wk.values()].sort((a, b) => a.week.localeCompare(b.week)),
     funnel: counts(rows),
-    funnelBySource: [...new Set(rows.map((r) => r.source))].sort().map((key) => ({ key, counts: counts(rows.filter((r) => r.source === key)) })),
+    funnelBySource: [...new Set(rows.map((r) => r.source))].sort().map((key) => ({ key, counts: counts(rows.filter((r) => r.source === key)) })).filter((x) => x.counts[0] > 0),
     funnelByIntent: intents.map((t) => ({ key: t.key, counts: counts(rows.filter((r) => r.intent === t.key)) })),
-    loops: Array.from({ length: MAX_LOOPS + 1 }, (_, i) => ({ loops: i, sessions: rows.reduce((a, r) => a + ((i === MAX_LOOPS ? r.loops >= MAX_LOOPS : r.loops === i) ? 1 : 0), 0) })),
-    frictionByIntent: intents.map((t) => ({ intent: t.key, friction: t.friction, n: t.sessions })).sort((a, b) => b.friction - a.friction),
+    loops: Array.from({ length: MAX_LOOPS + 1 }, (_, i) => ({ loops: i, sessions: asked.reduce((a, r) => a + ((i === MAX_LOOPS ? r.loops >= MAX_LOOPS : r.loops === i) ? 1 : 0), 0) })),
+    frictionByIntent: intents.filter((t) => t.asked > 0).map((t) => ({ intent: t.key, friction: t.friction, n: t.asked })).sort((a, b) => b.friction - a.friction),
     clusterCounts: cc, rows, legacy: false,
   };
 }
@@ -148,7 +151,7 @@ export function views(d: DashboardData, f: Filter): Views {
 /** Exports from before per-session rows: aggregates only, filters do not apply. */
 function legacyViews(d: DashboardData): Views {
   const t = d.totals;
-  const tl = (key: string, sessions: number, prompts = 0, tokens = 0, cost: number | null = null): Tally => ({ key, sessions, prompts, tokens, cost, applied: 0, friction: 0 });
+  const tl = (key: string, sessions: number, prompts = 0, tokens = 0, cost: number | null = null): Tally => ({ key, sessions, asked: sessions, prompts, tokens, cost, applied: 0, friction: 0 });
   const fi = new Map(d.friction.by_intent.map((x) => [x.intent, x.friction]));
   const weeks = new Map<string, Week>();
   for (const r of d.cost_river) {
@@ -159,7 +162,7 @@ function legacyViews(d: DashboardData): Views {
   }
   const sum = (xs: { counts: number[] }[]) => STAGES.map((_, i) => xs.reduce((a, x) => a + (x.counts[i] ?? 0), 0));
   return {
-    totals: { sessions: t.sessions, prompts: t.prompts, tokens: t.tokens, cost: t.cost_usd, unpriced: 0, projects: t.projects, activeDays: t.active_days, longest: t.longest_streak, current: t.current_streak, applied: 0, looped: 0, friction: 0 },
+    totals: { sessions: t.sessions, asked: sum(d.funnel.by_source)[0], prompts: t.prompts, tokens: t.tokens, cost: t.cost_usd, unpriced: 0, projects: t.projects, activeDays: t.active_days, longest: t.longest_streak, current: t.current_streak, applied: 0, looped: 0, friction: 0 },
     sources: d.by_source.filter((s) => s.prompts > 0).map((s) => tl(s.source, s.sessions, s.prompts, s.tokens, s.cost_usd > 0 ? s.cost_usd : null)),
     intents: d.funnel.by_intent.map((x) => tl(x.intent, x.counts[0] ?? 0)), projects: [],
     calendar: d.calendar.map((c) => ({ ...c, cost: c.cost_usd })), weeks: [...weeks.values()].sort((a, b) => a.week.localeCompare(b.week)),

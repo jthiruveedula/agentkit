@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Dashboard } from "../App";
-import { groupBySession } from "../components/ReviewQueue";
+import { collapse, groupBySession } from "../components/ReviewQueue";
 import { normalize } from "../data/load";
 import { views } from "../lib/filter";
 import sample from "../data/sample.dev.json";
@@ -112,5 +112,13 @@ describe("exposure grouping", () => {
     act(() => root!.render(<Dashboard d={d} initialFilter={{ source: src }} />));
     click(el.querySelector("#tab-friction"));
     expect(el.querySelectorAll(".rq-group").length).toBe(Math.min(8, want));
+  });
+});
+
+describe("review queue collapse", () => {
+  it("merges identical previews within a session and keeps every id", () => {
+    const it = (id: string, preview: string | null) => ({ id, session: "s", source: "copilot" as const, date: "2026-01-01", session_title: null, category: "pii" as const, kinds: ["email"], preview, status: "open" as const });
+    const out = collapse([it("a", "x"), it("b", "x"), it("c", "y"), it("d", null), it("e", null)]);
+    expect(out.map((g) => g.map((i) => i.id))).toEqual([["a", "b"], ["c"], ["d"], ["e"]]);
   });
 });

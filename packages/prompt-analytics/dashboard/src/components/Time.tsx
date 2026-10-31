@@ -94,7 +94,7 @@ export function Time() {
       <Panel title="Activity" meta="sessions per day, darker is busier" span={8}><Calendar /></Panel>
       <Panel title="Anomalies" meta={m ?? "rolling median/MAD"} span={4}>
         {an.length === 0 ? <Empty>No unusual days</Empty> : (
-          <ul className="rows">
+          <ul className="rows cap">
             {an.map((a) => (
               <li key={`${a.date}${a.metric}`} className="rowb">
                 <button type="button" className="link" style={{ textAlign: "left", padding: 0 }} aria-label={`${fmtDate(a.date)} ${a.metric} spike, z ${capZ(a.z)}. Open sessions`} onClick={() => drill({ from: a.date, to: a.date })}>{fmtDate(a.date)} · {a.metric}</button>

@@ -6,6 +6,20 @@ import sample from "../data/sample.dev.json";
 const d = normalize(sample);
 const rows = d.sessions;
 
+describe("rates use sessions with a prompt", () => {
+  it("empty sessions stay out of the applied/friction/funnel denominators", () => {
+    const base = rows[0];
+    const empty = { ...base, id: "e", source: "antigravity" as const, prompts: 0, reached_stage: 0, applied: false, loops: 0, friction: 0 };
+    const v = views({ ...d, sessions: [{ ...base, prompts: 2, reached_stage: 5, applied: true, friction: 0.5, loops: 0 }, empty] }, {});
+    expect(v.totals.sessions).toBe(2);
+    expect(v.totals.asked).toBe(1);
+    expect(v.totals.friction).toBe(0.5);
+    expect(v.loops[0].sessions).toBe(1);
+    expect(v.funnel[0]).toBe(1);
+    expect(v.funnelBySource.map((x) => x.key)).toEqual([base.source]);
+  });
+});
+
 describe("cross-filter", () => {
   it("sample has per-session rows and unpriced sources", () => {
     expect(rows.length).toBeGreaterThan(100);

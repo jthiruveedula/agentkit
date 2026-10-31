@@ -11,7 +11,7 @@ from prompt_analytics import analyze, export, insights
 from prompt_analytics.config import Config
 from prompt_analytics.schema import DDL
 
-KEYS = {"schema", "generated_at", "range", "engine", "sources", "totals", "by_source", "calendar", "hour_week", "cost_river", "anomalies", "ttr",
+KEYS = {"schema", "generated_at", "range", "engine", "sources", "totals", "by_source", "calendar", "hour_week", "cost_river", "anomalies", "ttr", "what_works_tested",
         "funnel", "tool_switch", "friction", "galaxy", "quality", "what_works", "sessions", "exposure", "insights", "recommendations"}
 
 

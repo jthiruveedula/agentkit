@@ -7,36 +7,6 @@
    "z": 66.019408
   },
   {
-   "date": "2026-09-10",
-   "metric": "cost",
-   "value": 0.528113,
-   "z": 6.104754
-  },
-  {
-   "date": "2026-04-03",
-   "metric": "cost",
-   "value": 0.422959,
-   "z": 4.535049
-  },
-  {
-   "date": "2026-09-03",
-   "metric": "cost",
-   "value": 0.481008,
-   "z": 4.531468
-  },
-  {
-   "date": "2026-07-08",
-   "metric": "cost",
-   "value": 0.564001,
-   "z": 4.270373
-  },
-  {
-   "date": "2026-03-13",
-   "metric": "cost",
-   "value": 0.469,
-   "z": 3.735471
-  },
-  {
    "date": "2026-03-12",
    "metric": "prompts",
    "value": 12.0,
@@ -76,11 +46,11 @@
  "by_source": [
   {
    "cost_is_estimate": true,
-   "cost_usd": 26.729313,
+   "cost_usd": 26.704668,
    "prompts": 400,
    "sessions": 163,
    "source": "claude_code",
-   "tokens": 4312370
+   "tokens": 4307139
   },
   {
    "cost_is_estimate": true,
@@ -609,7 +579,7 @@
    "sessions": 1
   },
   {
-   "cost_usd": 0.170176,
+   "cost_usd": 0.145531,
    "date": "2026-06-10",
    "prompts": 5,
    "sessions": 3
@@ -1249,7 +1219,7 @@
   {
    "date": "2026-06-08",
    "values": {
-    "claude_code": 0.215109,
+    "claude_code": 0.190464,
     "copilot": 0.318181,
     "cursor": 0.408466,
     "opencode": 0.243159
@@ -5398,7 +5368,7 @@
    ]
   }
  },
- "generated_at": "2026-10-31T19:08:18Z",
+ "generated_at": "2026-10-31T19:25:33Z",
  "hour_week": [
   {
    "dow": 0,
@@ -5913,7 +5883,7 @@
    "metric": "cost share",
    "rank": 2,
    "unit": "%",
-   "value": 57.5604
+   "value": 57.5379
   },
   {
    "chapter": "footprint",
@@ -6090,7 +6060,7 @@
   },
   {
    "chapter": "recommend",
-   "claim": "7 evidence-backed changes to try next",
+   "claim": "6 evidence-backed changes to try next",
    "delta": null,
    "drill": {
     "chapter": "recommend",
@@ -6098,13 +6068,13 @@
    },
    "evidence": {
     "method": "templated from top findings",
-    "n": 7
+    "n": 6
    },
    "id": "recommend.headline",
    "metric": "recommendations",
    "rank": 1,
    "unit": "",
-   "value": 7.0
+   "value": 6.0
   },
   {
    "chapter": "recommend",
@@ -6194,7 +6164,7 @@
    "metric": "summary:spend",
    "rank": 6,
    "unit": "USD",
-   "value": 46.437
+   "value": 46.4123
   },
   {
    "chapter": "time",
@@ -6259,21 +6229,21 @@
   },
   {
    "chapter": "time",
-   "claim": "Your daily cost spiked to $1 on 2026-09-10",
-   "delta": 2.3938,
+   "claim": "Your daily prompts spiked to 11 on 2026-08-18",
+   "delta": 2.6667,
    "drill": {
     "chapter": "time",
     "filter": {}
    },
    "evidence": {
     "method": "rolling median/MAD robust z, 28d",
-    "n": 20
+    "n": 24
    },
-   "id": "time.anomaly.cost.2026-09-10",
-   "metric": "daily cost",
+   "id": "time.anomaly.prompts.2026-08-18",
+   "metric": "daily prompts",
    "rank": 4,
-   "unit": "USD",
-   "value": 0.5281
+   "unit": "",
+   "value": 11.0
   },
   {
    "chapter": "works",
@@ -6419,16 +6389,9 @@
    "title": "Try Cursor first for refactor"
   },
   {
-   "action": "Review 2026-09-10 (cost $1) and set an alert above your normal daily range.",
-   "evidence_insight": "time.anomaly.cost.2026-09-10",
-   "id": "rec.6",
-   "impact": "A single day far outside the trailing 28-day range",
-   "title": "Set a daily spend alert"
-  },
-  {
    "action": "Start refactor tasks in Cursor; it lands code more often than Claude Code in your history.",
    "evidence_insight": "funnel.applied.refactor",
-   "id": "rec.7",
+   "id": "rec.6",
    "impact": "1.4x gap (descriptive, not causal)",
    "title": "Try Cursor first for refactor"
   }
@@ -12948,13 +12911,13 @@
  "totals": {
   "active_days": 166,
   "commits_linked": 162,
-  "cost_usd": 46.436955,
+  "cost_usd": 46.41231,
   "current_streak": 4,
   "longest_streak": 16,
   "projects": 6,
   "prompts": 895,
   "sessions": 399,
-  "tokens": 9613622
+  "tokens": 9608391
  },
  "ttr": [
   {
@@ -13108,5 +13071,6 @@
    "source": "opencode"
   }
  ],
- "what_works": []
+ "what_works": [],
+ "what_works_tested": 20
 }

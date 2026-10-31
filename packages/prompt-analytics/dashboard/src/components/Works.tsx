@@ -72,7 +72,7 @@ function Effects({ d }: { d: DashboardData }) {
   const top = Math.max(...rows.map((r) => Math.abs(r.effect)), 0);
   return (
     <Panel title="What moves success" meta="effect on success rate, 95% CI" span={7}>
-      {rows.length === 0 ? <Empty>No prompt effects measured yet</Empty> : (
+      {rows.length === 0 ? <Empty>{d.what_works_tested > 0 ? `No effect passed FDR correction (n=${fmtInt(d.what_works_tested)} tested)` : "No prompt effects measured yet"}</Empty> : (
         <BarList label="Prompt feature effects on success" max={top} rows={rows.map((r) => ({
           key: `${r.feature}${r.cluster}`, label: r.feature, value: Math.abs(r.effect), color: r.direction === "helps" ? "var(--good)" : "var(--bad)", text: pts(r.effect),
           sub: `${lab.get(r.cluster) ?? `topic ${r.cluster}`} · CI ${pts(r.ci[0])} to ${pts(r.ci[1])} · n=${fmtInt(r.n)}`,

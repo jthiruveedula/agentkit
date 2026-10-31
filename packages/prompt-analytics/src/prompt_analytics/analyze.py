@@ -255,13 +255,14 @@ def run(cfg: Config, con: duckdb.DuckDBPyConnection, mode: str | None = None) ->
 
     # ---- what works
     ww: list[dict] = []
+    ww_stats: dict[str, int] = {"tested": 0}
     nc = pfs.filter(pl.col("cluster_id") >= 0).height
     if nc:
         mc = max(30, min(100, nc // 15))
         if tier == "basic":
-            ww = whatworks.rate_diffs(pfs.filter(pl.col("sub")).sort("session_id", "idx").unique(subset="session_id", keep="first", maintain_order=True))
+            ww = whatworks.rate_diffs(pfs.filter(pl.col("sub")).sort("session_id", "idx").unique(subset="session_id", keep="first", maintain_order=True), stats=ww_stats)
         else:
-            ww = whatworks.analyze(pfs, min_cluster=mc, min_group=max(10, mc // 3))
+            ww = whatworks.analyze(pfs, min_cluster=mc, min_group=max(10, mc // 3), stats=ww_stats)
 
     # ---- daily + anomaly z (per source, cost)
     daily = mx.daily_frame(sess, mx.prompt_frame(b, sess))
@@ -301,7 +302,7 @@ def run(cfg: Config, con: duckdb.DuckDBPyConnection, mode: str | None = None) ->
     rep.engine = {"mode": tier, "requested": requested if requested in capabilities.MODES else "auto", "available": pr["available"], "libs": pr["libs"],
                   "accel": pr["accel"], "reason": rep.reason, "upgrade": pr["upgrade"], "methods": COMMON | METHODS[tier]}
     meta = {"engine": json.dumps(rep.engine), "mode": rep.mode, "backend": backend, "cluster_method": rep.cluster_method, "intents_version": spec.version,
-            "spearman": "" if val["spearman"] is None else str(val["spearman"]), "spearman_n": str(val["n"]),
+            "spearman": "" if val["spearman"] is None else str(val["spearman"]), "spearman_n": str(val["n"]), "ww_tested": str(ww_stats["tested"]),
             "auc": "" if val["auc"] is None else str(val["auc"]), "analyzed_at": datetime.now(timezone.utc).isoformat()}
     mx.put(con, "analysis_meta", pl.DataFrame({"key": list(meta), "value": list(meta.values())}), tmp)
     try:

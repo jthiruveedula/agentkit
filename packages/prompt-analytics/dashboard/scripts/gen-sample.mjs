@@ -184,7 +184,7 @@ const data = {
   engine: { mode: "ml", requested: "auto", available: ["basic", "ml"], libs: { duckdb: "1.1.3", scikit_learn: "1.9.1", fastembed: null }, accel: "cpu", reason: "auto: scikit-learn 1.9.1 found, no embedding model", upgrade: { mode: "deep", command: "pip install 'prompt-analytics[deep]'" }, methods: { footprint: "Counted from session logs", time: "Rolling z-score plus IsolationForest on daily cost", funnel: "Rule-based stage detection per session", friction: "Loop and retry heuristics", works: "TF-IDF + KMeans clusters; logistic model with bootstrap CI", recommend: "Ranked from the strongest evidence" } },
   totals: { sessions: totSessions, prompts: totPrompts, tokens: totTokens, cost_usd: r2(totCost), active_days: calendar.length, longest_streak: longest, current_streak: cur, projects: PROJECTS.length, commits_linked: Math.round(totSessions * 0.34) },
   by_source, calendar, hour_week, cost_river, anomalies, ttr, funnel, tool_switch, friction,
-  galaxy: { clusters, points: { x: px, y: py, c: pc, q: pq } }, quality, what_works, sessions, exposure, insights, recommendations,
+  galaxy: { clusters, points: { x: px, y: py, c: pc, q: pq } }, quality, what_works, what_works_tested: what_works.length + 40, sessions, exposure, insights, recommendations,
 };
 writeFileSync(new URL("../src/data/sample.dev.json", import.meta.url), JSON.stringify(data));
 console.log("sample.dev.json", JSON.stringify(data).length, "bytes");

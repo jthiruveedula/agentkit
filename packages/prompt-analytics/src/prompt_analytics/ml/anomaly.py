@@ -22,7 +22,8 @@ def robust_z(x: float, window: np.ndarray) -> float:
 
 
 def detect(dates: list[date], values: list[float], window_days: int = 28, min_prior: int = 7) -> list[dict]:
-    """Per active day: z (None until ``min_prior`` prior active days), trailing median and prior count."""
+    """Per active day: z (None until ``min_prior`` prior active days), trailing median, prior count and ``floor``
+    (75th percentile of the window's nonzero values: a spike must be at least this large to matter)."""
     order = sorted(range(len(dates)), key=lambda i: dates[i])
     ds = [dates[i] for i in order]
     vs = np.asarray([values[i] for i in order], dtype=float)
@@ -33,11 +34,15 @@ def detect(dates: list[date], values: list[float], window_days: int = 28, min_pr
             lo += 1
         w = vs[lo:i]
         if len(w) >= min_prior:
-            out.append({"date": d, "value": float(vs[i]), "z": robust_z(float(vs[i]), w), "median": float(np.median(w)), "n_prior": len(w)})
+            nz = w[w > 0]
+            out.append({"date": d, "value": float(vs[i]), "z": robust_z(float(vs[i]), w), "median": float(np.median(w)), "n_prior": len(w),
+                        "floor": float(np.percentile(nz, 75)) if nz.size else 0.0})
         else:
-            out.append({"date": d, "value": float(vs[i]), "z": None, "median": None, "n_prior": len(w)})
+            out.append({"date": d, "value": float(vs[i]), "z": None, "median": None, "n_prior": len(w), "floor": None})
     return out
 
 
-def flagged(rows: list[dict], thr: float = Z_THRESHOLD) -> list[dict]:
-    return [r for r in rows if r["z"] is not None and abs(r["z"]) >= thr]
+def flagged(rows: list[dict], thr: float = Z_THRESHOLD, min_value: float = 0.0) -> list[dict]:
+    """Rows with |z| >= thr. Positive spikes must also be material: >= the window's nonzero p75 and >= ``min_value``
+    (a $0.90 day is not a spike just because the trailing window is mostly $0 and MAD ~ 0)."""
+    return [r for r in rows if r["z"] is not None and abs(r["z"]) >= thr and (r["z"] < 0 or (r["value"] >= r["floor"] and r["value"] >= min_value))]

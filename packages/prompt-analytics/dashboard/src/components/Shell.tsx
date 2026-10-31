@@ -48,11 +48,11 @@ export function Kpis() {
   const cost = t.cost === null ? "not priced" : fmtUSD(t.cost);
   return (
     <dl className="kpis" aria-label="Totals for the current selection">
-      <div className="kpi"><dt>Sessions</dt><dd>{fmtInt(t.sessions)}</dd></div>
-      <div className="kpi"><dt>Prompts</dt><dd>{fmtCompact(t.prompts)}<small>{fmtInt(t.prompts)} total</small></dd></div>
+      <div className="kpi"><dt>Sessions</dt><dd>{fmtInt(t.sessions)}{t.asked < t.sessions ? <small>{fmtInt(t.asked)} with a prompt</small> : null}</dd></div>
+      <div className="kpi"><dt>Prompts</dt><dd>{fmtCompact(t.prompts)}{t.asked ? <small>{(t.prompts / t.asked).toFixed(1)} per session</small> : null}</dd></div>
       <div className="kpi"><dt>Tokens</dt><dd>{fmtCompact(t.tokens)}</dd></div>
       <div className="kpi"><dt>Cost</dt><dd>{cost}{t.cost !== null && t.unpriced > 0 ? <small>{fmtInt(t.unpriced)} sessions not priced</small> : null}</dd></div>
-      <div className="kpi"><dt>Applied</dt><dd>{t.sessions ? fmtPct(t.applied / t.sessions) : "0%"}<small>{fmtInt(t.applied)} sessions</small></dd></div>
+      <div className="kpi"><dt>Applied</dt><dd>{t.asked ? fmtPct(t.applied / t.asked) : "0%"}<small>{fmtInt(t.applied)} of {fmtInt(t.asked)} with a prompt</small></dd></div>
       <div className="kpi"><dt>Active days</dt><dd>{fmtInt(t.activeDays)}<small>streak {t.longest} longest, {t.current} now</small></dd></div>
       <div className="kpi"><dt>Projects</dt><dd>{fmtInt(t.projects)}</dd></div>
     </dl>

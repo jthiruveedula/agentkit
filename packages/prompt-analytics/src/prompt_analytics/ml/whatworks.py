@@ -47,10 +47,10 @@ def tercile_groups(score: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def analyze(df: pl.DataFrame, min_cluster: int = 100, min_group: int = 30, min_abs: float = 0.2, q: float = 0.1,
-            B: int = 1000, max_group: int = 100) -> list[dict]:
+            B: int = 1000, max_group: int = 100, stats: dict | None = None) -> list[dict]:
     """``df``: one row per prompt with cluster_id, outcome_score and the q_* columns. Returns significant
     effects only (|delta| >= min_abs, CI excludes 0, BH q); everything else is 'insufficient data'.
-    direction 'helps' = the feature is higher in top-outcome prompts."""
+    direction 'helps' = the feature is higher in top-outcome prompts. ``stats["tested"]`` gets the number of tests run."""
     rng = np.random.default_rng(0)
     tests = []
     for cid in sorted(df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()):
@@ -70,6 +70,8 @@ def analyze(df: pl.DataFrame, min_cluster: int = 100, min_group: int = 30, min_a
             d = cliffs_delta(a, b)
             lo, hi, p = bootstrap_delta(a, b, B=B, seed=int(cid) * 10 + FEATURES.index(feat))
             tests.append({"cluster": int(cid), "feature": feat, "effect": d, "ci": [lo, hi], "n": int(top.sum() + bot.sum()), "p": p})
+    if stats is not None:
+        stats["tested"] = len(tests)
     keep = bh_fdr([t["p"] for t in tests], q)
     out = [
         {k: t[k] for k in ("cluster", "feature", "effect", "ci", "n")} | {"direction": "helps" if t["effect"] > 0 else "hurts"}
@@ -90,11 +92,11 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float, float]:
     return p, max(0.0, c - h), min(1.0, c + h)
 
 
-def rate_diffs(df: pl.DataFrame, min_cluster: int = 20, min_group: int = 8, min_abs: float = 0.1) -> list[dict]:
+def rate_diffs(df: pl.DataFrame, min_cluster: int = 20, min_group: int = 8, min_abs: float = 0.1, stats: dict | None = None) -> list[dict]:
     """Basic tier (no sklearn): per group, applied-rate of sessions whose first prompt scores high (>=0.5) vs low on a
     quality axis. effect = rate difference, CI by Newcombe's method on Wilson bounds. ``df`` needs cluster_id,
     has_applied and q_* columns, one row per session. ponytail: no multiple-testing correction; the |d| and CI gates stand in."""
-    out = []
+    out, tested = [], 0
     for cid in sorted(df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()):
         g = df.filter((pl.col("cluster_id") == cid) & pl.col("q_specificity").is_not_null() & pl.col("has_applied").is_not_null())
         if g.height < min_cluster:
@@ -104,10 +106,13 @@ def rate_diffs(df: pl.DataFrame, min_cluster: int = 20, min_group: int = 8, min_
             hi = g[COLS[feat]].to_numpy().astype(float) >= 0.5
             if hi.sum() < min_group or (~hi).sum() < min_group:
                 continue
+            tested += 1
             p1, l1, u1 = wilson(int(y[hi].sum()), int(hi.sum()))
             p0, l0, u0 = wilson(int(y[~hi].sum()), int((~hi).sum()))
             d = p1 - p0
             lo, up = d - ((p1 - l1) ** 2 + (u0 - p0) ** 2) ** 0.5, d + ((u1 - p1) ** 2 + (p0 - l0) ** 2) ** 0.5
             if abs(d) >= min_abs and (lo > 0 or up < 0):
                 out.append({"cluster": int(cid), "feature": feat, "effect": d, "ci": [lo, up], "n": g.height, "direction": "helps" if d > 0 else "hurts", "rate": True})
+    if stats is not None:
+        stats["tested"] = tested
     return sorted(out, key=lambda r: (-abs(r["effect"]), r["cluster"], r["feature"]))

@@ -96,6 +96,7 @@ export function normalize(raw: unknown): DashboardData {
       })),
     },
     what_works: arr(raw.what_works),
+    what_works_tested: num(raw.what_works_tested),
     sessions: arr<DashboardData["sessions"][number]>(raw.sessions).map((r) => ({
       id: String(r.id), source: r.source, date: String(r.date ?? "").slice(0, 10), project: String(r.project ?? ""),
       intent: (typeof r.intent === "string" ? r.intent : "other") as never,

@@ -20,6 +20,7 @@ from .privacy import Redactor, harden_tree, write_private
 from .sensitive import ADVICE
 
 MAX_ANOMALIES = 6  # per metric
+MIN_COST_SPIKE = 5.0  # USD; smaller days are never "spikes"
 MAX_SESSIONS = 5000  # newest first; per-session rows for dashboard drilldowns
 
 SCHEMA = "1.0"
@@ -40,7 +41,8 @@ class ExportBlocked(RuntimeError):
 
 def core_sections(b: mx.Base, sess: pl.DataFrame, prompts: pl.DataFrame, sm: pl.DataFrame) -> tuple[dict[str, Any], dict[str, Any]]:
     """Contract sections computable from base tables + session_metrics, plus anomaly detail for insights."""
-    human = sess.filter(~pl.col("is_subagent"))
+    sess = sess.filter(~pl.col("is_subagent"))  # one base for every total: subagent sessions are excluded everywhere (tokens, cost, calendar, river)
+    human = sess
     dates = [d for d in human["date"].to_list() + prompts["pdate"].to_list() if d is not None]
     active, longest, current = mx.streaks(dates)
     dmin, dmax = (min(dates), max(dates)) if dates else (date(1970, 1, 1), date(1970, 1, 1))
@@ -52,8 +54,8 @@ def core_sections(b: mx.Base, sess: pl.DataFrame, prompts: pl.DataFrame, sm: pl.
 
     daily = mx.daily_frame(sess, prompts).group_by("date").agg(pl.col("cost").sum(), pl.col("prompts").sum()).sort("date")
     anoms, extras = [], []
-    for metric, col in (("cost", "cost"), ("prompts", "prompts")):
-        rows = anomaly.flagged(anomaly.detect(daily["date"].to_list(), [float(v) for v in daily[col].to_list()]))
+    for metric, col, floor in (("cost", "cost", MIN_COST_SPIKE), ("prompts", "prompts", 0.0)):
+        rows = anomaly.flagged(anomaly.detect(daily["date"].to_list(), [float(v) for v in daily[col].to_list()]), min_value=floor)
         # spikes only, strongest few: a chart with 20 markers says nothing
         rows = sorted((r for r in rows if r["z"] > 0), key=lambda r: -r["z"])[:MAX_ANOMALIES]
         for r in rows:
@@ -187,16 +189,15 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
         "quality": {"axes": ["specificity", "context", "constraints", "length"], "you": list(qs.get("you", zero)), "top": list(qs.get("top", zero)),
                     "by_source": [{"source": s, "values": list(qs[f"src:{s}"])} for s in mx.SOURCES if f"src:{s}" in qs],
                     "validation": {"spearman": float(rho) if rho not in (None, "") else None, "n": int(float(meta.get("spearman_n", 0)))}},
-        "what_works": ww, "sessions": _sessions(con, b, sess, sm, red), "exposure": {**sec["exposure"], "items": _exposure_items(b, sess, red)}, "insights": ins, "recommendations": recs,
+        "what_works": ww, "what_works_tested": int(float(meta.get("ww_tested") or 0)), "sessions": _sessions(con, b, sess, sm, red), "exposure": {**sec["exposure"], "items": _exposure_items(b, sess, red)}, "insights": ins, "recommendations": recs,
     }
     return _clean(data)
 
 
 def _sessions(con: duckdb.DuckDBPyConnection, b: mx.Base, sess: pl.DataFrame, sm: pl.DataFrame, red: Redactor) -> list[dict[str, Any]]:
     """One row per non-subagent session, newest first, capped. Titles are redacted snippets; no prompt text.
-    cost_usd is null for sources that never record a price (so the UI says "not priced" instead of plotting $0)."""
+    cost_usd is null for sessions with no known price (so the UI says "not priced" instead of plotting $0)."""
     human = sess.filter(~pl.col("is_subagent"))
-    priced = {r["source"] for r in human.group_by("source").agg(pl.col("cost").sum().alias("c")).iter_rows(named=True) if (r["c"] or 0) > 0}
     names = {r[0]: r[1] for r in con.execute("SELECT project_id, name FROM projects").fetchall()}
     titles = dict(b.titles.iter_rows())
     pf = mx.fetch(con, "SELECT turn_id, cluster_id FROM prompt_features WHERE cluster_id IS NOT NULL", {"turn_id": pl.Utf8, "cluster_id": pl.Int64})
@@ -213,7 +214,7 @@ def _sessions(con: duckdb.DuckDBPyConnection, b: mx.Base, sess: pl.DataFrame, sm
         out.append({"id": r["session_id"], "source": r["source"], "date": r["date"].isoformat() if r["date"] else "",
                     "project": (red.redact(name) or "")[:60] if name else "", "intent": x.get("intent") or "other",
                     "prompts": int(x.get("n_user") or 0), "tokens": int(r["tokens"] or 0),
-                    "cost_usd": float(r["cost"] or 0.0) if r["source"] in priced else None,
+                    "cost_usd": float(r["cost"] or 0.0) if r["priced"] else None,
                     "reached_stage": int(x.get("reached_stage") or 0), "applied": bool(x.get("has_applied")),
                     "loops": int(x.get("loops") or 0), "friction": float(x.get("friction") or 0.0),
                     "cluster": int(cl.get(r["session_id"], -1)), "title": (red.redact(" ".join(t.split())) or "")[:SNIPPET] if t else ""})

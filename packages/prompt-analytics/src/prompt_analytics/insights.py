@@ -295,7 +295,7 @@ def _hour_label(h: int) -> str:
 
 
 def _costliest_hour(sess: pl.DataFrame) -> list[dict]:
-    d = sess.filter(pl.col("started").is_not_null() & (pl.col("cost") > 0))
+    d = sess.filter(~pl.col("is_subagent") & pl.col("started").is_not_null() & (pl.col("cost") > 0))
     if d.height < 20:
         return []
     g = d.group_by(pl.col("started").dt.weekday().alias("dow"), pl.col("started").dt.hour().alias("hour")).agg(
