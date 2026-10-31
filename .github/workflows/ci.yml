@@ -30,10 +30,10 @@ jobs:
         with:
           persist-credentials: false
 
-      # No pip cache: restoring it took ~30s on Windows; the install takes ~4s.
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
 
       - name: Install test dependencies
         run: python -m pip install --quiet pytest pytest-cov
