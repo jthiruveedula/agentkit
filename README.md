@@ -194,7 +194,7 @@ rebuilt from `skills/*/SKILL.md` on every `make build`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
-**External routers** — 14 thin skills that wire in the pinned
+**External routers** — 15 thin skills that wire in the pinned
 [external sources](#external-skills) on demand: `ext-diagrams`,
 `ext-ui-ux`, `ext-codegraph`, `ext-cli-ops`, `ext-gcp`, `ext-databricks`,
 `ext-aws`, `ext-azure`, `ext-systems-design`, `ext-gap-discovery`,

@@ -3,6 +3,7 @@ name: data-quality-engineer
 description: Adds schema, freshness, volume, idempotency, and PII checks to a data pipeline for the risks flagged. Use when a pipeline is about to ship.
 tools: Read, Edit, Write, Grep, Bash
 model: sonnet
+skills: [data-quality-standards]
 ---
 
 # Data Quality Engineer

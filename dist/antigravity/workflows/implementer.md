@@ -3,6 +3,7 @@ name: implementer
 description: Makes code changes from a spec or researcher findings, scoped to the named files. Use when the change is already scoped with acceptance criteria.
 tools: Read, Edit, Write, Grep, Glob, Bash
 model: sonnet
+skills: [ext-security-audit]
 ---
 
 # Implementer

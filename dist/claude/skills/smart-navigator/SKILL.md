@@ -11,7 +11,9 @@ Map first, read later. A repo's manifests and skeleton answer
 "where does X live" and "what calls it" faster than reading code.
 See `reference/recon-playbook.md` for the full protocol with a
 worked example. No source, only a shipped build, binary or
-bundle? Use `ext-rea` instead.
+bundle? Use `ext-rea` instead. Repo already indexed by CodeGraph
+(`.codegraph/` exists)? Prefer `ext-codegraph` for symbol and call-path
+questions.
 
 ## Procedure
 
