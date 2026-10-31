@@ -228,3 +228,34 @@ def test_canvas_resolution_is_adaptive_and_capped():
     assert "backdrop-filter" not in re.search(
         r"\.card,details,#gwrap\{[^}]*\}", AUDIT
     ).group(0)
+
+
+def _outline(html):
+    return [int(m) for m in re.findall(r"<h([1-6])[ >]", html)]
+
+
+def test_heading_outline_has_one_h1_and_no_skipped_levels():
+    for html in (INDEX, AUDIT):
+        hs = _outline(html)
+        assert hs.count(1) == 1
+        assert all(b - a <= 1 for a, b in zip(hs, hs[1:]))
+    # audit cards are built by JS: they sit under the h2 "Gallery", so they must be h3
+    assert "el('h3',null,u.name,c)" in AUDIT_JS and "el('h4'" not in AUDIT_JS
+
+
+def test_audit_has_skip_graph_link_before_graph_and_legend_for_bars():
+    i = AUDIT.index('class="skipg" href="#gallery"')
+    assert i < AUDIT.index('id="gwrap"')
+    assert 'id="gallery"' in AUDIT
+    assert ".skipg:focus{position:static" in AUDIT  # visible on focus, not display:none
+    assert 'id="barkey"' in AUDIT and "below 60" in AUDIT
+
+
+def test_no_emoji_glyph_icons_in_audit_ui():
+    assert "⚠" not in AUDIT_JS and "⚠" not in AUDIT
+
+
+def test_visually_hidden_table_cannot_widen_the_page():
+    assert re.search(
+        r"table\.vh\{display:block\}", CSS
+    )  # a 1px table still sizes to content

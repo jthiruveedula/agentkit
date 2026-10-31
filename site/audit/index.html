@@ -17,7 +17,12 @@
 <meta property="og:title" content="agentkit audit — Agent Productivity Score">
 <meta property="og:description" content="Live audit dashboard for agentkit: productivity score, token surface, orchestration graph and findings.">
 <meta property="og:url" content="https://jthiruveedula.github.io/agentkit/audit/">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://jthiruveedula.github.io/agentkit/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="agentkit audit: Agent Productivity Score dashboard">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jthiruveedula.github.io/agentkit/assets/og.png">
 <meta name="twitter:title" content="agentkit audit — Agent Productivity Score">
 <meta name="twitter:description" content="Live audit dashboard for agentkit: productivity score, token surface, orchestration graph and findings.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A//www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='7' fill='%23005F8A'/%3E%3C/svg%3E">
@@ -88,7 +93,8 @@ body.paused .pulse{animation-play-state:paused}
 .node:hover circle,.node:focus-visible circle,.node:hover rect,.node:focus-visible rect{stroke:var(--ink);stroke-width:2.5}
 .node:focus-visible .ring{opacity:1}
 .ring{fill:none;stroke:var(--reg);stroke-width:1.5;opacity:0}
-.node text{font-size:9px;fill:var(--ink2);pointer-events:none}
+.node text{font-size:9px;fill:var(--ink2);pointer-events:none;opacity:0;paint-order:stroke;stroke:var(--paper);stroke-width:3px;stroke-linejoin:round}
+.node.hub text,.node:hover text,.node:focus-visible text{opacity:1}
 #gsvg.hl .edge,#gsvg.hl .pulse{opacity:.08}
 #gsvg.hl .edge.on{stroke:var(--reg);opacity:1}
 #gsvg.hl .pulse.on{opacity:1}
@@ -99,7 +105,12 @@ body.paused .pulse{animation-play-state:paused}
 .legend{display:flex;gap:16px;justify-content:center;margin-top:14px;color:var(--ink2);font-size:.8125rem;flex-wrap:wrap}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:2px solid var(--paper)}
 .legend .s-ok{background:var(--reg)}.legend .s-flag{background:var(--paper);border-color:var(--ink)}.legend .s-idle{background:var(--ui)}
+/* skip the 53 graph tab stops */
+.skipg{position:absolute;left:-9999px;top:auto;padding:10px 18px;border-radius:999px;background:var(--reg);color:var(--paper);font:500 .875rem var(--f2);text-decoration:none}
+.skipg:focus{position:static;display:inline-block;margin-bottom:16px}
 /* gallery */
+.bk{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.bk i{display:inline-block;width:18px;height:6px;border-radius:999px;margin-right:6px;vertical-align:middle;background:var(--reg)}.bk i.w{background:var(--ink)}
 .bar-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:20px}
 .fchip{font:inherit;font-size:.8125rem;text-transform:lowercase;color:var(--ink);padding:7px 14px;cursor:pointer;transition:background .2s,color .2s}
 .fchip[aria-pressed=true]{font-weight:500}
@@ -108,7 +119,7 @@ body.paused .pulse{animation-play-state:paused}
 #pausebtn{margin-left:auto}
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .u{display:block;position:relative;padding:14px;cursor:default}
-.u h4{margin:10px 0 2px;font:700 1.5rem/1 var(--f1);word-break:break-word}
+.u h3{margin:10px 0 2px;font:700 1.5rem/1 var(--f1);word-break:break-word}
 .u .meta{font-size:.75rem;color:var(--ink2);text-transform:lowercase}
 .glyph{height:64px;background:color-mix(in srgb,var(--ink) 6%,transparent);position:relative;overflow:hidden;display:grid;place-items:center}
 .glyph i{position:absolute;background:var(--reg);border-radius:50%;width:6px;height:6px;animation:var(--a,none) 2.4s var(--ease) infinite paused;animation-delay:calc(var(--k,0) * -.4s)}
@@ -154,7 +165,7 @@ body.paused .glyph i{animation-play-state:paused!important}
 .mini .bar{height:3px}
 .mini .bar>i{transition-delay:0s}
 .mini .bar.w>i{background:var(--ink)}
-.flag{color:var(--ink);font-size:.75rem;margin-top:6px;border-left:3px solid var(--ink);padding-left:6px}
+.flag{color:var(--ink);font-size:.75rem;margin-top:8px;padding-top:6px;border-top:1px solid var(--rule)}.flag b{font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
 /* log */
 details{margin-bottom:10px}
 summary{cursor:pointer;padding:14px 18px;font:700 1.5rem/1 var(--f1);list-style:none;display:flex;justify-content:space-between;gap:8px}
@@ -190,14 +201,14 @@ section{padding-top:clamp(72px,10vw,136px);padding-bottom:0}
 .nav a:hover,.nav button:hover{background:color-mix(in srgb,var(--reg) 12%,transparent)}
 .nav button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
 #notice{border-radius:18px;background:var(--card);box-shadow:var(--edge),var(--shadow)}
-#hero{padding-top:130px}
+#hero{padding-top:130px;align-items:flex-start;text-align:left}
 #hero h1{font:500 .875rem/1 var(--f2);text-transform:uppercase;letter-spacing:.06em;color:var(--ink2)}
 #aps{font:900 clamp(8rem,24vw,18rem)/.8 var(--f1);color:var(--reg);font-variant-numeric:tabular-nums}
 .chip{border-radius:999px;background:var(--card);box-shadow:var(--edge)}
 .sub{font-size:1.125rem}
 .card,details,#gwrap{border-radius:22px;background:var(--card);box-shadow:var(--edge),var(--shadow)}
 .kpi .v{font:900 4rem/.9 var(--f1)}
-.u h4{font:500 1.125rem/1.25 var(--sans);letter-spacing:-.01em}
+.u h3{font:500 1.125rem/1.25 var(--sans);letter-spacing:-.01em}
 .act h3{font-size:1.75rem}
 .kpi:hover,.u:hover,.u:focus-visible{transform:translateY(-3px)}
 .bar{height:6px;border-radius:999px}.bar>i{border-radius:inherit}
@@ -259,11 +270,12 @@ footer{font:500 .8125rem var(--f2)}
   <section id="graph" aria-labelledby="h-graph">
     <p class="eyebrow">Orchestration</p>
     <h2 id="h-graph">Node graph</h2>
+    <a class="skipg" href="#gallery">Skip graph, go to gallery</a>
     <div id="gwrap">
       <svg id="gsvg" viewBox="0 0 600 600" role="group" aria-label="Agent and skill relationship graph"></svg>
       <div id="tip" role="tooltip"></div>
     </div>
-    <div class="legend"><span><i class="s-ok"></i>healthy</span><span><i class="s-flag"></i>flagged</span><span><i class="s-idle"></i>idle</span><span>square = agent, circle = skill</span><button class="fchip pausebtn" id="gpause" type="button" aria-pressed="false" hidden>Pause animation</button></div>
+    <div class="legend"><span><i class="s-ok"></i>healthy</span><span><i class="s-flag"></i>flagged</span><span><i class="s-idle"></i>idle</span><span>square = agent, circle = skill. Hover or focus a node for its name.</span><button class="fchip pausebtn" id="gpause" type="button" aria-pressed="false" hidden>Pause animation</button></div>
   </section>
 
   <section id="gallery" aria-labelledby="h-gal">
@@ -271,6 +283,7 @@ footer{font:500 .8125rem var(--f2)}
     <h2 id="h-gal">Gallery</h2>
     <div class="bar-row" id="chips" role="group" aria-label="Filter by tag"></div>
     <p id="count" class="count" role="status" aria-live="polite"></p>
+    <p class="count bk" id="barkey"><span><i></i>PEI, OVS, CRI, SRS score out of 100</span><span><i class="w"></i>solid bar in the text colour, not blue: score below 60</span></p>
     <div id="grid"></div>
     <div id="scoretbl" class="vh"></div>
   </section>
