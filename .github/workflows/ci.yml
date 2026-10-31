@@ -20,9 +20,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        # PRs test the oldest and newest supported Python; pushes to main run
-        # all four. Keeps a PR run under the 20-concurrent-job runner limit.
+        # PRs run Linux only, on the oldest and newest supported Python; macOS
+        # and Windows take 30-45s just to install Python. Pushes to main run
+        # every OS on all four versions, so OS-specific breaks surface there.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-latest"]' || '["ubuntu-latest", "macos-latest", "windows-latest"]') }}
         python-version: ${{ fromJSON(github.event_name == 'pull_request' && '["3.10", "3.13"]' || '["3.10", "3.11", "3.12", "3.13"]') }}
     runs-on: ${{ matrix.os }}
     steps:
