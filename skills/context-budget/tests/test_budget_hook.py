@@ -245,3 +245,51 @@ def test_hook_command_quotes_paths_with_spaces(monkeypatch):
     monkeypatch.setattr(install_hooks, "HOOK", "/tmp/my dir/$x/budget_hook.py")
     cmd = install_hooks._entries()["UserPromptSubmit"][0]["hooks"][0]["command"]
     assert shlex.split(cmd) == ["python3", "/tmp/my dir/$x/budget_hook.py", "check"]
+
+
+def _inproc(monkeypatch, tmp_path):
+    monkeypatch.setenv("AGENTKIT_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("AGENTKIT_BUDGET_TOKENS", "1000")
+    monkeypatch.setenv("AGENTKIT_BUDGET_STEP", "500")
+
+
+def test_check_in_process_warns_once_per_step(monkeypatch, tmp_path):
+    _inproc(monkeypatch, tmp_path)
+    hook = {
+        "session_id": "ip1",
+        "cwd": str(tmp_path),
+        "transcript_path": _transcript(1100),
+    }
+    out = budget_hook.check(hook)
+    assert "CONTEXT BUDGET" in out["hookSpecificOutput"]["additionalContext"]
+    assert budget_hook.check(hook) is None  # same step: no repeat
+    hook["transcript_path"] = _transcript(1600)
+    assert budget_hook.check(hook) is not None  # next step warns again
+
+
+def test_state_write_is_atomic_and_leaves_no_temp(monkeypatch, tmp_path):
+    _inproc(monkeypatch, tmp_path)
+    sf = budget_hook._state_file("ip2")
+    budget_hook._write_state(sf, {"used": 5})
+    assert budget_hook._read_state(sf) == {"used": 5}
+    assert os.listdir(os.path.dirname(sf)) == [os.path.basename(sf)]
+
+
+def test_resume_in_process(monkeypatch, tmp_path):
+    _inproc(monkeypatch, tmp_path)
+    cp = budget_hook.checkpoint_path(str(tmp_path))
+    os.makedirs(os.path.dirname(cp), exist_ok=True)
+    with open(cp, "w", encoding="utf-8") as fh:
+        fh.write("## Goal\nship it\n")
+    out = budget_hook.resume({"source": "compact", "cwd": str(tmp_path)})
+    assert "ship it" in out["hookSpecificOutput"]["additionalContext"]
+    assert budget_hook.resume({"source": "startup", "cwd": str(tmp_path)}) is None
+
+
+def test_main_dispatch(monkeypatch, tmp_path, capsys):
+    _inproc(monkeypatch, tmp_path)
+    assert budget_hook.main(["bogus"]) == 2
+    assert budget_hook.main(["path", str(tmp_path)]) == 0
+    assert capsys.readouterr().out.strip().endswith(".md")
+    assert budget_hook.main(["status", _transcript(777)]) == 0
+    assert "777" in capsys.readouterr().out
