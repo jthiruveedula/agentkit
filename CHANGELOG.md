@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.17.0](https://github.com/jthiruveedula/agentkit/compare/v0.16.0...v0.17.0) (2026-10-31)
+
+
+### Features
+
+* add ext-hallmark router and apply it to all frontend work ([#72](https://github.com/jthiruveedula/agentkit/issues/72)) ([82ebab3](https://github.com/jthiruveedula/agentkit/commit/82ebab33ceb0be3f9a701534a59cf73960fadb0b))
+* add ext-security-audit and ext-seo router skills ([#71](https://github.com/jthiruveedula/agentkit/issues/71)) ([5037084](https://github.com/jthiruveedula/agentkit/commit/503708420daa250eeb77a90f93961a9424ad7558))
+* **site:** refract-style redesign of landing page and audit dashboard ([#88](https://github.com/jthiruveedula/agentkit/issues/88)) ([27a752e](https://github.com/jthiruveedula/agentkit/commit/27a752e322926c3f425f6db9f0a9eded8819f070))
+* **validate:** check agent definitions and roster parity, cap retry loops in skills ([#81](https://github.com/jthiruveedula/agentkit/issues/81)) ([b3f0820](https://github.com/jthiruveedula/agentkit/commit/b3f08209d64ca7b5e809b605d35df374e6aa1db4))
+
+
+### Bug Fixes
+
+* **audit:** credit evals defined at 10 points, below real tests at 30 ([#86](https://github.com/jthiruveedula/agentkit/issues/86)) ([79a2e28](https://github.com/jthiruveedula/agentkit/commit/79a2e28fcc215fa0d1cd28fd07786b3c9a7065b7))
+* **build:** fail --check on stray dist files, generate marketplace lists, sync versions ([#78](https://github.com/jthiruveedula/agentkit/issues/78)) ([6ea85a7](https://github.com/jthiruveedula/agentkit/commit/6ea85a779ed66a2079586f77d82b807556a53bd7))
+* **build:** stop attaching every skill to every Copilot request ([#83](https://github.com/jthiruveedula/agentkit/issues/83)) ([c1ff407](https://github.com/jthiruveedula/agentkit/commit/c1ff40733e9b23d978422a1aad9d8def855a836a))
+* harden installer uninstall, curl protocols, external sync and skill scaffold ([#80](https://github.com/jthiruveedula/agentkit/issues/80)) ([6a62389](https://github.com/jthiruveedula/agentkit/commit/6a623898cc5f03b19e828d778a91ee0032f094cf))
+* **hooks:** harden context-budget and session-insights hooks ([#84](https://github.com/jthiruveedula/agentkit/issues/84)) ([3c76994](https://github.com/jthiruveedula/agentkit/commit/3c76994edb6314fed031c41b5208f5c584b753a9))
+* **mcp-security-review:** harden scanner against lookalike hosts and unscanned inputs ([#79](https://github.com/jthiruveedula/agentkit/issues/79)) ([adbd905](https://github.com/jthiruveedula/agentkit/commit/adbd9054311316b226f1383fda2a415fb77e73e0))
+* **site:** WCAG 2.2 AA fixes, self-hosted fonts, strict CSP, SEO meta, no-JS catalog ([#87](https://github.com/jthiruveedula/agentkit/issues/87)) ([a06214e](https://github.com/jthiruveedula/agentkit/commit/a06214e814b62efbd8387046848983ef2f560e77))
+* **skills:** scope Bash pre-approvals and reject bare Bash in validate ([#82](https://github.com/jthiruveedula/agentkit/issues/82)) ([b1bc795](https://github.com/jthiruveedula/agentkit/commit/b1bc79553b16fd47b0437079e4aa6239a92f757f))
+
+
+### Performance Improvements
+
+* stream large files in token-saver, single-pass stats in smart-navigator ([#85](https://github.com/jthiruveedula/agentkit/issues/85)) ([9a180f1](https://github.com/jthiruveedula/agentkit/commit/9a180f18b814aaa023550eecd0ec34002a99f725))
+
 ## [0.16.0](https://github.com/jthiruveedula/agentkit/compare/v0.15.0...v0.16.0) (2026-10-25)
 
 

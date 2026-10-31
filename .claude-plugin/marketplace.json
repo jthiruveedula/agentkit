@@ -10,7 +10,7 @@
       "name": "agentkit",
       "source": "./",
       "description": "Portable, vendor-neutral agent foundation: skills, subagents, and commands that work identically in Claude Code, Copilot, Cursor, and Antigravity.",
-      "version": "0.16.0",
+      "version": "0.17.0",
       "license": "MIT",
       "skills": [
         "skills/agentkit-audit",
