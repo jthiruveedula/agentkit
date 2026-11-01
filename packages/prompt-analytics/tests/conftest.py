@@ -11,7 +11,7 @@ import pytest
 from prompt_analytics.adapters.base import Health, SourceFile, stat_file
 from prompt_analytics.config import Config
 from prompt_analytics.privacy import unblock_network
-from prompt_analytics.schema import CodeEdit, ParsedBatch, Session, ToolCall, Turn
+from prompt_analytics.schema import ParsedBatch, Session, Turn
 
 T0 = datetime(2026, 1, 1, 12, 0, tzinfo=timezone.utc)
 

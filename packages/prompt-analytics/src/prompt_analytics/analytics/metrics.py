@@ -62,7 +62,7 @@ class Base:
 
 
 def load_base(con: duckdb.DuckDBPyConnection) -> Base:
-    S, I, F, B = pl.Utf8, pl.Int64, pl.Float64, pl.Boolean
+    S, I, F, B = pl.Utf8, pl.Int64, pl.Float64, pl.Boolean  # noqa: E741
     return Base(
         sessions=fetch(con, f"""SELECT session_id, source, project_id, {utc('started_at')}, {utc('ended_at')},
             coalesce(is_subagent, false) AS is_subagent, model, tokens_in, tokens_out, cost_usd,

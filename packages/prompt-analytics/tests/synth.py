@@ -259,7 +259,7 @@ def make_db(con: duckdb.DuckDBPyConnection, seed: int = 7, n_sessions: int = 400
     # unlinked commit + source health
     g.rows["outcomes"].append({"outcome_id": "o-unlinked", "project_id": "p_webapp", "session_id": None, "ts": START + timedelta(days=5), "kind": "commit",
                                "files_changed": 2, "insertions": 10, "deletions": 1})
-    S, I, F, B = pl.Utf8, pl.Int64, pl.Float64, pl.Boolean
+    S, I, F, B = pl.Utf8, pl.Int64, pl.Float64, pl.Boolean  # noqa: E741
     ts = pl.Datetime("us", "UTC")
     schemas = {
         "sessions": {"session_id": S, "source": S, "source_key": S, "project_id": S, "title": S, "started_at": ts, "ended_at": ts, "is_subagent": B,

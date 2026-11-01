@@ -1,8 +1,6 @@
 import json
 import sqlite3
-import sys
 
-import pytest
 
 from prompt_analytics.adapters.base import user_data_dirs
 from prompt_analytics.adapters.copilot import CopilotAdapter, replay

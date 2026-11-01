@@ -49,7 +49,7 @@ def ctfidf_labels(texts: list[str], labels: np.ndarray, top_k: int = 6) -> dict[
     ids = sorted(set(labels.tolist()) - {-1})
     if not ids:
         return {}
-    docs = [" ".join(t for t, l in zip(texts, labels) if l == c) for c in ids]
+    docs = [" ".join(t for t, lb in zip(texts, labels) if lb == c) for c in ids]
     cv = CountVectorizer(stop_words=sorted(ENGLISH_STOP_WORDS | EXTRA_STOP), token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z_]{2,}\b", lowercase=True)
     try:
         X = cv.fit_transform(docs).toarray().astype(float)

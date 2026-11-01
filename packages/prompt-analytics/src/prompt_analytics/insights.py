@@ -360,12 +360,12 @@ def _specific_prompts(sm: pl.DataFrame) -> list[dict]:
     lo = d.filter(pl.col("first_quality") < cut)["has_applied"].cast(pl.Float64).to_numpy()
     if len(hi) < MIN_N or len(lo) < MIN_N:
         return []
-    est, l, h = _boot(hi, lo, _rate, 0.0, seed=11)
-    if l <= 0 or est < math.log(1.1):
+    est, ci_lo, h = _boot(hi, lo, _rate, 0.0, seed=11)
+    if ci_lo <= 0 or est < math.log(1.1):
         return []
     ratio = math.exp(est)
     return [_cand("works.specific_prompts", "works", f"Your detailed opening prompts succeed {(ratio - 1) * 100:.0f}% more often", "applied-rate ratio, top vs bottom half by quality",
-                  ratio, "x", ratio - 1, d.height, f"bootstrap ratio, B={B}", est * math.log(d.height), "specific", {}, [math.exp(l), math.exp(h)], {"ratio": ratio})]
+                  ratio, "x", ratio - 1, d.height, f"bootstrap ratio, B={B}", est * math.log(d.height), "specific", {}, [math.exp(ci_lo), math.exp(h)], {"ratio": ratio})]
 
 
 def _intent_mix(sm: pl.DataFrame) -> list[dict]:

@@ -9,7 +9,7 @@ from datetime import timedelta
 
 import pytest
 
-from conftest import T0, FakeAdapter
+from conftest import T0
 from prompt_analytics import scan, store
 from prompt_analytics.cli import main
 from prompt_analytics.privacy import NetworkBlocked, Redactor, block_network, unblock_network

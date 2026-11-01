@@ -56,7 +56,7 @@ def regex_hits(texts: list[str], spec: IntentSpec) -> np.ndarray:
 
 
 def centroids(E_seed: np.ndarray, seed_labels: list[str], labels: list[str]) -> np.ndarray:
-    C = np.stack([E_seed[[i for i, l in enumerate(seed_labels) if l == lab]].mean(axis=0) for lab in labels])
+    C = np.stack([E_seed[[i for i, s in enumerate(seed_labels) if s == lab]].mean(axis=0) for lab in labels])
     return C / np.maximum(np.linalg.norm(C, axis=1, keepdims=True), 1e-12)
 
 

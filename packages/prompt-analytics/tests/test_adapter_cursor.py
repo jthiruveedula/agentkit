@@ -12,7 +12,8 @@ def mk(tmp_path, monkeypatch, headers=True, bubble_v=3, tool_status="completed",
     db = g / "state.vscdb"
     c = sqlite3.connect(db)
     c.execute("CREATE TABLE cursorDiskKV (key TEXT PRIMARY KEY, value BLOB)")
-    kv = lambda k, v: c.execute("INSERT INTO cursorDiskKV VALUES (?,?)", (k, json.dumps(v).encode()))
+    def kv(k, v):
+        return c.execute("INSERT INTO cursorDiskKV VALUES (?,?)", (k, json.dumps(v).encode()))
     if headers:
         c.execute("CREATE TABLE composerHeaders (composerId TEXT, workspaceId TEXT, createdAt INT, lastUpdatedAt INT, isArchived INT, isSubagent INT, value BLOB)")
         c.execute("INSERT INTO composerHeaders VALUES ('c1','w1',1,2000,0,0,?)",
