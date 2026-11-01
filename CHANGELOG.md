@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.0](https://github.com/jthiruveedula/agentkit/compare/v0.18.0...v0.19.0) (2026-11-01)
+
+
+### Features
+
+* **prompt-analytics:** v2 dashboard polish with 3D terrain, paging, export and adaptive layouts ([#95](https://github.com/jthiruveedula/agentkit/issues/95)) ([2838ec0](https://github.com/jthiruveedula/agentkit/commit/2838ec0edea4d03afc64b05990d9418e8cf05bce))
+
 ## [0.18.0](https://github.com/jthiruveedula/agentkit/compare/v0.17.1...v0.18.0) (2026-11-01)
 
 
