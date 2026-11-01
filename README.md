@@ -209,6 +209,30 @@ baseline on every public page. `ext-hallmark` routes frontend design to the
 pinned `nutlope/hallmark`: every UI change passes its anti-slop Floor and
 `sloplint`; new pages get its full design flow.
 
+## Prompt analytics
+
+`packages/prompt-analytics` is a local-first analytics package for your own
+AI coding sessions. It reads Claude Code, Copilot, Cursor, Antigravity and
+opencode history into a local DuckDB store and builds a one-page dashboard:
+spend and time, the prompt-to-outcome funnel, friction hotspots, what works,
+repeated prompts, and a review queue for secrets or PII you pasted.
+
+```bash
+cd packages/prompt-analytics
+uv run --frozen prompt-analytics run     # scan, analyze, open the dashboard
+```
+
+- **Private by default.** No session data leaves the machine. Secrets, API
+  keys, emails and tokens are redacted before anything is stored; the
+  sensitive-data panel keeps counts and masked previews only.
+- **Adapts to your machine.** `basic` (stdlib + DuckDB), `ml` (scikit-learn)
+  and `deep` (local embeddings) tiers are picked from what is installed.
+- **Adapts to your data.** Single-tool users and sparse histories get
+  layouts that fit, not empty charts.
+
+See the [demo page](https://jthiruveedula.github.io/agentkit/prompt-analytics/)
+(mock data only) and `docs/prompt-analytics/` for the design notes.
+
 ## Deterministic where it matters
 
 Repeatable decisions live in stdlib-only scripts with tests, so behavior
