@@ -14,29 +14,90 @@ def make_db(path, filediff=True):
     create table part(id text primary key, message_id text, session_id text, time_created integer, data text);
     """)
     con.execute("insert into project values('p','/w')")
-    con.execute("insert into session values('s1','p',null,'/w','T',1000,5000,?,0.0123)",
-                (json.dumps({"id": "m-x", "providerID": "z"}),))
-    con.execute("insert into session values('s2','p','s1','/w','sub',2000,3000,null,null)")
+    con.execute(
+        "insert into session values('s1','p',null,'/w','T',1000,5000,?,0.0123)",
+        (json.dumps({"id": "m-x", "providerID": "z"}),),
+    )
+    con.execute(
+        "insert into session values('s2','p','s1','/w','sub',2000,3000,null,null)"
+    )
+
     def msg(i, sid, t, d):
         con.execute("insert into message values(?,?,?,?)", (i, sid, t, json.dumps(d)))
+
     def part(i, mid, t, d):
         con.execute("insert into part values(?,?,'x',?,?)", (i, mid, t, json.dumps(d)))
+
     msg("mu", "s1", 1000, {"role": "user", "time": {"created": 1000}})
     part("p1", "mu", 1000, {"type": "text", "text": "hi there"})
-    msg("ma", "s1", 2000, {"role": "assistant", "modelID": "m-x", "cost": 0.0123,
-        "time": {"created": 2000, "completed": 4500},
-        "tokens": {"input": 100, "output": 20, "reasoning": 5, "cache": {"read": 7, "write": 3}}})
+    msg(
+        "ma",
+        "s1",
+        2000,
+        {
+            "role": "assistant",
+            "modelID": "m-x",
+            "cost": 0.0123,
+            "time": {"created": 2000, "completed": 4500},
+            "tokens": {
+                "input": 100,
+                "output": 20,
+                "reasoning": 5,
+                "cache": {"read": 7, "write": 3},
+            },
+        },
+    )
     part("p2", "ma", 2001, {"type": "step-start"})
     part("p3", "ma", 2002, {"type": "text", "text": "ok"})
     md = {"filediff": {"additions": 4, "deletions": 1}} if filediff else {}
-    part("p4", "ma", 2003, {"type": "tool", "tool": "edit", "callID": "c1", "state": {
-        "status": "completed", "time": {"start": 2100, "end": 2400}, "metadata": md,
-        "input": {"filePath": "/w/a.py", "oldString": "a\nb\nc", "newString": "d\ne"}}})
-    part("p5", "ma", 2004, {"type": "tool", "tool": "bash", "callID": "c2", "state": {
-        "status": "error", "time": {"start": 2500, "end": 2600}, "input": {}}})
+    part(
+        "p4",
+        "ma",
+        2003,
+        {
+            "type": "tool",
+            "tool": "edit",
+            "callID": "c1",
+            "state": {
+                "status": "completed",
+                "time": {"start": 2100, "end": 2400},
+                "metadata": md,
+                "input": {
+                    "filePath": "/w/a.py",
+                    "oldString": "a\nb\nc",
+                    "newString": "d\ne",
+                },
+            },
+        },
+    )
+    part(
+        "p5",
+        "ma",
+        2004,
+        {
+            "type": "tool",
+            "tool": "bash",
+            "callID": "c2",
+            "state": {
+                "status": "error",
+                "time": {"start": 2500, "end": 2600},
+                "input": {},
+            },
+        },
+    )
     part("p6", "ma", 2005, {"type": "patch", "hash": "h", "files": ["/w/a.py"]})
-    part("p7", "ma", 2006, {"type": "step-finish", "cost": 0.0123, "tokens": {"input": 100}})
-    msg("sa", "s2", 2100, {"role": "assistant", "modelID": "m-x", "tokens": {"input": 1, "output": 2}})
+    part(
+        "p7",
+        "ma",
+        2006,
+        {"type": "step-finish", "cost": 0.0123, "tokens": {"input": 100}},
+    )
+    msg(
+        "sa",
+        "s2",
+        2100,
+        {"role": "assistant", "modelID": "m-x", "tokens": {"input": 1, "output": 2}},
+    )
     con.commit()
     con.close()
 
@@ -58,14 +119,30 @@ def test_discover_and_parse(tmp_path, monkeypatch):
     assert s.project_path == "/w" and not s.is_subagent and s.started_at.year == 1970
     u, asst = b.turns
     assert u.text == "hi there" and asst.text == "ok"
-    assert (asst.tokens_in, asst.tokens_out, asst.tokens_cache_read, asst.tokens_cache_write) == (100, 25, 7, 3)
+    assert (
+        asst.tokens_in,
+        asst.tokens_out,
+        asst.tokens_cache_read,
+        asst.tokens_cache_write,
+    ) == (100, 25, 7, 3)
     assert asst.cost_usd == 0.0123 and asst.latency_ms == 2500
     assert [(c.name, c.status, c.is_edit, c.duration_ms) for c in b.tool_calls] == [
-        ("edit", "ok", True, 300), ("bash", "error", False, 100)]
+        ("edit", "ok", True, 300),
+        ("bash", "error", False, 100),
+    ]
     (ce,) = b.code_edits  # patch part not double counted
-    assert (ce.file, ce.lines_added, ce.lines_removed, ce.state) == ("/w/a.py", 4, 1, "applied")
+    assert (ce.file, ce.lines_added, ce.lines_removed, ce.state) == (
+        "/w/a.py",
+        4,
+        1,
+        "applied",
+    )
     sub = a.parse(fs["s2"]).sessions[0]
-    assert sub.is_subagent and sub.parent_session_id == "opencode:s1" and sub.cost_usd is None
+    assert (
+        sub.is_subagent
+        and sub.parent_session_id == "opencode:s1"
+        and sub.cost_usd is None
+    )
 
 
 def test_missing_filediff(tmp_path, monkeypatch):

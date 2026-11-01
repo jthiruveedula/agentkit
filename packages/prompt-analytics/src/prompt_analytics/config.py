@@ -38,11 +38,24 @@ class Config:
     redact_style: str = "kind"
     sources: list[str] | None = None  # None = every registered adapter
     redact: dict[str, Any] = field(default_factory=dict)
-    outcomes: dict[str, Any] = field(default_factory=lambda: {"enabled": True, "before_h": 4, "after_h": 2, "repos": []})
+    outcomes: dict[str, Any] = field(
+        default_factory=lambda: {
+            "enabled": True,
+            "before_h": 4,
+            "after_h": 2,
+            "repos": [],
+        }
+    )
     pricing: dict[str, dict[str, float]] = field(default_factory=dict)
-    sensitive: dict[str, Any] = field(default_factory=dict)  # [sensitive] enabled / disabled kinds
-    analysis: dict[str, Any] = field(default_factory=lambda: {"mode": "auto"})  # [analysis] mode = auto|basic|ml|deep
-    embed_backend: str | None = None  # None = best installed: fastembed > model2vec > tfidf
+    sensitive: dict[str, Any] = field(
+        default_factory=dict
+    )  # [sensitive] enabled / disabled kinds
+    analysis: dict[str, Any] = field(
+        default_factory=lambda: {"mode": "auto"}
+    )  # [analysis] mode = auto|basic|ml|deep
+    embed_backend: str | None = (
+        None  # None = best installed: fastembed > model2vec > tfidf
+    )
 
     @property
     def db_path(self) -> Path:
@@ -76,5 +89,7 @@ class Config:
             if value is not None:
                 setattr(cfg, key, value)
         if cfg.store_text not in STORE_TEXT:
-            raise ValueError(f"store_text must be one of {STORE_TEXT}, got {cfg.store_text!r}")
+            raise ValueError(
+                f"store_text must be one of {STORE_TEXT}, got {cfg.store_text!r}"
+            )
         return cfg

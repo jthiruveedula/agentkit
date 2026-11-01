@@ -50,11 +50,19 @@ def _load_adapters() -> list[SourceAdapter]:
         return all_adapters()
     except ImportError:  # one adapter module missing/broken: load the rest
         out: list[SourceAdapter] = []
-        for mod, cls in (("claude_code", "ClaudeCodeAdapter"), ("copilot", "CopilotAdapter"),
-                         ("cursor", "CursorAdapter"), ("opencode", "OpencodeAdapter"),
-                         ("antigravity", "AntigravityAdapter")):
+        for mod, cls in (
+            ("claude_code", "ClaudeCodeAdapter"),
+            ("copilot", "CopilotAdapter"),
+            ("cursor", "CursorAdapter"),
+            ("opencode", "OpencodeAdapter"),
+            ("antigravity", "AntigravityAdapter"),
+        ):
             try:
-                out.append(getattr(importlib.import_module(f"prompt_analytics.adapters.{mod}"), cls)())
+                out.append(
+                    getattr(
+                        importlib.import_module(f"prompt_analytics.adapters.{mod}"), cls
+                    )()
+                )
             except Exception:
                 pass
         return out
@@ -65,8 +73,11 @@ def check_health(a: SourceAdapter) -> Health:
     try:
         return a.health()
     except Exception as e:
-        return Health(source=getattr(a, "name", "?"), status="unsupported",
-                      messages=[f"health check failed: {type(e).__name__}: {e}"])
+        return Health(
+            source=getattr(a, "name", "?"),
+            status="unsupported",
+            messages=[f"health check failed: {type(e).__name__}: {e}"],
+        )
 
 
 def _file_hmac(salt: bytes, f: SourceFile) -> str:
@@ -75,7 +86,9 @@ def _file_hmac(salt: bytes, f: SourceFile) -> str:
 
     if f.marker is not None:
         return hmac_hex(salt, f.marker.encode())
-    if f.key != str(f.path):  # DB-backed unit without a marker: size/mtime is all we have
+    if f.key != str(
+        f.path
+    ):  # DB-backed unit without a marker: size/mtime is all we have
         return hmac_hex(salt, f"{f.size}:{f.mtime_ns}".encode())
     h = hmac.new(salt, digestmod=hashlib.sha256)
     with f.path.open("rb") as fh:
@@ -84,15 +97,19 @@ def _file_hmac(salt: bytes, f: SourceFile) -> str:
     return h.hexdigest()
 
 
-def run(cfg: Config, sources: list[str] | None = None, full: bool = False,
-        progress: Callable[[str], None] | None = None,
-        adapters: list[SourceAdapter] | None = None) -> ScanReport:
+def run(
+    cfg: Config,
+    sources: list[str] | None = None,
+    full: bool = False,
+    progress: Callable[[str], None] | None = None,
+    adapters: list[SourceAdapter] | None = None,
+) -> ScanReport:
     block_network()
     report = ScanReport()
     ctx = store.make_ctx(cfg)
     con = store.connect(cfg)
     try:
-        for a in (adapters if adapters is not None else _load_adapters()):
+        for a in adapters if adapters is not None else _load_adapters():
             name = a.name
             if sources and name not in sources:
                 continue
@@ -106,21 +123,37 @@ def run(cfg: Config, sources: list[str] | None = None, full: bool = False,
 
                 report.outcomes = outcomes.collect(con, cfg)
             except Exception as e:
-                report.outcomes = {"warnings": [f"outcomes failed: {type(e).__name__}: {e}"]}
+                report.outcomes = {
+                    "warnings": [f"outcomes failed: {type(e).__name__}: {e}"]
+                }
         try:
             summ = store.exposure_summary(con)["categories"]
-            report.exposures = {c: {"sessions": v["sessions"], "kinds": {k: x["sessions"] for k, x in v["kinds"].items()},
-                                    "advice": v["advice"]} for c, v in summ.items()}
+            report.exposures = {
+                c: {
+                    "sessions": v["sessions"],
+                    "kinds": {k: x["sessions"] for k, x in v["kinds"].items()},
+                    "advice": v["advice"],
+                }
+                for c, v in summ.items()
+            }
         except Exception as e:
-            report.outcomes.setdefault("warnings", []).append(f"exposure summary failed: {type(e).__name__}")
+            report.outcomes.setdefault("warnings", []).append(
+                f"exposure summary failed: {type(e).__name__}"
+            )
     finally:
         con.close()
         harden_tree(cfg.data_dir)
     return report
 
 
-def _scan_one(con: Any, ctx: store.StoreCtx, a: SourceAdapter, rep: SourceReport, full: bool,
-              progress: Callable[[str], None] | None) -> None:
+def _scan_one(
+    con: Any,
+    ctx: store.StoreCtx,
+    a: SourceAdapter,
+    rep: SourceReport,
+    full: bool,
+    progress: Callable[[str], None] | None,
+) -> None:
     name = a.name
     health = check_health(a)
     rep.status = health.status
@@ -137,19 +170,28 @@ def _scan_one(con: Any, ctx: store.StoreCtx, a: SourceAdapter, rep: SourceReport
         try:
             wm = None if full else store.watermark_get(con, name, f.key, ctx)
             same_rules = wm is not None and wm.rules_version == RULES_VERSION
-            if wm and same_rules and f.marker is None and (wm.size, wm.mtime_ns) == (f.size, f.mtime_ns):
+            if (
+                wm
+                and same_rules
+                and f.marker is None
+                and (wm.size, wm.mtime_ns) == (f.size, f.mtime_ns)
+            ):
                 rep.skipped += 1
                 continue
             digest = _file_hmac(ctx.salt, f)
             if wm and same_rules and wm.content_hmac == digest:
-                store.watermark_set(con, name, f.key, ctx, f.size, f.mtime_ns, digest, RULES_VERSION)
+                store.watermark_set(
+                    con, name, f.key, ctx, f.size, f.mtime_ns, digest, RULES_VERSION
+                )
                 rep.skipped += 1
                 continue
             batch = a.parse(f)
             for w in batch.warnings:
                 rep.warn(w)
             store.replace_batch(con, name, f.key, batch, ctx)
-            store.watermark_set(con, name, f.key, ctx, f.size, f.mtime_ns, digest, RULES_VERSION)
+            store.watermark_set(
+                con, name, f.key, ctx, f.size, f.mtime_ns, digest, RULES_VERSION
+            )
             rep.parsed += 1
             rep.sessions += len(batch.sessions)
         except Exception as e:
@@ -157,19 +199,24 @@ def _scan_one(con: Any, ctx: store.StoreCtx, a: SourceAdapter, rep: SourceReport
     store.upsert_health(con, health, ctx, rep.warnings)
 
 
-def reveal(cfg: Config, con: Any, turn_id: str, adapters: list[SourceAdapter] | None = None) -> list[dict[str, str]] | None:
+def reveal(
+    cfg: Config, con: Any, turn_id: str, adapters: list[SourceAdapter] | None = None
+) -> list[dict[str, str]] | None:
     """Re-read the raw prompt from its source file and return finding contexts.
 
     Returns None when the turn is unknown, or its source file is gone or changed.
     The result holds RAW values: show it, never store or log it.
     """
-    row = con.execute("SELECT s.source, s.source_key FROM exposures e JOIN sessions s USING (session_id) "
-                      "WHERE e.turn_id=? LIMIT 1", [turn_id]).fetchone()
+    row = con.execute(
+        "SELECT s.source, s.source_key FROM exposures e JOIN sessions s USING (session_id) "
+        "WHERE e.turn_id=? LIMIT 1",
+        [turn_id],
+    ).fetchone()
     if not row:
         return None
     source, kid = row
     ctx = store.make_ctx(cfg)
-    for a in (adapters if adapters is not None else _load_adapters()):
+    for a in adapters if adapters is not None else _load_adapters():
         if a.name != source:
             continue
         try:

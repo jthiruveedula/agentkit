@@ -91,10 +91,15 @@ skills/analytics-dashboard/SKILL.md (+ scripts/run.py launcher)
 
 ```python
 class SourceAdapter(Protocol):
-    name: str                                   # "claude_code" | "copilot" | ...
-    def discover(self) -> list[SourceFile]: ... # cheap: paths + size + mtime, never content
-    def parse(self, f: SourceFile) -> ParsedBatch: ...  # raw, unredacted records for one file
-    def health(self) -> Health: ...             # ok | degraded | missing | unsupported + messages
+    name: str  # "claude_code" | "copilot" | ...
+
+    def discover(
+        self,
+    ) -> list[SourceFile]: ...  # cheap: paths + size + mtime, never content
+    def parse(
+        self, f: SourceFile
+    ) -> ParsedBatch: ...  # raw, unredacted records for one file
+    def health(self) -> Health: ...  # ok | degraded | missing | unsupported + messages
 ```
 
 - `SourceFile(source, path, size, mtime_ns, key)`. `key` identifies the

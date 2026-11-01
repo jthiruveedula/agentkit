@@ -74,7 +74,9 @@ class CodeEdit:
     edit_id: str
     session_id: str
     turn_id: str | None
-    file: str | None  # absolute or repo-relative; store makes it repo-relative + redacts
+    file: (
+        str | None
+    )  # absolute or repo-relative; store makes it repo-relative + redacts
     lines_added: int | None = None
     lines_removed: int | None = None
     state: str = "unknown"

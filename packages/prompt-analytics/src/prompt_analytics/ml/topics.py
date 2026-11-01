@@ -4,7 +4,22 @@ from __future__ import annotations
 
 import numpy as np
 
-EXTRA_STOP = {"redacted", "user", "please", "thanks", "thank", "just", "want", "need", "like", "make", "use", "using", "can", "you"}
+EXTRA_STOP = {
+    "redacted",
+    "user",
+    "please",
+    "thanks",
+    "thank",
+    "just",
+    "want",
+    "need",
+    "like",
+    "make",
+    "use",
+    "using",
+    "can",
+    "you",
+}
 HDBSCAN_MAX_N = 8000  # ponytail: sklearn HDBSCAN is superlinear; above this go straight to MiniBatchKMeans
 
 
@@ -15,7 +30,9 @@ def reduce(E: np.ndarray, dims: int = 32) -> np.ndarray:
     if k < 2:
         return E
     Z = PCA(n_components=k, random_state=0).fit_transform(E)
-    return (Z / np.maximum(np.linalg.norm(Z, axis=1, keepdims=True), 1e-12)).astype(np.float32)
+    return (Z / np.maximum(np.linalg.norm(Z, axis=1, keepdims=True), 1e-12)).astype(
+        np.float32
+    )
 
 
 def _kmeans(Z: np.ndarray) -> np.ndarray:
@@ -23,7 +40,11 @@ def _kmeans(Z: np.ndarray) -> np.ndarray:
 
     n = len(Z)
     k = int(min(max(2, n // 2), np.clip(round((n / 2) ** 0.5), 12, 60)))
-    return MiniBatchKMeans(n_clusters=k, random_state=0, n_init=3, batch_size=2048).fit_predict(Z).astype(int)
+    return (
+        MiniBatchKMeans(n_clusters=k, random_state=0, n_init=3, batch_size=2048)
+        .fit_predict(Z)
+        .astype(int)
+    )
 
 
 def cluster(E: np.ndarray) -> tuple[np.ndarray, str]:
@@ -35,14 +56,20 @@ def cluster(E: np.ndarray) -> tuple[np.ndarray, str]:
     if 45 <= n <= HDBSCAN_MAX_N:
         from sklearn.cluster import HDBSCAN
 
-        lab = HDBSCAN(min_cluster_size=max(15, n // 2000), min_samples=5, cluster_selection_method="leaf").fit_predict(Z)
+        lab = HDBSCAN(
+            min_cluster_size=max(15, n // 2000),
+            min_samples=5,
+            cluster_selection_method="leaf",
+        ).fit_predict(Z)
         k = len(set(lab.tolist()) - {-1})
         if k >= 2 and (lab == -1).mean() <= 0.5:
             return lab.astype(int), "hdbscan"
     return _kmeans(Z), "kmeans"
 
 
-def ctfidf_labels(texts: list[str], labels: np.ndarray, top_k: int = 6) -> dict[int, list[str]]:
+def ctfidf_labels(
+    texts: list[str], labels: np.ndarray, top_k: int = 6
+) -> dict[int, list[str]]:
     """Top ``top_k`` terms per cluster by class-based TF-IDF: tf(t,c) * log(1 + A / f_t)."""
     from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
 
@@ -50,7 +77,11 @@ def ctfidf_labels(texts: list[str], labels: np.ndarray, top_k: int = 6) -> dict[
     if not ids:
         return {}
     docs = [" ".join(t for t, lb in zip(texts, labels) if lb == c) for c in ids]
-    cv = CountVectorizer(stop_words=sorted(ENGLISH_STOP_WORDS | EXTRA_STOP), token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z_]{2,}\b", lowercase=True)
+    cv = CountVectorizer(
+        stop_words=sorted(ENGLISH_STOP_WORDS | EXTRA_STOP),
+        token_pattern=r"(?u)\b[a-zA-Z][a-zA-Z_]{2,}\b",
+        lowercase=True,
+    )
     try:
         X = cv.fit_transform(docs).toarray().astype(float)
     except ValueError:
@@ -84,7 +115,15 @@ def project2d(E: np.ndarray) -> np.ndarray:
     try:
         import umap  # type: ignore[import-not-found]
 
-        return np.asarray(umap.UMAP(n_components=2, metric="cosine", random_state=42, n_neighbors=min(15, n - 1)).fit_transform(E), dtype=np.float32)
+        return np.asarray(
+            umap.UMAP(
+                n_components=2,
+                metric="cosine",
+                random_state=42,
+                n_neighbors=min(15, n - 1),
+            ).fit_transform(E),
+            dtype=np.float32,
+        )
     except ImportError:
         from sklearn.decomposition import PCA
 

@@ -32,8 +32,13 @@ class FakeAdapter:
 
     name = "fake"
 
-    def __init__(self, root: Path, make_batch: Callable[[SourceFile], ParsedBatch] | None = None,
-                 parse_error: bool = False, health_error: bool = False):
+    def __init__(
+        self,
+        root: Path,
+        make_batch: Callable[[SourceFile], ParsedBatch] | None = None,
+        parse_error: bool = False,
+        health_error: bool = False,
+    ):
         self.root, self.make_batch = root, make_batch
         self.parse_error, self.health_error = parse_error, health_error
         self.parse_calls = 0
@@ -56,11 +61,32 @@ class FakeAdapter:
 def default_batch(f: SourceFile) -> ParsedBatch:
     sid = f"fake:{f.path.stem}"
     return ParsedBatch(
-        sessions=[Session(sid, "fake", f.key, project_path=None, title="t", started_at=T0, ended_at=T0 + timedelta(minutes=5),
-                          model="claude-sonnet-4-5")],
-        turns=[Turn(f"{sid}:0", sid, 0, "user", T0, "hello"),
-               Turn(f"{sid}:1", sid, 1, "assistant", T0 + timedelta(minutes=1), "hi", model="claude-sonnet-4-5",
-                    tokens_in=1000, tokens_out=500)],
+        sessions=[
+            Session(
+                sid,
+                "fake",
+                f.key,
+                project_path=None,
+                title="t",
+                started_at=T0,
+                ended_at=T0 + timedelta(minutes=5),
+                model="claude-sonnet-4-5",
+            )
+        ],
+        turns=[
+            Turn(f"{sid}:0", sid, 0, "user", T0, "hello"),
+            Turn(
+                f"{sid}:1",
+                sid,
+                1,
+                "assistant",
+                T0 + timedelta(minutes=1),
+                "hi",
+                model="claude-sonnet-4-5",
+                tokens_in=1000,
+                tokens_out=500,
+            ),
+        ],
     )
 
 

@@ -10,7 +10,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..schema import CodeEdit, ParsedBatch, Session, ToolCall, Turn
-from ._vscode import estimate_tokens, item_value, ms_to_dt, open_ro, uri_to_path, workspace_folder
+from ._vscode import (
+    estimate_tokens,
+    item_value,
+    ms_to_dt,
+    open_ro,
+    uri_to_path,
+    workspace_folder,
+)
 from .base import Health, SourceFile, user_data_dirs
 
 LEGACY_KEY = "workbench.panel.aichat.view.aichat.chatdata"
@@ -41,7 +48,12 @@ def _json(raw):
 
 
 def _tbl(conn, name) -> bool:
-    return conn.execute("SELECT 1 FROM sqlite_master WHERE name = ? AND type='table'", (name,)).fetchone() is not None
+    return (
+        conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE name = ? AND type='table'", (name,)
+        ).fetchone()
+        is not None
+    )
 
 
 class CursorAdapter:
@@ -56,7 +68,11 @@ class CursorAdapter:
         return ([Path(env)] if env else []) + user_data_dirs("Cursor")
 
     def _dbs(self) -> list[Path]:
-        return [d / "globalStorage" / "state.vscdb" for d in self._dirs() if (d / "globalStorage" / "state.vscdb").is_file()]
+        return [
+            d / "globalStorage" / "state.vscdb"
+            for d in self._dirs()
+            if (d / "globalStorage" / "state.vscdb").is_file()
+        ]
 
     def _connect(self, db: Path, warnings: list[str]) -> sqlite3.Connection:
         try:
@@ -85,7 +101,16 @@ class CursorAdapter:
                 conn = self._connect(db, warn)
                 try:
                     for cid, marker in self._composers(conn):
-                        res.append(SourceFile(self.name, db, st.st_size, st.st_mtime_ns, f"{db}#{cid}", marker))
+                        res.append(
+                            SourceFile(
+                                self.name,
+                                db,
+                                st.st_size,
+                                st.st_mtime_ns,
+                                f"{db}#{cid}",
+                                marker,
+                            )
+                        )
                 finally:
                     conn.close()
             except (sqlite3.Error, OSError):
@@ -100,7 +125,15 @@ class CursorAdapter:
                         conn.close()
                     st = wdb.stat()
                     if has:
-                        res.append(SourceFile(self.name, wdb, st.st_size, st.st_mtime_ns, f"{wdb}#legacy"))
+                        res.append(
+                            SourceFile(
+                                self.name,
+                                wdb,
+                                st.st_size,
+                                st.st_mtime_ns,
+                                f"{wdb}#legacy",
+                            )
+                        )
                 except (sqlite3.Error, OSError):
                     continue
         return res
@@ -109,13 +142,16 @@ class CursorAdapter:
         out = []
         if _tbl(conn, "composerHeaders"):
             for cid, upd, val in conn.execute(
-                "SELECT composerId, lastUpdatedAt, CAST(value AS TEXT) FROM composerHeaders"):
+                "SELECT composerId, lastUpdatedAt, CAST(value AS TEXT) FROM composerHeaders"
+            ):
                 v = _json(val) or {}
                 if v.get("isDraft") or not cid:
                     continue
                 out.append((cid, str(upd) if upd is not None else None))
         elif _tbl(conn, "cursorDiskKV"):
-            for (k,) in conn.execute("SELECT key FROM cursorDiskKV WHERE key LIKE 'composerData:%'"):
+            for (k,) in conn.execute(
+                "SELECT key FROM cursorDiskKV WHERE key LIKE 'composerData:%'"
+            ):
                 out.append((k.split(":", 1)[1], None))
         return out
 
@@ -133,11 +169,18 @@ class CursorAdapter:
             finally:
                 conn.close()
         except Exception as ex:  # noqa: BLE001
-            b.warnings.append(f"cursor: {f.key.rpartition('#')[2]}: {type(ex).__name__}")
+            b.warnings.append(
+                f"cursor: {f.key.rpartition('#')[2]}: {type(ex).__name__}"
+            )
         return b
 
-    def _composer(self, conn, db: Path, cid: str, f: SourceFile, b: ParsedBatch) -> None:
-        row = conn.execute("SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?", (f"composerData:{cid}",)).fetchone()
+    def _composer(
+        self, conn, db: Path, cid: str, f: SourceFile, b: ParsedBatch
+    ) -> None:
+        row = conn.execute(
+            "SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?",
+            (f"composerData:{cid}",),
+        ).fetchone()
         cd = _json(row[0]) if row else None
         if cd is None:
             b.warnings.append(f"cursor: composerData:{cid} missing or malformed")
@@ -148,18 +191,31 @@ class CursorAdapter:
                 self._bad_v.append(f"composerData _v={cd['_v']}")
         hdr = {}
         if _tbl(conn, "composerHeaders"):
-            r = conn.execute("SELECT CAST(value AS TEXT), workspaceId FROM composerHeaders WHERE composerId = ?", (cid,)).fetchone()
+            r = conn.execute(
+                "SELECT CAST(value AS TEXT), workspaceId FROM composerHeaders WHERE composerId = ?",
+                (cid,),
+            ).fetchone()
             if r:
                 hdr = _json(r[0]) or {}
                 hdr["_ws"] = r[1]
         sid = f"cursor:{cid}"
-        proj = uri_to_path(((hdr.get("workspaceIdentifier") or {}).get("uri") or {}).get("external")) \
-            or ((hdr.get("workspaceIdentifier") or {}).get("uri") or {}).get("fsPath") \
+        proj = (
+            uri_to_path(
+                ((hdr.get("workspaceIdentifier") or {}).get("uri") or {}).get(
+                    "external"
+                )
+            )
+            or ((hdr.get("workspaceIdentifier") or {}).get("uri") or {}).get("fsPath")
             or self._ws_map(db).get(str(hdr.get("_ws")))
+        )
         sess = Session(
-            sid, self.name, f.key, project_path=proj,
+            sid,
+            self.name,
+            f.key,
+            project_path=proj,
             title=hdr.get("name") or cd.get("name") or None,
-            started_at=_dt(cd.get("createdAt")), ended_at=_dt(cd.get("lastUpdatedAt")),
+            started_at=_dt(cd.get("createdAt")),
+            ended_at=_dt(cd.get("lastUpdatedAt")),
             mode=hdr.get("unifiedMode") or cd.get("unifiedMode"),
             is_subagent=bool(hdr.get("isSubagent")),
         )
@@ -169,8 +225,20 @@ class CursorAdapter:
         if mname and mname != "default":
             models[mname] += 1
         # message order
-        heads = [h.get("bubbleId") for h in (cd.get("fullConversationHeadersOnly") or []) if isinstance(h, dict)]
-        inline = {x.get("bubbleId"): x for x in (cd.get("conversation") or []) if isinstance(x, dict)} if not heads else {}
+        heads = [
+            h.get("bubbleId")
+            for h in (cd.get("fullConversationHeadersOnly") or [])
+            if isinstance(h, dict)
+        ]
+        inline = (
+            {
+                x.get("bubbleId"): x
+                for x in (cd.get("conversation") or [])
+                if isinstance(x, dict)
+            }
+            if not heads
+            else {}
+        )
         if not heads:
             heads = list(inline)
         seen, ti, last = set(), 0, sess.started_at
@@ -180,7 +248,10 @@ class CursorAdapter:
             seen.add(bid)
             bub = inline.get(bid)
             if bub is None:
-                r = conn.execute("SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?", (f"bubbleId:{cid}:{bid}",)).fetchone()
+                r = conn.execute(
+                    "SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?",
+                    (f"bubbleId:{cid}:{bid}",),
+                ).fetchone()
                 bub = _json(r[0]) if r else None
             if bub is None:
                 continue
@@ -201,10 +272,16 @@ class CursorAdapter:
             if role == "assistant":
                 mi = bub.get("modelInfo")
                 m = mi.get("modelName") if isinstance(mi, dict) else None
-                t.model = m if m and m != "default" else mname if mname != "default" else None
+                t.model = (
+                    m if m and m != "default" else mname if mname != "default" else None
+                )
                 if t.model:
                     models[t.model] += 1
-                tc = bub.get("tokenCount") if isinstance(bub.get("tokenCount"), dict) else {}
+                tc = (
+                    bub.get("tokenCount")
+                    if isinstance(bub.get("tokenCount"), dict)
+                    else {}
+                )
                 tin, tout = tc.get("inputTokens") or 0, tc.get("outputTokens") or 0
                 if tin or tout:
                     t.tokens_in, t.tokens_out = tin, tout
@@ -215,16 +292,32 @@ class CursorAdapter:
             tf = bub.get("toolFormerData")
             if isinstance(tf, dict) and tf.get("name"):
                 name = str(tf["name"])
-                b.tool_calls.append(ToolCall(
-                    str(tf.get("toolCallId") or f"{tid}:tool"), sid, tid, name, ts,
-                    status=CALL_STATUS.get(tf.get("status"), "pending"),
-                    is_edit=any(w in name.lower() for w in EDIT_WORDS)))
+                b.tool_calls.append(
+                    ToolCall(
+                        str(tf.get("toolCallId") or f"{tid}:tool"),
+                        sid,
+                        tid,
+                        name,
+                        ts,
+                        status=CALL_STATUS.get(tf.get("status"), "pending"),
+                        is_edit=any(w in name.lower() for w in EDIT_WORDS),
+                    )
+                )
             cbd = bub.get("codeBlockData")
-            for n, (uri, info) in enumerate((cbd or {}).items() if isinstance(cbd, dict) else []):
+            for n, (uri, info) in enumerate(
+                (cbd or {}).items() if isinstance(cbd, dict) else []
+            ):
                 st = info.get("status") if isinstance(info, dict) else None
-                b.code_edits.append(CodeEdit(
-                    f"{tid}:e{n}", sid, tid, uri_to_path(uri) or uri,
-                    state=BLOCK_STATE.get(st, "pending"), ts=ts))
+                b.code_edits.append(
+                    CodeEdit(
+                        f"{tid}:e{n}",
+                        sid,
+                        tid,
+                        uri_to_path(uri) or uri,
+                        state=BLOCK_STATE.get(st, "pending"),
+                        ts=ts,
+                    )
+                )
         sess.ended_at = sess.ended_at or last
         sess.model = models.most_common(1)[0][0] if models else None
         b.sessions.append(sess)
@@ -246,16 +339,33 @@ class CursorAdapter:
                 continue
             sid = f"cursor:legacy:{tab.get('tabId')}"
             ti = 0
-            s = Session(sid, self.name, f"{db}#legacy", folder, tab.get("chatTitle"),
-                        _dt(tab.get("lastSendTime")))
+            s = Session(
+                sid,
+                self.name,
+                f"{db}#legacy",
+                folder,
+                tab.get("chatTitle"),
+                _dt(tab.get("lastSendTime")),
+            )
             for i, bub in enumerate(tab.get("bubbles") or []):
                 if not isinstance(bub, dict):
                     continue
                 role = {"user": "user", "ai": "assistant"}.get(bub.get("type"))
                 if role:
                     text = bub.get("text") if isinstance(bub.get("text"), str) else None
-                    b.turns.append(Turn(f"{sid}:{i}", sid, ti, role, None, text,
-                                        tokens_out=estimate_tokens(text) if role == "assistant" else None))
+                    b.turns.append(
+                        Turn(
+                            f"{sid}:{i}",
+                            sid,
+                            ti,
+                            role,
+                            None,
+                            text,
+                            tokens_out=estimate_tokens(text)
+                            if role == "assistant"
+                            else None,
+                        )
+                    )
                     ti += 1
                     s.tokens_estimated = s.tokens_estimated or role == "assistant"
             b.sessions.append(s)
@@ -273,7 +383,10 @@ class CursorAdapter:
                     comps = self._composers(conn)
                     h.sessions_found += len(comps)
                     for cid, _ in comps[:50]:
-                        r = conn.execute("SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?", (f"composerData:{cid}",)).fetchone()
+                        r = conn.execute(
+                            "SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?",
+                            (f"composerData:{cid}",),
+                        ).fetchone()
                         v = _json(r[0]) if r else None
                         if v and v.get("_v") is not None:
                             h.versions_seen.append(str(v["_v"]))
@@ -281,7 +394,10 @@ class CursorAdapter:
                                 h.status = "degraded"
                                 h.messages.append(f"unknown composerData _v={v['_v']}")
                         for hd in (v or {}).get("fullConversationHeadersOnly", [])[:1]:
-                            r2 = conn.execute("SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?", (f"bubbleId:{cid}:{hd.get('bubbleId')}",)).fetchone()
+                            r2 = conn.execute(
+                                "SELECT CAST(value AS TEXT) FROM cursorDiskKV WHERE key = ?",
+                                (f"bubbleId:{cid}:{hd.get('bubbleId')}",),
+                            ).fetchone()
                             bv = (_json(r2[0]) or {}).get("_v") if r2 else None
                             if bv is not None and bv != KNOWN_BUBBLE_V:
                                 h.status = "degraded"

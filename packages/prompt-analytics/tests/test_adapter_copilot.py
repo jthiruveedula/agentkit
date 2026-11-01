@@ -25,50 +25,111 @@ def build(tmp_path, monkeypatch, lines, sid=SID, index=None):
     (g / "state.vscdb").unlink(missing_ok=True)
     c = sqlite3.connect(g / "state.vscdb")
     c.execute("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value BLOB)")
-    c.execute("INSERT INTO ItemTable VALUES (?,?)",
-              ("chat.ChatSessionStore.index", json.dumps({"version": 1, "entries": index or {}})))
+    c.execute(
+        "INSERT INTO ItemTable VALUES (?,?)",
+        (
+            "chat.ChatSessionStore.index",
+            json.dumps({"version": 1, "entries": index or {}}),
+        ),
+    )
     c.commit()
     c.close()
     return ws
 
 
 def init(requests=None):
-    return L(kind=0, v={"version": 3, "creationDate": 1_700_000_000_000, "sessionId": SID,
-                        "requests": requests or [], "inputState": {"mode": {"id": "agent", "kind": "agent"}}})
+    return L(
+        kind=0,
+        v={
+            "version": 3,
+            "creationDate": 1_700_000_000_000,
+            "sessionId": SID,
+            "requests": requests or [],
+            "inputState": {"mode": {"id": "agent", "kind": "agent"}},
+        },
+    )
 
 
 REQ = {
-    "timestamp": 1_700_000_001_000, "message": {"text": "hello"}, "modelId": "gpt-x",
-    "modelState": {"value": 1}, "elapsedMs": 50,
-    "response": [{"value": "hi "}, {"kind": "thinking", "value": "zzz"}, {"value": "there"},
-                 {"kind": "toolInvocationSerialized", "toolId": "run_in_terminal", "toolCallId": "t1", "isComplete": True},
-                 {"kind": "textEditGroup", "uri": {"path": "/tmp/my proj/a.py"}, "edits": [[{"text": "a\nb"}]]}],
+    "timestamp": 1_700_000_001_000,
+    "message": {"text": "hello"},
+    "modelId": "gpt-x",
+    "modelState": {"value": 1},
+    "elapsedMs": 50,
+    "response": [
+        {"value": "hi "},
+        {"kind": "thinking", "value": "zzz"},
+        {"value": "there"},
+        {
+            "kind": "toolInvocationSerialized",
+            "toolId": "run_in_terminal",
+            "toolCallId": "t1",
+            "isComplete": True,
+        },
+        {
+            "kind": "textEditGroup",
+            "uri": {"path": "/tmp/my proj/a.py"},
+            "edits": [[{"text": "a\nb"}]],
+        },
+    ],
     "editedFileEvents": [{"uri": {"path": "/tmp/my proj/a.py"}, "eventKind": 2}],
 }
 
 
 def test_replay_ops():
-    s = replay([L(kind=0, v={"a": [1, 2, 3], "b": {"c": 1}}), L(kind=2, k=["a"], v=[9], i=1),
-                L(kind=1, k=["b", "c"], v=5), L(kind=3, k=["b", "d"])])
+    s = replay(
+        [
+            L(kind=0, v={"a": [1, 2, 3], "b": {"c": 1}}),
+            L(kind=2, k=["a"], v=[9], i=1),
+            L(kind=1, k=["b", "c"], v=5),
+            L(kind=3, k=["b", "d"]),
+        ]
+    )
     assert s == {"a": [1, 9], "b": {"c": 5}}
 
 
 def test_parse_full(tmp_path, monkeypatch):
-    lines = [init([REQ]),
-             L(kind=1, k=["requests", 0, "result"], v={"metadata": {"promptTokens": 10, "outputTokens": 5, "resolvedModel": "gpt-real"},
-                                                      "timings": {"totalElapsed": 700}}),
-             L(kind=1, k=["customTitle"], v="My title")]
+    lines = [
+        init([REQ]),
+        L(
+            kind=1,
+            k=["requests", 0, "result"],
+            v={
+                "metadata": {
+                    "promptTokens": 10,
+                    "outputTokens": 5,
+                    "resolvedModel": "gpt-real",
+                },
+                "timings": {"totalElapsed": 700},
+            },
+        ),
+        L(kind=1, k=["customTitle"], v="My title"),
+    ]
     build(tmp_path, monkeypatch, lines)
     a = CopilotAdapter()
     fs = a.discover()
     assert len(fs) == 1
     b = a.parse(fs[0])
     s = b.sessions[0]
-    assert (s.session_id, s.title, s.project_path, s.mode, s.model) == ("copilot:sess-1", "My title", "/tmp/my proj", "agent", "gpt-real")
+    assert (s.session_id, s.title, s.project_path, s.mode, s.model) == (
+        "copilot:sess-1",
+        "My title",
+        "/tmp/my proj",
+        "agent",
+        "gpt-real",
+    )
     assert s.started_at.tzinfo is not None and not s.tokens_estimated
     assert s.ended_at.timestamp() == 1_700_000_001.7
     u, asst = b.turns
-    assert (u.role, u.text, asst.text, asst.tokens_in, asst.tokens_out, asst.latency_ms, asst.status) == ("user", "hello", "hi there", 10, 5, 700, "ok")
+    assert (
+        u.role,
+        u.text,
+        asst.text,
+        asst.tokens_in,
+        asst.tokens_out,
+        asst.latency_ms,
+        asst.status,
+    ) == ("user", "hello", "hi there", 10, 5, 700, "ok")
     assert b.tool_calls[0].name == "run_in_terminal" and b.tool_calls[0].status == "ok"
     e = b.code_edits[0]
     assert (e.lines_added, e.state) == (2, "rejected")
@@ -77,13 +138,29 @@ def test_parse_full(tmp_path, monkeypatch):
 
 def test_estimate_and_error(tmp_path, monkeypatch):
     r = dict(REQ, modelState={"value": 3}, editedFileEvents=[])
-    ws = build(tmp_path, monkeypatch, [init([r]), L(kind=1, k=["requests", 0, "result"], v={"errorDetails": {"code": "x"}})])
+    ws = build(
+        tmp_path,
+        monkeypatch,
+        [
+            init([r]),
+            L(kind=1, k=["requests", 0, "result"], v={"errorDetails": {"code": "x"}}),
+        ],
+    )
     (ws / "chatEditingSessions" / SID).mkdir(parents=True)
-    (ws / "chatEditingSessions" / SID / "state.json").write_text(json.dumps(
-        {"recentSnapshot": {"entries": [{"resource": "file:///tmp/my%20proj/a.py", "state": 1}]}}))
+    (ws / "chatEditingSessions" / SID / "state.json").write_text(
+        json.dumps(
+            {
+                "recentSnapshot": {
+                    "entries": [{"resource": "file:///tmp/my%20proj/a.py", "state": 1}]
+                }
+            }
+        )
+    )
     a = CopilotAdapter()
     b = a.parse(a.discover()[0])
-    assert b.sessions[0].tokens_estimated and b.turns[1].tokens_out == len("hi there") // 4
+    assert (
+        b.sessions[0].tokens_estimated and b.turns[1].tokens_out == len("hi there") // 4
+    )
     assert b.turns[1].status == "error"
     assert b.code_edits[0].state == "accepted"
 

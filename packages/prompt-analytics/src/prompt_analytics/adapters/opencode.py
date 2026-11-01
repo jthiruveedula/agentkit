@@ -32,7 +32,9 @@ def _dbs() -> list[Path]:
     if env:
         return [Path(env)] if Path(env).is_file() else []
     d = _data_dir()
-    return sorted(p for p in d.glob("opencode*.db") if p.is_file()) if d.is_dir() else []
+    return (
+        sorted(p for p in d.glob("opencode*.db") if p.is_file()) if d.is_dir() else []
+    )
 
 
 def _connect(path: Path) -> sqlite3.Connection:
@@ -85,12 +87,20 @@ class OpencodeAdapter:
                     cols = _cols(con, "session")
                     if not {"id", "time_updated"} <= cols:
                         continue
-                    rows = con.execute("select id, time_updated from session").fetchall()
+                    rows = con.execute(
+                        "select id, time_updated from session"
+                    ).fetchall()
             except (OSError, sqlite3.Error):
                 continue
             out += [
-                SourceFile(self.name, db, st.st_size, st.st_mtime_ns,
-                           f"{db}#{r['id']}", str(r["time_updated"]))
+                SourceFile(
+                    self.name,
+                    db,
+                    st.st_size,
+                    st.st_mtime_ns,
+                    f"{db}#{r['id']}",
+                    str(r["time_updated"]),
+                )
                 for r in rows
             ]
         return out
@@ -99,14 +109,23 @@ class OpencodeAdapter:
         dbs = _dbs()
         if not dbs:
             if (_data_dir() / "storage" / "session").is_dir():
-                return Health(self.name, "unsupported", messages=[
-                    "legacy JSON storage era (storage/session) is not supported"])
-            return Health(self.name, "missing", messages=["opencode database not found"])
+                return Health(
+                    self.name,
+                    "unsupported",
+                    messages=[
+                        "legacy JSON storage era (storage/session) is not supported"
+                    ],
+                )
+            return Health(
+                self.name, "missing", messages=["opencode database not found"]
+            )
         found, msgs, status = 0, [], "ok"
         for db in dbs:
             try:
                 with closing(_connect(db)) as con:
-                    missing = [t for t in ("session", "message", "part") if not _cols(con, t)]
+                    missing = [
+                        t for t in ("session", "message", "part") if not _cols(con, t)
+                    ]
                     if missing:
                         status = "degraded"
                         msgs.append(f"{db.name}: missing tables {missing}")
@@ -128,13 +147,22 @@ class OpencodeAdapter:
                 return batch
             msgs = con.execute(
                 "select id, time_created, data from message where session_id=? "
-                "order by time_created, id", (sid,)).fetchall()
-            parts = con.execute(
-                "select p.message_id, p.data from part p join message m on m.id=p.message_id "
-                "where m.session_id=? order by p.time_created, p.id", (sid,)).fetchall() \
-                if "time_created" in _cols(con, "part") else con.execute(
-                "select p.message_id, p.data from part p join message m on m.id=p.message_id "
-                "where m.session_id=? order by p.id", (sid,)).fetchall()
+                "order by time_created, id",
+                (sid,),
+            ).fetchall()
+            parts = (
+                con.execute(
+                    "select p.message_id, p.data from part p join message m on m.id=p.message_id "
+                    "where m.session_id=? order by p.time_created, p.id",
+                    (sid,),
+                ).fetchall()
+                if "time_created" in _cols(con, "part")
+                else con.execute(
+                    "select p.message_id, p.data from part p join message m on m.id=p.message_id "
+                    "where m.session_id=? order by p.id",
+                    (sid,),
+                ).fetchall()
+            )
 
         by_msg: dict[str, list[dict]] = {}
         for p in parts:
@@ -156,27 +184,47 @@ class OpencodeAdapter:
                 stamps.append(done)
             mid = f"{session_id}:{m['id']}"
             ps = by_msg.get(m["id"], [])
-            text = "\n".join(
-                p["text"] for p in ps
-                if p.get("type") == "text" and isinstance(p.get("text"), str) and not p.get("synthetic")
-            ) or None
-            turn = Turn(turn_id=mid, session_id=session_id, idx=i, role=role, ts=created, text=text)
+            text = (
+                "\n".join(
+                    p["text"]
+                    for p in ps
+                    if p.get("type") == "text"
+                    and isinstance(p.get("text"), str)
+                    and not p.get("synthetic")
+                )
+                or None
+            )
+            turn = Turn(
+                turn_id=mid,
+                session_id=session_id,
+                idx=i,
+                role=role,
+                ts=created,
+                text=text,
+            )
             if role == "assistant":
                 turn.model = d.get("modelID")
                 if turn.model:
                     models[turn.model] += 1
                 out, reas = _num(d, "tokens", "output"), _num(d, "tokens", "reasoning")
                 turn.tokens_in = _num(d, "tokens", "input")
-                turn.tokens_out = None if out is None and reas is None else (out or 0) + (reas or 0)
+                turn.tokens_out = (
+                    None if out is None and reas is None else (out or 0) + (reas or 0)
+                )
                 turn.tokens_cache_read = _num(d, "tokens", "cache", "read")
                 turn.tokens_cache_write = _num(d, "tokens", "cache", "write")
                 c = d.get("cost")
                 turn.cost_usd = float(c) if isinstance(c, (int, float)) else None
                 if created and done:
-                    turn.latency_ms = max(0, int((done - created).total_seconds() * 1000))
+                    turn.latency_ms = max(
+                        0, int((done - created).total_seconds() * 1000)
+                    )
                 err = d.get("error")
                 if err:
-                    aborted = isinstance(err, dict) and err.get("name") == "MessageAbortedError"
+                    aborted = (
+                        isinstance(err, dict)
+                        and err.get("name") == "MessageAbortedError"
+                    )
                     turn.status = "cancelled" if aborted else "error"
             batch.turns.append(turn)
             for p in ps:
@@ -186,17 +234,27 @@ class OpencodeAdapter:
         sm = _j(srow["model"]) if "model" in scols else {}
         model = sm.get("id") or (models.most_common(1)[0][0] if models else None)
         cost = srow["cost"] if "cost" in scols else None
-        batch.sessions.append(Session(
-            session_id=session_id, source=self.name, source_key=f.key,
-            project_path=srow["directory"] if "directory" in scols else None,
-            title=srow["title"] if "title" in scols else None,
-            started_at=_dt(srow["time_created"]) if "time_created" in scols else (min(stamps) if stamps else None),
-            ended_at=_dt(srow["time_updated"]) if "time_updated" in scols else (max(stamps) if stamps else None),
-            is_subagent=bool("parent_id" in scols and srow["parent_id"]),
-            parent_session_id=f"opencode:{srow['parent_id']}" if "parent_id" in scols and srow["parent_id"] else None,
-            model=model,
-            cost_usd=float(cost) if isinstance(cost, (int, float)) else None,
-        ))
+        batch.sessions.append(
+            Session(
+                session_id=session_id,
+                source=self.name,
+                source_key=f.key,
+                project_path=srow["directory"] if "directory" in scols else None,
+                title=srow["title"] if "title" in scols else None,
+                started_at=_dt(srow["time_created"])
+                if "time_created" in scols
+                else (min(stamps) if stamps else None),
+                ended_at=_dt(srow["time_updated"])
+                if "time_updated" in scols
+                else (max(stamps) if stamps else None),
+                is_subagent=bool("parent_id" in scols and srow["parent_id"]),
+                parent_session_id=f"opencode:{srow['parent_id']}"
+                if "parent_id" in scols and srow["parent_id"]
+                else None,
+                model=model,
+                cost_usd=float(cost) if isinstance(cost, (int, float)) else None,
+            )
+        )
         return batch
 
     @staticmethod
@@ -208,17 +266,32 @@ class OpencodeAdapter:
         status = CALL_STATUS.get(st.get("status"), "pending")
         is_edit = name.lower() in EDIT_TOOLS
         ts = _dt(start)
-        batch.tool_calls.append(ToolCall(
-            call_id=f"{session_id}:{cid}", session_id=session_id, turn_id=turn_id, name=name,
-            ts=ts, duration_ms=max(0, end - start) if start is not None and end is not None else None,
-            status=status, is_edit=is_edit,
-        ))
+        batch.tool_calls.append(
+            ToolCall(
+                call_id=f"{session_id}:{cid}",
+                session_id=session_id,
+                turn_id=turn_id,
+                name=name,
+                ts=ts,
+                duration_ms=max(0, end - start)
+                if start is not None and end is not None
+                else None,
+                status=status,
+                is_edit=is_edit,
+            )
+        )
         if not is_edit:
             return
         inp = st.get("input") if isinstance(st.get("input"), dict) else {}
         meta = st.get("metadata") if isinstance(st.get("metadata"), dict) else {}
         fd = meta.get("filediff")
-        fds = [fd] if isinstance(fd, dict) else [x for x in fd if isinstance(x, dict)] if isinstance(fd, list) else []
+        fds = (
+            [fd]
+            if isinstance(fd, dict)
+            else [x for x in fd if isinstance(x, dict)]
+            if isinstance(fd, list)
+            else []
+        )
         if fds and all(isinstance(x.get("additions"), int) for x in fds):
             added = sum(x["additions"] for x in fds)
             removed = sum(x.get("deletions") or 0 for x in fds)
@@ -226,9 +299,15 @@ class OpencodeAdapter:
             added, removed = _lines(inp.get("content")), 0
         else:
             added, removed = _lines(inp.get("newString")), _lines(inp.get("oldString"))
-        batch.code_edits.append(CodeEdit(
-            edit_id=f"{session_id}:{cid}", session_id=session_id, turn_id=turn_id,
-            file=inp.get("filePath") or inp.get("file_path") or inp.get("path"),
-            lines_added=added, lines_removed=removed,
-            state=EDIT_STATE.get(st.get("status"), "unknown"), ts=ts,
-        ))
+        batch.code_edits.append(
+            CodeEdit(
+                edit_id=f"{session_id}:{cid}",
+                session_id=session_id,
+                turn_id=turn_id,
+                file=inp.get("filePath") or inp.get("file_path") or inp.get("path"),
+                lines_added=added,
+                lines_removed=removed,
+                state=EDIT_STATE.get(st.get("status"), "unknown"),
+                ts=ts,
+            )
+        )

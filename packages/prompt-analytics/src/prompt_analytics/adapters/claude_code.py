@@ -72,9 +72,15 @@ def _text_of(content) -> tuple[str, bool]:
 def _result_text(content) -> str:
     if isinstance(content, str):
         return content
-    return "\n".join(
-        b["text"] for b in content if isinstance(b, dict) and isinstance(b.get("text"), str)
-    ) if isinstance(content, list) else ""
+    return (
+        "\n".join(
+            b["text"]
+            for b in content
+            if isinstance(b, dict) and isinstance(b.get("text"), str)
+        )
+        if isinstance(content, list)
+        else ""
+    )
 
 
 def _patch_counts(sp) -> tuple[int, int] | None:
@@ -94,7 +100,11 @@ def _input_counts(name: str, inp: dict) -> tuple[int, int]:
         return _lines(inp.get("content")), 0
     if name == "NotebookEdit":
         return _lines(inp.get("new_source")), 0
-    edits = inp.get("edits") if name == "MultiEdit" and isinstance(inp.get("edits"), list) else [inp]
+    edits = (
+        inp.get("edits")
+        if name == "MultiEdit" and isinstance(inp.get("edits"), list)
+        else [inp]
+    )
     a = r = 0
     for e in edits:
         if isinstance(e, dict):
@@ -152,7 +162,9 @@ class ClaudeCodeAdapter:
                 continue
             total += len(recs) + bad
             bad_total += bad
-            versions.update(v for v in (r.get("version") for r in recs) if isinstance(v, str))
+            versions.update(
+                v for v in (r.get("version") for r in recs) if isinstance(v, str)
+            )
         msgs: list[str] = []
         status = "ok"
         if total and bad_total / total > 0.05:
@@ -170,13 +182,22 @@ class ClaudeCodeAdapter:
 
         parts = f.path.parts
         is_sub = "subagents" in parts
-        sid = next((r.get("sessionId") or r.get("session_id") for r in recs
-                    if r.get("sessionId") or r.get("session_id")), None)
+        sid = next(
+            (
+                r.get("sessionId") or r.get("session_id")
+                for r in recs
+                if r.get("sessionId") or r.get("session_id")
+            ),
+            None,
+        )
         if is_sub and not sid:
             sid = parts[parts.index("subagents") - 1]
         sid = sid or f.path.stem
         if is_sub:
-            agent = next((r.get("agentId") for r in recs if r.get("agentId")), None) or f.path.stem
+            agent = (
+                next((r.get("agentId") for r in recs if r.get("agentId")), None)
+                or f.path.stem
+            )
             session_id, parent = f"claude_code:{sid}:{agent}", f"claude_code:{sid}"
         else:
             session_id, parent = f"claude_code:{sid}", None
@@ -194,7 +215,11 @@ class ClaudeCodeAdapter:
                     texts_by_id.setdefault(m["id"], []).append(tx)
             elif r.get("type") == "user" and isinstance(m.get("content"), list):
                 for b in m["content"]:
-                    if isinstance(b, dict) and b.get("type") == "tool_result" and b.get("tool_use_id"):
+                    if (
+                        isinstance(b, dict)
+                        and b.get("type") == "tool_result"
+                        and b.get("tool_use_id")
+                    ):
                         results[b["tool_use_id"]] = {
                             "ts": _ts(r.get("timestamp")),
                             "is_error": bool(b.get("is_error")),
@@ -237,9 +262,13 @@ class ClaudeCodeAdapter:
                 intr = text.startswith(INTERRUPT)
                 cur_user = Turn(
                     turn_id=f"{session_id}:u:{r.get('uuid') or idx}",
-                    session_id=session_id, idx=idx, role="user", ts=ts,
+                    session_id=session_id,
+                    idx=idx,
+                    role="user",
+                    ts=ts,
                     text=None if intr else text,
-                    status="interrupted" if intr else "ok", is_interrupt=intr,
+                    status="interrupted" if intr else "ok",
+                    is_interrupt=intr,
                 )
                 idx += 1
                 cur_assist = []
@@ -255,11 +284,25 @@ class ClaudeCodeAdapter:
                     src = last_msg.get(mid, {"msg": m}) if mid else {"msg": m}
                     fm = src["msg"]
                     synthetic = fm.get("model") == "<synthetic>"
-                    u = fm.get("usage") if isinstance(fm.get("usage"), dict) and not synthetic else None
-                    texts = texts_by_id.get(mid, []) if mid else [_text_of(m.get("content"))[0]]
-                    status = "error" if (synthetic or r.get("isApiErrorMessage")) else "ok"
+                    u = (
+                        fm.get("usage")
+                        if isinstance(fm.get("usage"), dict) and not synthetic
+                        else None
+                    )
+                    texts = (
+                        texts_by_id.get(mid, [])
+                        if mid
+                        else [_text_of(m.get("content"))[0]]
+                    )
+                    status = (
+                        "error" if (synthetic or r.get("isApiErrorMessage")) else "ok"
+                    )
                     turn = Turn(
-                        turn_id=turn_id, session_id=session_id, idx=idx, role="assistant", ts=ts,
+                        turn_id=turn_id,
+                        session_id=session_id,
+                        idx=idx,
+                        role="assistant",
+                        ts=ts,
                         text="\n".join(x for x in texts if x) or None,
                         model=None if synthetic else fm.get("model"),
                         tokens_in=(u or {}).get("input_tokens"),
@@ -283,13 +326,21 @@ class ClaudeCodeAdapter:
                     if isinstance(b, dict) and b.get("type") == "tool_use":
                         self._tool(batch, session_id, turn_id, b, ts, results)
 
-        batch.sessions.append(Session(
-            session_id=session_id, source=self.name, source_key=f.key,
-            project_path=project, title=custom or title,
-            started_at=min(stamps) if stamps else None, ended_at=max(stamps) if stamps else None,
-            is_subagent=is_sub, parent_session_id=parent,
-            mode=mode, model=models.most_common(1)[0][0] if models else None,
-        ))
+        batch.sessions.append(
+            Session(
+                session_id=session_id,
+                source=self.name,
+                source_key=f.key,
+                project_path=project,
+                title=custom or title,
+                started_at=min(stamps) if stamps else None,
+                ended_at=max(stamps) if stamps else None,
+                is_subagent=is_sub,
+                parent_session_id=parent,
+                mode=mode,
+                model=models.most_common(1)[0][0] if models else None,
+            )
+        )
         return batch
 
     @staticmethod
@@ -306,19 +357,32 @@ class ClaudeCodeAdapter:
         else:
             status = "ok"
         is_edit = name in EDIT_TOOLS
-        batch.tool_calls.append(ToolCall(
-            call_id=f"{session_id}:{cid}", session_id=session_id, turn_id=turn_id, name=name,
-            ts=ts, duration_ms=_ms(ts, res["ts"]) if res else None,
-            status=status, is_edit=is_edit,
-        ))
+        batch.tool_calls.append(
+            ToolCall(
+                call_id=f"{session_id}:{cid}",
+                session_id=session_id,
+                turn_id=turn_id,
+                name=name,
+                ts=ts,
+                duration_ms=_ms(ts, res["ts"]) if res else None,
+                status=status,
+                is_edit=is_edit,
+            )
+        )
         if not is_edit:
             return
         inp = b.get("input") if isinstance(b.get("input"), dict) else {}
         tur = res["tur"] if res and isinstance(res["tur"], dict) else {}
         counts = _patch_counts(tur.get("structuredPatch")) or _input_counts(name, inp)
-        batch.code_edits.append(CodeEdit(
-            edit_id=f"{session_id}:{cid}", session_id=session_id, turn_id=turn_id,
-            file=inp.get("file_path") or inp.get("notebook_path"),
-            lines_added=counts[0], lines_removed=counts[1],
-            state={"ok": "applied", "denied": "rejected"}.get(status, "unknown"), ts=ts,
-        ))
+        batch.code_edits.append(
+            CodeEdit(
+                edit_id=f"{session_id}:{cid}",
+                session_id=session_id,
+                turn_id=turn_id,
+                file=inp.get("file_path") or inp.get("notebook_path"),
+                lines_added=counts[0],
+                lines_removed=counts[1],
+                state={"ok": "applied", "denied": "rejected"}.get(status, "unknown"),
+                ts=ts,
+            )
+        )

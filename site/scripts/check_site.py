@@ -10,7 +10,11 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 SITE = Path(__file__).resolve().parent.parent
-PAGES = [SITE / "index.html", SITE / "audit" / "index.html", SITE / "prompt-analytics" / "index.html"]
+PAGES = [
+    SITE / "index.html",
+    SITE / "audit" / "index.html",
+    SITE / "prompt-analytics" / "index.html",
+]
 # innerHTML-family write whose RHS is not a plain string literal
 SINK = re.compile(
     r"(?:\.(?:innerHTML|outerHTML)\s*(?:\+)?=(?!=)\s*(?!\s)(?![\"'`][^`\"'$+]*[\"'`]\s*[;,)\n])|insertAdjacentHTML\s*\(|document\.write(?:ln)?\s*\(|\beval\s*\(|new\s+Function\s*\(|set(?:Timeout|Interval)\s*\(\s*[\"'`])"

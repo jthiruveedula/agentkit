@@ -42,7 +42,9 @@ def test_health_error_unsupported(cfg, make_fake):
     r = run(cfg, make_fake(health_error=True))
     assert r.status == "unsupported" and r.files_seen == 0
     con = store.connect(cfg, read_only=True)
-    assert con.execute("SELECT status FROM source_health").fetchone()[0] == "unsupported"
+    assert (
+        con.execute("SELECT status FROM source_health").fetchone()[0] == "unsupported"
+    )
 
 
 def test_source_filter(cfg, make_fake):

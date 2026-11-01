@@ -50,7 +50,7 @@ def parse_pb(b: bytes) -> list[tuple[int, int, object]]:
                 n, i = _varint(b, i)
                 if i + n > len(b):
                     raise ValueError("truncated")
-                v, i = b[i:i + n], i + n
+                v, i = b[i : i + n], i + n
             elif wt == 1:
                 v, i = struct.unpack_from("<Q", b, i)[0], i + 8
             elif wt == 5:
@@ -78,7 +78,9 @@ def _ts(raw) -> datetime | None:
         secs = _first(m, 1, 0)
         if not secs:
             return None
-        return datetime.fromtimestamp(secs + (_first(m, 2, 0) or 0) / 1e9, tz=timezone.utc)
+        return datetime.fromtimestamp(
+            secs + (_first(m, 2, 0) or 0) / 1e9, tz=timezone.utc
+        )
     except (ValueError, OverflowError, OSError):
         return None
 
@@ -120,13 +122,16 @@ def decode_summaries(value: str) -> tuple[list[dict], int]:
             e = parse_pb(entry)
             uid = _text(_first(e, 1, 2))
             wrapper = parse_pb(_first(e, 2, 2) or b"")
-            inner = parse_pb(base64.b64decode(_first(wrapper, 1, 2) or b"", validate=True))
+            inner = parse_pb(
+                base64.b64decode(_first(wrapper, 1, 2) or b"", validate=True)
+            )
             c = {
                 "uuid": _text(_first(inner, 4, 2)) or uid,
                 "title": _text(_first(inner, 1, 2)),
                 "last": _ts(_first(inner, 3, 2)),
                 "created": _ts(_first(inner, 7, 2)),
-                "uri": _find_uri(_first(inner, 9, 2)) or _find_uri(_first(inner, 17, 2)),
+                "uri": _find_uri(_first(inner, 9, 2))
+                or _find_uri(_first(inner, 17, 2)),
             }
             if not c["uuid"]:
                 raise ValueError("no uuid")
@@ -143,8 +148,12 @@ class AntigravityAdapter:
         self._cache: dict[Path, tuple[list[dict], int]] = {}
 
     def _dbs(self) -> list[Path]:
-        return [d / "globalStorage" / "state.vscdb" for a in APPS for d in user_data_dirs(a)
-                if (d / "globalStorage" / "state.vscdb").is_file()]
+        return [
+            d / "globalStorage" / "state.vscdb"
+            for a in APPS
+            for d in user_data_dirs(a)
+            if (d / "globalStorage" / "state.vscdb").is_file()
+        ]
 
     def _pbs(self) -> list[Path]:
         d = home() / ".gemini" / "antigravity" / "conversations"
@@ -176,17 +185,33 @@ class AntigravityAdapter:
                 known = {c["uuid"] for db in self._dbs() for c in self._safe(db)[0]}
                 if f.path.stem not in known:
                     t = datetime.fromtimestamp(f.mtime_ns / 1e9, tz=timezone.utc)
-                    b.sessions.append(Session(f"antigravity:{f.path.stem}", self.name, f.key,
-                                              started_at=t, ended_at=t))
+                    b.sessions.append(
+                        Session(
+                            f"antigravity:{f.path.stem}",
+                            self.name,
+                            f.key,
+                            started_at=t,
+                            ended_at=t,
+                        )
+                    )
                 return b
             convs, bad = self._read(f.path)
             if bad:
-                b.warnings.append(f"antigravity: skipped {bad} malformed conversation(s)")
+                b.warnings.append(
+                    f"antigravity: skipped {bad} malformed conversation(s)"
+                )
             for c in convs:
-                b.sessions.append(Session(
-                    f"antigravity:{c['uuid']}", self.name, f.key,
-                    project_path=uri_to_path(c["uri"]), title=c["title"] or None,
-                    started_at=c["created"] or c["last"], ended_at=c["last"]))
+                b.sessions.append(
+                    Session(
+                        f"antigravity:{c['uuid']}",
+                        self.name,
+                        f.key,
+                        project_path=uri_to_path(c["uri"]),
+                        title=c["title"] or None,
+                        started_at=c["created"] or c["last"],
+                        ended_at=c["last"],
+                    )
+                )
         except Exception as ex:  # noqa: BLE001
             b.warnings.append(f"antigravity: {f.path.name}: {type(ex).__name__}")
         return b

@@ -27,7 +27,9 @@ class Embedder(Protocol):
 
 
 def l2(x: np.ndarray) -> np.ndarray:
-    return (x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-12)).astype(np.float32)
+    return (x / np.maximum(np.linalg.norm(x, axis=1, keepdims=True), 1e-12)).astype(
+        np.float32
+    )
 
 
 class TfidfSvd:
@@ -45,7 +47,13 @@ class TfidfSvd:
 
         docs = [t[:MAX_CHARS] for t in texts]
         for min_df in (3, 1):
-            self.vec = TfidfVectorizer(ngram_range=(1, 2), sublinear_tf=True, min_df=min_df, max_features=50000, dtype=np.float32)
+            self.vec = TfidfVectorizer(
+                ngram_range=(1, 2),
+                sublinear_tf=True,
+                min_df=min_df,
+                max_features=50000,
+                dtype=np.float32,
+            )
             try:
                 X = self.vec.fit_transform(docs)
                 break
@@ -70,13 +78,19 @@ class FastEmbed:
         from fastembed import TextEmbedding
 
         self.name = "fastembed:BAAI/bge-small-en-v1.5"
-        self.m = TextEmbedding("BAAI/bge-small-en-v1.5", cache_dir=str(models_dir) if models_dir else None)
+        self.m = TextEmbedding(
+            "BAAI/bge-small-en-v1.5", cache_dir=str(models_dir) if models_dir else None
+        )
 
     def fit(self, texts: list[str]) -> None:
         pass
 
     def embed(self, texts: list[str]) -> np.ndarray:
-        return l2(np.array(list(self.m.embed([t[:MAX_CHARS] for t in texts])), dtype=np.float32))
+        return l2(
+            np.array(
+                list(self.m.embed([t[:MAX_CHARS] for t in texts])), dtype=np.float32
+            )
+        )
 
 
 class Model2Vec:
@@ -92,25 +106,45 @@ class Model2Vec:
         pass
 
     def embed(self, texts: list[str]) -> np.ndarray:
-        return l2(np.asarray(self.m.encode([t[:MAX_CHARS] for t in texts]), dtype=np.float32))
+        return l2(
+            np.asarray(self.m.encode([t[:MAX_CHARS] for t in texts]), dtype=np.float32)
+        )
 
 
-def get_embedder(backend: str | None, models_dir: Path | None = None) -> tuple[Embedder, list[str]]:
+def get_embedder(
+    backend: str | None, models_dir: Path | None = None
+) -> tuple[Embedder, list[str]]:
     """Best installed backend (or the requested one), degrading to tfidf with a warning."""
     warnings: list[str] = []
-    order = ["fastembed", "model2vec", "tfidf"] if backend in (None, "auto") else [backend, "tfidf"]
+    order = (
+        ["fastembed", "model2vec", "tfidf"]
+        if backend in (None, "auto")
+        else [backend, "tfidf"]
+    )
     for name in order:
         if name == "tfidf":
             return TfidfSvd(), warnings
         try:
-            return (FastEmbed(models_dir) if name == "fastembed" else Model2Vec()), warnings
-        except Exception as e:  # ImportError, missing/offline model, onnx runtime problems
+            return (
+                FastEmbed(models_dir) if name == "fastembed" else Model2Vec()
+            ), warnings
+        except (
+            Exception
+        ) as e:  # ImportError, missing/offline model, onnx runtime problems
             if backend not in (None, "auto"):
-                warnings.append(f"embed backend {name} unavailable ({type(e).__name__}); using tfidf")
+                warnings.append(
+                    f"embed backend {name} unavailable ({type(e).__name__}); using tfidf"
+                )
     return TfidfSvd(), warnings
 
 
-def embed_cached(con: duckdb.DuckDBPyConnection, emb: Embedder, texts: list[str], salt: bytes, tmp_dir: Path | None = None) -> np.ndarray:
+def embed_cached(
+    con: duckdb.DuckDBPyConnection,
+    emb: Embedder,
+    texts: list[str],
+    salt: bytes,
+    tmp_dir: Path | None = None,
+) -> np.ndarray:
     """Embed ``texts`` (any order, duplicates ok). Pretrained vectors are read from / written to the cache."""
     import polars as pl
 
@@ -121,23 +155,47 @@ def embed_cached(con: duckdb.DuckDBPyConnection, emb: Embedder, texts: list[str]
         vecs = dict(zip(uniq, emb.embed(uniq)))
         return np.stack([vecs[t] for t in texts])
     keys = {t: hmac_hex(salt, t.encode()) for t in uniq}
-    have = {k: np.asarray(v, dtype=np.float32) for k, v in con.execute(
-        "SELECT text_hmac, vec FROM embeddings_cache WHERE backend = ?", [emb.name]).fetchall()}
+    have = {
+        k: np.asarray(v, dtype=np.float32)
+        for k, v in con.execute(
+            "SELECT text_hmac, vec FROM embeddings_cache WHERE backend = ?", [emb.name]
+        ).fetchall()
+    }
     miss = [t for t in uniq if keys[t] not in have]
     if miss:
         new = emb.embed(miss)
-        put(con, "embeddings_cache", pl.DataFrame(
-            {"text_hmac": [keys[t] for t in miss], "backend": [emb.name] * len(miss), "vec": [v.tolist() for v in new]},
-            schema={"text_hmac": pl.Utf8, "backend": pl.Utf8, "vec": pl.List(pl.Float32)}), tmp_dir)
+        put(
+            con,
+            "embeddings_cache",
+            pl.DataFrame(
+                {
+                    "text_hmac": [keys[t] for t in miss],
+                    "backend": [emb.name] * len(miss),
+                    "vec": [v.tolist() for v in new],
+                },
+                schema={
+                    "text_hmac": pl.Utf8,
+                    "backend": pl.Utf8,
+                    "vec": pl.List(pl.Float32),
+                },
+            ),
+            tmp_dir,
+        )
         have.update({keys[t]: v for t, v in zip(miss, new)})
     return np.stack([have[keys[t]] for t in texts])
 
 
-def near_dupes(E: np.ndarray, codes: np.ndarray, thr: float = 0.95, cap: int = 4000) -> dict[str, float]:
+def near_dupes(
+    E: np.ndarray, codes: np.ndarray, thr: float = 0.95, cap: int = 4000
+) -> dict[str, float]:
     """Share of prompts with an earlier near-identical prompt from ANOTHER session. ponytail: first ``cap`` prompts, dense O(cap^2)."""
     E, codes = E[:cap], codes[:cap]
     if len(E) < 2:
         return {"n": 0, "of": len(E), "share": 0.0}
-    hit = (E @ E.T >= thr) & (codes[:, None] != codes[None, :]) & np.triu(np.ones((len(E), len(E)), dtype=bool), 1)
+    hit = (
+        (E @ E.T >= thr)
+        & (codes[:, None] != codes[None, :])
+        & np.triu(np.ones((len(E), len(E)), dtype=bool), 1)
+    )
     n = int(hit.any(axis=0).sum())
     return {"n": n, "of": len(E), "share": n / len(E)}

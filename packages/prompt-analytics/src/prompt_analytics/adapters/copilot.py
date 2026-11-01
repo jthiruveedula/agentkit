@@ -7,7 +7,14 @@ from collections import Counter
 from pathlib import Path
 
 from ..schema import CodeEdit, ParsedBatch, Session, ToolCall, Turn
-from ._vscode import estimate_tokens, item_value, ms_to_dt, open_ro, uri_to_path, workspace_folder
+from ._vscode import (
+    estimate_tokens,
+    item_value,
+    ms_to_dt,
+    open_ro,
+    uri_to_path,
+    workspace_folder,
+)
 from .base import Health, SourceFile, stat_file, user_data_dirs
 
 APPS = ("Code", "Code - Insiders", "VSCodium")
@@ -49,7 +56,7 @@ def replay(lines) -> dict | None:
                 else:
                     arr = parent[last]
                     if d.get("i") is not None:
-                        del arr[d["i"]:]
+                        del arr[d["i"] :]
                     arr.extend(v or [])
             except (KeyError, IndexError, TypeError):
                 continue
@@ -114,7 +121,10 @@ class CopilotAdapter:
         """(file, user_dir, workspace_dir|None)."""
         out = []
         for u in self._user_dirs():
-            groups = [(ws, ws / "chatSessions") for ws in sorted((u / "workspaceStorage").glob("*"))]
+            groups = [
+                (ws, ws / "chatSessions")
+                for ws in sorted((u / "workspaceStorage").glob("*"))
+            ]
             groups.append((None, u / "globalStorage" / "emptyWindowChatSessions"))
             for ws, d in groups:
                 if not d.is_dir():
@@ -153,7 +163,9 @@ class CopilotAdapter:
             with f.path.open(encoding="utf-8", errors="replace") as fh:
                 return replay(fh)
         except (OSError, ValueError) as ex:
-            b.warnings.append(f"copilot: {f.path.name}: unreadable ({type(ex).__name__})")
+            b.warnings.append(
+                f"copilot: {f.path.name}: unreadable ({type(ex).__name__})"
+            )
             return None
 
     def _parse(self, f: SourceFile, b: ParsedBatch) -> None:
@@ -174,7 +186,10 @@ class CopilotAdapter:
         sid = f"copilot:{sid_raw}"
         title = data.get("customTitle") or idx.get("title") or None
         sess = Session(
-            session_id=sid, source=self.name, source_key=f.key, title=title,
+            session_id=sid,
+            source=self.name,
+            source_key=f.key,
+            title=title,
             project_path=workspace_folder(ws) if ws else None,
             started_at=ms_to_dt(data.get("creationDate")),
             mode=_mode((data.get("inputState") or {}).get("mode")),
@@ -189,8 +204,14 @@ class CopilotAdapter:
             ts_ms = _n(req.get("timestamp"))
             ts = ms_to_dt(ts_ms)
             result = req.get("result") if isinstance(req.get("result"), dict) else {}
-            meta = result.get("metadata") if isinstance(result.get("metadata"), dict) else {}
-            timings = result.get("timings") if isinstance(result.get("timings"), dict) else {}
+            meta = (
+                result.get("metadata")
+                if isinstance(result.get("metadata"), dict)
+                else {}
+            )
+            timings = (
+                result.get("timings") if isinstance(result.get("timings"), dict) else {}
+            )
             lat = _n(timings.get("totalElapsed"))
             if lat is None:
                 lat = _n(req.get("elapsedMs"))
@@ -214,12 +235,27 @@ class CopilotAdapter:
             model = meta.get("resolvedModel") or req.get("modelId")
             if model:
                 models[model] += 1
-            ms = req.get("modelState") if isinstance(req.get("modelState"), dict) else {}
+            ms = (
+                req.get("modelState") if isinstance(req.get("modelState"), dict) else {}
+            )
             status = STATUS.get(ms.get("value"), "ok")
             if result.get("errorDetails"):
                 status = "error"
-            b.turns.append(Turn(atid, sid, ti, "assistant", ts, atext, model, tin, tout,
-                                latency_ms=lat, status=status))
+            b.turns.append(
+                Turn(
+                    atid,
+                    sid,
+                    ti,
+                    "assistant",
+                    ts,
+                    atext,
+                    model,
+                    tin,
+                    tout,
+                    latency_ms=lat,
+                    status=status,
+                )
+            )
             ti += 1
             events = {}
             for ev in req.get("editedFileEvents") or []:
@@ -232,21 +268,51 @@ class CopilotAdapter:
                     continue
                 k = part.get("kind")
                 if k == "toolInvocationSerialized":
-                    ok = part.get("isComplete") and not part.get("isError") and not part.get("errorDetails")
+                    ok = (
+                        part.get("isComplete")
+                        and not part.get("isError")
+                        and not part.get("errorDetails")
+                    )
                     name = part.get("toolId") or "unknown"
-                    b.tool_calls.append(ToolCall(
-                        part.get("toolCallId") or f"{sid}:{ri}:t{pi}", sid, atid, name, ts,
-                        status="ok" if ok else "pending" if not part.get("isComplete") else "error"))
+                    b.tool_calls.append(
+                        ToolCall(
+                            part.get("toolCallId") or f"{sid}:{ri}:t{pi}",
+                            sid,
+                            atid,
+                            name,
+                            ts,
+                            status="ok"
+                            if ok
+                            else "pending"
+                            if not part.get("isComplete")
+                            else "error",
+                        )
+                    )
                 elif k == "textEditGroup":
                     uri = part.get("uri")
-                    path = (uri.get("path") or uri.get("fsPath")) if isinstance(uri, dict) else uri
+                    path = (
+                        (uri.get("path") or uri.get("fsPath"))
+                        if isinstance(uri, dict)
+                        else uri
+                    )
                     path = uri_to_path(path) or path if isinstance(path, str) else None
                     added = sum(
                         (e.get("text") or "").count("\n") + 1
-                        for grp in (part.get("edits") or []) if isinstance(grp, list)
-                        for e in grp if isinstance(e, dict) and e.get("text"))
-                    state = events.get(str(path)) or edit_states.get(path or "") or "unknown"
-                    b.code_edits.append(CodeEdit(f"{sid}:{ri}:e{pi}", sid, atid, path, added, None, state, ts))
+                        for grp in (part.get("edits") or [])
+                        if isinstance(grp, list)
+                        for e in grp
+                        if isinstance(e, dict) and e.get("text")
+                    )
+                    state = (
+                        events.get(str(path))
+                        or edit_states.get(path or "")
+                        or "unknown"
+                    )
+                    b.code_edits.append(
+                        CodeEdit(
+                            f"{sid}:{ri}:e{pi}", sid, atid, path, added, None, state, ts
+                        )
+                    )
         sess.ended_at = ms_to_dt(end_ms)
         sess.model = models.most_common(1)[0][0] if models else None
         b.sessions.append(sess)
@@ -257,8 +323,10 @@ class CopilotAdapter:
         if ws is None:
             return out
         try:
-            st = json.loads((ws / "chatEditingSessions" / sid / "state.json").read_text("utf-8"))
-            for e in ((st.get("recentSnapshot") or {}).get("entries") or []):
+            st = json.loads(
+                (ws / "chatEditingSessions" / sid / "state.json").read_text("utf-8")
+            )
+            for e in (st.get("recentSnapshot") or {}).get("entries") or []:
                 u = e.get("resource") or e.get("uri")
                 path = uri_to_path(u) if isinstance(u, str) else None
                 if path and e.get("state") in SNAP_STATE:
@@ -293,5 +361,7 @@ class CopilotAdapter:
             h.messages.append(f"{bad} session file(s) unreadable or without version")
         if versions - {"3"}:
             h.status = "degraded"
-            h.messages.append(f"unverified session versions: {sorted(versions - {'3'})}")
+            h.messages.append(
+                f"unverified session versions: {sorted(versions - {'3'})}"
+            )
         return h

@@ -19,12 +19,16 @@ GOLDEN = Path(__file__).parent / "golden" / "dashboard.json"
 
 def _cmp(a, b, path="$"):
     if isinstance(a, dict):
-        assert isinstance(b, dict) and a.keys() == b.keys(), f"{path}: keys {sorted(set(a) ^ set(b))}"
+        assert isinstance(b, dict) and a.keys() == b.keys(), (
+            f"{path}: keys {sorted(set(a) ^ set(b))}"
+        )
         for k in a:
             if k != "generated_at":
                 _cmp(a[k], b[k], f"{path}.{k}")
     elif isinstance(a, list):
-        assert isinstance(b, list) and len(a) == len(b), f"{path}: len {len(a)} != {len(b)}"
+        assert isinstance(b, list) and len(a) == len(b), (
+            f"{path}: len {len(a)} != {len(b)}"
+        )
         for i, (x, y) in enumerate(zip(a, b)):
             _cmp(x, y, f"{path}[{i}]")
     elif isinstance(a, float) or isinstance(b, float):
@@ -36,7 +40,9 @@ def _cmp(a, b, path="$"):
 def test_golden():
     cfg, con, _ = synth.build_analyzed(backend="tfidf")
     got = json.loads(export.serialize(export.build(con, cfg)))
-    got["engine"] = {k: got["engine"][k] for k in ("mode", "requested", "methods")}  # libs/accel/reason are machine-specific
+    got["engine"] = {
+        k: got["engine"][k] for k in ("mode", "requested", "methods")
+    }  # libs/accel/reason are machine-specific
     if os.environ.get("UPDATE_GOLDEN") or not GOLDEN.exists():
         GOLDEN.parent.mkdir(exist_ok=True)
         GOLDEN.write_text(json.dumps(got, indent=1, sort_keys=True) + "\n")

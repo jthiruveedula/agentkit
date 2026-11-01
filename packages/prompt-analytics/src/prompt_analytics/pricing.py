@@ -42,10 +42,20 @@ def lookup(model: str | None, cfg: Any = None) -> dict[str, float] | None:
     return _longest(over, n) or _longest(_builtin(), n)
 
 
-def estimate(model: str | None, tin: int | None, tout: int | None, cread: int | None, cwrite: int | None, cfg: Any = None) -> float | None:
+def estimate(
+    model: str | None,
+    tin: int | None,
+    tout: int | None,
+    cread: int | None,
+    cwrite: int | None,
+    cfg: Any = None,
+) -> float | None:
     """USD estimate, or None when the model is unknown or no tokens are known."""
     rates = lookup(model, cfg)
     if rates is None or all(t is None for t in (tin, tout, cread, cwrite)):
         return None
     toks = (tin, tout, cread, cwrite)
-    return sum((t or 0) * float(rates.get(k, 0.0)) for t, k in zip(toks, _RATE_KEYS)) / 1_000_000
+    return (
+        sum((t or 0) * float(rates.get(k, 0.0)) for t, k in zip(toks, _RATE_KEYS))
+        / 1_000_000
+    )

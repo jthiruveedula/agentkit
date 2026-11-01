@@ -25,13 +25,19 @@ RULES_VERSION = "1"
 
 _HEX_ID = re.compile(r"^(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$")
 _UUID = re.compile(r"^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$")
-_ENTROPY_TOKEN = re.compile(r"(?<![A-Za-z0-9+/_=-])[A-Za-z0-9+/_=-]{24,}(?![A-Za-z0-9+/_=-])")
+_ENTROPY_TOKEN = re.compile(
+    r"(?<![A-Za-z0-9+/_=-])[A-Za-z0-9+/_=-]{24,}(?![A-Za-z0-9+/_=-])"
+)
 _PLACEHOLDER = re.compile(r"\[REDACTED:[a-z_-]+(?::[0-9a-f]{8})?\]|\[USER\]")
 
 # (kind, pattern, group to replace or 0 for whole match). Order matters:
 # most specific first so a generic rule never eats half a known token.
 _BUILTINS: list[tuple[str, str, int]] = [
-    ("pem", r"-----BEGIN [A-Z ]*PRIVATE KEY-----(?:[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----|[\s\S]*\Z)", 0),
+    (
+        "pem",
+        r"-----BEGIN [A-Z ]*PRIVATE KEY-----(?:[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----|[\s\S]*\Z)",
+        0,
+    ),
     ("aws", r"\b(?:AKIA|ASIA|AGPA|AIDA|AROA)[0-9A-Z]{16}\b", 0),
     ("github", r"\b(?:gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{50,})\b", 0),
     ("anthropic", r"\bsk-ant-[A-Za-z0-9_-]{20,}", 0),
@@ -52,9 +58,21 @@ _BUILTINS: list[tuple[str, str, int]] = [
     ("email", r"\b[A-Za-z0-9._+-]+%40[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", 0),  # URL-encoded
     ("ssn", r"\b(?!000|666|9\d\d)\d{3}-(?!00)\d{2}-(?!0000)\d{4}\b", 0),
     ("card", r"(?<![\d-])(?:\d[ -]?){12,18}\d(?![\d-])", 0),
-    ("phone", r"(?<![\w.])\+?\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]\d{3,4}[\s.-]\d{3,4}(?![\w.])", 0),
-    ("ipv4", r"(?<![\w.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\w.])", 0),
-    ("hostname", r"(?i)\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:internal|corp|lan|intra)\b", 0),
+    (
+        "phone",
+        r"(?<![\w.])\+?\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]\d{3,4}[\s.-]\d{3,4}(?![\w.])",
+        0,
+    ),
+    (
+        "ipv4",
+        r"(?<![\w.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\w.])",
+        0,
+    ),
+    (
+        "hostname",
+        r"(?i)\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:internal|corp|lan|intra)\b",
+        0,
+    ),
 ]
 _HOMEDIR = [
     re.compile(r"(/Users/|/home/)(?!\[USER\])[^/\s\"'`]+"),
@@ -95,14 +113,26 @@ class _Rule:
 class Redactor:
     """Configurable redactor. ``cfg`` is the ``[redact]`` table of config.toml."""
 
-    def __init__(self, cfg: dict[str, Any] | None = None, salt: bytes | None = None, style: str = "kind"):
+    def __init__(
+        self,
+        cfg: dict[str, Any] | None = None,
+        salt: bytes | None = None,
+        style: str = "kind",
+    ):
         cfg = cfg or {}
-        enabled = {k: True for k, _, _ in _BUILTINS} | {"homedir": True, "entropy": True}
+        enabled = {k: True for k, _, _ in _BUILTINS} | {
+            "homedir": True,
+            "entropy": True,
+        }
         enabled.update({k: bool(v) for k, v in (cfg.get("builtins") or {}).items()})
         self.enabled = enabled
-        self.rules = [_Rule(k, re.compile(p), g) for k, p, g in _BUILTINS if enabled.get(k, True)]
+        self.rules = [
+            _Rule(k, re.compile(p), g) for k, p, g in _BUILTINS if enabled.get(k, True)
+        ]
         for c in cfg.get("custom") or []:
-            self.rules.append(_Rule(str(c["name"]), re.compile(c["pattern"]), int(c.get("group", 0))))
+            self.rules.append(
+                _Rule(str(c["name"]), re.compile(c["pattern"]), int(c.get("group", 0)))
+            )
         allow = cfg.get("allow") or {}
         self.allow_literals = set(allow.get("literals") or [])
         self.allow_patterns = [re.compile(p) for p in allow.get("patterns") or []]
@@ -110,7 +140,9 @@ class Redactor:
         self.style = style
 
     def _allowed(self, value: str) -> bool:
-        return value in self.allow_literals or any(p.search(value) for p in self.allow_patterns)
+        return value in self.allow_literals or any(
+            p.search(value) for p in self.allow_patterns
+        )
 
     def _token(self, kind: str, value: str) -> str:
         if self.style == "hash" and self.salt:
@@ -133,7 +165,11 @@ class Redactor:
             start, end = m.span(rule.group)
             base = m.start(0)
             whole = m.group(0)
-            return whole[: start - base] + self._token(rule.kind, value) + whole[end - base :]
+            return (
+                whole[: start - base]
+                + self._token(rule.kind, value)
+                + whole[end - base :]
+            )
 
         return rule.rx.sub(repl, text)
 
@@ -169,7 +205,11 @@ class Redactor:
                 continue  # PII heuristics are too noisy to fail a build on
             for m in rule.rx.finditer(text):
                 value = m.group(rule.group)
-                if not (_PLACEHOLDER.fullmatch(value) or _PLACEHOLDER.search(value) or self._allowed(value)):
+                if not (
+                    _PLACEHOLDER.fullmatch(value)
+                    or _PLACEHOLDER.search(value)
+                    or self._allowed(value)
+                ):
                     hits.append(rule.kind)
                     break
         for rx in _HOMEDIR:
@@ -253,9 +293,15 @@ def block_network(allow_loopback: bool = True) -> None:
 
     def guarded(self: socket.socket, address: Any) -> Any:
         host = address[0] if isinstance(address, tuple) else address
-        if allow_loopback and (host in ("127.0.0.1", "::1", "localhost") or isinstance(host, str) and host.startswith("/")):
+        if allow_loopback and (
+            host in ("127.0.0.1", "::1", "localhost")
+            or isinstance(host, str)
+            and host.startswith("/")
+        ):
             return _real_connect(self, address)  # type: ignore[misc]
-        raise NetworkBlocked(f"prompt-analytics is local-only; blocked connect to {host!r}")
+        raise NetworkBlocked(
+            f"prompt-analytics is local-only; blocked connect to {host!r}"
+        )
 
     socket.socket.connect = guarded  # type: ignore[method-assign]
 

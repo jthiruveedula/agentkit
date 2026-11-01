@@ -16,11 +16,20 @@ def test_intent_margin_and_floor():
     labels = ["bugfix", "docs"]
     z = np.zeros((1, 2), dtype=np.float32)
     E = np.array([[1.0, 0.0], [0.7, 0.68], [0.1, 0.1]], dtype=np.float32)
-    out, score = intent.classify(E, C, np.zeros((3, 2), dtype=np.float32), labels, min_score=0.35, margin=0.1)
+    out, score = intent.classify(
+        E, C, np.zeros((3, 2), dtype=np.float32), labels, min_score=0.35, margin=0.1
+    )
     assert out == ["bugfix", "other", "other"]  # clear win; thin margin; below floor
-    out, _ = intent.classify(E[1:2], C, np.array([[0, 2]], dtype=np.float32), labels, 0.35, 0.03)
+    out, _ = intent.classify(
+        E[1:2], C, np.array([[0, 2]], dtype=np.float32), labels, 0.35, 0.03
+    )
     assert out == ["docs"]  # regex prior breaks the tie
-    assert intent.classify(np.zeros((0, 2), dtype=np.float32), C, z[:0], labels, 0.1, 0.1)[0] == []
+    assert (
+        intent.classify(np.zeros((0, 2), dtype=np.float32), C, z[:0], labels, 0.1, 0.1)[
+            0
+        ]
+        == []
+    )
 
 
 def test_regex_hits_capped():
@@ -31,26 +40,53 @@ def test_regex_hits_capped():
 
 def test_friction_cues():
     assert friction.lexical_flags("no, that's wrong") == (True, False)
-    assert friction.lexical_flags("ugh, still not working!!") [1]
+    assert friction.lexical_flags("ugh, still not working!!")[1]
     assert friction.lexical_flags("please add a button") == (False, False)
     assert friction.lexical_flags(None) == (False, False)
 
 
 def test_rephrase_same_session_only():
-    t = ["fix the login bug in auth", "fix the login bug in auth please", "fix the login bug in auth", "write docs"]
+    t = [
+        "fix the login bug in auth",
+        "fix the login bug in auth please",
+        "fix the login bug in auth",
+        "write docs",
+    ]
     toks = [friction.tokens(x) for x in t]
     E = np.array([[1, 0], [0.99, 0.1], [1, 0], [0, 1]], dtype=np.float32)
     E /= np.linalg.norm(E, axis=1, keepdims=True)
     f = friction.rephrase_flags(E, np.array([0, 0, 1, 1]), toks, thr=0.8)
-    assert f.tolist() == [False, True, False, False]  # row 2 is a new session: no look-back across sessions
+    assert f.tolist() == [
+        False,
+        True,
+        False,
+        False,
+    ]  # row 2 is a new session: no look-back across sessions
 
 
 def test_abandoned_and_friction_score():
-    df = pl.DataFrame({"n_turns": [1, 6, 2, 0], "last_role": ["user", "assistant", "assistant", None], "last_ok": [False, True, True, False],
-                       "has_work": [False, True, False, False], "has_applied": [False, True, False, False], "has_outcome": [False] * 4,
-                       "intent": ["bugfix", "bugfix", "explain", None]})
+    df = pl.DataFrame(
+        {
+            "n_turns": [1, 6, 2, 0],
+            "last_role": ["user", "assistant", "assistant", None],
+            "last_ok": [False, True, True, False],
+            "has_work": [False, True, False, False],
+            "has_applied": [False, True, False, False],
+            "has_outcome": [False] * 4,
+            "intent": ["bugfix", "bugfix", "explain", None],
+        }
+    )
     assert friction.abandoned(df).to_list() == [True, False, False, False]
-    d = pl.DataFrame({"n_user": [4, 0], "corrections": [4, 0], "frustrations": [0, 0], "loops": [3, 0], "interrupts": [0, 0], "abandoned": [False, False]})
+    d = pl.DataFrame(
+        {
+            "n_user": [4, 0],
+            "corrections": [4, 0],
+            "frustrations": [0, 0],
+            "loops": [3, 0],
+            "interrupts": [0, 0],
+            "abandoned": [False, False],
+        }
+    )
     s = friction.friction_score(d)["friction"].to_list()
     assert abs(s[0] - (0.30 + 0.25)) < 1e-9 and s[1] is None
 
@@ -63,7 +99,10 @@ def test_quality_subscores():
     assert sv[0] == 0.0 and sv[1] == 0.0 and sv[3] < 0.2
     assert quality.blend(sg) > quality.blend(sv)
     assert quality.subscores("```py\nx=1\n```")[1] == 1.0
-    assert 0.0 <= quality.blend(sg) <= 100.0 and quality.blend(quality.subscores("")) == 0.0
+    assert (
+        0.0 <= quality.blend(sg) <= 100.0
+        and quality.blend(quality.subscores("")) == 0.0
+    )
 
 
 def test_quality_validate_negative_when_good_means_fewer_followups():
@@ -86,7 +125,28 @@ def test_mad_anomaly_and_zero_mad_fallback():
 def test_detect_needs_history_and_flags_spike():
     d0 = date(2026, 1, 1)
     dates = [d0 + timedelta(days=i) for i in range(20)]
-    vals = [10.0, 11, 9, 10, 12, 10, 11, 10, 9, 11, 10, 10, 11, 9, 10, 12, 10, 11, 10, 90]
+    vals = [
+        10.0,
+        11,
+        9,
+        10,
+        12,
+        10,
+        11,
+        10,
+        9,
+        11,
+        10,
+        10,
+        11,
+        9,
+        10,
+        12,
+        10,
+        11,
+        10,
+        90,
+    ]
     rows = anomaly.detect(dates, vals)
     assert all(r["z"] is None for r in rows[:7])
     assert [r["date"] for r in anomaly.flagged(rows)] == [dates[-1]]
@@ -98,7 +158,9 @@ def test_spike_needs_materiality():
     # mostly-$0 history: z is huge for $0.90 but it is not a material spike; $12 is
     vals = [0.0] * 8 + [0.1, 0.0, 0.2] + [0.0] * 8 + [0.9]
     rows = anomaly.detect(dates, vals)
-    assert dates[-1] in [r["date"] for r in anomaly.flagged(rows)]  # passes z and p75 alone
+    assert dates[-1] in [
+        r["date"] for r in anomaly.flagged(rows)
+    ]  # passes z and p75 alone
     assert anomaly.flagged(rows, min_value=5.0) == []  # absolute floor drops it
     rows = anomaly.detect(dates, vals[:-1] + [12.0])
     assert [r["date"] for r in anomaly.flagged(rows, min_value=5.0)] == [dates[-1]]
@@ -119,7 +181,12 @@ def test_bh_fdr_and_cliffs():
 
 
 def test_ctfidf_labels_pick_distinct_terms():
-    texts = ["deploy docker pipeline fails", "docker deploy workflow broken", "csv export orders pandas", "pandas csv cleaning orders"]
+    texts = [
+        "deploy docker pipeline fails",
+        "docker deploy workflow broken",
+        "csv export orders pandas",
+        "pandas csv cleaning orders",
+    ]
     lab = topics.ctfidf_labels(texts, np.array([0, 0, 1, 1]))
     assert "docker" in lab[0][:2] and "deploy" in lab[0][:3]
     assert "csv" in lab[1][:2] or "pandas" in lab[1][:2]
@@ -127,11 +194,26 @@ def test_ctfidf_labels_pick_distinct_terms():
 
 
 def test_funnel_monotone():
-    flags = ["has_intent", "has_prompt", "has_response", "iterating", "has_applied", "has_outcome"]
-    rows = [dict.fromkeys(flags, True), {**dict.fromkeys(flags, True), "has_response": False}, {**dict.fromkeys(flags, False), "has_outcome": True}]
+    flags = [
+        "has_intent",
+        "has_prompt",
+        "has_response",
+        "iterating",
+        "has_applied",
+        "has_outcome",
+    ]
+    rows = [
+        dict.fromkeys(flags, True),
+        {**dict.fromkeys(flags, True), "has_response": False},
+        {**dict.fromkeys(flags, False), "has_outcome": True},
+    ]
     df = pl.DataFrame(rows).with_columns(pl.lit("cursor").alias("source"))
     c = funnel.cumulative(df)
-    assert c["reached_stage"].to_list() == [6, 2, 0]  # later flags never count without earlier ones
+    assert c["reached_stage"].to_list() == [
+        6,
+        2,
+        0,
+    ]  # later flags never count without earlier ones
     got = funnel.counts(c, "source", ["cursor", "opencode"])
     assert got[0]["counts"] == [2, 2, 1, 1, 1, 1] and got[1]["counts"] == [0] * 6
 

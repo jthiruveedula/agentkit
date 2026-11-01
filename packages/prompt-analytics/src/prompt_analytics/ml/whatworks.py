@@ -6,19 +6,32 @@ import numpy as np
 import polars as pl
 
 FEATURES = ["specificity", "context", "constraints", "length"]
-COLS = {"specificity": "q_specificity", "context": "q_context", "constraints": "q_constraints", "length": "q_length"}
+COLS = {
+    "specificity": "q_specificity",
+    "context": "q_context",
+    "constraints": "q_constraints",
+    "length": "q_length",
+}
 
 
 def cliffs_delta(a: np.ndarray, b: np.ndarray) -> float:
-    return float(((a[:, None] > b[None, :]).sum() - (a[:, None] < b[None, :]).sum()) / (len(a) * len(b)))
+    return float(
+        ((a[:, None] > b[None, :]).sum() - (a[:, None] < b[None, :]).sum())
+        / (len(a) * len(b))
+    )
 
 
-def bootstrap_delta(a: np.ndarray, b: np.ndarray, B: int = 1000, seed: int = 0) -> tuple[float, float, float]:
+def bootstrap_delta(
+    a: np.ndarray, b: np.ndarray, B: int = 1000, seed: int = 0
+) -> tuple[float, float, float]:
     """(ci_lo, ci_hi, two-sided bootstrap p) of Cliff's delta. Vectorised over resamples."""
     rng = np.random.default_rng(seed)
     A = a[rng.integers(0, len(a), (B, len(a)))]
     Bm = b[rng.integers(0, len(b), (B, len(b)))]
-    d = ((A[:, :, None] > Bm[:, None, :]).sum((1, 2)) - (A[:, :, None] < Bm[:, None, :]).sum((1, 2))) / (len(a) * len(b))
+    d = (
+        (A[:, :, None] > Bm[:, None, :]).sum((1, 2))
+        - (A[:, :, None] < Bm[:, None, :]).sum((1, 2))
+    ) / (len(a) * len(b))
     lo, hi = np.percentile(d, [2.5, 97.5])
     p = 2 * min((d <= 0).mean(), (d >= 0).mean())
     return float(lo), float(hi), float(max(p, 1.0 / (B + 1)))
@@ -46,15 +59,29 @@ def tercile_groups(score: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return score >= hi, score <= lo
 
 
-def analyze(df: pl.DataFrame, min_cluster: int = 100, min_group: int = 30, min_abs: float = 0.2, q: float = 0.1,
-            B: int = 1000, max_group: int = 100, stats: dict | None = None) -> list[dict]:
+def analyze(
+    df: pl.DataFrame,
+    min_cluster: int = 100,
+    min_group: int = 30,
+    min_abs: float = 0.2,
+    q: float = 0.1,
+    B: int = 1000,
+    max_group: int = 100,
+    stats: dict | None = None,
+) -> list[dict]:
     """``df``: one row per prompt with cluster_id, outcome_score and the q_* columns. Returns significant
     effects only (|delta| >= min_abs, CI excludes 0, BH q); everything else is 'insufficient data'.
     direction 'helps' = the feature is higher in top-outcome prompts. ``stats["tested"]`` gets the number of tests run."""
     rng = np.random.default_rng(0)
     tests = []
-    for cid in sorted(df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()):
-        g = df.filter((pl.col("cluster_id") == cid) & pl.col("outcome_score").is_not_null() & pl.col("q_specificity").is_not_null())
+    for cid in sorted(
+        df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()
+    ):
+        g = df.filter(
+            (pl.col("cluster_id") == cid)
+            & pl.col("outcome_score").is_not_null()
+            & pl.col("q_specificity").is_not_null()
+        )
         if g.height < min_cluster:
             continue
         top, bot = tercile_groups(g["outcome_score"].to_numpy())
@@ -68,13 +95,25 @@ def analyze(df: pl.DataFrame, min_cluster: int = 100, min_group: int = 30, min_a
             if len(b) > max_group:
                 b = b[np.sort(rng.choice(len(b), max_group, replace=False))]
             d = cliffs_delta(a, b)
-            lo, hi, p = bootstrap_delta(a, b, B=B, seed=int(cid) * 10 + FEATURES.index(feat))
-            tests.append({"cluster": int(cid), "feature": feat, "effect": d, "ci": [lo, hi], "n": int(top.sum() + bot.sum()), "p": p})
+            lo, hi, p = bootstrap_delta(
+                a, b, B=B, seed=int(cid) * 10 + FEATURES.index(feat)
+            )
+            tests.append(
+                {
+                    "cluster": int(cid),
+                    "feature": feat,
+                    "effect": d,
+                    "ci": [lo, hi],
+                    "n": int(top.sum() + bot.sum()),
+                    "p": p,
+                }
+            )
     if stats is not None:
         stats["tested"] = len(tests)
     keep = bh_fdr([t["p"] for t in tests], q)
     out = [
-        {k: t[k] for k in ("cluster", "feature", "effect", "ci", "n")} | {"direction": "helps" if t["effect"] > 0 else "hurts"}
+        {k: t[k] for k in ("cluster", "feature", "effect", "ci", "n")}
+        | {"direction": "helps" if t["effect"] > 0 else "hurts"}
         for t, k_ in zip(tests, keep)
         if k_ and abs(t["effect"]) >= min_abs and (t["ci"][0] > 0 or t["ci"][1] < 0)
     ]
@@ -92,13 +131,25 @@ def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float, float]:
     return p, max(0.0, c - h), min(1.0, c + h)
 
 
-def rate_diffs(df: pl.DataFrame, min_cluster: int = 20, min_group: int = 8, min_abs: float = 0.1, stats: dict | None = None) -> list[dict]:
+def rate_diffs(
+    df: pl.DataFrame,
+    min_cluster: int = 20,
+    min_group: int = 8,
+    min_abs: float = 0.1,
+    stats: dict | None = None,
+) -> list[dict]:
     """Basic tier (no sklearn): per group, applied-rate of sessions whose first prompt scores high (>=0.5) vs low on a
     quality axis. effect = rate difference, CI by Newcombe's method on Wilson bounds. ``df`` needs cluster_id,
     has_applied and q_* columns, one row per session. ponytail: no multiple-testing correction; the |d| and CI gates stand in."""
     out, tested = [], 0
-    for cid in sorted(df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()):
-        g = df.filter((pl.col("cluster_id") == cid) & pl.col("q_specificity").is_not_null() & pl.col("has_applied").is_not_null())
+    for cid in sorted(
+        df.filter(pl.col("cluster_id") >= 0)["cluster_id"].unique().to_list()
+    ):
+        g = df.filter(
+            (pl.col("cluster_id") == cid)
+            & pl.col("q_specificity").is_not_null()
+            & pl.col("has_applied").is_not_null()
+        )
         if g.height < min_cluster:
             continue
         y = g["has_applied"].to_numpy().astype(bool)
@@ -110,9 +161,22 @@ def rate_diffs(df: pl.DataFrame, min_cluster: int = 20, min_group: int = 8, min_
             p1, l1, u1 = wilson(int(y[hi].sum()), int(hi.sum()))
             p0, l0, u0 = wilson(int(y[~hi].sum()), int((~hi).sum()))
             d = p1 - p0
-            lo, up = d - ((p1 - l1) ** 2 + (u0 - p0) ** 2) ** 0.5, d + ((u1 - p1) ** 2 + (p0 - l0) ** 2) ** 0.5
+            lo, up = (
+                d - ((p1 - l1) ** 2 + (u0 - p0) ** 2) ** 0.5,
+                d + ((u1 - p1) ** 2 + (p0 - l0) ** 2) ** 0.5,
+            )
             if abs(d) >= min_abs and (lo > 0 or up < 0):
-                out.append({"cluster": int(cid), "feature": feat, "effect": d, "ci": [lo, up], "n": g.height, "direction": "helps" if d > 0 else "hurts", "rate": True})
+                out.append(
+                    {
+                        "cluster": int(cid),
+                        "feature": feat,
+                        "effect": d,
+                        "ci": [lo, up],
+                        "n": g.height,
+                        "direction": "helps" if d > 0 else "hurts",
+                        "rate": True,
+                    }
+                )
     if stats is not None:
         stats["tested"] = tested
     return sorted(out, key=lambda r: (-abs(r["effect"]), r["cluster"], r["feature"]))

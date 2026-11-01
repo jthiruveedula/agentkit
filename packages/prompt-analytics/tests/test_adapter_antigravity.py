@@ -31,8 +31,15 @@ def ts(secs, nanos=0):
 
 
 def conv(uid, title, last, created, folder):
-    inner = ld(1, title) + vi(2, 12) + ld(3, ts(last, 5)) + ld(4, uid) + ld(7, ts(created)) \
-        + ld(9, ld(1, ld(2, folder))) + ld(10, ts(last))
+    inner = (
+        ld(1, title)
+        + vi(2, 12)
+        + ld(3, ts(last, 5))
+        + ld(4, uid)
+        + ld(7, ts(created))
+        + ld(9, ld(1, ld(2, folder)))
+        + ld(10, ts(last))
+    )
     return ld(1, ld(1, uid) + ld(2, ld(1, base64.b64encode(inner))))
 
 
@@ -40,13 +47,22 @@ def build(tmp_path, monkeypatch, extra=b""):
     monkeypatch.setenv("PA_HOME", str(tmp_path))
     g = user_data_dirs("Antigravity IDE")[0] / "globalStorage"
     g.mkdir(parents=True)
-    blob = conv("u1", "First", 1_700_000_100, 1_700_000_000, "file:///tmp/p%201") \
-        + conv("u2", "Second", 1_700_000_200, 1_700_000_050, "file:///tmp/p2") \
-        + conv("u3", "Third", 1_700_000_300, 1_700_000_060, "file:///tmp/p3") + extra
+    blob = (
+        conv("u1", "First", 1_700_000_100, 1_700_000_000, "file:///tmp/p%201")
+        + conv("u2", "Second", 1_700_000_200, 1_700_000_050, "file:///tmp/p2")
+        + conv("u3", "Third", 1_700_000_300, 1_700_000_060, "file:///tmp/p3")
+        + extra
+    )
     c = sqlite3.connect(g / "state.vscdb")
     c.execute("CREATE TABLE ItemTable (key TEXT PRIMARY KEY, value BLOB)")
-    c.execute("INSERT INTO ItemTable VALUES (?,?)", (ag.SUMMARIES_KEY, base64.b64encode(blob).decode()))
-    c.execute("INSERT INTO ItemTable VALUES (?,?)", ("antigravityUnifiedStateSync.oauthToken", "FAKE-DO-NOT-READ"))
+    c.execute(
+        "INSERT INTO ItemTable VALUES (?,?)",
+        (ag.SUMMARIES_KEY, base64.b64encode(blob).decode()),
+    )
+    c.execute(
+        "INSERT INTO ItemTable VALUES (?,?)",
+        ("antigravityUnifiedStateSync.oauthToken", "FAKE-DO-NOT-READ"),
+    )
     c.commit()
     c.close()
     return g / "state.vscdb"
@@ -69,17 +85,30 @@ def test_parse_and_whitelist(tmp_path, monkeypatch):
     fs = a.discover()
     b = a.parse(fs[0])
     h = a.health()
-    assert [s.session_id for s in b.sessions] == ["antigravity:u1", "antigravity:u2", "antigravity:u3"]
+    assert [s.session_id for s in b.sessions] == [
+        "antigravity:u1",
+        "antigravity:u2",
+        "antigravity:u3",
+    ]
     s = b.sessions[0]
     assert (s.title, s.project_path) == ("First", "/tmp/p 1") and not b.turns
-    assert s.started_at.timestamp() == 1_700_000_000 and int(s.ended_at.timestamp()) == 1_700_000_100
+    assert (
+        s.started_at.timestamp() == 1_700_000_000
+        and int(s.ended_at.timestamp()) == 1_700_000_100
+    )
     assert s.ended_at.tzinfo is not None
     assert any("malformed" in w for w in b.warnings)
     assert h.status == "degraded"  # malformed entry flagged
     assert any("metadata-only" in m for m in h.messages)
     assert not any("oauth" in q.lower() or "select *" in q.lower() for q in sql)
-    assert all("WHERE key = " in q for q in sql if "ItemTable" in q and "sqlite_master" not in q)
-    assert "FAKE-DO-NOT-READ" not in json.dumps([vars(x) for x in b.sessions], default=str)
+    assert all(
+        "WHERE key = " in q
+        for q in sql
+        if "ItemTable" in q and "sqlite_master" not in q
+    )
+    assert "FAKE-DO-NOT-READ" not in json.dumps(
+        [vars(x) for x in b.sessions], default=str
+    )
     assert db.stat().st_mtime_ns == mt
 
 
@@ -100,5 +129,6 @@ def test_pb_fallback_and_missing(tmp_path, monkeypatch):
 
 def test_truncated_pb_raises_valueerror():
     import pytest
+
     with pytest.raises(ValueError):
         ag.parse_pb(ld(1, "abcdef")[:-2])

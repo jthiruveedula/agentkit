@@ -17,7 +17,9 @@ def _data():
 def test_streak_cost_spike_and_switches():
     _, d = _data()
     assert d["totals"]["longest_streak"] >= 14
-    assert any(a["metric"] == "cost" and a["date"] == synth.SPIKE_DAY for a in d["anomalies"])
+    assert any(
+        a["metric"] == "cost" and a["date"] == synth.SPIKE_DAY for a in d["anomalies"]
+    )
     sw = {(t["from"], t["to"]): t["count"] for t in d["tool_switch"]}
     assert sw[("claude_code", "cursor")] >= 12
 
@@ -30,11 +32,15 @@ def test_cursor_refactor_fastest():
 
 def test_loop_session_and_antigravity_and_subagent():
     con, d = _data()
-    loops = con.execute("select loops from session_metrics where session_id='claude_code:loop01'").fetchall()[0][0]
+    loops = con.execute(
+        "select loops from session_metrics where session_id='claude_code:loop01'"
+    ).fetchall()[0][0]
     assert loops >= 4
     ag = next(r for r in d["funnel"]["by_source"] if r["source"] == "antigravity")
     assert ag["counts"] == [0] * 6  # metadata-only source never enters the funnel
-    n_human = con.execute("select count(*) from sessions where not is_subagent").fetchall()[0][0]
+    n_human = con.execute(
+        "select count(*) from sessions where not is_subagent"
+    ).fetchall()[0][0]
     assert d["totals"]["sessions"] == n_human
 
 
@@ -47,7 +53,9 @@ def test_funnel_monotone_everywhere():
 
 def test_vague_prompts_hurt():
     con, _ = _data()
-    rho = con.execute("select corr(first_quality, n_user) from session_metrics where first_quality is not null").fetchall()[0][0]
+    rho = con.execute(
+        "select corr(first_quality, n_user) from session_metrics where first_quality is not null"
+    ).fetchall()[0][0]
     assert rho < 0
 
 

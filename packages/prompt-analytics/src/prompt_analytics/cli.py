@@ -19,17 +19,34 @@ MODEL = "BAAI/bge-small-en-v1.5"
 
 
 def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="prompt-analytics", description="Local-first analytics over AI coding sessions.")
+    p = argparse.ArgumentParser(
+        prog="prompt-analytics",
+        description="Local-first analytics over AI coding sessions.",
+    )
     p.add_argument("--data-dir", type=Path, default=None)
     sub = p.add_subparsers(dest="cmd")
 
     def scan_args(s: argparse.ArgumentParser) -> None:
-        s.add_argument("--full", action="store_true", help="ignore watermarks, re-parse everything")
-        s.add_argument("--source", action="append", default=None, help="limit to a source (repeatable)")
-        s.add_argument("--store-text", choices=("none", "redacted", "full"), default=None)
+        s.add_argument(
+            "--full", action="store_true", help="ignore watermarks, re-parse everything"
+        )
+        s.add_argument(
+            "--source",
+            action="append",
+            default=None,
+            help="limit to a source (repeatable)",
+        )
+        s.add_argument(
+            "--store-text", choices=("none", "redacted", "full"), default=None
+        )
 
     def mode_args(s: argparse.ArgumentParser) -> None:
-        s.add_argument("--mode", choices=("auto", "basic", "ml", "deep"), default=None, help="analysis tier (default: [analysis] mode, else auto)")
+        s.add_argument(
+            "--mode",
+            choices=("auto", "basic", "ml", "deep"),
+            default=None,
+            help="analysis tier (default: [analysis] mode, else auto)",
+        )
 
     def serve_args(s: argparse.ArgumentParser) -> None:
         s.add_argument("--port", type=int, default=0)
@@ -47,10 +64,17 @@ def _parser() -> argparse.ArgumentParser:
     s = sub.add_parser("doctor", help="adapter health, permissions, ML backends")
     s.add_argument("--json", action="store_true")
     s.add_argument("--download-models", action="store_true")
-    s = sub.add_parser("exposure", help="sensitive data pasted into assistants (counts only)")
+    s = sub.add_parser(
+        "exposure", help="sensitive data pasted into assistants (counts only)"
+    )
     s.add_argument("--json", action="store_true")
     s.add_argument("--since", type=int, default=None, metavar="DAYS")
-    s.add_argument("--reveal", metavar="TURN_ID", default=None, help="print raw context of a flagged prompt (stdout only)")
+    s.add_argument(
+        "--reveal",
+        metavar="TURN_ID",
+        default=None,
+        help="print raw context of a flagged prompt (stdout only)",
+    )
     s = sub.add_parser("run", help="scan, analyze, serve (default)")
     scan_args(s)
     serve_args(s)
@@ -65,14 +89,20 @@ def _scan(cfg: Config, args: argparse.Namespace, as_json: bool = False) -> int:
     if as_json:
         print(json.dumps(rep.to_dict(), indent=2, default=str))
         return 0
-    print(f"{'source':<12} {'status':<12} {'files':>6} {'parsed':>6} {'skip':>6} {'sess':>6} warn")
+    print(
+        f"{'source':<12} {'status':<12} {'files':>6} {'parsed':>6} {'skip':>6} {'sess':>6} warn"
+    )
     for r in rep.sources.values():
-        print(f"{r.source:<12} {r.status:<12} {r.files_seen:>6} {r.parsed:>6} {r.skipped:>6} {r.sessions:>6} {r.n_warnings}")
+        print(
+            f"{r.source:<12} {r.status:<12} {r.files_seen:>6} {r.parsed:>6} {r.skipped:>6} {r.sessions:>6} {r.n_warnings}"
+        )
         for w in r.warnings[:3]:
             print(f"    ! {w}")
     o = rep.outcomes
     if o:
-        print(f"outcomes: {o.get('outcomes', 0)} commits in {o.get('repos', 0)} repos ({o.get('linked', 0)} linked)")
+        print(
+            f"outcomes: {o.get('outcomes', 0)} commits in {o.get('repos', 0)} repos ({o.get('linked', 0)} linked)"
+        )
     _print_exposure_warning(rep.exposures)
     return 0
 
@@ -87,8 +117,12 @@ def _print_exposure_warning(exp: dict[str, Any]) -> None:
     for cat in ("secret", "pii", "phi"):
         v = exp.get(cat)
         if v:
-            kinds = ", ".join(f"{k} {n}" for k, n in sorted(v["kinds"].items(), key=lambda x: -x[1]))
-            parts.append(f"{_LABEL[cat]} in {v['sessions']} session{'s' * (v['sessions'] != 1)} ({kinds})")
+            kinds = ", ".join(
+                f"{k} {n}" for k, n in sorted(v["kinds"].items(), key=lambda x: -x[1])
+            )
+            parts.append(
+                f"{_LABEL[cat]} in {v['sessions']} session{'s' * (v['sessions'] != 1)} ({kinds})"
+            )
     print("WARNING: sensitive data pasted into assistants: " + " | ".join(parts))
     for cat in ("secret", "pii", "phi"):
         if exp.get(cat):
@@ -113,10 +147,14 @@ def _exposure(cfg: Config, args: argparse.Namespace) -> int:
 
             found = scan.reveal(cfg, con, args.reveal)
             if found is None:
-                print("unknown turn, or its source file is gone/changed", file=sys.stderr)
+                print(
+                    "unknown turn, or its source file is gone/changed", file=sys.stderr
+                )
                 return 1
             for f in found:
-                print(f"[{f['category']}/{f['kind']}] {f['before']!r} >>> {f['value']!r} <<< {f['after']!r}")
+                print(
+                    f"[{f['category']}/{f['kind']}] {f['before']!r} >>> {f['value']!r} <<< {f['after']!r}"
+                )
             return 0
         data = store.exposure_summary(con, args.since)
     finally:
@@ -128,14 +166,20 @@ def _exposure(cfg: Config, args: argparse.Namespace) -> int:
         print("no sensitive data detected in user prompts")
         return 0
     for cat, v in data["categories"].items():
-        print(f"{_LABEL.get(cat, cat)}: {v['sessions']} sessions, {v['prompts']} prompts, "
-              f"{v['first']}..{v['last']}, by source {v['by_source']}")
+        print(
+            f"{_LABEL.get(cat, cat)}: {v['sessions']} sessions, {v['prompts']} prompts, "
+            f"{v['first']}..{v['last']}, by source {v['by_source']}"
+        )
         for k, x in v["kinds"].items():
-            print(f"    {k:<14} sessions {x['sessions']:>4}  prompts {x['prompts']:>4}  matches {x['count']:>4}")
+            print(
+                f"    {k:<14} sessions {x['sessions']:>4}  prompts {x['prompts']:>4}  matches {x['count']:>4}"
+            )
         print(f"    advice: {v['advice']}")
     print("\nsessions (source, date, title, kinds):")
     for s in data["sessions"][:50]:
-        print(f"  {s['source']:<12} {s['date']}  {(s['title'] or '-')[:60]:<60}  {', '.join(s['kinds'])}  [{_status(s['turns'])}]")
+        print(
+            f"  {s['source']:<12} {s['date']}  {(s['title'] or '-')[:60]:<60}  {', '.join(s['kinds'])}  [{_status(s['turns'])}]"
+        )
     return 0
 
 
@@ -156,7 +200,10 @@ def _analyze(cfg: Config, mode: str | None = None) -> int:
     if mode not in (None, "auto") and eng.get("mode") != mode:
         print(f"warning: {rep.reason}", file=sys.stderr)
         if eng.get("upgrade"):
-            print(f"  to unlock {eng['upgrade']['mode']}: {eng['upgrade']['command']}", file=sys.stderr)
+            print(
+                f"  to unlock {eng['upgrade']['mode']}: {eng['upgrade']['command']}",
+                file=sys.stderr,
+            )
     print(f"analyze: done ({eng.get('mode')} tier; {rep.reason})")
     return 0
 
@@ -193,7 +240,11 @@ def _serve(cfg: Config, args: argparse.Namespace) -> int:
 def _loose_perms(root: Path) -> list[str]:
     if not root.exists():
         return []
-    return [str(p.relative_to(root)) or "." for p in [root, *root.rglob("*")] if stat.S_IMODE(p.stat().st_mode) & 0o077]
+    return [
+        str(p.relative_to(root)) or "."
+        for p in [root, *root.rglob("*")]
+        if stat.S_IMODE(p.stat().st_mode) & 0o077
+    ]
 
 
 def _download_models(cfg: Config) -> str:
@@ -223,8 +274,11 @@ def _doctor(cfg: Config, args: argparse.Namespace) -> int:
 
     if not args.download_models:
         block_network()
-    health: list[Health] = [scan.check_health(a) for a in scan._load_adapters()
-                            if cfg.sources is None or a.name in cfg.sources]
+    health: list[Health] = [
+        scan.check_health(a)
+        for a in scan._load_adapters()
+        if cfg.sources is None or a.name in cfg.sources
+    ]
     ml = {m: importlib.util.find_spec(m) is not None for m in ML_BACKENDS}
     from . import capabilities
 
@@ -235,7 +289,11 @@ def _doctor(cfg: Config, args: argparse.Namespace) -> int:
     if args.json:
         out: dict[str, Any] = {
             "sources": [vars(h) for h in health],
-            "data_dir": {"path": str(cfg.data_dir), "exists": cfg.data_dir.exists(), "loose_perms": loose},
+            "data_dir": {
+                "path": str(cfg.data_dir),
+                "exists": cfg.data_dir.exists(),
+                "loose_perms": loose,
+            },
             "ml": ml,
             "analysis": {**pr, "mode": tier, "reason": why},
         }
@@ -245,12 +303,26 @@ def _doctor(cfg: Config, args: argparse.Namespace) -> int:
         return 0
     print(f"{'source':<12} {'status':<12} {'sessions':>8}  versions / messages")
     for h in health:
-        print(f"{h.source:<12} {h.status:<12} {h.sessions_found:>8}  {','.join(h.versions_seen)}")
+        print(
+            f"{h.source:<12} {h.status:<12} {h.sessions_found:>8}  {','.join(h.versions_seen)}"
+        )
         for m in h.messages:
             print(f"    {m}")
-    print(f"data dir: {cfg.data_dir} " + ("(missing)" if not cfg.data_dir.exists() else
-          "(perms ok)" if not loose else f"(LOOSE perms on {len(loose)} paths: {', '.join(loose[:5])})"))
-    print("ml backends: " + ", ".join(f"{k}={'yes' if v else 'no'}" for k, v in ml.items()) + " (tfidf always)")
+    print(
+        f"data dir: {cfg.data_dir} "
+        + (
+            "(missing)"
+            if not cfg.data_dir.exists()
+            else "(perms ok)"
+            if not loose
+            else f"(LOOSE perms on {len(loose)} paths: {', '.join(loose[:5])})"
+        )
+    )
+    print(
+        "ml backends: "
+        + ", ".join(f"{k}={'yes' if v else 'no'}" for k, v in ml.items())
+        + " (tfidf always)"
+    )
     print("analysis libs:")
     for k, v in pr["libs"].items():
         print(f"    {k:<22} {v or 'missing'}")
@@ -268,7 +340,11 @@ def main(argv: list[str] | None = None) -> int:
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--data-dir", type=Path, default=None)
     g, rest = pre.parse_known_args(argv)
-    if (not rest or rest[0] not in COMMANDS) and "-h" not in rest and "--help" not in rest:
+    if (
+        (not rest or rest[0] not in COMMANDS)
+        and "-h" not in rest
+        and "--help" not in rest
+    ):
         rest = ["run", *rest]
     full = (["--data-dir", str(g.data_dir)] if g.data_dir else []) + rest
     try:

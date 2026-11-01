@@ -41,12 +41,18 @@ def ms_to_dt(ms) -> datetime | None:
 def open_ro(db: Path, immutable: bool = False) -> sqlite3.Connection:
     """Read-only open; never copies the DB."""
     q = "immutable=1" if immutable else "mode=ro"
-    return sqlite3.connect(f"file:{db.as_posix().replace('?', '%3f').replace('#', '%23')}?{q}", uri=True, timeout=1.0)
+    return sqlite3.connect(
+        f"file:{db.as_posix().replace('?', '%3f').replace('#', '%23')}?{q}",
+        uri=True,
+        timeout=1.0,
+    )
 
 
 def item_value(conn: sqlite3.Connection, key: str) -> str | None:
     """Read one ItemTable value by exact key (never SELECT *)."""
-    row = conn.execute("SELECT CAST(value AS TEXT) FROM ItemTable WHERE key = ?", (key,)).fetchone()
+    row = conn.execute(
+        "SELECT CAST(value AS TEXT) FROM ItemTable WHERE key = ?", (key,)
+    ).fetchone()
     return row[0] if row else None
 
 

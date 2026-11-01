@@ -19,9 +19,11 @@ from . import scan, store
 from .config import Config
 
 HOST = "127.0.0.1"  # literal on purpose: not configurable
-CSP = ("default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-       "img-src 'self' data:; font-src 'self' data:; connect-src 'self'; base-uri 'none'; "
-       "form-action 'none'; frame-ancestors 'none'")
+CSP = (
+    "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
+    "img-src 'self' data:; font-src 'self' data:; connect-src 'self'; base-uri 'none'; "
+    "form-action 'none'; frame-ancestors 'none'"
+)
 
 
 _ANALYZE_LOCK = threading.Lock()  # one re-analysis at a time
@@ -55,7 +57,10 @@ class _Handler(SimpleHTTPRequestHandler):
 
     def _body(self) -> dict | None:
         """Checked JSON object body (type, length <= 1 KiB); sends the error response and returns None on failure."""
-        if self.headers.get("Content-Type", "").split(";")[0].strip().lower() != "application/json":
+        if (
+            self.headers.get("Content-Type", "").split(";")[0].strip().lower()
+            != "application/json"
+        ):
             self._json(415, {"error": "application/json required"})
             return None
         try:
@@ -88,7 +93,9 @@ class _Handler(SimpleHTTPRequestHandler):
             return self._json(400, {"error": "bad mode"})
         avail = capabilities.probe(cfg.models_dir, mode)["available"]
         if mode != "auto" and mode not in avail:
-            return self._json(409, {"error": f"mode {mode} not available", "available": avail})
+            return self._json(
+                409, {"error": f"mode {mode} not available", "available": avail}
+            )
         with _ANALYZE_LOCK:
             con = store.connect(cfg)
             try:
@@ -107,12 +114,16 @@ class _Handler(SimpleHTTPRequestHandler):
             return False
         html = p.read_text(encoding="utf-8")
         meta = f'<meta name="pa-token" content="{self.server.token}">'  # type: ignore[attr-defined]
-        html, n = re.subn(r"(?i)<head[^>]*>", lambda m: m.group(0) + meta, html, count=1)
+        html, n = re.subn(
+            r"(?i)<head[^>]*>", lambda m: m.group(0) + meta, html, count=1
+        )
         body = (html if n else meta + html).encode()
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Vary", "Accept-Encoding")
-        if "gzip" in self.headers.get("Accept-Encoding", ""):  # ~490 kB page; gzip cuts it to ~165 kB
+        if "gzip" in self.headers.get(
+            "Accept-Encoding", ""
+        ):  # ~490 kB page; gzip cuts it to ~165 kB
             body = gzip.compress(body, 6)
             self.send_header("Content-Encoding", "gzip")
         self.send_header("Content-Length", str(len(body)))
@@ -127,14 +138,20 @@ class _Handler(SimpleHTTPRequestHandler):
             if method != "POST":
                 return self._json(405, {"error": "method not allowed"})
             return self._analyze() if self._authed() else None
-        if parts[:3] != ["", "api", "exposure"] or len(parts) not in (4, 5) or not parts[3]:
+        if (
+            parts[:3] != ["", "api", "exposure"]
+            or len(parts) not in (4, 5)
+            or not parts[3]
+        ):
             return self._json(404, {"error": "not found"})
         if not self._authed():
             return
         tid = parts[3]
         con = store.connect(self.server.cfg)  # type: ignore[attr-defined]
         try:
-            if not con.execute("SELECT 1 FROM exposures WHERE turn_id=? LIMIT 1", [tid]).fetchone():
+            if not con.execute(
+                "SELECT 1 FROM exposures WHERE turn_id=? LIMIT 1", [tid]
+            ).fetchone():
                 return self._json(404, {"error": "unknown turn"})
             if len(parts) == 4 and method == "GET":
                 found = scan.reveal(self.server.cfg, con, tid, self.server.adapters)  # type: ignore[attr-defined]
@@ -182,13 +199,20 @@ class _Handler(SimpleHTTPRequestHandler):
         pass
 
 
-def make_server(cfg: Config, port: int = 0, directory: Path | None = None, adapters: list[Any] | None = None) -> ThreadingHTTPServer:
+def make_server(
+    cfg: Config,
+    port: int = 0,
+    directory: Path | None = None,
+    adapters: list[Any] | None = None,
+) -> ThreadingHTTPServer:
     """Bind 127.0.0.1:<port> serving only ``directory`` (default: the export dir). Does not export."""
     d = Path(directory or cfg.export_dir)
     srv = ThreadingHTTPServer((HOST, port), partial(_Handler, directory=str(d)))
     srv.daemon_threads = True
     srv.cfg, srv.adapters = cfg, adapters  # type: ignore[attr-defined]
-    srv.token = secrets.token_urlsafe(32)  # per run, memory only  # type: ignore[attr-defined]
+    srv.token = secrets.token_urlsafe(
+        32
+    )  # per run, memory only  # type: ignore[attr-defined]
     return srv
 
 
@@ -204,7 +228,9 @@ def serve(cfg: Config, port: int = 0, open_browser: bool = True) -> None:
             con.close()
     except ImportError:
         if not index.is_file():
-            raise RuntimeError("export module unavailable and no previous export found") from None
+            raise RuntimeError(
+                "export module unavailable and no previous export found"
+            ) from None
     srv = make_server(cfg, port)
     url = f"http://{HOST}:{srv.server_address[1]}/"
     print(f"Serving {url} (Ctrl-C to stop)", flush=True)
