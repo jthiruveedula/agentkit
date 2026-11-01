@@ -1,0 +1,25 @@
+WEBVTT
+
+00:00.000 --> 00:04.500
+Where do your AI coding hours go? Your prompts are scattered across five assistants.
+
+00:04.500 --> 00:09.500
+Claude Code, Copilot, Cursor, Antigravity and opencode converge into one local view.
+
+00:09.500 --> 00:14.500
+Sessions, prompts, tokens and estimated cost count up, with deltas.
+
+00:14.500 --> 00:21.000
+A calendar heatmap of 164 active days ripples out, with spend by tool.
+
+00:21.000 --> 00:27.000
+A funnel shows where prompts stall, and friction rates show corrections and retries.
+
+00:27.000 --> 00:33.000
+Secrets and PII are found and masked. Redacted before anything is stored.
+
+00:33.000 --> 00:38.000
+Click any bar or cluster to drill into the prompts behind it.
+
+00:38.000 --> 00:42.000
+Know where your hours go. Run uvx prompt-analytics run.

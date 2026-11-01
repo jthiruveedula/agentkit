@@ -1,0 +1,114 @@
+# Seed phrases and regex priors for intent classification (ml/intent.py).
+# Score per class = cosine(prompt, centroid of seeds) + 0.05 * regex hits (cap 2).
+# A prompt falls back to "other" when the best score or the margin to the runner-up is too low.
+# Bump `version` whenever seeds, patterns or thresholds change.
+version = "1"
+
+# [min_score, margin] per embedding backend; dense models are better separated than tfidf+SVD.
+[thresholds]
+default = [0.35, 0.03]
+tfidf = [0.15, 0.02]
+
+[intents.bugfix]
+seeds = [
+  "fix the bug in this function, it throws an error",
+  "this crashes with a traceback, please debug it",
+  "the test is failing and the page is broken after the change",
+  "why does this exception happen when I click submit",
+  "login stopped working, find and fix the regression",
+  "resolve the null pointer error in the handler",
+  "the build fails with a stack trace, figure out why",
+  "it returns the wrong value, this is a bug",
+]
+patterns = ['\b(bug|crash(es|ed)?|exception|traceback|stack ?trace|broken|regression|fails?|failing|fix(es|ed)?)\b']
+
+[intents.feature]
+seeds = [
+  "add a new feature that lets users export their data",
+  "implement a settings page with a dark mode toggle",
+  "create an endpoint that returns the list of orders",
+  "build a new component for the dashboard",
+  "support pagination in the search results",
+  "add a command line flag to control the output format",
+  "implement the new user onboarding flow",
+  "write a function that parses the config file",
+]
+patterns = ['\b(implement|add support|new feature|create (a|an|the) (new )?(endpoint|component|page|command)|build (a|an|the))\b']
+
+[intents.refactor]
+seeds = [
+  "refactor this module to remove duplication",
+  "clean up and simplify this class without changing behaviour",
+  "extract the shared logic into a helper function",
+  "rename the variable across the codebase and tidy the structure",
+  "split this large file into smaller modules",
+  "restructure the service layer to use dependency injection",
+  "migrate this code to the new api and drop the old wrapper",
+  "reorganize the folder layout and improve readability",
+]
+patterns = ['\b(refactor|restructure|clean ?up|simplify|extract|rename|deduplicate|reorganize|tidy)\b']
+
+[intents.explain]
+seeds = [
+  "explain how this function works",
+  "what does this code do and why is it written this way",
+  "walk me through the request lifecycle in this app",
+  "can you summarize what this module is responsible for",
+  "help me understand this regex",
+  "what is the difference between these two approaches",
+  "how does the authentication flow work here",
+  "describe the architecture of this repository",
+]
+patterns = ['\b(explain|what does|how does|why does|walk me through|help me understand|summari[sz]e|describe)\b']
+
+[intents.test]
+seeds = [
+  "write unit tests for this function",
+  "add test coverage for the edge cases",
+  "create a pytest fixture and test the parser",
+  "generate integration tests for the api endpoints",
+  "increase coverage and add assertions for the error path",
+  "mock the database and test the service",
+  "add a regression test for this behaviour",
+  "write jest tests for the component",
+]
+patterns = ['\b(unit tests?|write tests?|add tests?|test coverage|pytest|jest|mock|fixture|assert(ions?)?)\b']
+
+[intents.docs]
+seeds = [
+  "update the readme with installation instructions",
+  "write documentation for the public api",
+  "add docstrings and comments to this module",
+  "document the configuration options in the docs folder",
+  "draft a changelog entry for this release",
+  "improve the contributing guide",
+  "write a tutorial section explaining the setup",
+  "fix typos in the documentation",
+]
+patterns = ['\b(readme|docs?|documentation|docstrings?|changelog|comments?|tutorial|contributing)\b']
+
+[intents.devops]
+seeds = [
+  "set up the ci pipeline in github actions",
+  "write a dockerfile and compose file for the service",
+  "configure terraform for the staging environment",
+  "the deploy job fails in the workflow, fix the pipeline",
+  "add a kubernetes manifest and health checks",
+  "configure nginx and environment variables for production",
+  "speed up the build with caching in ci",
+  "set up monitoring and alerts for the deployment",
+]
+patterns = ['\b(docker(file)?|ci|cd|pipeline|github actions|workflow|terraform|kubernetes|k8s|helm|deploy(ment)?|nginx|ansible)\b']
+
+[intents.data]
+seeds = [
+  "write a sql query that aggregates revenue by month",
+  "build a pandas pipeline to clean this csv",
+  "design the database schema and migration for orders",
+  "add a dbt model for the daily sessions table",
+  "analyze this dataset and plot the distribution",
+  "optimize the slow query with an index",
+  "transform the json export into a parquet table",
+  "train a model on this feature table and report accuracy",
+]
+patterns = ['\b(sql|query|dataframe|pandas|polars|csv|parquet|dbt|schema|migration|dataset|etl|warehouse|embedding)\b']

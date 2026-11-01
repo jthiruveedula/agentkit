@@ -1,0 +1,11 @@
+{
+  "name": "prompt-analytics",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "data": "python3 build-data.py",
+    "dev": "npx --yes hyperframes@0.8.224 preview",
+    "check": "npx --yes hyperframes@0.8.224 check",
+    "render": "npx --yes hyperframes@0.8.224 render --quality high --output out/raw.mp4"
+  }
+}
