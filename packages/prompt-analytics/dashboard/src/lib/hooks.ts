@@ -21,9 +21,22 @@ export function useRoving(n: number, h = 1, v = 1, start = 0) {
 
 /** Enter / Space activate a non-button mark the same way a click does. */
 export const press = (fn: () => void) => ({
-  onClick: fn,
+  onClick: (e: { currentTarget: Element; clientX?: number; clientY?: number }) => { ripple(e.currentTarget, e.clientX, e.clientY); fn(); },
   onKeyDown: (e: RKE) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); fn(); } },
 });
+
+/** Press ripple (HTML hosts only; motion on only). A span scales and fades from the press point, then removes itself. */
+export function ripple(el: Element, cx?: number, cy?: number) {
+  if (!fxOn() || !(el instanceof HTMLElement)) return;
+  const r = el.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2, x = (cx ? cx - r.left : r.width / 2), y = (cy ? cy - r.top : r.height / 2);
+  const s = document.createElement("span");
+  s.className = "rip"; s.setAttribute("aria-hidden", "true");
+  s.style.cssText = `width:${d}px;height:${d}px;left:${x - d / 2}px;top:${y - d / 2}px`;
+  const own = getComputedStyle(el).position === "static";   // only take `position` when the host has none (never override absolute / sticky / fixed)
+  if (own) el.style.position = "relative";
+  el.classList.add("rip-host"); el.appendChild(s);
+  setTimeout(() => { s.remove(); if (!el.querySelector(".rip")) { el.classList.remove("rip-host"); if (own) el.style.removeProperty("position"); } }, 520);
+}
 
 /** Measures an element once synchronously, then follows ResizeObserver (rAF-batched). */
 export function useSize(ref: RefObject<HTMLElement | null>): Size {
@@ -62,47 +75,29 @@ export function onReveal(el: Element | null, fn: () => void): () => void {
   return () => { set.delete(fn); };
 }
 
-/** Pointer tilt for `.card` / `.kpi` (mouse only): sets --rx/--ry/--gx/--gy; flat over interactive marks so hit targets stay put. */
-function tilt() {
-  let cur: HTMLElement | null = null, raf = 0, ev: PointerEvent | null = null;
-  const release = (el: HTMLElement) => {
-    el.style.setProperty("--rx", "0deg"); el.style.setProperty("--ry", "0deg");
-    window.setTimeout(() => { if (el !== cur) el.removeAttribute("data-tilt"); }, 500);
-  };
-  const apply = () => {
-    raf = 0; const e = ev; if (!e) return;
-    const t = e.target as Element | null, el = (t?.closest?.(".card, .kpi") ?? null) as HTMLElement | null;
-    if (el !== cur) { if (cur) release(cur); cur = el; }
-    if (!el || !t) return;
-    const r = el.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
-    const kpi = el.classList.contains("kpi"), max = kpi ? 7 : 4;
-    const flat = !kpi && !!t.closest("button, [role=button], select, input, a, .cell, .cal-stage, .hit, .band, .dot, .bar-row, .col, .fr, .mm");
-    el.setAttribute("data-tilt", "");
-    el.style.setProperty("--rx", `${flat ? 0 : (0.5 - py) * 2 * max}deg`);
-    el.style.setProperty("--ry", `${flat ? 0 : (px - 0.5) * 2 * max}deg`);
-    el.style.setProperty("--gx", `${px * 100}%`); el.style.setProperty("--gy", `${py * 100}%`);
-  };
-  const move = (e: PointerEvent) => { if (e.pointerType !== "mouse") return; ev = e; if (!raf) raf = requestAnimationFrame(apply); };
-  const out = (e: PointerEvent) => { if (!e.relatedTarget && cur) { release(cur); cur = null; } };
-  document.addEventListener("pointermove", move, { passive: true }); document.addEventListener("pointerout", out);
-  return () => { document.removeEventListener("pointermove", move); document.removeEventListener("pointerout", out); cancelAnimationFrame(raf); };
-}
+/** Turns motion on (html.fx) before the first render, so every element's first frame is already the motion-aware one.
+ *  Only in real browsers with IntersectionObserver and no reduced-motion preference; otherwise everything renders at its end state. */
+const realBrowser = () => typeof IntersectionObserver !== "undefined" && typeof matchMedia === "function" && !/jsdom/i.test(navigator.userAgent);
+export function initFx() { setFx(!reducedNow()); }
+/** Switch `html.fx` on or off (only ever on in a real browser). Called at start-up and whenever the reduced-motion preference changes. */
+export function setFx(on: boolean) { if (typeof document !== "undefined") document.documentElement.classList.toggle("fx", on && realBrowser()); }
 
+const reveal = (sec: Element) => {
+  if (sec.hasAttribute("data-in")) return;
+  sec.setAttribute("data-in", "");
+  waiting.get(sec)?.forEach((fn) => fn()); waiting.delete(sec);
+};
+
+/** Sections render their end state by default; a section only animates once it gets `data-in`. Sections already on screen get it
+ *  before the first paint, the rest when their first pixel scrolls in, so a full-page capture never shows blank sections. */
 export function useReveal() {
-  useEffect(() => {
-    const real = typeof IntersectionObserver !== "undefined" && typeof matchMedia === "function" && !/jsdom/i.test(navigator.userAgent);
-    if (!real || reducedNow()) return;
-    document.documentElement.classList.add("fx");
-    const io = new IntersectionObserver((es) => {
-      for (const e of es) {
-        if (!e.isIntersecting) continue;
-        e.target.setAttribute("data-in", ""); io.unobserve(e.target);
-        waiting.get(e.target)?.forEach((fn) => fn()); waiting.delete(e.target);
-      }
-    }, { rootMargin: "0px 0px -8% 0px" });
-    document.querySelectorAll(".sec").forEach((s) => io.observe(s));
-    const stop = tilt();
-    return () => { io.disconnect(); stop(); document.documentElement.classList.remove("fx"); };
+  useLayoutEffect(() => {
+    if (!fxOn()) return;
+    const secs = [...document.querySelectorAll(".sec")];
+    secs.forEach((s) => { const r = s.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) reveal(s); });
+    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); } });
+    secs.forEach((s) => { if (!s.hasAttribute("data-in")) io.observe(s); });
+    return () => io.disconnect();
   }, []);
 }
 

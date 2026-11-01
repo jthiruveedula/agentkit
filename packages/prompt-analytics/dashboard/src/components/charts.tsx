@@ -3,22 +3,43 @@
 import type React from "react";
 import { useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
 import { press, useMorph, useRoving, useSize } from "../lib/hooks";
+import { linkProps } from "../lib/motion";
 import { fmtDate } from "../lib/format";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
 import type { Week } from "../lib/filter";
 import { Empty } from "./ui";
 
 /** 24 mini bars in a card. Decorative: the value and delta beside it carry the meaning. */
-export function Spark({ values, w = 120, h = 24 }: { values: number[]; w?: number; h?: number }) {
-  const top = Math.max(...values, 0), bw = w / Math.max(values.length, 1);
+/** Sparkline ceiling. `cap` clips at 2x the 75th percentile of non-zero values, so one spike day cannot flatten the rest. */
+export function sparkTop(values: number[], cap = false): number {
+  const top = Math.max(...values, 0);
+  if (!cap) return top;
+  const nz = values.filter((v) => v > 0).sort((a, b) => a - b);
+  if (nz.length < 4) return top;
+  return Math.min(top, 2 * nz[Math.floor((nz.length - 1) * 0.75)]);
+}
+
+export function Spark({ values, w = 120, h = 24, cap = false }: { values: number[]; w?: number; h?: number; cap?: boolean }) {
+  const top = sparkTop(values, cap), bw = w / Math.max(values.length, 1);
   return (
     <svg className="spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {values.map((v, i) => { const bh = top > 0 && v > 0 ? Math.max(1.5, (v / top) * (h - 1)) : 0; return <rect key={i} style={{ "--i": i } as React.CSSProperties} x={i * bw + 0.5} y={h - bh} width={Math.max(1, bw - 1)} height={bh} />; })}
+      {values.map((v, i) => { const bh = top > 0 && v > 0 ? Math.max(1.5, (Math.min(v, top) / top) * (h - 1)) : 0; return <rect key={i} style={{ "--i": i } as React.CSSProperties} x={i * bw + 0.5} y={h - bh} width={Math.max(1, bw - 1)} height={bh} />; })}
     </svg>
   );
 }
 
-const PAD = { l: 44, r: 10, t: 10, b: 22 };
+/** 0 to max colour key for the cell heatmaps (same mix as `.cell`). */
+export function Ramp({ max, label, fmt = (n: number) => `${Math.round(n * 100)}%` }: { max: number; label: string; fmt?: (n: number) => string }) {
+  return (
+    <p className="ramp" aria-label={`${label} colour scale: lighter is lower, from ${fmt(0)} to ${fmt(max)}`}>
+      <span className="meta">{label}</span><span>{fmt(0)}</span><i aria-hidden="true" /><span>{fmt(max)}</span>
+    </p>
+  );
+}
+
+const PAD0 = { l: 44, r: 10, t: 10, b: 22 };
+/** Left gutter wide enough for the longest tick label (so a leading "$" never clips). */
+const padFor = (max: number, fmt: (n: number) => string) => ({ ...PAD0, l: Math.max(PAD0.l, 14 + 6.6 * Math.max(...[0, 0.5, 1].map((t) => fmt(max * t).length))) });
 const key = (fn: () => void) => (e: RKE) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } };
 const ticks = (max: number, fmt: (n: number) => string) => [0, 0.5, 1].map((t) => ({ t, text: fmt(max * t) }));
 
@@ -44,6 +65,7 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
   const swallow = useRef(false);
   const [brush, setBrush] = useState<[number, number] | null>(null);
   const max = Math.max(...lines.flatMap((l) => l.values), 0) || 1;
+  const PAD = padFor(max, fmt);
   const iw = Math.max(1, w - PAD.l - PAD.r), ih = height - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
@@ -93,6 +115,7 @@ export function River({ weeks, sel, onBand, onWeek, activeWeek, fmt, label, heig
   const ser = srcs.map((_, k) => mv.slice(k * n, (k + 1) * n));   // per-tool weekly values, morphing toward the data
   const total = weeks.map((_, i) => ser.reduce((a, v) => a + (v[i] ?? 0), 0));
   const max = Math.max(...total, 0) || 1;
+  const PAD = { ...padFor(max, fmt), b: 36 };   // room for the week strip under the plot
   const iw = Math.max(1, w - PAD.l - PAD.r), ih = height - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
@@ -110,17 +133,24 @@ export function River({ weeks, sel, onBand, onWeek, activeWeek, fmt, label, heig
         <svg width={w} height={height} role="group" aria-label={label}>
           {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
           <text className="ax" x={PAD.l} y={height - 6}>{fmtDate(weeks[0].week)}</text><text className="ax" x={w - PAD.r} y={height - 6} textAnchor="end">{fmtDate(weeks[n - 1].week)}</text>
+          {/* week columns sit under the bands: a band wins the pointer where it is drawn (tool), the column catches the empty space above it (week) */}
+          {weeks.map((wk, i) => (
+            <g key={wk.week} {...linkProps(`week:${wk.week}`)}><rect className="hit" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} role="button" aria-label={`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}. Filter to this week`}
+              {...mark(srcs.length + i)} {...press(() => onWeek(i))} /></g>
+          ))}
           <g className="rise" data-sel={sel ? "1" : undefined}>
             {bands.map((b, i) => (
-              <path key={b.s} className="band" d={b.d} fill={srcColor(b.s)} data-on={sel === b.s || undefined} role="button" aria-label={`${srcLabel(b.s)} cost band. Filter to this tool`} aria-pressed={sel === b.s}
-                {...mark(i)} {...press(() => onBand(b.s))}><title>{srcLabel(b.s)}</title></path>
+              <g key={b.s} {...linkProps(`tool:${b.s}`)}>
+                <path className="band" d={b.d} fill={srcColor(b.s)} data-on={sel === b.s || undefined} role="button" aria-label={`${srcLabel(b.s)} cost band. Filter to this tool`} aria-pressed={sel === b.s}
+                  {...mark(i)} {...press(() => onBand(b.s))}><title>{srcLabel(b.s)}</title></path>
+              </g>
             ))}
           </g>
-          {activeWeek && weeks.map((_, i) => (activeWeek(i) ? <rect key={i} className="sel-band" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} /> : null))}
+          {/* the strip is the mouse route to a week: the bands cover the columns, so each week also gets a thin target below the plot */}
           {weeks.map((wk, i) => (
-            <rect key={wk.week} className="hit" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} role="button" aria-label={`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}. Filter to this week`}
-              {...mark(srcs.length + i)} {...press(() => onWeek(i))}><title>{`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}`}</title></rect>
+            <g key={`s${wk.week}`} {...linkProps(`week:${wk.week}`)} aria-hidden="true"><rect className="wk-strip" data-on={activeWeek?.(i) || undefined} x={x(i) - Math.max(step, 2) / 2 + 1} y={PAD.t + ih + 4} width={Math.max(step - 2, 2)} height={10} rx={2} onClick={() => onWeek(i)}><title>{`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}. Click to filter`}</title></rect></g>
           ))}
+          {activeWeek && weeks.map((_, i) => (activeWeek(i) ? <rect key={i} className="sel-band" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} /> : null))}
         </svg>
       )}
     </div>

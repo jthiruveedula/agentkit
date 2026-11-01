@@ -27,7 +27,7 @@ export function Exposure() {
   const peak = Math.max(...ex.by_kind.flatMap((k) => srcs.map((s) => k.by_source[s] ?? 0)), 1);
   return (
     <Section id="s-exposure" title="Exposure" q="What sensitive data did you paste?">
-      <Card title="Findings by category" meta={ids ? `${fmtInt(total)} sessions in this selection` : `${fmtInt(ex.sessions)} sessions, ${fmtPct(ex.share, 1)} of all`} span={7}>
+      <Card title="Findings by category" meta={ids ? `${fmtInt(total)} sessions in this selection. weekly chart: whole export` : `${fmtInt(ex.sessions)} sessions, ${fmtPct(ex.share, 1)} of all`} span={7}>
         <ul className="tiles" data-sel={exCat !== "all" || undefined}>
           {CATS.map((c) => (
             <li key={c.id}>
@@ -41,14 +41,14 @@ export function Exposure() {
         {ex.weekly.length > 0 && (
           <>
             <Cols height={64} label="Sessions with findings per week, stacked by category. Aggregate" cols={ex.weekly.map((w) => ({
-              key: w.date, label: w.date, segs: CATS.map((c) => ({ v: w[c.id], color: c.color })), aria: `Week of ${w.date}: ${w.secret} secrets, ${w.pii} PII, ${w.phi} PHI`,
+              ent: `week:${w.date}`, key: w.date, label: w.date, segs: CATS.map((c) => ({ v: w[c.id], color: c.color })), aria: `Week of ${w.date}: ${w.secret} secrets, ${w.pii} PII, ${w.phi} PHI`,
             }))} />
             <ul className="legend">{CATS.map((c) => <li key={c.id} style={{ "--c": c.color } as React.CSSProperties}>{c.name}</li>)}</ul>
           </>
         )}
         <DataTable caption="Findings per week" head={["Week", "Secrets", "PII", "PHI"]} rows={ex.weekly.map((w) => [w.date, w.secret, w.pii, w.phi])} />
       </Card>
-      <Card title="Kinds by tool" meta="sessions, all sessions" span={5}>
+      <Card title="Kinds by tool" meta="sessions. whole export, ignores filters" span={5}>
         {ex.by_kind.length === 0 ? <Empty /> : (
           <ul className="kinds">
             {ex.by_kind.map((k) => (

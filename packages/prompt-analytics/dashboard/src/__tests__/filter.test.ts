@@ -44,9 +44,9 @@ describe("cross-filter", () => {
     expect(both.every((r) => r.date === day && r.source === rows[0].source)).toBe(true);
     expect(both.length).toBeLessThanOrEqual(one.length);
   });
-  it("stage means reached >= n; loops 8 means 8+", () => {
+  it("stage means reached >= n; loops 5 means 5+", () => {
     expect(applyFilter(rows, { stage: 5 }).every((r) => r.reached_stage >= 5)).toBe(true);
-    expect(applyFilter(rows, { loops: 8 }).every((r) => r.loops >= 8)).toBe(true);
+    expect(applyFilter(rows, { loops: 5 }).every((r) => r.loops >= 5)).toBe(true);
   });
   it("unpriced sessions never contribute $0 to cost", () => {
     const unpriced = rows.find((r) => r.cost_usd === null)!;

@@ -43,3 +43,10 @@ export function fmtValue(v: number, unit: string): string {
   if (unit === "tokens") return `${fmtCompact(v)} tokens`;
   return fmtCompact(v);
 }
+
+/** "Sep 3 – Oct 2, 2026" (en dash; years shown on both ends only when they differ). */
+export function fmtRange(from: string, to: string): string {
+  if (!from || !to) return "";
+  const y = (iso: string) => iso.slice(0, 4);
+  return y(from) === y(to) ? `${fmtDate(from)} – ${fmtDate(to)}, ${y(to)}` : `${fmtDate(from)}, ${y(from)} – ${fmtDate(to)}, ${y(to)}`;
+}

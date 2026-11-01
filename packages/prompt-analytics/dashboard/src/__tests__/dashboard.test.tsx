@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Dashboard } from "../App";
@@ -44,7 +44,7 @@ describe("one-page drilldown", () => {
     expect(kpi("sessions")).toBe(fmtInt(src.sessions));
     expect(location.hash).toContain(`src=${src.key}`);
     expect(el.querySelector(".panel")).toBeNull();
-    click([...el.querySelectorAll<HTMLButtonElement>(".metaline .link")].at(-1)!);
+    click(el.querySelector(".top .count"));
     const panel = el.querySelector(".panel")!;
     expect(panel.getAttribute("data-mode")).toBe("list");
     expect(panel.querySelectorAll(".srow").length).toBe(Math.min(100, src.sessions));
@@ -69,10 +69,12 @@ describe("one-page drilldown", () => {
     mount();
     const src = views(d, {}).sources[0];
     click(toolRow(0));
-    expect(el.querySelectorAll("#s-sessions tbody tr").length).toBe(Math.min(100, src.sessions));
-    expect(el.querySelector(".crumbs")!.textContent).toMatch(/All sessions/);
-    expect(el.querySelectorAll(".crumbs .crumb").length).toBe(2);
-    click(el.querySelector(".crumbs .crumb"));   // "All sessions" clears
+    expect(el.querySelectorAll("#s-sessions tbody tr").length).toBe(Math.min(10, src.sessions));
+    expect(el.querySelector('nav[aria-label="Sessions pages"]')!.textContent).toContain(`of ${src.sessions}`);
+    expect(el.querySelector(".crumbs")!.textContent).not.toMatch(/All sessions/);   // no duplicate scope text, only removable chips
+    expect(el.querySelectorAll(".crumbs .crumb").length).toBe(1);
+    expect(el.querySelector(".top .count")!.textContent).toContain(fmtInt(src.sessions));
+    click(el.querySelector(".crumbs .crumb"));   // removing the only chip clears
     expect(kpi("sessions")).toBe(total());
   });
   it("a calendar day filters to that date", () => {
@@ -93,12 +95,12 @@ describe("one-page drilldown", () => {
     const rec = d.recommendations.find((r) => { const i = d.insights.find((x) => x.id === r.evidence_insight); return i && Object.keys(i.drill.filter).length > 0; })!;
     click(el.querySelector(`[data-rec="${rec.id}"] button`));
     expect(el.querySelector(".panel")).not.toBeNull();
-    expect(el.querySelectorAll(".crumbs .crumb").length).toBeGreaterThan(1);
+    expect(el.querySelectorAll(".crumbs .crumb").length).toBeGreaterThan(0);
   });
   it("Escape closes the panel first, then drops the last selection", () => {
     mount();
     click(toolRow(0));
-    click([...el.querySelectorAll<HTMLButtonElement>(".metaline .link")].at(-1)!);
+    click(el.querySelector(".top .count"));
     const esc = () => act(() => { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
     esc();
     expect(el.querySelector(".panel")).toBeNull();
@@ -154,5 +156,72 @@ describe("review queue collapse", () => {
     const it = (id: string, preview: string | null) => ({ id, session: "s", source: "copilot" as const, date: "2026-01-01", session_title: null, category: "pii" as const, kinds: ["email"], preview, status: "open" as const });
     const out = collapse([it("a", "x"), it("b", "x"), it("c", "y"), it("d", null), it("e", null)]);
     expect(out.map((g) => g.map((i) => i.id))).toEqual([["a", "b"], ["c"], ["d"], ["e"]]);
+  });
+});
+
+describe("iteration 3: unit economics and nav", () => {
+  const mountWith = (data: typeof d) => {
+    el = document.createElement("div"); document.body.append(el);
+    root = createRoot(el);
+    act(() => root!.render(<Dashboard d={data} />));
+  };
+  it("basic tier renders hour-by-weekday without hour_week[].applied (schema 1.0)", () => {
+    const raw = JSON.parse(JSON.stringify(sample));
+    raw.schema = "1.0"; raw.engine = { ...raw.engine, mode: "basic" };
+    raw.hour_week = raw.hour_week.map(({ dow, hour, prompts }: { dow: number; hour: number; prompts: number }) => ({ dow, hour, prompts }));
+    mountWith(normalize(raw));
+    expect(el.querySelector("#s-time .hw")).not.toBeNull();
+    expect(el.querySelector('[aria-label="Heatmap shows"]')).toBeNull();
+    expect(el.textContent).not.toContain("Golden hours");
+  });
+  it("golden hours toggle appears with the field and switches the heatmap", () => {
+    mount();
+    const seg = el.querySelector('[aria-label="Heatmap shows"]');
+    expect(seg).not.toBeNull();
+    click([...seg!.querySelectorAll("button")].find((b) => b.textContent === "Success")!);
+    expect(el.querySelector("#s-golden h3")?.textContent).toBe("Hours with the highest applied rate");
+  });
+  it("router hatches thin cells with text and a cell click drills to tool + intent", () => {
+    mount();
+    const cells = [...el.querySelectorAll<HTMLButtonElement>(".rt .cell")];
+    expect(cells.length).toBeGreaterThan(0);
+    for (const c of cells.filter((c) => c.dataset.low !== undefined)) { expect(c.textContent).toBe("–"); expect(c.title).toMatch(/not enough data/); }
+    const ok = cells.find((c) => c.dataset.low === undefined)!;
+    click(ok);
+    expect(location.hash).toMatch(/src=/); expect(location.hash).toMatch(/int=/);
+    expect(kpi("sessions")).not.toBe(total());
+  });
+  it("with no prices, the cost KPI swaps to tokens per applied change (never $0)", () => {
+    const raw = JSON.parse(JSON.stringify(sample));
+    raw.sessions = raw.sessions.map((s: Record<string, unknown>) => ({ ...s, cost_usd: null }));
+    mountWith(normalize(raw));
+    expect(el.querySelector('.kpi[data-kpi="cpa"]')).toBeNull();
+    const card = el.querySelector('.kpi[data-kpi="tpa"]')!;
+    expect(card.hasAttribute("data-primary")).toBe(true);
+    expect(card.textContent).toMatch(/record prices/);
+    expect(el.querySelector(".kpis")!.textContent).not.toMatch(/\$0/);
+  });
+  it("cost KPI reconciles its denominators", () => {
+    mount();
+    expect(el.querySelector('.kpi[data-kpi="cpa"] .sub')!.textContent).toMatch(/^per applied · [\d,]+ priced of [\d,]+ applied$/);
+    expect(el.querySelector('.kpi[data-kpi="applied"] .sub')!.textContent).toMatch(/of [\d,]+ sessions with prompts$/);
+  });
+  it("mobile More names the current section in its label (no aria-current), and closes on Esc", () => {
+    // jsdom lays everything out at top 0, which the scroll-spy reads as "scrolled past every section"
+    const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({ top: 2000, bottom: 2100, left: 0, right: 0, width: 0, height: 0, x: 0, y: 2000, toJSON() {} });
+    mount();
+    const more = el.querySelector<HTMLButtonElement>(".bar > button")!;
+    expect(more.getAttribute("aria-label")).toBe("More");
+    expect(more.getAttribute("aria-controls")).toBeNull();
+    click(more);
+    expect(more.getAttribute("aria-controls")).toBe("more");
+    expect(document.activeElement).toBe(el.querySelector("#more a"));
+    act(() => { document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); });
+    expect(el.querySelector("#more")).toBeNull();
+    click(more);
+    click(el.querySelector<HTMLAnchorElement>('#more a[href*="s-sessions"]'));
+    expect(more.getAttribute("aria-current")).toBeNull();
+    expect(more.getAttribute("aria-label")).toBe("More, current: Sessions");
+    rect.mockRestore();
   });
 });

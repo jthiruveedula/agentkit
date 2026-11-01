@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { DashboardData } from "./data/types";
 import { chips, patchFilter, same, views, isEmpty, type Filter, type FilterKey, type Views } from "./lib/filter";
 import { priorViews, windowOf, type Cmp, type Prior, type Win } from "./lib/compare";
-import { fromHash, toHash, type Nav } from "./lib/hash";
+import { fromHash, lockSpy, sectionOf, toHash, type Nav } from "./lib/hash";
+import { capabilities, sectionsFor, type Caps } from "./lib/capabilities";
 
 export interface Crumb { id: string; label: string; keys: FilterKey[] | "sel" }
 type Cat = "all" | "secret" | "pii" | "phi";
@@ -12,6 +13,12 @@ export interface Store {
   d: DashboardData;
   f: Filter;
   v: Views;
+  /** What the rows in view can honestly show (recomputed under every filter). */
+  caps: Caps;
+  /** Same flags for the whole export, ignoring filters: keeps a clicked row's table in place. */
+  capsAll: Caps;
+  /** Section ids with something to show, for the nav and scroll-spy. */
+  secs: Set<string>;
   win: Win;
   /** Prior-period views, null for "All", cmp off, or a prior window outside the data. */
   prior: Prior | null;
@@ -39,6 +46,12 @@ export interface Store {
   clear: (keys?: FilterKey[]) => void;
   /** Clear every crumb after index i (-1 = all). */
   clearAfter: (i: number) => void;
+  /** Sessions table view (page, rows per page, density, sort); all in the hash. */
+  view: Pick<Nav, "pg" | "pgs" | "dens" | "so">;
+  /** Patch the table view (replace, no history spam); a key set to undefined resets it. */
+  setView: (p: Partial<Pick<Nav, "pg" | "pgs" | "dens" | "so">>) => void;
+  /** Apply a saved or shared hash (`#/s-time?src=...`) as the whole navigation state. */
+  go: (hash: string) => void;
   openList: () => void;
   openSession: (id: string) => void;
   back: () => void;
@@ -76,10 +89,11 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   };
   const [s, setS] = useState<S>(boot);
   const sRef = useRef(s);
-  const secRef = useRef(first.sec);
-  const [section, setSec] = useState(first.sec);
+  const secRef = useRef(sectionOf(first.sec));
+  const [section, setSec] = useState(sectionOf(first.sec));
   const [exCat, setExCat] = useState<Cat>("all");
   const { f, sel, list, cmp } = s.nav;
+  const view = useMemo(() => ({ pg: s.nav.pg, pgs: s.nav.pgs, dens: s.nav.dens, so: s.nav.so }), [s.nav.pg, s.nav.pgs, s.nav.dens, s.nav.so]);
 
   const write = useCallback((next: S, mode: "push" | "replace") => {
     sRef.current = next; setS(next);
@@ -87,12 +101,14 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
     history[mode === "push" ? "pushState" : "replaceState"]({ order: next.order }, "", toHash(next.nav, secRef.current));
   }, []);
   const commit = useCallback((nav: Nav, mode: "push" | "replace") => {
+    const cur = sRef.current.nav;   // a new filter starts the sessions table on page 1
+    if (nav.pg && nav.pg === cur.pg && !same(nav.f, cur.f)) nav = { ...nav, pg: undefined };
     write({ nav, order: reorder(sRef.current.order, labelOf(nav.f, clusterLabel).map((c) => c.keys.join())) }, mode);
   }, [write, clusterLabel]);
 
   useEffect(() => {   // Back / Forward and pasted hashes re-read the URL
     const on = () => {
-      const h = readHash(); secRef.current = h.sec; setSec(h.sec);
+      const h = readHash(); secRef.current = sectionOf(h.sec); setSec(sectionOf(h.sec));
       const next = { nav: h.nav, order: reorder(history.state?.order ?? [], labelOf(h.nav.f, clusterLabel).map((c) => c.keys.join())) };
       sRef.current = next; setS(next);
     };
@@ -101,6 +117,12 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   }, [clusterLabel]);
 
   const v = useMemo(() => views(d, f), [d, f]);
+  const caps = useMemo(() => capabilities(d, v), [d, v]);
+  // Section visibility follows the whole export, so drilling into one day never collapses the page;
+  // the content inside each section follows the filtered caps.
+  const whole = useMemo(() => (isEmpty(f) ? null : views(d, {})), [d, f]);
+  const capsAll = useMemo(() => (whole ? capabilities(d, whole) : caps), [whole, caps, d]);
+  const secs = useMemo(() => (whole ? sectionsFor(capsAll, d, whole) : sectionsFor(caps, d, v)), [whole, caps, capsAll, d, v]);
   const prior = useMemo(() => priorViews(d, f, cmp), [d, f, cmp]);
   const win = useMemo(() => windowOf(d, f), [d, f]);
   const ids = useMemo(() => (isEmpty(f) ? null : new Set(v.rows.map((r) => r.id))), [f, v.rows]);
@@ -128,14 +150,21 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   const openSession = useCallback((id: string) => commit(nav({ sel: id }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
   const back = useCallback(() => { const n = sRef.current.nav; commit(n.sel ? { ...n, sel: undefined } : { ...n, list: false }, "push"); }, [commit]);
   const closePanel = useCallback(() => commit(nav({ sel: undefined, list: false }), "push"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const setView = useCallback((p: Partial<Pick<Nav, "pg" | "pgs" | "dens" | "so">>) => commit(nav(p), "replace"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const go = useCallback((hash: string) => {
+    const h = fromHash(hash), id = sectionOf(h.sec);
+    secRef.current = id; setSec(id); commit(h.nav, "push");
+    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView?.());
+  }, [commit]);
   const setCmp = useCallback((c: Cmp) => commit(nav({ cmp: c }), "replace"), [commit]);  // eslint-disable-line react-hooks/exhaustive-deps
-  const setSection = useCallback((id: string) => {
+  const setSection = useCallback((raw: string) => {
+    const id = sectionOf(raw);
     if (secRef.current === id) return;
     secRef.current = id; setSec(id);
     if (typeof history !== "undefined") history.replaceState(history.state, "", toHash(sRef.current.nav, id));
   }, []);
   const goto = useCallback((id: string) => {
-    setSection(id === "s-attention" ? "s-overview" : id);
+    setSection(sectionOf(id)); lockSpy(sectionOf(id));
     const el = document.getElementById(id);
     if (el) el.scrollIntoView?.({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   }, [setSection]);
@@ -146,6 +175,6 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
 
   const href = (sec: string) => toHash(s.nav, sec);
   const panel = sel ? "detail" : list ? "list" : "none";
-  const store: Store = { d, f, v, win, prior, cmp, setCmp, ids, exposed, sel, list, panel, crumbs, section, setSection, goto, set, drill, apply, href, clear, clearAfter, openList, openSession, back, closePanel, exCat, setExCat, clusterLabel };
+  const store: Store = { d, f, v, caps, capsAll, secs, win, prior, cmp, setCmp, ids, exposed, sel, list, panel, crumbs, section, setSection, goto, set, drill, apply, href, clear, clearAfter, view, setView, go, openList, openSession, back, closePanel, exCat, setExCat, clusterLabel };
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }

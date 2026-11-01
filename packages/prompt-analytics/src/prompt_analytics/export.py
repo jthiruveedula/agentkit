@@ -15,7 +15,8 @@ import polars as pl
 from .analytics import funnel as fn
 from .analytics import metrics as mx
 from .config import Config
-from .ml import anomaly
+from . import repeats as rp
+from .ml import anomaly, whatworks
 from .privacy import Redactor, harden_tree, write_private
 from .sensitive import ADVICE
 
@@ -23,7 +24,9 @@ MAX_ANOMALIES = 6  # per metric
 MIN_COST_SPIKE = 5.0  # USD; smaller days are never "spikes"
 MAX_SESSIONS = 5000  # newest first; per-session rows for dashboard drilldowns
 
-SCHEMA = "1.0"
+SCHEMA = (
+    "1.2"  # 1.1: hour_week[].sessions / .applied; 1.2: repeats[], sessions[].features
+)
 MAX_POINTS = 20000
 SNIPPET = 160
 PLACEHOLDER = '<script type="application/json" id="pa-data">null</script>'
@@ -159,7 +162,14 @@ def core_sections(
         "totals": totals,
         "by_source": by_source,
         "calendar": mx.calendar(sess, prompts),
-        "hour_week": mx.hour_week(prompts),
+        "hour_week": mx.hour_week(
+            prompts,
+            human.join(
+                sm.select("session_id", "n_user", "has_applied"), on="session_id"
+            )
+            .filter(pl.col("n_user") > 0)
+            .select("started", pl.col("has_applied").fill_null(False).alias("applied")),
+        ),
         "cost_river": mx.cost_river(sess),
         "anomalies": anoms,
         "ttr": mx.ttr_table(sm),
@@ -427,11 +437,68 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
         "what_works": ww,
         "what_works_tested": int(float(meta.get("ww_tested") or 0)),
         "sessions": _sessions(con, b, sess, sm, red),
+        "repeats": _repeats(con, b, sess, red, meta),
         "exposure": {**sec["exposure"], "items": _exposure_items(b, sess, red)},
         "insights": ins,
         "recommendations": recs,
     }
     return _clean(data)
+
+
+FEATURE_MIN = 0.5  # a prompt "shows" a feature when its quality sub-score is at least this (same cut as basic-tier what_works)
+
+
+def _repeats(
+    con: duckdb.DuckDBPyConnection,
+    b: mx.Base,
+    sess: pl.DataFrame,
+    red: Redactor,
+    meta: dict[str, str],
+) -> list[dict[str, Any]]:
+    """Prompts typed again in other sessions. Text is redacted before grouping; only the exemplar and session ids leave."""
+    human = sess.filter(~pl.col("is_subagent"))
+    pf = mx.fetch(
+        con,
+        "SELECT turn_id, cluster_id FROM prompt_features",
+        {"turn_id": pl.Utf8, "cluster_id": pl.Int64},
+    )
+    cl = dict(zip(pf["turn_id"].to_list(), pf["cluster_id"].to_list()))
+    t = (
+        b.turns.filter((pl.col("role") == "user") & pl.col("text").is_not_null())
+        .join(human.select("session_id", "date"), on="session_id", how="inner")
+        .sort(["date", "session_id", "idx"], descending=[True, True, False])
+    )
+    rows = [
+        (r["session_id"], red.redact(r["text"]) or "", int(cl.get(r["turn_id"]) or -1))
+        for r in t.iter_rows(named=True)
+    ]
+    mode = _engine(meta).get("mode")
+    return rp.find_repeats(rows, semantic=mode in ("ml", "deep"))
+
+
+def _features(con: duckdb.DuckDBPyConnection, b: mx.Base) -> dict[str, list[str]]:
+    """Per session: quality features (what_works ids) at least one of its prompts shows."""
+    pf = mx.fetch(
+        con,
+        "SELECT turn_id, q_specificity, q_context, q_constraints, q_length FROM prompt_features WHERE q_specificity IS NOT NULL",
+        {
+            "turn_id": pl.Utf8,
+            "q_specificity": pl.Float64,
+            "q_context": pl.Float64,
+            "q_constraints": pl.Float64,
+            "q_length": pl.Float64,
+        },
+    )
+    j = b.turns.select("turn_id", "session_id").join(pf, on="turn_id", how="inner")
+    if not j.height:
+        return {}
+    g = j.group_by("session_id").agg(
+        [pl.col(whatworks.COLS[f]).max().alias(f) for f in whatworks.FEATURES]
+    )
+    return {
+        r["session_id"]: [f for f in whatworks.FEATURES if (r[f] or 0.0) >= FEATURE_MIN]
+        for r in g.iter_rows(named=True)
+    }
 
 
 def _sessions(
@@ -465,6 +532,7 @@ def _sessions(
     )
     cl = dict(zip(top["session_id"].to_list(), top["cluster_id"].to_list()))
     m = {r["session_id"]: r for r in sm.iter_rows(named=True)}
+    feats = _features(con, b)
     rows = human.sort(
         ["date", "session_id"], descending=[True, True], nulls_last=True
     ).head(MAX_SESSIONS)
@@ -488,6 +556,7 @@ def _sessions(
                 "loops": int(x.get("loops") or 0),
                 "friction": float(x.get("friction") or 0.0),
                 "cluster": int(cl.get(r["session_id"], -1)),
+                "features": feats.get(r["session_id"], []),
                 "title": (red.redact(" ".join(t.split())) or "")[:SNIPPET] if t else "",
             }
         )

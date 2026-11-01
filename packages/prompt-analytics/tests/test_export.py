@@ -35,6 +35,7 @@ KEYS = {
     "exposure",
     "insights",
     "recommendations",
+    "repeats",
 }
 
 
@@ -46,7 +47,7 @@ def built():
 
 def test_contract_shape(built):
     _, d = built
-    assert set(d) == KEYS and d["schema"] == "1.0"
+    assert set(d) == KEYS and d["schema"] == "1.2"
     g = d["galaxy"]
     assert len(g["points"]["x"]) <= 20000 and all(
         0 <= v <= 1 for v in g["points"]["x"] + g["points"]["y"]
@@ -60,6 +61,16 @@ def test_contract_shape(built):
         "weekly",
         "items",
     }
+
+
+def test_hour_week_applied(built):
+    _, d = built
+    hw = d["hour_week"]
+    asked = [s for s in d["sessions"] if s["prompts"] > 0]
+    assert all(0 <= c["applied"] <= c["sessions"] for c in hw)
+    assert sum(c["sessions"] for c in hw) == len(asked)
+    assert sum(c["applied"] for c in hw) == sum(s["applied"] for s in asked)
+    assert len({(c["dow"], c["hour"]) for c in hw}) == len(hw)
 
 
 def test_exposure_items_and_exclusions(built):
@@ -113,7 +124,7 @@ def test_write_gate_escape_and_perms(built, tmp_path):
         and "<!--" not in html.split('id="pa-data"')[1].split("</script>")[0]
     )
     blob = html.split('id="pa-data">')[1].split("</script>")[0]
-    assert json.loads(blob)["schema"] == "1.0"
+    assert json.loads(blob)["schema"] == "1.2"
     assert stat.S_IMODE(os.stat(out).st_mode) == 0o600
     assert stat.S_IMODE(os.stat(tmp_path / "o" / "dashboard.json").st_mode) == 0o600
 
@@ -156,6 +167,7 @@ def test_sessions_rows(built):
         "friction",
         "cluster",
         "title",
+        "features",
     }
     assert all(
         set(r) == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS

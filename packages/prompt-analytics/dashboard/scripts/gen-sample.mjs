@@ -68,7 +68,18 @@ const hour_week = [];
 for (let dow = 0; dow < 7; dow++) for (let hour = 0; hour < 24; hour++) {
   const w = dow >= 5 ? 0.35 : 1;
   const peak = Math.exp(-((hour - 11) ** 2) / 14) + 0.8 * Math.exp(-((hour - 15.5) ** 2) / 10) + 0.35 * Math.exp(-((hour - 22) ** 2) / 8);
-  hour_week.push({ dow, hour, prompts: Math.round(w * peak * (totPrompts / 900) * (0.8 + rnd() * 0.4)) });
+  hour_week.push({ dow, hour, prompts: Math.round(w * peak * (totPrompts / 900) * (0.8 + rnd() * 0.4)), sessions: 0, applied: 0 });
+}
+// schema 1.1: sessions started / applied per cell. Start hour comes from a hash of the id (no rnd() draws, so the rest of the data is unchanged)
+{
+  const hw = Array.from({ length: 24 }, (_, h) => Math.exp(-((h - 11) ** 2) / 14) + 0.8 * Math.exp(-((h - 15.5) ** 2) / 10) + 0.35 * Math.exp(-((h - 22) ** 2) / 8));
+  const tot = hw.reduce((a, b) => a + b, 0);
+  for (const x of sessions) {
+    if (!x.prompts) continue;
+    let h = 2166136261; for (const c of x.id) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0;
+    let u = (h % 100000) / 100000 * tot, hour = 0; while (hour < 23 && (u -= hw[hour]) > 0) hour++;
+    const c = hour_week[((new Date(`${x.date}T00:00:00Z`).getUTCDay() + 6) % 7) * 24 + hour]; c.sessions++; if (x.applied) c.applied++;
+  }
 }
 const wk = (d) => { const t = new Date(`${d}T00:00:00Z`); t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7)); return iso(t); };
 const weeks = new Map();
@@ -130,6 +141,19 @@ const what_works = feats.map((feature, i) => {
   const helps = i < 5; const effect = r2((helps ? 1 : -1) * (0.04 + rnd() * 0.16), 3);
   return { cluster: i % labels.length, feature, effect, ci: [r2(effect - 0.05 - rnd() * 0.04, 3), r2(effect + 0.05 + rnd() * 0.04, 3)], n: Math.round(80 + rnd() * 500), direction: helps ? "helps" : "hurts" };
 }).sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect));
+
+// schema 1.2: per-session feature tags and repeated prompts. Both come from id hashes (no rnd() draws, so the rest of the data is unchanged).
+const fnv = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h; };
+for (const x of sessions) x.features = x.prompts ? feats.filter((f) => (fnv(x.id + f) % 1000) / 1000 < (x.applied ? 0.68 : 0.3)) : [];
+const REPEATS = [
+  ["add unit tests for the new handler and keep the existing mocks", 2, 41], ["fix the failing [path] test and explain the root cause", 1, 33],
+  ["summarise what changed in this branch for the pull request description", 3, 24], ["explain what this function does and list its edge cases", 3, 19],
+  ["bump the dependencies and run the full test suite before you stop", 4, 14], ["rewrite this commit message in the conventional commits style", 6, 9],
+];
+const repeats = REPEATS.map(([exemplar, cluster, count]) => {
+  const pool = sessions.filter((x) => x.prompts > 1).sort((a, b) => fnv(a.id + exemplar) - fnv(b.id + exemplar)).slice(0, Math.min(count, 25));
+  return { cluster, count, exemplar, sessions: pool.sort((a, b) => (a.date < b.date ? 1 : -1)).map((x) => x.id) };
+});
 
 const asked = sessions.filter((x) => x.prompts > 0);   // every rate uses sessions with a prompt
 const pct = (a, b) => Math.round((100 * a) / (b || 1));
@@ -194,11 +218,11 @@ const exposure = {
   items: items.sort((a, b) => (a.date < b.date ? 1 : -1)),
 };
 const data = {
-  schema: "1.0", generated_at: "2026-10-26T08:00:00Z", range: { start: iso(start), end: iso(new Date(start.getTime() + (days - 1) * 864e5)) }, sources,
+  schema: "1.2", generated_at: "2026-10-26T08:00:00Z", range: { start: iso(start), end: iso(new Date(start.getTime() + (days - 1) * 864e5)) }, sources,
   engine: { mode: "ml", requested: "auto", available: ["basic", "ml"], libs: { duckdb: "1.1.3", scikit_learn: "1.9.1", fastembed: null }, accel: "cpu", reason: "auto: scikit-learn 1.9.1 found, no embedding model", upgrade: { mode: "deep", command: "pip install 'prompt-analytics[deep]'" }, methods: { footprint: "Counted from session logs", time: "Rolling z-score plus IsolationForest on daily cost", funnel: "Rule-based stage detection per session", friction: "Loop and retry heuristics", works: "TF-IDF + KMeans clusters; logistic model with bootstrap CI", recommend: "Ranked from the strongest evidence" } },
   totals: { sessions: totSessions, prompts: totPrompts, tokens: totTokens, cost_usd: r2(totCost), active_days: calendar.length, longest_streak: longest, current_streak: cur, projects: PROJECTS.length, commits_linked: Math.round(totSessions * 0.34) },
   by_source, calendar, hour_week, cost_river, anomalies, ttr, funnel, tool_switch, friction,
-  galaxy: { clusters, points: { x: px, y: py, c: pc, q: pq } }, quality, what_works, what_works_tested: what_works.length + 40, sessions, exposure, insights, recommendations,
+  galaxy: { clusters, points: { x: px, y: py, c: pc, q: pq } }, quality, what_works, what_works_tested: what_works.length + 40, sessions, repeats, exposure, insights, recommendations,
 };
 writeFileSync(new URL("../src/data/sample.dev.json", import.meta.url), JSON.stringify(data));
 console.log("sample.dev.json", JSON.stringify(data).length, "bytes");

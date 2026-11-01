@@ -8,14 +8,16 @@ export interface Filter {
   from?: string; to?: string;          // ISO dates, inclusive
   stage?: number;                      // reached funnel stage >= n (1..6)
   stageExact?: number;                 // reached funnel stage == n (drop-off: reached n, not n+1)
-  loops?: number;                      // rephrase loops == n (8 means 8+)
+  loops?: number;                      // rephrase loops == n (MAX_LOOPS means MAX_LOOPS+)
   applied?: boolean;
   frictionMin?: number;                // friction band [min, max); max >= 1 includes 1
   frictionMax?: number;
+  q?: string;                          // session-title search: every word must appear (case-insensitive)
 }
 export type FilterKey = keyof Filter;
 export const STAGES = ["Intent", "Prompt", "Response", "Iterate", "Applied", "Outcome"] as const;
-export const MAX_LOOPS = 8;
+/** Top rephrase-loop bin ("5+"): the histogram, Loop breaker and loops filter share it. */
+export const MAX_LOOPS = 5;
 
 export const isEmpty = (f: Filter) => (Object.keys(f) as FilterKey[]).every((k) => f[k] === undefined);
 const clean = (f: Filter): Filter => Object.fromEntries(Object.entries(f).filter(([, v]) => v !== undefined)) as Filter;
@@ -35,8 +37,11 @@ export function match(r: SessionRow, f: Filter): boolean {
     && (f.loops === undefined || (f.loops >= MAX_LOOPS ? r.loops >= MAX_LOOPS : r.loops === f.loops))
     && (f.applied === undefined || r.applied === f.applied)
     && (f.frictionMin === undefined || r.friction >= f.frictionMin)
-    && (f.frictionMax === undefined || f.frictionMax >= 1 || r.friction < f.frictionMax);
+    && (f.frictionMax === undefined || f.frictionMax >= 1 || r.friction < f.frictionMax)
+    && (f.q === undefined || titleHas(r.title, f.q));
 }
+/** Every whitespace-separated word of `q` appears in the title (case-insensitive). An empty query matches all. */
+export const titleHas = (title: string, q: string) => { const t = (title ?? "").toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w)); };
 export const applyFilter = (rows: SessionRow[], f: Filter) => (isEmpty(f) ? rows : rows.filter((r) => match(r, f)));
 
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
@@ -45,7 +50,7 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   const out: { keys: FilterKey[]; label: string }[] = [];
   if (f.from !== undefined || f.to !== undefined) {
     const a = f.from && day(f.from), b = f.to && day(f.to);
-    out.push({ keys: ["from", "to"], label: a && b ? (f.from === f.to ? a : `${a} to ${b}`) : a ? `From ${a}` : `Until ${b}` });
+    out.push({ keys: ["from", "to"], label: a && b ? (f.from === f.to ? a : `${a} – ${b}`) : a ? `From ${a}` : `Until ${b}` });
   }
   if (f.source) out.push({ keys: ["source"], label: srcLabel(f.source) });
   if (f.intent) out.push({ keys: ["intent"], label: f.intent });
@@ -56,6 +61,7 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   if (f.applied !== undefined) out.push({ keys: ["applied"], label: f.applied ? "Applied" : "Not applied" });
   if (f.stageExact) out.push({ keys: ["stageExact"], label: `Stopped at ${STAGES[f.stageExact - 1]?.toLowerCase()}` });
   if (f.frictionMin !== undefined || f.frictionMax !== undefined) out.push({ keys: ["frictionMin", "frictionMax"], label: `Friction ${(f.frictionMin ?? 0).toFixed(1)} to ${(f.frictionMax ?? 1).toFixed(1)}` });
+  if (f.q) out.push({ keys: ["q"], label: `Title: ${f.q}` });
   return out;
 }
 
@@ -176,7 +182,7 @@ function legacyViews(d: DashboardData): Views {
     calendar: d.calendar.map((c) => ({ ...c, cost: c.cost_usd })), weeks: [...weeks.values()].sort((a, b) => a.week.localeCompare(b.week)),
     funnel: sum(d.funnel.by_source), funnelBySource: d.funnel.by_source.map((x) => ({ key: x.source, counts: x.counts })),
     funnelByIntent: d.funnel.by_intent.map((x) => ({ key: x.intent, counts: x.counts })),
-    loops: d.friction.loops_hist, frictionByIntent: d.friction.by_intent.map((x) => ({ ...x, friction: fi.get(x.intent) ?? x.friction })),
+    loops: Array.from({ length: MAX_LOOPS + 1 }, (_, i) => ({ loops: i, sessions: d.friction.loops_hist.reduce((a, l) => a + ((i === MAX_LOOPS ? l.loops >= MAX_LOOPS : l.loops === i) ? l.sessions : 0), 0) })), frictionByIntent: d.friction.by_intent.map((x) => ({ ...x, friction: fi.get(x.intent) ?? x.friction })),
     clusterCounts: new Map(), rows: [], legacy: true,
   };
 }

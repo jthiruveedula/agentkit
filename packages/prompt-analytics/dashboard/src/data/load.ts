@@ -1,4 +1,5 @@
 import type { DashboardData, Chapter, Insight } from "./types";
+import { isFresh } from "../lib/live";
 
 export class SchemaError extends Error {}
 
@@ -36,6 +37,14 @@ export function normEngine(x: unknown): DashboardData["engine"] {
     upgrade: isMode(up.mode) && typeof up.command === "string" ? { mode: up.mode, command: up.command } : null,
     methods: obj(e.methods) as never,
   };
+}
+
+/** Drops malformed rows; text is clipped to the contract's 160 chars. */
+export function normRepeats(x: unknown[]): NonNullable<DashboardData["repeats"]> {
+  return x.filter(isObj).map((r) => ({
+    cluster: num(r.cluster, -1), count: num(r.count), exemplar: String(r.exemplar ?? "").slice(0, 160),
+    sessions: Array.isArray(r.sessions) ? r.sessions.map(String) : [],
+  })).filter((r) => r.exemplar && r.count > 0);
 }
 
 /**
@@ -103,7 +112,9 @@ export function normalize(raw: unknown): DashboardData {
       prompts: num(r.prompts), tokens: num(r.tokens), cost_usd: typeof r.cost_usd === "number" && Number.isFinite(r.cost_usd) ? r.cost_usd : null,
       reached_stage: num(r.reached_stage), applied: !!r.applied, loops: num(r.loops), friction: num(r.friction),
       cluster: num(r.cluster, -1), title: String(r.title ?? "").slice(0, 160),
+      ...(Array.isArray(r.features) ? { features: r.features.map(String) } : {}),
     })),
+    ...(Array.isArray(raw.repeats) ? { repeats: normRepeats(raw.repeats) } : {}),
     insights: arr(raw.insights),
     recommendations: arr(raw.recommendations),
   };
@@ -120,8 +131,24 @@ export async function loadData(): Promise<DashboardData | null> {
   const inline = readInline();
   if (inline !== null) return normalize(inline);
   if (import.meta.env.DEV) {
+    // Dev only: `?sample=single-claude|single-copilot|two-tools|no-prices|basic|small|missing|empty`.
+    const want = new URLSearchParams(location.search).get("sample");
+    if (want === "single-claude") return normalize((await import("./sample-single-claude.json")).default);
+    if (want === "single-copilot") return normalize((await import("./sample-single-copilot.json")).default);
     const m = await import("./sample.dev.json");
-    return normalize(m.default);
+    const { SHAPES } = await import("./shapes");
+    const shape = want ? SHAPES[want] : undefined;
+    return normalize(shape ? shape(m.default as never) : m.default);
   }
   return null;
+}
+
+/** Re-reads dashboard.json (same origin, served next to index.html). Resolves null when unchanged, unreachable or not JSON. */
+export async function refreshData(prev: string): Promise<DashboardData | null> {
+  try {
+    const r = await fetch("dashboard.json", { cache: "no-store", credentials: "same-origin" });
+    if (!r.ok) return null;
+    const d = normalize(await r.json());
+    return isFresh(prev, d.generated_at) ? d : null;
+  } catch { return null; }
 }
