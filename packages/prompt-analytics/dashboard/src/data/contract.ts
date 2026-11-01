@@ -26,10 +26,15 @@ export interface SessionRow {
   prompts: number; tokens: number; cost_usd: number | null;
   reached_stage: number; applied: boolean; loops: number; friction: number;
   cluster: number; title: string;
+  /** (1.2+) Prompt-quality features (what_works ids) at least one prompt in the session showed. Absent in older exports. */
+  features?: string[];
 }
 
+/** (1.2+) A prompt typed again in other sessions. `exemplar` is redacted, <= 160 chars; `sessions` are ids only, newest first. */
+export interface Repeat { cluster: number; count: number; exemplar: string; sessions: string[] }
+
 export interface DashboardData {
-  schema: "1.0";
+  schema: "1.0" | "1.1" | "1.2";                // 1.1 adds hour_week[].sessions / .applied; 1.2 adds repeats[] and sessions[].features
   generated_at: string;                         // ISO UTC
   range: { start: string; end: string };        // ISO dates
   sources: { source: Source; status: "ok" | "degraded" | "missing" | "unsupported"; sessions: number; note?: string }[];
@@ -41,7 +46,7 @@ export interface DashboardData {
 
   // Chapter 2 · Where time goes
   calendar: { date: string; sessions: number; prompts: number; cost_usd: number }[];          // one per active day
-  hour_week: { dow: number; hour: number; prompts: number }[];                                 // dow 0=Mon
+  hour_week: { dow: number; hour: number; prompts: number; sessions?: number; applied?: number }[];  // dow 0=Mon; sessions/applied (1.1+): sessions with a prompt started in that hour, and how many applied
   cost_river: { date: string; values: Partial<Record<Source, number>> }[];                     // weekly USD by source
   anomalies: { date: string; metric: "cost" | "prompts"; value: number; z: number }[];
   ttr: { source: Source; intent: Intent; median_min: number; n: number }[];
@@ -81,6 +86,8 @@ export interface DashboardData {
   // for sources that never record a price (shown as "not priced", never plotted as $0). `cluster` -1 = none.
   // `reached_stage` 0..6 (funnel stages reached, cumulative); `friction` 0..1.
   sessions: SessionRow[];
+  /** (1.2+) Top repeated prompts (count >= 3 over >= 2 sessions, max 10). Absent = older export; [] = none found. */
+  repeats?: Repeat[];
 
   // Chapter 4 panel · Sensitive data you pasted (counts only; no values ever leave the store)
   exposure: {

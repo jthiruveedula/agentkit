@@ -284,7 +284,11 @@ def calendar(sess: pl.DataFrame, prompts: pl.DataFrame) -> list[dict[str, Any]]:
     ]
 
 
-def hour_week(prompts: pl.DataFrame) -> list[dict[str, int]]:
+def hour_week(
+    prompts: pl.DataFrame, starts: pl.DataFrame | None = None
+) -> list[dict[str, int]]:
+    """Prompts per (weekday, hour). With ``starts`` (columns ``started``, ``applied``: one row per
+    session with a prompt) each cell also gets ``sessions`` started there and how many ``applied``."""
     p = prompts.filter(pl.col("ts").is_not_null())
     g = (
         p.group_by(
@@ -293,10 +297,31 @@ def hour_week(prompts: pl.DataFrame) -> list[dict[str, int]]:
         .agg(pl.len().alias("prompts"))
         .sort("dow", "hour")
     )
-    return [
+    out = [
         {"dow": r["dow"] - 1, "hour": r["hour"], "prompts": r["prompts"]}
         for r in g.iter_rows(named=True)
     ]
+    if starts is None:
+        return out
+    s = (
+        starts.filter(pl.col("started").is_not_null())
+        .group_by(
+            pl.col("started").dt.weekday().alias("dow"),
+            pl.col("started").dt.hour().alias("hour"),
+        )
+        .agg(pl.len().alias("sessions"), pl.col("applied").sum().alias("applied"))
+    )
+    m = {
+        (r["dow"] - 1, r["hour"]): (r["sessions"], int(r["applied"] or 0))
+        for r in s.iter_rows(named=True)
+    }
+    for r in out:
+        r["sessions"], r["applied"] = m.pop((r["dow"], r["hour"]), (0, 0))
+    out += [  # sessions started in an hour with no timestamped prompt
+        {"dow": d, "hour": h, "prompts": 0, "sessions": n, "applied": a}
+        for (d, h), (n, a) in m.items()
+    ]
+    return sorted(out, key=lambda r: (r["dow"], r["hour"]))
 
 
 def cost_river(sess: pl.DataFrame) -> list[dict[str, Any]]:

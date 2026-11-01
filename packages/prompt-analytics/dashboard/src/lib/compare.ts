@@ -5,7 +5,8 @@ import { addDays, views, weekStart, type Filter, type Views } from "./filter";
 
 export type Cmp = "prev" | "yoy" | "off";
 /** A prior period with fewer sessions than this gets no delta chip. */
-export const MIN_PRIOR_N = 5;
+import { MIN_PRIOR_N } from "./thresholds";
+export { MIN_PRIOR_N };
 
 export interface Win { from: string; to: string; days: number }
 export const dayDiff = (a: string, b: string) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5);
@@ -67,10 +68,15 @@ export function monthProjection(rows: SessionRow[], end: string): { mtd: number;
 }
 
 /** Priced cost per applied session; unpriced sessions are excluded and counted. */
-export function costPerApplied(rows: SessionRow[]): { value: number | null; excluded: number } {
+export function costPerApplied(rows: SessionRow[]): { value: number | null; excluded: number; cost: number; pricedApplied: number; applied: number } {
   const priced = rows.filter((r) => r.cost_usd !== null);
-  const applied = priced.filter((r) => r.applied).length;
-  return { value: applied ? priced.reduce((a, r) => a + (r.cost_usd ?? 0), 0) / applied : null, excluded: rows.length - priced.length };
+  const pricedApplied = priced.filter((r) => r.applied).length, cost = priced.reduce((a, r) => a + (r.cost_usd ?? 0), 0);
+  return { value: pricedApplied ? cost / pricedApplied : null, excluded: rows.length - priced.length, cost, pricedApplied, applied: rows.filter((r) => r.applied).length };
+}
+/** Fallback when nothing is priced: tokens spent per applied change. */
+export function tokensPerApplied(rows: SessionRow[]): number | null {
+  const applied = rows.filter((r) => r.applied).length;
+  return applied ? rows.reduce((a, r) => a + r.tokens, 0) / applied : null;
 }
 
 export interface Cell { source: Source; intent: Intent; n: number; asked: number; applied: number; friction: number }

@@ -1,6 +1,7 @@
 import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
 import { onReveal, reducedNow, useRoving } from "../lib/hooks";
 import { fmtInt } from "../lib/format";
+import { linkProps, type Ent } from "../lib/motion";
 
 export type Span = 3 | 4 | 5 | 6 | 7 | 8 | 12;
 
@@ -31,30 +32,35 @@ export function Card({ title, meta, span = 6, actions, children, id }: { title: 
   );
 }
 
-/** A number that counts up (~800 ms, ease-out) when its section scrolls into view and morphs to new values on filter changes.
- *  The text node always holds the final string, so format is preserved and jsdom / reduced motion see it at once. */
-export function Count({ text, className, as: Tag = "span" }: { text: string; className?: string; as?: "span" | "b" }) {
-  const ref = useRef<HTMLElement>(null), shown = useRef<number | null>(null), seen = useRef(false);
+/** Only plain counts tick up: "837", "12,400", "1.2k". Ratios, rates, money and signed deltas ("56%", "0.41", "$3.20", "+12%") always show at once. */
+export const countable = (text: string) => /^\d[\d,]*(\.\d)?[kMB]?$/.test(text) && !/^0\.\d$/.test(text);
+
+/** A count that ticks up (~800 ms, ease-out) once, the first time its section scrolls into view. Later values (a filter change) and tooltip values snap.
+ *  The text node always holds the final string, so format is preserved and jsdom / reduced motion see it at once.
+ *  `quick` marks a tooltip value: it never animates. */
+export function Count({ text, className, as: Tag = "span", quick }: { text: string; className?: string; as?: "span" | "b"; quick?: boolean }) {
+  const ref = useRef<HTMLElement>(null), played = useRef(false), latest = useRef(text);
+  latest.current = text;
   useLayoutEffect(() => {
     const node = ref.current?.firstChild, m = /^(.*?)(-?\d[\d,]*)(\.\d+)?(.*)$/.exec(text);
-    if (!ref.current || !node || !m || reducedNow()) return;
+    if (!ref.current || !node || !m || quick || played.current || !countable(text) || reducedNow()) return;
     const target = parseFloat(`${m[2].replace(/,/g, "")}${m[3] ?? ""}`), dec = m[3] ? m[3].length - 1 : 0, comma = m[2].includes(",");
     const fmt = (n: number) => `${m[1]}${comma ? n.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : n.toFixed(dec)}${m[4]}`;
     let raf = 0, off = () => {};
     const run = () => {
-      seen.current = true;
-      const from = shown.current ?? 0, t0 = performance.now(), dur = from === 0 && shown.current === null ? 800 : 450;
+      played.current = true;
+      const t0 = performance.now();
+      node.nodeValue = fmt(0);
       const tick = (now: number) => {
-        const p = Math.min(1, (now - t0) / dur), cur = from + (target - from) * (1 - (1 - p) ** 3);
-        node.nodeValue = p < 1 ? fmt(cur) : text; shown.current = p < 1 ? cur : target;
+        const p = Math.min(1, (now - t0) / 800);
+        node.nodeValue = p < 1 ? fmt(target * (1 - (1 - p) ** 3)) : text;
         if (p < 1) raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
     };
-    if (seen.current) run();
-    else if (document.documentElement.classList.contains("fx")) { node.nodeValue = fmt(0); off = onReveal(ref.current, run); }
-    return () => { cancelAnimationFrame(raf); off(); };
-  }, [text]);
+    if (document.documentElement.classList.contains("fx")) off = onReveal(ref.current, run);   // the final text stays until the section reveals
+    return () => { cancelAnimationFrame(raf); off(); node.nodeValue = latest.current; };   // never leave a half-counted value behind
+  }, [text, quick]);
   const T = Tag as "span";
   return <T ref={ref as never} className={className}>{text}</T>;
 }
@@ -65,6 +71,8 @@ export const Note = ({ children }: { children: ReactNode }) => <p className="not
 export interface BarRowData {
   key: string; label: ReactNode; value: number; text: ReactNode; sub?: ReactNode;
   active?: boolean; color?: string; onClick?: () => void; aria: string;
+  /** Linked-hover entity: hovering or focusing the row highlights the same entity in every chart. */
+  ent?: Ent;
   /** Reference tick as a fraction of the bar track (an overall mean, a top-tercile score). */
   mark?: number;
 }
@@ -77,7 +85,7 @@ export function BarList({ rows, max, label, cascade }: { rows: BarRowData[]; max
   return (
     <ul className="bars" aria-label={label} data-sel={sel || undefined} data-cascade={cascade || undefined}>
       {rows.map((r, i) => (
-        <li key={r.key} style={{ "--i": i } as CSSProperties}>
+        <li key={r.key} style={{ "--i": i } as CSSProperties} {...(r.ent ? linkProps(r.ent) : {})}>
           <button type="button" className="bar-row" aria-pressed={r.onClick ? !!r.active : undefined} aria-label={r.aria} onClick={r.onClick} disabled={!r.onClick}
             style={{ "--w": top > 0 ? Math.max(r.value > 0 ? 0.01 : 0, r.value / top) : 0, ...(r.color ? { "--c": r.color } : {}), ...(r.mark !== undefined ? { "--m": r.mark } : {}) } as CSSProperties}>
             <span className="bar-l" title={typeof r.label === "string" ? r.label : undefined}>{r.label}</span>
@@ -105,9 +113,9 @@ export function DataTable({ caption, head, rows }: { caption: string; head: stri
 }
 
 /** Segmented toggle. */
-export function Segmented<T extends string>({ label, options, value, onChange }: { label: string; options: { id: T; text: string }[]; value: T; onChange: (v: T) => void }) {
+export function Segmented<T extends string>({ label, options, value, onChange, quiet }: { label: string; options: { id: T; text: string }[]; value: T; onChange: (v: T) => void; quiet?: boolean }) {
   return (
-    <div className="seg" role="group" aria-label={label}>
+    <div className={quiet ? "seg seg-q" : "seg"} role="group" aria-label={label}>
       {options.map((o) => <button key={o.id} type="button" aria-pressed={o.id === value} onClick={() => onChange(o.id)}>{o.text}</button>)}
     </div>
   );
@@ -116,33 +124,41 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
 export const pct = (n: number, total: number) => (total > 0 ? `${Math.round((n / total) * 100)}%` : "0%");
 export const nOf = (n: number) => `n=${fmtInt(n)}`;
 
-export interface ColData { key: string; label: string; segs: { v: number; color: string }[]; active?: boolean; onClick?: () => void; aria: string }
+export interface ColData { ent?: Ent; key: string; label: string; segs: { v: number; color: string }[]; active?: boolean; onClick?: () => void; aria: string }
 /** Vertical stacked columns, one button each (roving tabindex: one tab stop, arrows move). Heights are relative to the tallest column. */
-export function Cols({ cols, label, height, max }: { cols: ColData[]; label: string; height?: number; max?: number }) {
-  const top = max ?? Math.max(...cols.map((c) => c.segs.reduce((a, s) => a + s.v, 0)), 0);
+export function Cols({ cols, label, height, max, peak }: { cols: ColData[]; label: string; height?: number; max?: number; peak?: boolean }) {
+  const sums = cols.map((c) => c.segs.reduce((a, s) => a + s.v, 0));
+  const top = max ?? Math.max(...sums, 0), pk = peak && top > 0 ? sums.indexOf(Math.max(...sums)) : -1;
   const first = Math.max(0, cols.findIndex((c) => c.onClick));
   const { group, mark } = useRoving(cols.length, 1, 1, first);
   const sel = cols.some((c) => c.active);
   return (
     <div className="cols" role="group" aria-label={label} style={height ? { height } : undefined} data-sel={sel || undefined} {...group}>
       {cols.map((c, i) => {
-        const bars = c.segs.map((s, j) => (s.v > 0 ? <i key={j} style={{ height: `${top > 0 ? Math.max(2, (s.v / top) * 100) : 0}%`, "--c": s.color } as CSSProperties} /> : null));
+        const bars = [...c.segs.map((s, j) => (s.v > 0 ? <i key={j} style={{ height: `${top > 0 ? Math.max(2, (s.v / top) * 100) : 0}%`, "--c": s.color } as CSSProperties} /> : null)),
+          i === pk ? <b key="pk" className="col-pk" aria-hidden="true">{fmtInt(sums[i])}</b> : null];
+        const lp = c.ent ? linkProps(c.ent) : null;
         // inert columns are plain divs: they may sit inside another button (funnel minis)
         return c.onClick
-          ? <button key={c.key} type="button" className="col" style={{ "--i": i } as CSSProperties} aria-pressed={!!c.active} aria-label={c.aria} title={c.aria} onClick={c.onClick} {...mark(i)}>{bars}</button>
-          : <div key={c.key} className="col" style={{ "--i": i } as CSSProperties} role="img" aria-label={c.aria} title={c.aria}>{bars}</div>;
+          ? <button key={c.key} type="button" className="col" style={{ "--i": i } as CSSProperties} aria-pressed={!!c.active} aria-label={c.aria} title={c.aria} onClick={c.onClick} {...mark(i)} {...lp} onFocus={(e) => { mark(i).onFocus(); lp?.onFocus(e); }}>{bars}</button>
+          : <div key={c.key} className="col" style={{ "--i": i } as CSSProperties} {...lp} role="img" aria-label={c.aria} title={c.aria}>{bars}</div>;
       })}
     </div>
   );
 }
 
 export type Tone = "good" | "bad" | "flat";
-/** Delta chip: arrow glyph + sign, tone by whether the change is good. `lowerBetter` inverts (cost, friction). */
-export function Delta({ pct: p, text, lowerBetter = false }: { pct: number | "new" | null; text?: string; lowerBetter?: boolean }) {
+/** Delta chip: arrow glyph + sign, tone by whether the change is good. `lowerBetter` inverts (cost, friction).
+ *  `neutral` keeps volume metrics (sessions, prompts) grey: more of them is neither good nor bad. */
+export function Delta({ pct: p, text, lowerBetter = false, neutral = false, still = false }: { pct: number | "new" | null; text?: string; lowerBetter?: boolean; neutral?: boolean; still?: boolean }) {
   if (p === null) return null;
-  const flat = p !== "new" && Math.abs(p) < 0.005;
+  const flat = p !== "new" && +Math.abs(p * 100).toFixed(Math.abs(p) < 0.1 ? 1 : 0) === 0;
   const up = p === "new" || p > 0;
-  const tone: Tone = flat ? "flat" : up !== lowerBetter ? "good" : "bad";
-  const label = text ?? (p === "new" ? "new" : `${p > 0 ? "+" : p < 0 ? "-" : ""}${Math.abs(p * 100).toFixed(Math.abs(p) < 0.1 ? 1 : 0)}%`);
-  return <span className="delta" data-tone={tone} aria-label={`${label} versus the previous period`}><span aria-hidden="true">{flat ? "▬" : up ? "▲" : "▼"}</span> {label}</span>;
+  const tone: Tone = flat || neutral ? "flat" : up !== lowerBetter ? "good" : "bad";
+  const mag = p === "new" ? "" : Math.abs(p * 100).toFixed(Math.abs(p) < 0.1 ? 1 : 0);   // sign comes from the printed value, so no "-0%"
+  const label = text ?? (p === "new" ? "new" : +mag === 0 ? "flat" : `${p > 0 ? "+" : "-"}${mag}%`);
+  return <span className="delta" data-tone={tone} aria-label={`${label} versus the previous period`}><span aria-hidden="true">{flat ? "▬" : up ? "▲" : "▼"}</span> {still ? label : <Count text={label} />}</span>;
 }
+
+/** Shown instead of a delta when the comparison period has too few sessions to trust a percentage. */
+export const LowBase = ({ n }: { n: number }) => <span className="delta" title={`previous period has ${n} sessions`}><span>low base</span></span>;

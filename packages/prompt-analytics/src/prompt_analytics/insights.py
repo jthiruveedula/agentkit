@@ -441,7 +441,10 @@ def _footprint(sec: dict) -> list[dict]:
     out = []
     t = sec["totals"]
     rows = [r for r in sec["by_source"] if r["sessions"] > 0]
-    if t["sessions"] and rows:
+    priced = [r for r in sec["by_source"] if r["cost_usd"] > 0]
+    if (
+        t["sessions"] and len(rows) >= 2
+    ):  # a share of one tool is always 100%: not an insight
         top = max(rows, key=lambda r: (r["sessions"], r["source"]))
         share = top["sessions"] / t["sessions"]
         out.append(
@@ -460,8 +463,8 @@ def _footprint(sec: dict) -> list[dict]:
                 {"source": top["source"]},
             )
         )
-    if t["cost_usd"] > 0:
-        top = max(sec["by_source"], key=lambda r: (r["cost_usd"], r["source"]))
+    if t["cost_usd"] > 0 and len(priced) >= 2:
+        top = max(priced, key=lambda r: (r["cost_usd"], r["source"]))
         share = top["cost_usd"] / t["cost_usd"]
         out.append(
             _cand(
@@ -894,6 +897,15 @@ def _intent_mix(sm: pl.DataFrame) -> list[dict]:
     ]
 
 
+def _across(rows: list[dict]) -> str:
+    """'in Copilot' for one tool, 'across 3 tools' otherwise (never '1 tools')."""
+    return (
+        f"in {NAMES[rows[0]['source']]}"
+        if len(rows) == 1
+        else f"across {len(rows)} tools"
+    )
+
+
 def _summary(sec: dict, sm: pl.DataFrame) -> list[dict]:
     """Five 'year in review' stats (chapter recommend, metric prefix summary:)."""
     t = sec["totals"]
@@ -920,12 +932,13 @@ def _summary(sec: dict, sm: pl.DataFrame) -> list[dict]:
     if t["sessions"] and rows:
         add(
             "sessions",
-            f"You ran {t['sessions']} sessions across {len(rows)} tools",
+            f"You ran {t['sessions']} sessions {_across(rows)}",
             t["sessions"],
             "",
             t["sessions"],
             0,
         )
+    if t["sessions"] and len(rows) >= 2:
         top = max(rows, key=lambda r: (r["sessions"], r["source"]))
         add(
             "top_tool",
@@ -955,10 +968,16 @@ def _summary(sec: dict, sm: pl.DataFrame) -> list[dict]:
             3,
         )
     if t["cost_usd"] > 0:
-        top = max(sec["by_source"], key=lambda r: (r["cost_usd"], r["source"]))
+        priced = [r for r in sec["by_source"] if r["cost_usd"] > 0]
+        top = max(priced, key=lambda r: (r["cost_usd"], r["source"]))
+        where = (
+            f", mostly on {NAMES[top['source']]}"
+            if len(priced) >= 2
+            else f" on {NAMES[top['source']]}"
+        )
         add(
             "spend",
-            f"You spent ${t['cost_usd']:.0f}, mostly on {NAMES[top['source']]}",
+            f"You spent ${t['cost_usd']:.0f}{where}",
             t["cost_usd"],
             "USD",
             t["sessions"],
@@ -996,7 +1015,7 @@ def _fallbacks(sec: dict, ww_n: int) -> dict[str, dict]:
     return {
         "footprint": mk(
             "footprint",
-            f"{t['sessions']} sessions across {sum(1 for r in sec['by_source'] if r['sessions'])} tools",
+            f"{t['sessions']} sessions {_across([r for r in sec['by_source'] if r['sessions']])}",
             "sessions",
             t["sessions"],
             "",

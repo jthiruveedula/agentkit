@@ -7,7 +7,7 @@ export function Recommend() {
   const byId = new Map(d.insights.map((i) => [i.id, i]));
   return (
     <Section id="s-recs" title="Recommendations" q="What should you change?">
-      <Card title="Suggested changes" meta="each cites the insight behind it. Aggregates, ignore filters" span={12}>
+      <Card title="Suggested changes" meta="each cites the insight behind it. whole export, ignores filters" span={12}>
         {d.recommendations.length === 0 ? <Empty>No recommendations yet</Empty> : (
           <ul className="recs">
             {d.recommendations.map((r) => {

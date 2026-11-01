@@ -1,29 +1,49 @@
 import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { attention, THRESHOLDS, type Item } from "../lib/attention";
-import { bucketSeries, buckets, dayDiff, delta, isWide, METRICS, pointDelta, sparkSeries, wilson } from "../lib/compare";
+import { costPerApplied, tokensPerApplied, delta, isWide, METRICS, MIN_PRIOR_N, pointDelta, sparkSeries, wilson } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
-import { Card, Count, DataTable, Delta, Empty, Section, Segmented } from "./ui";
-import { LineChart, Spark } from "./charts";
+import { Card, Count, Delta, Empty, LowBase, Section, Segmented } from "./ui";
+import { Spark } from "./charts";
+import { CopySummary } from "./CopySummary";
+import { WrappedButton } from "./Wrapped";
+import { Trend, type Metric } from "./Trend";
+import { whereDims } from "../lib/summary";
+import { listNames } from "../lib/capabilities";
+import { srcLabel } from "../lib/palette";
+import type { Source } from "../data/types";
 
-type Metric = "sessions" | "prompts" | "cost";
-const FMT: Record<Metric, (n: number) => string> = { sessions: fmtInt, prompts: fmtCompact, cost: fmtUSD };
+const srcNames = (xs: Source[]) => listNames(xs.map(srcLabel));
+
 
 function Kpis({ setMetric }: { setMetric: (m: Metric) => void }) {
-  const { d, v, prior, win, exposed, goto } = useStore();
+  const { d, v, prior, win, exposed, goto, caps } = useStore();
   const t = v.totals, p = prior?.v.totals, pn = p?.sessions ?? 0;
   const open = useMemo(() => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string)), [d]);
   const pExposed = prior ? prior.v.rows.filter((r) => open.has(r.id)).length : 0;
-  const cap = prior ? `vs ${fmtDate(prior.win.from)} - ${fmtDate(prior.win.to)}` : "no earlier period";
+  const cap = prior ? `vs ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)}` : "";
   const rate = t.asked ? t.applied / t.asked : 0, prate = p && p.asked ? p.applied / p.asked : 0;
-  const dPts = (cur: number, pr: number, digits: number, unit: string) => { const x = pointDelta(cur, pr, pn); return x === null ? null : { pct: x, text: `${x > 0 ? "+" : x < 0 ? "-" : ""}${Math.abs(unit === "pp" ? x * 100 : x).toFixed(digits)} ${unit}`.trim() }; };
+  const dPts = (cur: number, pr: number, digits: number, unit: string) => { const x = pointDelta(cur, pr, pn >= 30 ? pn : 0); if (x === null) return null; const m = Math.abs(unit === "pp" ? x * 100 : x).toFixed(digits); return { pct: x, text: (+m === 0 ? `±0 ${unit}` : `${x > 0 ? "+" : "-"}${m} ${unit}`).trim() }; };   // guard n>=30; sign from the printed value
   const sp = (fn: (r: typeof v.rows) => number) => sparkSeries(v.rows, win, fn);
-  const cards: { id: string; label: string; value: string; sub?: string; chip: React.ReactNode; spark: number[]; low?: boolean; go: () => void }[] = [
-    { id: "sessions", label: "Sessions", value: fmtInt(t.sessions), chip: p && (() => { const x = delta(t.sessions, p.sessions, pn); return x && <Delta pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sp(METRICS.sessions), go: () => { setMetric("sessions"); goto("s-attention"); } },
-    { id: "prompts", label: "Prompts", value: fmtCompact(t.prompts), sub: t.asked ? `${(t.prompts / t.asked).toFixed(1)} per session with prompts` : undefined, chip: p && (() => { const x = delta(t.prompts, p.prompts, pn); return x && <Delta pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sp(METRICS.prompts), go: () => { setMetric("prompts"); goto("s-attention"); } },
-    { id: "cost", label: "Cost", value: t.cost === null ? "not priced" : fmtUSD(t.cost), sub: t.cost !== null && t.unpriced > 0 ? `${fmtInt(t.unpriced)} sessions unpriced` : undefined,
-      chip: p && t.cost !== null && p.cost !== null && (() => { const x = delta(t.cost as number, p.cost as number, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sp(METRICS.cost), go: () => { setMetric("cost"); goto("s-time"); } },
-    { id: "applied", label: "Applied", value: t.asked ? fmtPct(rate) : "0%", sub: t.asked ? (isWide(t.applied, t.asked) ? `n=${fmtInt(t.asked)}, wide CI ${fmtPct(wilson(t.applied, t.asked)[0])}-${fmtPct(wilson(t.applied, t.asked)[1])}` : `${fmtInt(t.applied)} of ${fmtInt(t.asked)}`) : undefined,
+  const cpa = costPerApplied(v.rows), pcpa = prior ? costPerApplied(prior.v.rows) : null;
+  const tpa = tokensPerApplied(v.rows), ptpa = prior ? tokensPerApplied(prior.v.rows) : null;
+  const unShare = t.sessions ? t.unpriced / t.sessions : 0;
+  const partial = caps.hasCost && unShare > 0.2 ? <span className="tag" data-st="partial">{fmtPct(unShare)} unpriced, partial</span> : null;
+  // No price anywhere in view: never show $0; tokens per applied change carries the efficiency story instead.
+  const effCard = caps.hasCost
+    ? { id: "cpa", primary: true, label: "Cost per applied change", value: cpa.value === null ? "–" : fmtUSD(cpa.value),
+        sub: cpa.value === null ? "no priced session applied a change" : `per applied · ${fmtInt(cpa.pricedApplied)} priced of ${fmtInt(cpa.applied)} applied`,
+        chip: <>{pcpa && cpa.value !== null && pcpa.value !== null && (() => { const x = delta(cpa.value, pcpa.value, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })()}{partial}</>,
+        spark: sp((rs) => costPerApplied(rs).value ?? 0), cap: true, go: () => goto("s-tools") }
+    : { id: "tpa", primary: true, label: "Tokens per applied change", value: tpa === null ? "–" : fmtCompact(tpa),
+        sub: `${caps.unpriced.length ? `${srcNames(caps.unpriced)} ${caps.unpriced.length === 1 ? "doesn't" : "don't"} record prices` : "No prices recorded"}, so tokens stand in for cost`,
+        chip: ptpa !== null && tpa !== null && (() => { const x = delta(tpa, ptpa, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(),
+        spark: sp((rs) => tokensPerApplied(rs) ?? 0), cap: true, go: () => goto("s-funnel") };
+  const cards: { id: string; label: string; value: string; sub?: string; chip: React.ReactNode; spark: number[]; low?: boolean; primary?: boolean; cap?: boolean; go: () => void }[] = [
+    { id: "sessions", primary: true, label: "Sessions", value: fmtInt(t.sessions), chip: p && (() => { const x = delta(t.sessions, p.sessions, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.sessions), go: () => { setMetric("sessions"); goto("s-trend"); } },
+    effCard,
+    { id: "prompts", label: "Prompts", value: fmtCompact(t.prompts), sub: t.asked ? `${(t.prompts / t.asked).toFixed(1)} per session with prompts` : undefined, chip: p && (() => { const x = delta(t.prompts, p.prompts, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.prompts), go: () => { setMetric("prompts"); goto("s-trend"); } },
+    { id: "applied", label: "Applied", value: t.asked ? fmtPct(rate) : "0%", sub: t.asked ? (isWide(t.applied, t.asked) ? `n=${fmtInt(t.asked)}, wide CI ${fmtPct(wilson(t.applied, t.asked)[0])}-${fmtPct(wilson(t.applied, t.asked)[1])}` : `${fmtInt(t.applied)} of ${fmtInt(t.asked)} sessions with prompts`) : undefined,
       chip: p && (() => { const x = dPts(rate, prate, 1, "pp"); return x && <Delta pct={x.pct} text={x.text} />; })(), spark: sp(METRICS.applied), low: t.asked > 0 && isWide(t.applied, t.asked), go: () => goto("s-funnel") },
     { id: "friction", label: "Friction", value: t.friction.toFixed(2), sub: "0 to 1, lower is better", chip: p && (() => { const x = dPts(t.friction, p.friction, 2, ""); return x && <Delta lowerBetter pct={x.pct} text={x.text} />; })(), spark: sp(METRICS.friction), go: () => goto("s-friction") },
     { id: "exposed", label: "Exposed", value: t.sessions ? fmtPct(exposed.size / t.sessions, 1) : "0%", sub: `${fmtInt(exposed.size)} sessions with open findings`,
@@ -32,48 +52,17 @@ function Kpis({ setMetric }: { setMetric: (m: Metric) => void }) {
   return (
     <ul className="kpis" aria-label="Totals for the current selection">
       {cards.map((c, i) => (
-        <li key={c.id} style={{ "--i": i } as React.CSSProperties}>
-          <button type="button" className="kpi" data-kpi={c.id} onClick={c.go} aria-label={`${c.label}: ${c.value}. Jump to details`}>
+        <li key={c.id} data-primary={c.primary || undefined} style={{ "--i": i } as React.CSSProperties}>
+          <button type="button" className="kpi" data-kpi={c.id} data-primary={c.primary || undefined} onClick={c.go} aria-label={`${c.label}: ${c.value}. Jump to details`}>
             <span className="lbl">{c.label}</span>
             <Count className="val" text={c.value} />
             <span className="chips">{c.chip}{c.sub ? <span className="sub" data-low={c.low || undefined}>{c.sub}</span> : null}</span>
-            <Spark values={c.spark} />
-            <span className="cap">{cap}</span>
+            <Spark values={c.spark} cap={c.cap} />
+            {cap && <span className="cap">{cap}</span>}
           </button>
         </li>
       ))}
     </ul>
-  );
-}
-
-function Trend({ metric, setMetric }: { metric: Metric; setMetric: (m: Metric) => void }) {
-  const { d, v, win, prior, apply } = useStore();
-  const auto: 1 | 7 = win.days > 60 ? 7 : 1;
-  const [pick, setPick] = useState<{ days: number; step: 1 | 7 } | null>(null);
-  const step = pick && pick.days === win.days ? pick.step : auto;   // a new window re-picks the natural bucket
-  const bks = useMemo(() => buckets(win, step), [win, step]);
-  const cur = useMemo(() => bucketSeries(v.rows, win, step, METRICS[metric]), [v.rows, win, step, metric]);
-  const prv = useMemo(() => (prior ? bucketSeries(prior.v.rows, prior.win, step, METRICS[metric]) : null), [prior, step, metric]);
-  const rings = useMemo(() => (metric === "sessions" ? [] : d.anomalies.filter((a) => a.metric === (metric === "cost" ? "cost" : "prompts")).map((a) => Math.floor(dayDiff(win.from, a.date) / step)).filter((i) => i >= 0 && i < bks.length)), [d.anomalies, metric, win, step, bks.length]);
-  const fmt = FMT[metric];
-  const labels = bks.map((b) => (step === 1 || b.from === b.to ? fmtDate(b.from) : `${fmtDate(b.from)} - ${fmtDate(b.to)}`));
-  const go = (a: number, b: number) => apply({ from: bks[a].from, to: bks[b].to });
-  return (
-    <Card id="s-trend" title="Current vs previous period" meta={prior ? `${fmtDate(win.from)} - ${fmtDate(win.to)} against ${fmtDate(prior.win.from)} - ${fmtDate(prior.win.to)}` : `${fmtDate(win.from)} - ${fmtDate(win.to)}, no earlier period`} span={8}
-      actions={<>
-        <Segmented label="Metric" value={metric} onChange={setMetric} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, { id: "cost", text: "Cost" }]} />
-        <Segmented label="Bucket" value={String(step)} onChange={(s) => setPick({ days: win.days, step: s === "7" ? 7 : 1 })} options={[{ id: "1", text: "Daily" }, { id: "7", text: "Weekly" }]} />
-      </>}>
-      {v.totals.sessions === 0 || cur.length === 0 ? <Empty>No sessions in this period.</Empty> : (
-        <>
-          <LineChart label={`${metric} per ${step === 1 ? "day" : "week"}, click or drag to filter the period`} labels={labels} fmt={fmt} rings={rings}
-            lines={[{ name: "This period", color: "var(--accent)", values: cur }, ...(prv ? [{ name: "Previous", color: "var(--prior)", values: prv, dashed: true }] : [])]}
-            onPick={(i) => go(i, i)} onBrush={go} />
-          <ul className="legend"><li style={{ "--c": "var(--accent)" } as React.CSSProperties}>This period</li>{prv && <li style={{ "--c": "var(--prior)" } as React.CSSProperties}>Previous period</li>}{rings.length > 0 && <li className="ringkey">Unusual day or week</li>}</ul>
-          <DataTable caption={`${metric} by ${step === 1 ? "day" : "week"}`} head={["Bucket", "This period", ...(prv ? ["Previous"] : [])]} rows={bks.map((_, i) => [labels[i], +cur[i].toFixed(2), ...(prv ? [+(prv[i] ?? 0).toFixed(2)] : [])])} />
-        </>
-      )}
-    </Card>
   );
 }
 
@@ -106,18 +95,58 @@ function Attention() {
   );
 }
 
+/** Top 5 projects, tools or intents by share of priced cost (tokens when unpriced). One denominator for every row (lib/share.ts), a fixed 0-100% track,
+ *  an "Other" row so the list adds to 100%, and per-row mean friction (vs the median of the group) and cost per session. A row filters the page to it. */
+function WhereWent() {
+  const { v, caps, drill, goto } = useStore();
+  const dims = useMemo(() => whereDims(v, caps, 5), [v, caps]);
+  const [pick, setPick] = useState<string>("projects");
+  if (!dims.length) return null;
+  const dm = dims.find((x) => x.id === pick) ?? dims[0];
+  const text = (x: number) => (dm.byCost ? fmtUSD(x) : `${fmtCompact(x)} tok`);
+  const filterOf = (id: string, key: string) => (id === "tools" ? { source: key as Source } : id === "intents" ? { intent: key as never } : { project: key });
+  const fr = (x: number | null) => (x === null ? "–" : x.toFixed(2)), vs = (x: number | null) => (x === null ? "" : `${x >= 0 ? "+" : "−"}${Math.abs(x).toFixed(2)}`);
+  const o = dm.outlier;
+  return (
+    <Card id="s-where" title="Where it went" meta={`top ${dm.rows.length} by ${dm.note}${dm.byCost ? "" : " (nothing priced, so tokens stand in)"}; one click filters`} span={12}
+      actions={dims.length > 1 ? <Segmented quiet label="Break down by" value={dm.id} onChange={setPick} options={dims.map((x) => ({ id: x.id, text: x.name }))} /> : undefined}>
+      <div className="wh" role="group" aria-label={`${dm.name} by ${dm.note}`}>
+        <div className="wh-r wh-h" aria-hidden="true"><span>{dm.name.slice(0, -1)}</span><span className="wh-t">0 to 100%</span><span className="wh-v">{dm.byCost ? "Cost · share" : "Tokens · share"}</span><span className="wh-f">Friction (vs median)</span><span className="wh-p">{dm.byCost ? "$ / session" : "tok / session"}</span></div>
+        {dm.rows.map((r) => (
+          <button key={r.key} type="button" className="wh-r wh-b" aria-pressed={undefined} disabled={!r.filterable} style={{ "--w": r.share } as React.CSSProperties}
+            onClick={() => drill(filterOf(dm.id, r.key))}
+            aria-label={`${r.label}: ${text(r.value)}, ${fmtPct(r.share)} of ${dm.note.replace("share of ", "")}, friction ${fr(r.friction)}${r.vsMedian === null ? "" : `, ${vs(r.vsMedian)} against the median`}, ${fmtInt(r.sessions)} sessions.${r.filterable ? " Filter" : " Cannot be filtered"}`}>
+            <span className="wh-l" title={r.label}>{r.label}</span>
+            <span className="bar-t wh-t" aria-hidden="true"><i /></span>
+            <span className="wh-v"><b>{text(r.value)}</b> · {fmtPct(r.share)}</span>
+            <span className="wh-f">{fr(r.friction)}{r.vsMedian !== null && <small data-up={r.vsMedian > 0.05 || undefined}> {vs(r.vsMedian)}</small>}</span>
+            <span className="wh-p">{r.perSession === null ? "–" : dm.byCost ? fmtUSD(r.perSession) : fmtCompact(r.perSession)}</span>
+          </button>
+        ))}
+        {dm.other && (
+          <div className="wh-r wh-o" style={{ "--w": dm.other.share } as React.CSSProperties} aria-label={`${dm.other.n} more: ${fmtPct(dm.other.share)}`}>
+            <span className="wh-l">Other ({dm.other.n})</span><span className="bar-t wh-t" aria-hidden="true"><i /></span><span className="wh-v"><b>{text(dm.other.value)}</b> · {fmtPct(dm.other.share)}</span><span className="wh-f" /><span className="wh-p" />
+          </div>
+        )}
+      </div>
+      {o && <p className="wh-out"><b>{o.label}</b> is the friction outlier ({fr(o.friction)}, {vs(o.vsMedian)} vs the median {fr(dm.median)}). <button type="button" className="link" onClick={() => goto("s-friction")}>See Friction</button> · <button type="button" className="link" onClick={() => goto("s-recs")}>See Recommendations</button></p>}
+      <p className="note">Shares are of {dm.byCost ? "priced cost" : "all tokens"} in this view ({text(dm.total)}).{dm.unpriced ? ` ${fmtInt(dm.unpriced.n)} of ${fmtInt(dm.unpriced.of)} sessions are unpriced: excluded from cost, not counted as $0.` : ""}{dm.id === "projects" && dm.rows.some((r) => !r.filterable) ? " Sessions with no project cannot be filtered to." : ""}</p>
+    </Card>
+  );
+}
+
 export function Overview() {
   const { d } = useStore();
   const [metric, setMetric] = useState<Metric>("sessions");
   const t = d.totals;
   return (
-    <Section id="s-overview" title="Overview" q="Is anything on fire?">
+    <Section id="s-overview" title="Overview" q="Is anything on fire?" actions={<><WrappedButton /><CopySummary /></>}>
       <div className="s12"><Kpis setMetric={setMetric} /></div>
       <p className="s12 allt" aria-label="All-time totals, not filtered">
         <span className="meta">All time</span> {fmtInt(t.active_days)} active days · streak {t.longest_streak} longest, {t.current_streak} now · {fmtInt(t.projects)} projects · {fmtInt(t.commits_linked)} commits linked
       </p>
       <Trend metric={metric} setMetric={setMetric} />
-      <Attention />
+      <Attention /><WhereWent />
     </Section>
   );
 }

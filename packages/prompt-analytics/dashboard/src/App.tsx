@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { DashboardData } from "./data/types";
-import { loadData, normalize, readInline } from "./data/load";
+import { loadData, normalize, readInline, refreshData } from "./data/load";
+import { shouldRefresh } from "./lib/live";
+import { fxOn } from "./lib/hooks";
 import { StoreProvider, useStore } from "./state";
 import type { Filter } from "./lib/filter";
-import { SECTIONS } from "./lib/hash";
+import { SECTIONS, spyLocked } from "./lib/hash";
 import { Header, Nav } from "./components/Shell";
 import { Overview } from "./components/Overview";
 import { MindMap } from "./components/MindMap";
@@ -16,8 +18,13 @@ import { Exposure } from "./components/Exposure";
 import { Recommend } from "./components/Recommend";
 import { Sessions } from "./components/Sessions";
 import { Panel } from "./components/Detail";
+import { Palette } from "./components/Palette";
+import { WrappedHost } from "./components/Wrapped";
+import { Toaster } from "./components/Toaster";
 import { useReveal } from "./lib/hooks";
-import { Caustic } from "./components/Caustic";
+import { FxHost } from "./components/Fx";
+import { SOURCES, srcLabel } from "./lib/palette";
+import { unlockText } from "./lib/capabilities";
 
 type State = { kind: "loading" } | { kind: "empty" } | { kind: "error"; msg: string } | { kind: "ready"; d: DashboardData };
 
@@ -32,41 +39,89 @@ function initial(): State {
 }
 
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
-  const { d, panel, crumbs, closePanel, clearAfter, setSection } = useStore();
+  const { d, panel, crumbs, closePanel, clearAfter, setSection, secs, caps } = useStore();
   useReveal();
 
   useEffect(() => {   // Esc: close the panel first, else drop the last selection
     const on = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const t = e.target as Element | null;
-      if (t?.closest?.("select, input, .pop") || document.querySelector(".rq-box")) return;
+      if (t?.closest?.("select, input, .pop, .palette, .wrap, .menu") || document.querySelector(".rq-box")) return;
       if (panel !== "none") closePanel(); else if (crumbs.length) clearAfter(crumbs.length - 2);
     };
     window.addEventListener("keydown", on);
     return () => window.removeEventListener("keydown", on);
   }, [panel, crumbs.length, closePanel, clearAfter]);
 
-  useEffect(() => {   // the nav highlights the section under the header
-    if (typeof IntersectionObserver === "undefined") return;
-    const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) setSection(e.target.id); }, { rootMargin: "-25% 0px -65% 0px" });
-    SECTIONS.forEach((id) => { const el = document.getElementById(id); if (el) io.observe(el); });
-    return () => io.disconnect();
-  }, [setSection]);
+  const shown = SECTIONS.filter((id) => secs.has(id));
+  const shownKey = shown.join();
+  useEffect(() => {   // the nav highlights the last section whose top passed 30% of the viewport (or the last one at the page end): always exactly one
+    let raf = 0;
+    const spy = () => {
+      raf = 0;
+      const locked = spyLocked();
+      if (locked) return setSection(locked);
+      const ids = shownKey.split(",").filter(Boolean);
+      if (!ids.length) return;
+      if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) return setSection(ids[ids.length - 1]);
+      const line = window.innerHeight * 0.3;
+      let cur = ids[0];
+      for (const id of ids) { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top <= line) cur = id; }
+      setSection(cur);
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(spy); };
+    spy();
+    window.addEventListener("scroll", on, { passive: true }); window.addEventListener("resize", on);
+    return () => { window.removeEventListener("scroll", on); window.removeEventListener("resize", on); cancelAnimationFrame(raf); };
+  }, [setSection, shownKey]);
 
   return (
     <div className="app" data-panel={panel}>
-      <Caustic />
       <a className="skip" href="#main">Skip to content</a>
       <Header d={d} onData={onData} />
-      {d.engine.mode === "basic" && <div className="banner" role="status">Basic mode: topics are grouped by keywords. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to cluster by meaning.</> : null}</div>}
+      {d.engine.mode === "basic" && !caps.empty && <div className="banner" role="status">Basic mode: topics are grouped by keywords; the Playbook and topic views need the ML engine. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to unlock them.</> : null}</div>}
       <div className="frame">
         <Nav />
         <main id="main" tabIndex={-1}>
-          <Overview /><MindMap /><Tools /><Time /><Funnel /><Friction /><Works /><Exposure /><Recommend /><Sessions />
+          {caps.empty ? <EmptyState /> : <>
+            <OtherTools />
+            {caps.tooSmall && <p className="hint unlock" role="status">{unlockText(caps, secs.has("s-time"))}</p>}
+            {secs.has("s-overview") && <Overview />}{secs.has("s-tools") && <Tools />}{secs.has("s-time") && <Time />}{secs.has("s-funnel") && <Funnel />}
+            {secs.has("s-friction") && <Friction />}{secs.has("s-works") && <Works />}{secs.has("s-exposure") && <Exposure />}{secs.has("s-recs") && <Recommend />}
+            {secs.has("s-sessions") && <Sessions />}{secs.has("s-map") && <MindMap />}
+          </>}
         </main>
       </div>
       <Panel />
+      <Palette /><WrappedHost /><Toaster /><FxHost />
     </div>
+  );
+}
+
+function EmptyState() {
+  return (
+    <section className="sec empty-state" id="s-overview" aria-labelledby="empty-h">
+      <h2 id="empty-h">No sessions yet</h2>
+      <p>Nothing to chart so far. Use Claude Code, Copilot, Cursor, OpenCode or Antigravity for a while, then run <code>prompt-analytics export</code> again; every tool found on this machine is picked up automatically.</p>
+    </section>
+  );
+}
+
+const HINT_KEY = "pa.hint.tools";
+const hintGone = () => { try { return localStorage.getItem(HINT_KEY) === "1"; } catch { return false; } };
+/** Only for one-tool exports: a one-time, dismissible pointer that other tools are detected too. Never shown under a filter. */
+function OtherTools() {
+  const { d, f } = useStore();
+  const [gone, setGone] = useState(hintGone);
+  const used = new Set(d.sessions.map((r) => r.source));
+  if (gone || used.size !== 1 || Object.keys(f).length) return null;
+  const others = SOURCES.filter((s) => !used.has(s)).map(srcLabel);
+  const close = () => { setGone(true); try { localStorage.setItem(HINT_KEY, "1"); } catch { /* private mode: dismiss for this visit only */ } };
+  return (
+    <p className="hint" role="note">
+      <span>Using other tools too? {others.slice(0, -1).join(", ")} and {others.at(-1)} are detected automatically if present locally.</span>
+      <button type="button" className="link" onClick={close} aria-label="Dismiss tip about other tools">Dismiss</button>
+    </p>
   );
 }
 
@@ -81,6 +136,22 @@ export function App() {
     if (st.kind !== "loading") return;
     loadData().then((d) => setSt(d ? { kind: "ready", d } : { kind: "empty" })).catch((e) => setSt({ kind: "error", msg: String(e.message ?? e) }));
   }, [st.kind]);
+  const stamp = st.kind === "ready" ? st.d.generated_at : "";
+  useEffect(() => {   // live feel: re-read dashboard.json when the tab regains focus (http only; file:// has nothing to fetch)
+    if (!stamp) return;
+    let last = Date.now(), busy = false;
+    const go = async () => {
+      if (busy || !shouldRefresh(location.protocol, document.visibilityState === "visible", Date.now(), last)) return;
+      busy = true; last = Date.now();
+      const d = await refreshData(stamp);
+      busy = false;
+      if (!d) return;
+      setSt({ kind: "ready", d });   // same StoreProvider: filter, selection and scroll stay; useMorph glides the charts
+      if (fxOn()) { const h = document.documentElement; h.setAttribute("data-pulse", ""); window.setTimeout(() => h.removeAttribute("data-pulse"), 1000); }
+    };
+    document.addEventListener("visibilitychange", go); window.addEventListener("focus", go);
+    return () => { document.removeEventListener("visibilitychange", go); window.removeEventListener("focus", go); };
+  }, [stamp]);
   if (st.kind !== "ready") {
     const msg = st.kind === "error" ? st.msg : st.kind === "empty" ? "No data embedded. Run prompt-analytics export, then open the dashboard." : "Loading";
     return <main id="main" className="status" role={st.kind === "error" ? "alert" : "status"}><h1>{msg}</h1></main>;

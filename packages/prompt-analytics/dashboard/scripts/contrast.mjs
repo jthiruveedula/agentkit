@@ -20,13 +20,18 @@ const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
 // [foreground, background, minimum]. 4.5 text, 3 for graphical marks.
 const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface", 4.5], ["muted", "bg", 4.5], ["muted", "sunk", 4.5], ["accent", "surface", 4.5], ["accent", "bg", 4.5],
   ["accent-ink", "accent", 4.5], ["ink", "accent-soft", 4.5], ["good", "surface", 3], ["bad", "surface", 3], ["warn-secret", "surface", 3], ["warn-pii", "surface", 3], ["warn-phi", "surface", 3],
-  ["bad", "bg", 3], ["good", "bg", 3], ["warn", "surface", 4.5], ["prior", "surface", 3], ["warn", "bg", 3],
+  ["bad", "bg", 3], ["good", "bg", 3], ["warn-ink", "surface", 4.5], ["warn-ink", "bg", 4.5], ["warn", "surface", 3], ["prior", "surface", 3], ["warn", "bg", 3], ["muted", "accent-soft", 4.5], ["amber", "accent", 3], ["warn-ink", "accent-soft", 4.5], ["accent", "accent-soft", 4.5],
+  ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => [`s${i}c`, "surface", 3]),
   ...["claude_code", "copilot", "cursor", "opencode", "antigravity", "other"].flatMap((s) => [[`src-${s}`, "surface", 3], [`src-${s}`, "bg", 3]]), ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => [`t${i}`, "surface", 3])];
+// categorical hues must differ enough in lightness or hue to tell apart: Antigravity vs Claude (the old pair was both blue)
+const dist = (a, b) => Math.hypot(a[0] - b[0], 0.5 * (a[1] * Math.cos(a[2] * Math.PI / 180) - b[1] * Math.cos(b[2] * Math.PI / 180)) , 0.5 * (a[1] * Math.sin(a[2] * Math.PI / 180) - b[1] * Math.sin(b[2] * Math.PI / 180)));
+const apart = [["src-antigravity", "src-claude_code", 0.15]];
 let bad = 0;
 const all = parse(block);
 for (const [fg, bg, min] of pairs) {
   const r = ratio(all[fg], all[bg]);
   if (r < min) { bad++; console.log(`FAIL ${fg} on ${bg}: ${r.toFixed(2)} < ${min}`); }
 }
+for (const [a, b, min] of apart) { const d = dist(all[a], all[b]); if (d < min) { bad++; console.log(`FAIL ${a} vs ${b}: distance ${d.toFixed(2)} < ${min}`); } }
 console.log(bad ? `${bad} failing pairs` : "contrast ok");
 process.exit(bad ? 1 : 0);

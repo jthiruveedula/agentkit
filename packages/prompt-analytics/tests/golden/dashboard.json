@@ -5368,482 +5368,679 @@
    ]
   }
  },
- "generated_at": "2026-10-31T19:58:19Z",
+ "generated_at": "2026-11-01T05:38:11Z",
  "hour_week": [
   {
+   "applied": 1,
    "dow": 0,
    "hour": 7,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 2,
    "dow": 0,
    "hour": 8,
-   "prompts": 6
+   "prompts": 6,
+   "sessions": 4
   },
   {
+   "applied": 3,
    "dow": 0,
    "hour": 9,
-   "prompts": 12
+   "prompts": 12,
+   "sessions": 5
   },
   {
+   "applied": 4,
    "dow": 0,
    "hour": 10,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 5
   },
   {
+   "applied": 5,
    "dow": 0,
    "hour": 11,
-   "prompts": 11
+   "prompts": 11,
+   "sessions": 7
   },
   {
+   "applied": 5,
    "dow": 0,
    "hour": 12,
-   "prompts": 17
+   "prompts": 17,
+   "sessions": 7
   },
   {
+   "applied": 3,
    "dow": 0,
    "hour": 13,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 4
   },
   {
+   "applied": 4,
    "dow": 0,
    "hour": 14,
-   "prompts": 11
+   "prompts": 11,
+   "sessions": 6
   },
   {
+   "applied": 6,
    "dow": 0,
    "hour": 15,
-   "prompts": 14
+   "prompts": 14,
+   "sessions": 9
   },
   {
+   "applied": 3,
    "dow": 0,
    "hour": 16,
-   "prompts": 8
+   "prompts": 8,
+   "sessions": 4
   },
   {
+   "applied": 4,
    "dow": 0,
    "hour": 17,
-   "prompts": 13
+   "prompts": 13,
+   "sessions": 7
   },
   {
+   "applied": 1,
    "dow": 0,
    "hour": 18,
-   "prompts": 11
+   "prompts": 11,
+   "sessions": 3
   },
   {
+   "applied": 0,
    "dow": 0,
    "hour": 19,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 1
   },
   {
+   "applied": 2,
    "dow": 0,
    "hour": 20,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 3
   },
   {
+   "applied": 0,
    "dow": 0,
    "hour": 21,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 7,
-   "prompts": 8
+   "prompts": 8,
+   "sessions": 3
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 8,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 2
   },
   {
+   "applied": 6,
    "dow": 1,
    "hour": 9,
-   "prompts": 19
+   "prompts": 19,
+   "sessions": 6
   },
   {
+   "applied": 5,
    "dow": 1,
    "hour": 10,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 7
   },
   {
+   "applied": 5,
    "dow": 1,
    "hour": 11,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 5
   },
   {
+   "applied": 4,
    "dow": 1,
    "hour": 12,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 5
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 13,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 5
   },
   {
+   "applied": 9,
    "dow": 1,
    "hour": 14,
-   "prompts": 25
+   "prompts": 25,
+   "sessions": 9
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 15,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 3
   },
   {
+   "applied": 0,
    "dow": 1,
    "hour": 16,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 2
   },
   {
+   "applied": 4,
    "dow": 1,
    "hour": 17,
-   "prompts": 13
+   "prompts": 13,
+   "sessions": 5
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 18,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 5
   },
   {
+   "applied": 1,
    "dow": 1,
    "hour": 19,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 0,
    "dow": 1,
    "hour": 20,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 2
   },
   {
+   "applied": 2,
    "dow": 1,
    "hour": 22,
-   "prompts": 8
+   "prompts": 8,
+   "sessions": 3
   },
   {
+   "applied": 0,
    "dow": 1,
    "hour": 23,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 0
   },
   {
+   "applied": 2,
    "dow": 2,
    "hour": 7,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 2
   },
   {
+   "applied": 3,
    "dow": 2,
    "hour": 9,
-   "prompts": 17
+   "prompts": 17,
+   "sessions": 6
   },
   {
+   "applied": 5,
    "dow": 2,
    "hour": 10,
-   "prompts": 16
+   "prompts": 16,
+   "sessions": 6
   },
   {
+   "applied": 4,
    "dow": 2,
    "hour": 11,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 5
   },
   {
+   "applied": 5,
    "dow": 2,
    "hour": 12,
-   "prompts": 11
+   "prompts": 11,
+   "sessions": 5
   },
   {
+   "applied": 4,
    "dow": 2,
    "hour": 13,
-   "prompts": 13
+   "prompts": 13,
+   "sessions": 7
   },
   {
+   "applied": 7,
    "dow": 2,
    "hour": 14,
-   "prompts": 20
+   "prompts": 20,
+   "sessions": 10
   },
   {
+   "applied": 2,
    "dow": 2,
    "hour": 15,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 2
   },
   {
+   "applied": 2,
    "dow": 2,
    "hour": 16,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 5
   },
   {
+   "applied": 3,
    "dow": 2,
    "hour": 17,
-   "prompts": 8
+   "prompts": 8,
+   "sessions": 4
   },
   {
+   "applied": 2,
    "dow": 2,
    "hour": 18,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 2
   },
   {
+   "applied": 3,
    "dow": 2,
    "hour": 19,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 3
   },
   {
+   "applied": 1,
    "dow": 2,
    "hour": 20,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 2,
    "dow": 2,
    "hour": 21,
-   "prompts": 6
+   "prompts": 6,
+   "sessions": 2
   },
   {
+   "applied": 1,
    "dow": 2,
    "hour": 22,
-   "prompts": 5
+   "prompts": 5,
+   "sessions": 2
   },
   {
+   "applied": 4,
    "dow": 3,
    "hour": 7,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 5
   },
   {
+   "applied": 0,
    "dow": 3,
    "hour": 8,
-   "prompts": 5
+   "prompts": 5,
+   "sessions": 2
   },
   {
+   "applied": 3,
    "dow": 3,
    "hour": 9,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 5
   },
   {
+   "applied": 3,
    "dow": 3,
    "hour": 10,
-   "prompts": 12
+   "prompts": 12,
+   "sessions": 4
   },
   {
+   "applied": 4,
    "dow": 3,
    "hour": 11,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 5
   },
   {
+   "applied": 8,
    "dow": 3,
    "hour": 12,
-   "prompts": 31
+   "prompts": 31,
+   "sessions": 11
   },
   {
+   "applied": 9,
    "dow": 3,
    "hour": 13,
-   "prompts": 34
+   "prompts": 34,
+   "sessions": 13
   },
   {
+   "applied": 5,
    "dow": 3,
    "hour": 14,
-   "prompts": 26
+   "prompts": 26,
+   "sessions": 6
   },
   {
+   "applied": 4,
    "dow": 3,
    "hour": 15,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 5
   },
   {
+   "applied": 1,
    "dow": 3,
    "hour": 16,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 1
   },
   {
+   "applied": 1,
    "dow": 3,
    "hour": 17,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 3
   },
   {
+   "applied": 1,
    "dow": 3,
    "hour": 18,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 2
   },
   {
+   "applied": 1,
    "dow": 3,
    "hour": 19,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 2
   },
   {
+   "applied": 0,
    "dow": 3,
    "hour": 20,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 0
   },
   {
+   "applied": 2,
    "dow": 4,
    "hour": 7,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 4
   },
   {
+   "applied": 1,
    "dow": 4,
    "hour": 8,
-   "prompts": 1
+   "prompts": 1,
+   "sessions": 1
   },
   {
+   "applied": 6,
    "dow": 4,
    "hour": 9,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 7
   },
   {
+   "applied": 2,
    "dow": 4,
    "hour": 10,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 2
   },
   {
+   "applied": 4,
    "dow": 4,
    "hour": 11,
-   "prompts": 17
+   "prompts": 17,
+   "sessions": 6
   },
   {
+   "applied": 5,
    "dow": 4,
    "hour": 12,
-   "prompts": 13
+   "prompts": 13,
+   "sessions": 6
   },
   {
+   "applied": 5,
    "dow": 4,
    "hour": 13,
-   "prompts": 27
+   "prompts": 27,
+   "sessions": 8
   },
   {
+   "applied": 1,
    "dow": 4,
    "hour": 14,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 6
   },
   {
+   "applied": 4,
    "dow": 4,
    "hour": 15,
-   "prompts": 12
+   "prompts": 12,
+   "sessions": 5
   },
   {
+   "applied": 2,
    "dow": 4,
    "hour": 16,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 3
   },
   {
+   "applied": 2,
    "dow": 4,
    "hour": 17,
-   "prompts": 20
+   "prompts": 20,
+   "sessions": 7
   },
   {
+   "applied": 2,
    "dow": 4,
    "hour": 18,
-   "prompts": 12
+   "prompts": 12,
+   "sessions": 5
   },
   {
+   "applied": 3,
    "dow": 4,
    "hour": 19,
-   "prompts": 15
+   "prompts": 15,
+   "sessions": 4
   },
   {
+   "applied": 0,
    "dow": 4,
    "hour": 20,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 0
   },
   {
+   "applied": 2,
    "dow": 5,
    "hour": 9,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 4
   },
   {
+   "applied": 4,
    "dow": 5,
    "hour": 10,
-   "prompts": 25
+   "prompts": 25,
+   "sessions": 5
   },
   {
+   "applied": 1,
    "dow": 5,
    "hour": 11,
-   "prompts": 5
+   "prompts": 5,
+   "sessions": 2
   },
   {
+   "applied": 2,
    "dow": 5,
    "hour": 12,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 3
   },
   {
+   "applied": 1,
    "dow": 5,
    "hour": 13,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 1
   },
   {
+   "applied": 1,
    "dow": 5,
    "hour": 15,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 2
   },
   {
+   "applied": 1,
    "dow": 5,
    "hour": 16,
-   "prompts": 5
+   "prompts": 5,
+   "sessions": 2
   },
   {
+   "applied": 1,
    "dow": 5,
    "hour": 17,
-   "prompts": 1
+   "prompts": 1,
+   "sessions": 1
   },
   {
+   "applied": 0,
    "dow": 6,
    "hour": 7,
-   "prompts": 5
+   "prompts": 5,
+   "sessions": 1
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 8,
-   "prompts": 1
+   "prompts": 1,
+   "sessions": 1
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 9,
-   "prompts": 11
+   "prompts": 11,
+   "sessions": 3
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 10,
-   "prompts": 10
+   "prompts": 10,
+   "sessions": 3
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 11,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 4,
    "dow": 6,
    "hour": 12,
-   "prompts": 9
+   "prompts": 9,
+   "sessions": 4
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 13,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 1
   },
   {
+   "applied": 2,
    "dow": 6,
    "hour": 14,
-   "prompts": 7
+   "prompts": 7,
+   "sessions": 5
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 15,
-   "prompts": 4
+   "prompts": 4,
+   "sessions": 1
   },
   {
+   "applied": 1,
+   "dow": 6,
+   "hour": 16,
+   "prompts": 0,
+   "sessions": 1
+  },
+  {
+   "applied": 0,
    "dow": 6,
    "hour": 17,
-   "prompts": 3
+   "prompts": 3,
+   "sessions": 0
   },
   {
+   "applied": 0,
    "dow": 6,
    "hour": 18,
-   "prompts": 2
+   "prompts": 2,
+   "sessions": 1
   },
   {
+   "applied": 1,
    "dow": 6,
    "hour": 19,
-   "prompts": 6
+   "prompts": 6,
+   "sessions": 1
   },
   {
+   "applied": 0,
    "dow": 6,
    "hour": 22,
-   "prompts": 1
+   "prompts": 1,
+   "sessions": 1
   }
  ],
  "insights": [
@@ -6396,13 +6593,265 @@
    "title": "Try Cursor first for refactor"
   }
  ],
- "schema": "1.0",
+ "repeats": [
+  {
+   "cluster": -1,
+   "count": 85,
+   "exemplar": "still not working, it fails again",
+   "sessions": [
+    "cursor:00287",
+    "copilot:00201",
+    "opencode:00277",
+    "cursor:00377",
+    "claude_code:00124",
+    "claude_code:00214",
+    "opencode:00073",
+    "claude_code:00199",
+    "opencode:00131",
+    "cursor:00227",
+    "opencode:00126",
+    "cursor:00080",
+    "claude_code:00095",
+    "claude_code:00164",
+    "copilot:00051",
+    "claude_code:00311",
+    "claude_code:00309",
+    "opencode:00308",
+    "claude_code:00209",
+    "claude_code:00289",
+    "cursor:00045",
+    "copilot:00197",
+    "copilot:00198",
+    "opencode:00361",
+    "cursor:00079"
+   ]
+  },
+  {
+   "cluster": 9,
+   "count": 30,
+   "exemplar": "this is broken, can you fix the bug",
+   "sessions": [
+    "copilot:00201",
+    "copilot:00278",
+    "claude_code:00270",
+    "opencode:00284",
+    "claude_code:00196",
+    "claude_code:00095",
+    "cursor:00400",
+    "claude_code:00117",
+    "cursor:00271",
+    "cursor:00179",
+    "copilot:00304",
+    "claude_code:00181",
+    "opencode:00237",
+    "opencode:00082",
+    "copilot:00334",
+    "copilot:00183",
+    "copilot:00302",
+    "claude_code:00165",
+    "copilot:00301",
+    "cursor:00068",
+    "copilot:00062",
+    "copilot:00307",
+    "cursor:00012",
+    "claude_code:00323",
+    "claude_code:loop01"
+   ]
+  },
+  {
+   "cluster": 13,
+   "count": 22,
+   "exemplar": "clean this up and simplify it",
+   "sessions": [
+    "cursor:00287",
+    "cursor:00227",
+    "cursor:00080",
+    "opencode:00308",
+    "claude_code:00289",
+    "cursor:00045",
+    "cursor:00093",
+    "claude_code:00226",
+    "cursor:00174",
+    "cursor:00069",
+    "cursor:00092",
+    "claude_code:00375",
+    "cursor:00067",
+    "cursor:00243",
+    "copilot:00103",
+    "claude_code:00008",
+    "copilot:00005",
+    "claude_code:00135",
+    "cursor:00372",
+    "cursor:00233",
+    "claude_code:00060",
+    "cursor:00374"
+   ]
+  },
+  {
+   "cluster": 18,
+   "count": 21,
+   "exemplar": "add a feature for exporting stuff",
+   "sessions": [
+    "claude_code:00214",
+    "opencode:00073",
+    "cursor:00353",
+    "copilot:00110",
+    "cursor:00079",
+    "cursor:00364",
+    "copilot:00155",
+    "cursor:00315",
+    "claude_code:00387",
+    "claude_code:00108",
+    "cursor:00373",
+    "claude_code:00194",
+    "cursor:00102",
+    "cursor:00279",
+    "copilot:00363",
+    "copilot:00177",
+    "copilot:00064",
+    "claude_code:00384",
+    "claude_code:00286",
+    "copilot:00390",
+    "claude_code:00168"
+   ]
+  },
+  {
+   "cluster": 6,
+   "count": 16,
+   "exemplar": "ugh, still broken!! the TypeError is back",
+   "sessions": [
+    "copilot:00278",
+    "claude_code:00240",
+    "opencode:00154",
+    "cursor:00385",
+    "opencode:00343",
+    "claude_code:00387",
+    "copilot:00191",
+    "opencode:00082",
+    "cursor:00081",
+    "copilot:00177",
+    "cursor:00369",
+    "claude_code:00339",
+    "opencode:00007",
+    "cursor:00205",
+    "claude_code:00281",
+    "claude_code:00211"
+   ]
+  },
+  {
+   "cluster": 3,
+   "count": 14,
+   "exemplar": "fix the github actions workflow, the deploy pipeline fails",
+   "sessions": [
+    "claude_code:00119",
+    "claude_code:00124",
+    "copilot:00167",
+    "claude_code:00311",
+    "claude_code:00272",
+    "claude_code:00367",
+    "claude_code:00254",
+    "opencode:00361",
+    "opencode:00383",
+    "copilot:00140",
+    "claude_code:00297",
+    "claude_code:00030",
+    "claude_code:00351",
+    "opencode:00010"
+   ]
+  },
+  {
+   "cluster": 2,
+   "count": 14,
+   "exemplar": "no, that's wrong. the ECONNRESET 502 still happens",
+   "sessions": [
+    "copilot:00337",
+    "claude_code:00270",
+    "claude_code:00214",
+    "claude_code:00199",
+    "copilot:00086",
+    "cursor:00043",
+    "cursor:00037",
+    "cursor:00102",
+    "claude_code:00297",
+    "cursor:00029",
+    "claude_code:00028",
+    "claude_code:00392",
+    "copilot:00005",
+    "claude_code:00255"
+   ]
+  },
+  {
+   "cluster": 5,
+   "count": 14,
+   "exemplar": "ugh, still broken!! the ValueError is back",
+   "sessions": [
+    "claude_code:00391",
+    "claude_code:00256",
+    "cursor:00159",
+    "opencode:00126",
+    "claude_code:00289",
+    "cursor:00364",
+    "claude_code:00016",
+    "claude_code:00036",
+    "claude_code:00345",
+    "claude_code:00194",
+    "cursor:00269",
+    "claude_code:00091",
+    "cursor:00243",
+    "claude_code:00323"
+   ]
+  },
+  {
+   "cluster": -1,
+   "count": 13,
+   "exemplar": "actually don't touch pkg/server/handler.go, undo that change",
+   "sessions": [
+    "copilot:00206",
+    "claude_code:00395",
+    "cursor:00360",
+    "cursor:00331",
+    "claude_code:00182",
+    "opencode:00237",
+    "claude_code:00108",
+    "cursor:00279",
+    "claude_code:00245",
+    "cursor:00389",
+    "claude_code:00055",
+    "copilot:00005",
+    "claude_code:00151"
+   ]
+  },
+  {
+   "cluster": -1,
+   "count": 11,
+   "exemplar": "actually don't touch app/models/user.rb, undo that change",
+   "sessions": [
+    "copilot:00203",
+    "copilot:00338",
+    "opencode:00082",
+    "cursor:00106",
+    "claude_code:00305",
+    "copilot:00363",
+    "cursor:00025",
+    "opencode:00314",
+    "claude_code:00281",
+    "claude_code:00261",
+    "opencode:00210"
+   ]
+  }
+ ],
+ "schema": "1.2",
  "sessions": [
   {
    "applied": true,
    "cluster": -1,
    "cost_usd": 0.067386,
    "date": "2026-09-24",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00242",
    "intent": "feature",
@@ -6419,6 +6868,10 @@
    "cluster": -1,
    "cost_usd": 0.020885,
    "date": "2026-09-24",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00077",
    "intent": "explain",
@@ -6435,6 +6888,9 @@
    "cluster": 12,
    "cost_usd": 0.018441,
    "date": "2026-09-24",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00066",
    "intent": "devops",
@@ -6451,6 +6907,7 @@
    "cluster": -1,
    "cost_usd": 0.141418,
    "date": "2026-09-24",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00359",
    "intent": "other",
@@ -6467,6 +6924,7 @@
    "cluster": -1,
    "cost_usd": 0.1486,
    "date": "2026-09-24",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00296",
    "intent": "other",
@@ -6483,6 +6941,11 @@
    "cluster": 15,
    "cost_usd": 0.037172,
    "date": "2026-09-23",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "copilot:00071",
    "intent": "docs",
@@ -6499,6 +6962,9 @@
    "cluster": 0,
    "cost_usd": 0.06991,
    "date": "2026-09-22",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "cursor:00287",
    "intent": "refactor",
@@ -6515,6 +6981,10 @@
    "cluster": 2,
    "cost_usd": 0.042079,
    "date": "2026-09-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00337",
    "intent": "feature",
@@ -6531,6 +7001,7 @@
    "cluster": -1,
    "cost_usd": 0.209998,
    "date": "2026-09-22",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00116",
    "intent": "other",
@@ -6547,6 +7018,11 @@
    "cluster": 4,
    "cost_usd": 0.012279,
    "date": "2026-09-21",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00122",
    "intent": "refactor",
@@ -6563,6 +7039,11 @@
    "cluster": -1,
    "cost_usd": 0.085296,
    "date": "2026-09-18",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00312",
    "intent": "data",
@@ -6579,6 +7060,11 @@
    "cluster": -1,
    "cost_usd": 0.032366,
    "date": "2026-09-18",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00206",
    "intent": "refactor",
@@ -6595,6 +7081,10 @@
    "cluster": -1,
    "cost_usd": 0.048338,
    "date": "2026-09-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00130",
    "intent": "feature",
@@ -6611,6 +7101,9 @@
    "cluster": -1,
    "cost_usd": 0.046418,
    "date": "2026-09-16",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00201",
    "intent": "bugfix",
@@ -6627,6 +7120,11 @@
    "cluster": 0,
    "cost_usd": 0.076491,
    "date": "2026-09-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "opencode:00277",
    "intent": "devops",
@@ -6643,6 +7141,10 @@
    "cluster": 9,
    "cost_usd": 0.116185,
    "date": "2026-09-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00278",
    "intent": "bugfix",
@@ -6659,6 +7161,11 @@
    "cluster": 1,
    "cost_usd": 0.031743,
    "date": "2026-09-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00175",
    "intent": "feature",
@@ -6675,6 +7182,11 @@
    "cluster": 4,
    "cost_usd": 0.024082,
    "date": "2026-09-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00275",
    "intent": "refactor",
@@ -6691,6 +7203,10 @@
    "cluster": 10,
    "cost_usd": 0.027763,
    "date": "2026-09-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00070",
    "intent": "feature",
@@ -6707,6 +7223,9 @@
    "cluster": 3,
    "cost_usd": 0.025194,
    "date": "2026-09-14",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00119",
    "intent": "devops",
@@ -6723,6 +7242,7 @@
    "cluster": -1,
    "cost_usd": 0.190625,
    "date": "2026-09-14",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00146",
    "intent": "other",
@@ -6739,6 +7259,10 @@
    "cluster": 2,
    "cost_usd": 0.15618,
    "date": "2026-09-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.18,
    "id": "claude_code:00270",
    "intent": "bugfix",
@@ -6755,6 +7279,10 @@
    "cluster": -1,
    "cost_usd": 0.100154,
    "date": "2026-09-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "cursor:00377",
    "intent": "bugfix",
@@ -6771,6 +7299,10 @@
    "cluster": 12,
    "cost_usd": 0.164358,
    "date": "2026-09-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "claude_code:00268",
    "intent": "devops",
@@ -6787,6 +7319,9 @@
    "cluster": 0,
    "cost_usd": 0.053475,
    "date": "2026-09-10",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00124",
    "intent": "devops",
@@ -6803,6 +7338,11 @@
    "cluster": 11,
    "cost_usd": 0.210126,
    "date": "2026-09-10",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.190476,
    "id": "claude_code:00099",
    "intent": "explain",
@@ -6819,6 +7359,11 @@
    "cluster": 4,
    "cost_usd": 0.064133,
    "date": "2026-09-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00393",
    "intent": "refactor",
@@ -6835,6 +7380,10 @@
    "cluster": 18,
    "cost_usd": 0.167025,
    "date": "2026-09-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "claude_code:00214",
    "intent": "other",
@@ -6851,6 +7400,11 @@
    "cluster": -1,
    "cost_usd": 0.087654,
    "date": "2026-09-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00180",
    "intent": "other",
@@ -6867,6 +7421,10 @@
    "cluster": 16,
    "cost_usd": 0.031032,
    "date": "2026-09-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00149",
    "intent": "explain",
@@ -6883,6 +7441,10 @@
    "cluster": 19,
    "cost_usd": 0.112848,
    "date": "2026-09-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "claude_code:00054",
    "intent": "bugfix",
@@ -6899,6 +7461,11 @@
    "cluster": -1,
    "cost_usd": 0.038517,
    "date": "2026-09-04",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.05,
    "id": "opencode:00129",
    "intent": "feature",
@@ -6915,6 +7482,10 @@
    "cluster": -1,
    "cost_usd": 0.09039,
    "date": "2026-09-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00240",
    "intent": "data",
@@ -6931,6 +7502,11 @@
    "cluster": 1,
    "cost_usd": 0.12198,
    "date": "2026-09-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.216667,
    "id": "opencode:00114",
    "intent": "feature",
@@ -6947,6 +7523,11 @@
    "cluster": 18,
    "cost_usd": 0.147192,
    "date": "2026-09-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "opencode:00073",
    "intent": "other",
@@ -6963,6 +7544,11 @@
    "cluster": -1,
    "cost_usd": 0.143076,
    "date": "2026-09-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00395",
    "intent": "docs",
@@ -6979,6 +7565,11 @@
    "cluster": -1,
    "cost_usd": 0.06876,
    "date": "2026-09-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00229",
    "intent": "feature",
@@ -6995,6 +7586,11 @@
    "cluster": -1,
    "cost_usd": 0.093002,
    "date": "2026-09-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "copilot:00203",
    "intent": "refactor",
@@ -7011,6 +7607,10 @@
    "cluster": 0,
    "cost_usd": 0.102159,
    "date": "2026-09-02",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "claude_code:00199",
    "intent": "devops",
@@ -7027,6 +7627,10 @@
    "cluster": 2,
    "cost_usd": 0.084396,
    "date": "2026-09-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00391",
    "intent": "explain",
@@ -7043,6 +7647,10 @@
    "cluster": 19,
    "cost_usd": 0.102924,
    "date": "2026-09-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "claude_code:00322",
    "intent": "bugfix",
@@ -7059,6 +7667,11 @@
    "cluster": -1,
    "cost_usd": 0.0771,
    "date": "2026-08-28",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00360",
    "intent": "bugfix",
@@ -7075,6 +7688,11 @@
    "cluster": 4,
    "cost_usd": 0.016505,
    "date": "2026-08-28",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00100",
    "intent": "refactor",
@@ -7091,6 +7709,11 @@
    "cluster": 4,
    "cost_usd": 0.036759,
    "date": "2026-08-28",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00189",
    "intent": "refactor",
@@ -7107,6 +7730,9 @@
    "cluster": 0,
    "cost_usd": 0.085239,
    "date": "2026-08-27",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "opencode:00131",
    "intent": "explain",
@@ -7123,6 +7749,11 @@
    "cluster": -1,
    "cost_usd": 0.034622,
    "date": "2026-08-27",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00349",
    "intent": "data",
@@ -7139,6 +7770,11 @@
    "cluster": 7,
    "cost_usd": 0.032352,
    "date": "2026-08-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00340",
    "intent": "bugfix",
@@ -7155,6 +7791,11 @@
    "cluster": -1,
    "cost_usd": 0.089694,
    "date": "2026-08-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00256",
    "intent": "test",
@@ -7171,6 +7812,10 @@
    "cluster": -1,
    "cost_usd": 0.057559,
    "date": "2026-08-25",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "cursor:00053",
    "intent": "bugfix",
@@ -7187,6 +7832,10 @@
    "cluster": 10,
    "cost_usd": 0.030289,
    "date": "2026-08-25",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00358",
    "intent": "feature",
@@ -7203,6 +7852,11 @@
    "cluster": -1,
    "cost_usd": 0.035269,
    "date": "2026-08-25",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00338",
    "intent": "bugfix",
@@ -7219,6 +7873,10 @@
    "cluster": 2,
    "cost_usd": 0.041582,
    "date": "2026-08-25",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00167",
    "intent": "devops",
@@ -7235,6 +7893,10 @@
    "cluster": 9,
    "cost_usd": 0.09318,
    "date": "2026-08-24",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00284",
    "intent": "bugfix",
@@ -7251,6 +7913,10 @@
    "cluster": -1,
    "cost_usd": 0.03359,
    "date": "2026-08-24",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.125,
    "id": "copilot:00352",
    "intent": "explain",
@@ -7267,6 +7933,10 @@
    "cluster": -1,
    "cost_usd": 0.079014,
    "date": "2026-08-24",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00196",
    "intent": "bugfix",
@@ -7283,6 +7953,10 @@
    "cluster": -1,
    "cost_usd": 0.146527,
    "date": "2026-08-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "cursor:00227",
    "intent": "refactor",
@@ -7299,6 +7973,10 @@
    "cluster": -1,
    "cost_usd": 0.07601,
    "date": "2026-08-21",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "cursor:00159",
    "intent": "bugfix",
@@ -7315,6 +7993,10 @@
    "cluster": 0,
    "cost_usd": 0.123882,
    "date": "2026-08-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "opencode:00126",
    "intent": "bugfix",
@@ -7331,6 +8013,11 @@
    "cluster": -1,
    "cost_usd": 0.09552,
    "date": "2026-08-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00331",
    "intent": "refactor",
@@ -7347,6 +8034,11 @@
    "cluster": -1,
    "cost_usd": 0.060341,
    "date": "2026-08-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "copilot:00144",
    "intent": "feature",
@@ -7363,6 +8055,11 @@
    "cluster": 7,
    "cost_usd": 0.082077,
    "date": "2026-08-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00370",
    "intent": "bugfix",
@@ -7379,6 +8076,10 @@
    "cluster": 13,
    "cost_usd": 0.154385,
    "date": "2026-08-19",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "cursor:00080",
    "intent": "refactor",
@@ -7395,6 +8096,9 @@
    "cluster": 0,
    "cost_usd": 0.0963,
    "date": "2026-08-19",
+   "features": [
+    "length"
+   ],
    "friction": 0.433333,
    "id": "claude_code:00095",
    "intent": "bugfix",
@@ -7411,6 +8115,10 @@
    "cluster": -1,
    "cost_usd": 0.063846,
    "date": "2026-08-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00283",
    "intent": "explain",
@@ -7427,6 +8135,10 @@
    "cluster": 9,
    "cost_usd": 0.096089,
    "date": "2026-08-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.308333,
    "id": "cursor:00400",
    "intent": "bugfix",
@@ -7443,6 +8155,10 @@
    "cluster": 10,
    "cost_usd": 0.119775,
    "date": "2026-08-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "claude_code:00219",
    "intent": "feature",
@@ -7459,6 +8175,11 @@
    "cluster": 0,
    "cost_usd": 0.039357,
    "date": "2026-08-18",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00164",
    "intent": "data",
@@ -7475,6 +8196,10 @@
    "cluster": -1,
    "cost_usd": 0.046269,
    "date": "2026-08-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00319",
    "intent": "explain",
@@ -7491,6 +8216,10 @@
    "cluster": -1,
    "cost_usd": 0.075807,
    "date": "2026-08-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00325",
    "intent": "explain",
@@ -7507,6 +8236,10 @@
    "cluster": -1,
    "cost_usd": 0.098117,
    "date": "2026-08-16",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "cursor:00056",
    "intent": "bugfix",
@@ -7523,6 +8256,11 @@
    "cluster": 0,
    "cost_usd": 0.054239,
    "date": "2026-08-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "copilot:00051",
    "intent": "bugfix",
@@ -7539,6 +8277,7 @@
    "cluster": -1,
    "cost_usd": 0.136212,
    "date": "2026-08-16",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00252",
    "intent": "other",
@@ -7555,6 +8294,11 @@
    "cluster": 0,
    "cost_usd": 0.114798,
    "date": "2026-08-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "claude_code:00311",
    "intent": "devops",
@@ -7571,6 +8315,10 @@
    "cluster": 17,
    "cost_usd": 0.025362,
    "date": "2026-08-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00244",
    "intent": "docs",
@@ -7587,6 +8335,10 @@
    "cluster": 10,
    "cost_usd": 0.024984,
    "date": "2026-08-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00394",
    "intent": "feature",
@@ -7603,6 +8355,11 @@
    "cluster": -1,
    "cost_usd": 0.081372,
    "date": "2026-08-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00161",
    "intent": "bugfix",
@@ -7619,6 +8376,9 @@
    "cluster": 3,
    "cost_usd": 0.05166,
    "date": "2026-08-12",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00272",
    "intent": "devops",
@@ -7635,6 +8395,9 @@
    "cluster": 3,
    "cost_usd": 0.020178,
    "date": "2026-08-11",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00367",
    "intent": "devops",
@@ -7651,6 +8414,10 @@
    "cluster": 19,
    "cost_usd": 0.029487,
    "date": "2026-08-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00046",
    "intent": "bugfix",
@@ -7667,6 +8434,7 @@
    "cluster": -1,
    "cost_usd": 0.145845,
    "date": "2026-08-11",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00145",
    "intent": "other",
@@ -7683,6 +8451,7 @@
    "cluster": -1,
    "cost_usd": 0.211781,
    "date": "2026-08-10",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00263",
    "intent": "other",
@@ -7699,6 +8468,11 @@
    "cluster": 4,
    "cost_usd": 0.02903,
    "date": "2026-08-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00397",
    "intent": "refactor",
@@ -7715,6 +8489,11 @@
    "cluster": -1,
    "cost_usd": 0.06402,
    "date": "2026-08-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00309",
    "intent": "refactor",
@@ -7731,6 +8510,9 @@
    "cluster": 0,
    "cost_usd": 0.080835,
    "date": "2026-08-08",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "opencode:00308",
    "intent": "refactor",
@@ -7747,6 +8529,11 @@
    "cluster": -1,
    "cost_usd": 0.138489,
    "date": "2026-08-07",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.133333,
    "id": "opencode:00075",
    "intent": "test",
@@ -7763,6 +8550,10 @@
    "cluster": -1,
    "cost_usd": 0.044741,
    "date": "2026-08-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.133333,
    "id": "copilot:00388",
    "intent": "bugfix",
@@ -7779,6 +8570,10 @@
    "cluster": -1,
    "cost_usd": 0.143868,
    "date": "2026-08-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2125,
    "id": "claude_code:00209",
    "intent": "data",
@@ -7795,6 +8590,11 @@
    "cluster": 8,
    "cost_usd": 0.053321,
    "date": "2026-08-06",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00353",
    "intent": "other",
@@ -7811,6 +8611,10 @@
    "cluster": 18,
    "cost_usd": 0.107177,
    "date": "2026-08-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.120833,
    "id": "copilot:00110",
    "intent": "other",
@@ -7827,6 +8631,10 @@
    "cluster": -1,
    "cost_usd": 0.091211,
    "date": "2026-08-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00086",
    "intent": "feature",
@@ -7843,6 +8651,11 @@
    "cluster": 17,
    "cost_usd": 0.031566,
    "date": "2026-08-06",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00306",
    "intent": "test",
@@ -7859,6 +8672,10 @@
    "cluster": 9,
    "cost_usd": 0.148578,
    "date": "2026-08-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00117",
    "intent": "bugfix",
@@ -7875,6 +8692,10 @@
    "cluster": 0,
    "cost_usd": 0.092889,
    "date": "2026-08-05",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00289",
    "intent": "refactor",
@@ -7891,6 +8712,10 @@
    "cluster": -1,
    "cost_usd": 0.106434,
    "date": "2026-08-03",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00193",
    "intent": "explain",
@@ -7907,6 +8732,7 @@
    "cluster": -1,
    "cost_usd": 0.168951,
    "date": "2026-08-02",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00333",
    "intent": "other",
@@ -7923,6 +8749,9 @@
    "cluster": 13,
    "cost_usd": 0.090598,
    "date": "2026-08-01",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "cursor:00045",
    "intent": "refactor",
@@ -7939,6 +8768,10 @@
    "cluster": 10,
    "cost_usd": 0.116871,
    "date": "2026-08-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "claude_code:00356",
    "intent": "feature",
@@ -7955,6 +8788,10 @@
    "cluster": -1,
    "cost_usd": 0.133341,
    "date": "2026-08-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00044",
    "intent": "explain",
@@ -7971,6 +8808,11 @@
    "cluster": 0,
    "cost_usd": 0.064582,
    "date": "2026-07-31",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "copilot:00197",
    "intent": "feature",
@@ -7987,6 +8829,10 @@
    "cluster": 3,
    "cost_usd": 0.195207,
    "date": "2026-07-31",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.270833,
    "id": "claude_code:00254",
    "intent": "devops",
@@ -8003,6 +8849,10 @@
    "cluster": 0,
    "cost_usd": 0.058752,
    "date": "2026-07-30",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "copilot:00198",
    "intent": "data",
@@ -8019,6 +8869,11 @@
    "cluster": -1,
    "cost_usd": 0.08454,
    "date": "2026-07-29",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "cursor:00282",
    "intent": "test",
@@ -8035,6 +8890,11 @@
    "cluster": 1,
    "cost_usd": 0.02048,
    "date": "2026-07-28",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00300",
    "intent": "feature",
@@ -8051,6 +8911,10 @@
    "cluster": -1,
    "cost_usd": 0.017499,
    "date": "2026-07-28",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00139",
    "intent": "explain",
@@ -8067,6 +8931,9 @@
    "cluster": -1,
    "cost_usd": 0.106737,
    "date": "2026-07-27",
+   "features": [
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00361",
    "intent": "devops",
@@ -8083,6 +8950,10 @@
    "cluster": -1,
    "cost_usd": 0.077496,
    "date": "2026-07-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00271",
    "intent": "bugfix",
@@ -8099,6 +8970,10 @@
    "cluster": -1,
    "cost_usd": 0.034531,
    "date": "2026-07-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00248",
    "intent": "explain",
@@ -8115,6 +8990,11 @@
    "cluster": -1,
    "cost_usd": 0.113607,
    "date": "2026-07-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.133333,
    "id": "claude_code:00368",
    "intent": "other",
@@ -8131,6 +9011,11 @@
    "cluster": 7,
    "cost_usd": 0.030228,
    "date": "2026-07-24",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00236",
    "intent": "bugfix",
@@ -8147,6 +9032,10 @@
    "cluster": 17,
    "cost_usd": 0.143868,
    "date": "2026-07-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "opencode:00154",
    "intent": "data",
@@ -8163,6 +9052,9 @@
    "cluster": 13,
    "cost_usd": 0.066022,
    "date": "2026-07-22",
+   "features": [
+    "length"
+   ],
    "friction": 0.075,
    "id": "cursor:00093",
    "intent": "refactor",
@@ -8179,6 +9071,10 @@
    "cluster": 18,
    "cost_usd": 0.169771,
    "date": "2026-07-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.216667,
    "id": "cursor:00079",
    "intent": "other",
@@ -8195,6 +9091,9 @@
    "cluster": 9,
    "cost_usd": 0.073742,
    "date": "2026-07-21",
+   "features": [
+    "length"
+   ],
    "friction": 0.25,
    "id": "cursor:00179",
    "intent": "bugfix",
@@ -8211,6 +9110,7 @@
    "cluster": -1,
    "cost_usd": 0.137873,
    "date": "2026-07-21",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00157",
    "intent": "other",
@@ -8227,6 +9127,7 @@
    "cluster": -1,
    "cost_usd": 0.23004,
    "date": "2026-07-21",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00111",
    "intent": "other",
@@ -8243,6 +9144,11 @@
    "cluster": 0,
    "cost_usd": 0.089102,
    "date": "2026-07-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "cursor:00364",
    "intent": "other",
@@ -8259,6 +9165,10 @@
    "cluster": -1,
    "cost_usd": 0.050155,
    "date": "2026-07-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00043",
    "intent": "refactor",
@@ -8275,6 +9185,10 @@
    "cluster": -1,
    "cost_usd": 0.109908,
    "date": "2026-07-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.133333,
    "id": "claude_code:00226",
    "intent": "refactor",
@@ -8291,6 +9205,10 @@
    "cluster": 0,
    "cost_usd": 0.053841,
    "date": "2026-07-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00042",
    "intent": "feature",
@@ -8307,6 +9225,10 @@
    "cluster": -1,
    "cost_usd": 0.040187,
    "date": "2026-07-19",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00132",
    "intent": "refactor",
@@ -8323,6 +9245,7 @@
    "cluster": -1,
    "cost_usd": 0.099252,
    "date": "2026-07-19",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00173",
    "intent": "other",
@@ -8339,6 +9262,10 @@
    "cluster": -1,
    "cost_usd": 0.022668,
    "date": "2026-07-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00078",
    "intent": "explain",
@@ -8355,6 +9282,9 @@
    "cluster": 0,
    "cost_usd": 0.04504,
    "date": "2026-07-17",
+   "features": [
+    "length"
+   ],
    "friction": 0.3,
    "id": "copilot:00304",
    "intent": "bugfix",
@@ -8371,6 +9301,10 @@
    "cluster": -1,
    "cost_usd": 0.101307,
    "date": "2026-07-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00172",
    "intent": "explain",
@@ -8387,6 +9321,11 @@
    "cluster": -1,
    "cost_usd": 0.093847,
    "date": "2026-07-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00202",
    "intent": "devops",
@@ -8403,6 +9342,11 @@
    "cluster": -1,
    "cost_usd": 0.06087,
    "date": "2026-07-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00101",
    "intent": "feature",
@@ -8419,6 +9363,11 @@
    "cluster": 4,
    "cost_usd": 0.052485,
    "date": "2026-07-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00195",
    "intent": "refactor",
@@ -8435,6 +9384,10 @@
    "cluster": -1,
    "cost_usd": 0.038382,
    "date": "2026-07-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00133",
    "intent": "explain",
@@ -8451,6 +9404,10 @@
    "cluster": 2,
    "cost_usd": 0.039892,
    "date": "2026-07-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00155",
    "intent": "other",
@@ -8467,6 +9424,10 @@
    "cluster": -1,
    "cost_usd": 0.083706,
    "date": "2026-07-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00288",
    "intent": "explain",
@@ -8483,6 +9444,10 @@
    "cluster": -1,
    "cost_usd": 0.111171,
    "date": "2026-07-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "claude_code:00142",
    "intent": "docs",
@@ -8499,6 +9464,11 @@
    "cluster": -1,
    "cost_usd": 0.034422,
    "date": "2026-07-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00182",
    "intent": "refactor",
@@ -8515,6 +9485,10 @@
    "cluster": -1,
    "cost_usd": 0.029259,
    "date": "2026-07-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00376",
    "intent": "explain",
@@ -8531,6 +9505,9 @@
    "cluster": 18,
    "cost_usd": 0.097814,
    "date": "2026-07-09",
+   "features": [
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00315",
    "intent": "other",
@@ -8547,6 +9524,10 @@
    "cluster": -1,
    "cost_usd": 0.056054,
    "date": "2026-07-09",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00186",
    "intent": "explain",
@@ -8563,6 +9544,11 @@
    "cluster": -1,
    "cost_usd": 0.08187,
    "date": "2026-07-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00379",
    "intent": "explain",
@@ -8579,6 +9565,10 @@
    "cluster": -1,
    "cost_usd": 0.096867,
    "date": "2026-07-09",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00324",
    "intent": "refactor",
@@ -8595,6 +9585,11 @@
    "cluster": 4,
    "cost_usd": 0.051861,
    "date": "2026-07-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00121",
    "intent": "refactor",
@@ -8611,6 +9606,11 @@
    "cluster": 16,
    "cost_usd": 0.090062,
    "date": "2026-07-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "cursor:00041",
    "intent": "test",
@@ -8627,6 +9627,11 @@
    "cluster": 8,
    "cost_usd": 0.062064,
    "date": "2026-07-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00040",
    "intent": "feature",
@@ -8643,6 +9648,7 @@
    "cluster": -1,
    "cost_usd": 0.115968,
    "date": "2026-07-08",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00160",
    "intent": "other",
@@ -8659,6 +9665,7 @@
    "cluster": -1,
    "cost_usd": 0.244045,
    "date": "2026-07-08",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00104",
    "intent": "other",
@@ -8675,6 +9682,10 @@
    "cluster": 2,
    "cost_usd": 0.150408,
    "date": "2026-07-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.308333,
    "id": "claude_code:00181",
    "intent": "bugfix",
@@ -8691,6 +9702,10 @@
    "cluster": 2,
    "cost_usd": 0.049793,
    "date": "2026-07-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00298",
    "intent": "feature",
@@ -8707,6 +9722,10 @@
    "cluster": 5,
    "cost_usd": 0.05139,
    "date": "2026-07-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00076",
    "intent": "feature",
@@ -8723,6 +9742,11 @@
    "cluster": -1,
    "cost_usd": 0.096319,
    "date": "2026-07-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "cursor:00385",
    "intent": "refactor",
@@ -8739,6 +9763,11 @@
    "cluster": -1,
    "cost_usd": 0.061776,
    "date": "2026-07-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00230",
    "intent": "refactor",
@@ -8755,6 +9784,11 @@
    "cluster": -1,
    "cost_usd": 0.199038,
    "date": "2026-07-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.283333,
    "id": "opencode:00343",
    "intent": "test",
@@ -8771,6 +9805,11 @@
    "cluster": -1,
    "cost_usd": 0.164313,
    "date": "2026-07-01",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00299",
    "intent": "bugfix",
@@ -8787,6 +9826,10 @@
    "cluster": -1,
    "cost_usd": 0.139305,
    "date": "2026-06-30",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "claude_code:00387",
    "intent": "other",
@@ -8803,6 +9846,11 @@
    "cluster": -1,
    "cost_usd": 0.116499,
    "date": "2026-06-29",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00237",
    "intent": "bugfix",
@@ -8819,6 +9867,10 @@
    "cluster": 19,
    "cost_usd": 0.052575,
    "date": "2026-06-29",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00113",
    "intent": "bugfix",
@@ -8835,6 +9887,10 @@
    "cluster": -1,
    "cost_usd": 0.095958,
    "date": "2026-06-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00291",
    "intent": "bugfix",
@@ -8851,6 +9907,11 @@
    "cluster": 1,
    "cost_usd": 0.063734,
    "date": "2026-06-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.208333,
    "id": "cursor:00039",
    "intent": "feature",
@@ -8867,6 +9928,11 @@
    "cluster": 6,
    "cost_usd": 0.04174,
    "date": "2026-06-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.075,
    "id": "copilot:00191",
    "intent": "docs",
@@ -8883,6 +9949,11 @@
    "cluster": -1,
    "cost_usd": 0.078071,
    "date": "2026-06-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "copilot:00141",
    "intent": "other",
@@ -8899,6 +9970,10 @@
    "cluster": -1,
    "cost_usd": 0.087498,
    "date": "2026-06-26",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00057",
    "intent": "bugfix",
@@ -8915,6 +9990,11 @@
    "cluster": 17,
    "cost_usd": 0.022368,
    "date": "2026-06-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00038",
    "intent": "test",
@@ -8931,6 +10011,10 @@
    "cluster": -1,
    "cost_usd": 0.051859,
    "date": "2026-06-24",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "cursor:00239",
    "intent": "refactor",
@@ -8947,6 +10031,11 @@
    "cluster": 17,
    "cost_usd": 0.032654,
    "date": "2026-06-24",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00224",
    "intent": "test",
@@ -8963,6 +10052,10 @@
    "cluster": -1,
    "cost_usd": 0.072326,
    "date": "2026-06-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00280",
    "intent": "refactor",
@@ -8979,6 +10072,10 @@
    "cluster": 10,
    "cost_usd": 0.020637,
    "date": "2026-06-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00171",
    "intent": "feature",
@@ -8995,6 +10092,11 @@
    "cluster": 8,
    "cost_usd": 0.090978,
    "date": "2026-06-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00264",
    "intent": "explain",
@@ -9011,6 +10113,11 @@
    "cluster": 3,
    "cost_usd": 0.044211,
    "date": "2026-06-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00222",
    "intent": "devops",
@@ -9027,6 +10134,7 @@
    "cluster": -1,
    "cost_usd": 0.20029,
    "date": "2026-06-19",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00341",
    "intent": "other",
@@ -9043,6 +10151,9 @@
    "cluster": 3,
    "cost_usd": 0.055056,
    "date": "2026-06-18",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00383",
    "intent": "devops",
@@ -9059,6 +10170,11 @@
    "cluster": 7,
    "cost_usd": 0.051336,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00362",
    "intent": "bugfix",
@@ -9075,6 +10191,10 @@
    "cluster": -1,
    "cost_usd": 0.057297,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00303",
    "intent": "explain",
@@ -9091,6 +10211,11 @@
    "cluster": 7,
    "cost_usd": 0.015867,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00204",
    "intent": "bugfix",
@@ -9107,6 +10232,11 @@
    "cluster": -1,
    "cost_usd": 1.78848,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00021",
    "intent": "feature",
@@ -9123,6 +10253,11 @@
    "cluster": 1,
    "cost_usd": 2.35212,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "claude_code:00020",
    "intent": "feature",
@@ -9139,6 +10274,11 @@
    "cluster": 0,
    "cost_usd": 2.01276,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00019",
    "intent": "feature",
@@ -9155,6 +10295,11 @@
    "cluster": 1,
    "cost_usd": 0.69396,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00018",
    "intent": "feature",
@@ -9171,6 +10316,11 @@
    "cluster": 1,
    "cost_usd": 2.0562,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00017",
    "intent": "feature",
@@ -9187,6 +10337,11 @@
    "cluster": 1,
    "cost_usd": 3.56808,
    "date": "2026-06-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00016",
    "intent": "feature",
@@ -9203,6 +10358,7 @@
    "cluster": -1,
    "cost_usd": 0.20328,
    "date": "2026-06-17",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00247",
    "intent": "other",
@@ -9219,6 +10375,9 @@
    "cluster": 13,
    "cost_usd": 0.151022,
    "date": "2026-06-16",
+   "features": [
+    "length"
+   ],
    "friction": 0.316667,
    "id": "cursor:00174",
    "intent": "refactor",
@@ -9235,6 +10394,10 @@
    "cluster": 15,
    "cost_usd": 0.073741,
    "date": "2026-06-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "copilot:00094",
    "intent": "docs",
@@ -9251,6 +10414,10 @@
    "cluster": 10,
    "cost_usd": 0.140997,
    "date": "2026-06-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.308333,
    "id": "claude_code:00253",
    "intent": "feature",
@@ -9267,6 +10434,11 @@
    "cluster": -1,
    "cost_usd": 0.197031,
    "date": "2026-06-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.18,
    "id": "opencode:00082",
    "intent": "bugfix",
@@ -9283,6 +10455,10 @@
    "cluster": 2,
    "cost_usd": 0.093362,
    "date": "2026-06-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00037",
    "intent": "bugfix",
@@ -9299,6 +10475,10 @@
    "cluster": -1,
    "cost_usd": 0.08778,
    "date": "2026-06-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.125,
    "id": "claude_code:00036",
    "intent": "explain",
@@ -9315,6 +10495,11 @@
    "cluster": -1,
    "cost_usd": 0.033269,
    "date": "2026-06-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00326",
    "intent": "data",
@@ -9331,6 +10516,11 @@
    "cluster": 11,
    "cost_usd": 0.082903,
    "date": "2026-06-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00106",
    "intent": "explain",
@@ -9347,6 +10537,9 @@
    "cluster": 13,
    "cost_usd": 0.0,
    "date": "2026-06-12",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "cursor:00069",
    "intent": "refactor",
@@ -9363,6 +10556,10 @@
    "cluster": 19,
    "cost_usd": 0.087118,
    "date": "2026-06-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "copilot:00357",
    "intent": "bugfix",
@@ -9379,6 +10576,11 @@
    "cluster": -1,
    "cost_usd": 0.072864,
    "date": "2026-06-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "cursor:00294",
    "intent": "bugfix",
@@ -9395,6 +10597,11 @@
    "cluster": -1,
    "cost_usd": 0.05136,
    "date": "2026-06-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00258",
    "intent": "refactor",
@@ -9411,6 +10618,10 @@
    "cluster": 9,
    "cost_usd": 0.063497,
    "date": "2026-06-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00334",
    "intent": "bugfix",
@@ -9427,6 +10638,10 @@
    "cluster": -1,
    "cost_usd": 0.049734,
    "date": "2026-06-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "copilot:00140",
    "intent": "devops",
@@ -9443,6 +10658,10 @@
    "cluster": 20,
    "cost_usd": 0.042847,
    "date": "2026-06-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.216667,
    "id": "copilot:00052",
    "intent": "bugfix",
@@ -9459,6 +10678,11 @@
    "cluster": -1,
    "cost_usd": 0.050979,
    "date": "2026-06-10",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00212",
    "intent": "test",
@@ -9475,6 +10699,11 @@
    "cluster": 1,
    "cost_usd": 0.051705,
    "date": "2026-06-10",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00058",
    "intent": "feature",
@@ -9491,6 +10720,11 @@
    "cluster": -1,
    "cost_usd": 0.074707,
    "date": "2026-06-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.05,
    "id": "cursor:00081",
    "intent": "data",
@@ -9507,6 +10741,10 @@
    "cluster": -1,
    "cost_usd": 0.046128,
    "date": "2026-06-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00137",
    "intent": "explain",
@@ -9523,6 +10761,11 @@
    "cluster": 0,
    "cost_usd": 0.074984,
    "date": "2026-06-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.420833,
    "id": "copilot:00183",
    "intent": "bugfix",
@@ -9539,6 +10782,10 @@
    "cluster": -1,
    "cost_usd": 0.037077,
    "date": "2026-06-05",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00185",
    "intent": "refactor",
@@ -9555,6 +10802,11 @@
    "cluster": -1,
    "cost_usd": 0.109491,
    "date": "2026-06-05",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "claude_code:00108",
    "intent": "other",
@@ -9571,6 +10823,7 @@
    "cluster": -1,
    "cost_usd": 0.126498,
    "date": "2026-06-05",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00320",
    "intent": "other",
@@ -9587,6 +10840,7 @@
    "cluster": -1,
    "cost_usd": 0.218879,
    "date": "2026-06-05",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00274",
    "intent": "other",
@@ -9603,6 +10857,9 @@
    "cluster": 11,
    "cost_usd": 0.016585,
    "date": "2026-06-04",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00063",
    "intent": "explain",
@@ -9619,6 +10876,11 @@
    "cluster": 0,
    "cost_usd": 0.087177,
    "date": "2026-06-04",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00178",
    "intent": "feature",
@@ -9635,6 +10897,10 @@
    "cluster": 10,
    "cost_usd": 0.173937,
    "date": "2026-06-03",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "opencode:00192",
    "intent": "feature",
@@ -9651,6 +10917,11 @@
    "cluster": -1,
    "cost_usd": 0.047334,
    "date": "2026-06-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00187",
    "intent": "bugfix",
@@ -9667,6 +10938,10 @@
    "cluster": -1,
    "cost_usd": 0.073951,
    "date": "2026-06-02",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00250",
    "intent": "explain",
@@ -9683,6 +10958,11 @@
    "cluster": 7,
    "cost_usd": 0.024137,
    "date": "2026-06-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00035",
    "intent": "bugfix",
@@ -9699,6 +10979,9 @@
    "cluster": -1,
    "cost_usd": 0.069558,
    "date": "2026-06-02",
+   "features": [
+    "constraints"
+   ],
    "friction": 0.0,
    "id": "claude_code:00162",
    "intent": "other",
@@ -9715,6 +10998,10 @@
    "cluster": -1,
    "cost_usd": 0.07308,
    "date": "2026-06-02",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00083",
    "intent": "bugfix",
@@ -9731,6 +11018,9 @@
    "cluster": 12,
    "cost_usd": 0.170664,
    "date": "2026-06-02",
+   "features": [
+    "length"
+   ],
    "friction": 0.233333,
    "id": "claude_code:00034",
    "intent": "devops",
@@ -9747,6 +11037,10 @@
    "cluster": -1,
    "cost_usd": 0.05436,
    "date": "2026-06-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00090",
    "intent": "explain",
@@ -9763,6 +11057,10 @@
    "cluster": 0,
    "cost_usd": 0.179081,
    "date": "2026-05-29",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.308333,
    "id": "cursor:00373",
    "intent": "other",
@@ -9779,6 +11077,11 @@
    "cluster": 9,
    "cost_usd": 0.131999,
    "date": "2026-05-29",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.21,
    "id": "copilot:00302",
    "intent": "bugfix",
@@ -9795,6 +11098,7 @@
    "cluster": -1,
    "cost_usd": 0.143466,
    "date": "2026-05-29",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00238",
    "intent": "other",
@@ -9811,6 +11115,10 @@
    "cluster": 20,
    "cost_usd": 0.086057,
    "date": "2026-05-28",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "cursor:00050",
    "intent": "bugfix",
@@ -9827,6 +11135,11 @@
    "cluster": 0,
    "cost_usd": 0.036547,
    "date": "2026-05-27",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.225,
    "id": "copilot:00267",
    "intent": "feature",
@@ -9843,6 +11156,10 @@
    "cluster": -1,
    "cost_usd": 0.023546,
    "date": "2026-05-26",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00273",
    "intent": "explain",
@@ -9859,6 +11176,11 @@
    "cluster": -1,
    "cost_usd": 0.096122,
    "date": "2026-05-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "cursor:00092",
    "intent": "refactor",
@@ -9875,6 +11197,11 @@
    "cluster": -1,
    "cost_usd": 0.195624,
    "date": "2026-05-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "claude_code:00345",
    "intent": "feature",
@@ -9891,6 +11218,10 @@
    "cluster": 18,
    "cost_usd": 0.154851,
    "date": "2026-05-26",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00194",
    "intent": "other",
@@ -9907,6 +11238,11 @@
    "cluster": -1,
    "cost_usd": 0.107253,
    "date": "2026-05-25",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00305",
    "intent": "explain",
@@ -9923,6 +11259,11 @@
    "cluster": -1,
    "cost_usd": 0.052617,
    "date": "2026-05-25",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00292",
    "intent": "docs",
@@ -9939,6 +11280,7 @@
    "cluster": -1,
    "cost_usd": 0.250813,
    "date": "2026-05-25",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00188",
    "intent": "other",
@@ -9955,6 +11297,7 @@
    "cluster": -1,
    "cost_usd": 0.256328,
    "date": "2026-05-22",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00200",
    "intent": "other",
@@ -9971,6 +11314,10 @@
    "cluster": -1,
    "cost_usd": 0.038645,
    "date": "2026-05-21",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00033",
    "intent": "refactor",
@@ -9987,6 +11334,10 @@
    "cluster": -1,
    "cost_usd": 0.133785,
    "date": "2026-05-21",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00049",
    "intent": "bugfix",
@@ -10003,6 +11354,11 @@
    "cluster": 5,
    "cost_usd": 0.042015,
    "date": "2026-05-21",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00032",
    "intent": "docs",
@@ -10019,6 +11375,7 @@
    "cluster": -1,
    "cost_usd": 0.201449,
    "date": "2026-05-21",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00231",
    "intent": "other",
@@ -10035,6 +11392,11 @@
    "cluster": -1,
    "cost_usd": 0.151878,
    "date": "2026-05-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00232",
    "intent": "feature",
@@ -10051,6 +11413,10 @@
    "cluster": -1,
    "cost_usd": 0.072684,
    "date": "2026-05-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00265",
    "intent": "refactor",
@@ -10067,6 +11433,11 @@
    "cluster": -1,
    "cost_usd": 0.053631,
    "date": "2026-05-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00260",
    "intent": "bugfix",
@@ -10083,6 +11454,11 @@
    "cluster": -1,
    "cost_usd": 0.136572,
    "date": "2026-05-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00382",
    "intent": "bugfix",
@@ -10099,6 +11475,10 @@
    "cluster": -1,
    "cost_usd": 0.106846,
    "date": "2026-05-16",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "cursor:00269",
    "intent": "feature",
@@ -10115,6 +11495,11 @@
    "cluster": 7,
    "cost_usd": 0.026234,
    "date": "2026-05-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00285",
    "intent": "bugfix",
@@ -10131,6 +11516,11 @@
    "cluster": -1,
    "cost_usd": 0.153888,
    "date": "2026-05-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.18,
    "id": "cursor:00102",
    "intent": "other",
@@ -10147,6 +11537,11 @@
    "cluster": -1,
    "cost_usd": 0.060054,
    "date": "2026-05-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00347",
    "intent": "feature",
@@ -10163,6 +11558,11 @@
    "cluster": 7,
    "cost_usd": 0.030075,
    "date": "2026-05-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00329",
    "intent": "bugfix",
@@ -10179,6 +11579,10 @@
    "cluster": 2,
    "cost_usd": 0.110679,
    "date": "2026-05-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00297",
    "intent": "devops",
@@ -10195,6 +11599,7 @@
    "cluster": -1,
    "cost_usd": 0.213454,
    "date": "2026-05-15",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00207",
    "intent": "other",
@@ -10211,6 +11616,9 @@
    "cluster": -1,
    "cost_usd": 0.0,
    "date": "2026-05-13",
+   "features": [
+    "constraints"
+   ],
    "friction": 0.2,
    "id": "cursor:00065",
    "intent": "other",
@@ -10227,6 +11635,10 @@
    "cluster": 0,
    "cost_usd": 0.077607,
    "date": "2026-05-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00398",
    "intent": "bugfix",
@@ -10243,6 +11655,11 @@
    "cluster": 2,
    "cost_usd": 0.131991,
    "date": "2026-05-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "claude_code:00165",
    "intent": "bugfix",
@@ -10259,6 +11676,7 @@
    "cluster": -1,
    "cost_usd": 0.068344,
    "date": "2026-05-13",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00148",
    "intent": "other",
@@ -10275,6 +11693,10 @@
    "cluster": 9,
    "cost_usd": 0.105998,
    "date": "2026-05-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.345833,
    "id": "copilot:00301",
    "intent": "bugfix",
@@ -10291,6 +11713,11 @@
    "cluster": 8,
    "cost_usd": 0.119538,
    "date": "2026-05-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00217",
    "intent": "explain",
@@ -10307,6 +11734,7 @@
    "cluster": -1,
    "cost_usd": 0.197404,
    "date": "2026-05-12",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00216",
    "intent": "other",
@@ -10323,6 +11751,11 @@
    "cluster": -1,
    "cost_usd": 0.067932,
    "date": "2026-05-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00279",
    "intent": "other",
@@ -10339,6 +11772,11 @@
    "cluster": -1,
    "cost_usd": 0.059578,
    "date": "2026-05-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00228",
    "intent": "feature",
@@ -10355,6 +11793,11 @@
    "cluster": 4,
    "cost_usd": 0.028834,
    "date": "2026-05-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00354",
    "intent": "refactor",
@@ -10371,6 +11814,10 @@
    "cluster": 10,
    "cost_usd": 0.201306,
    "date": "2026-05-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "claude_code:00371",
    "intent": "feature",
@@ -10387,6 +11834,11 @@
    "cluster": 17,
    "cost_usd": 0.034654,
    "date": "2026-05-10",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00147",
    "intent": "data",
@@ -10403,6 +11855,10 @@
    "cluster": -1,
    "cost_usd": 0.028692,
    "date": "2026-05-09",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2,
    "id": "cursor:00031",
    "intent": "explain",
@@ -10419,6 +11875,11 @@
    "cluster": 7,
    "cost_usd": 0.052209,
    "date": "2026-05-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00317",
    "intent": "bugfix",
@@ -10435,6 +11896,10 @@
    "cluster": -1,
    "cost_usd": 0.154959,
    "date": "2026-05-09",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00030",
    "intent": "devops",
@@ -10451,6 +11916,10 @@
    "cluster": 20,
    "cost_usd": 0.061497,
    "date": "2026-05-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "claude_code:00169",
    "intent": "bugfix",
@@ -10467,6 +11936,11 @@
    "cluster": 18,
    "cost_usd": 0.080305,
    "date": "2026-05-07",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "copilot:00363",
    "intent": "other",
@@ -10483,6 +11957,11 @@
    "cluster": -1,
    "cost_usd": 0.14172,
    "date": "2026-05-07",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1125,
    "id": "claude_code:00091",
    "intent": "feature",
@@ -10499,6 +11978,10 @@
    "cluster": 13,
    "cost_usd": 0.189081,
    "date": "2026-05-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "claude_code:00375",
    "intent": "refactor",
@@ -10515,6 +11998,11 @@
    "cluster": -1,
    "cost_usd": 0.140619,
    "date": "2026-05-06",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00118",
    "intent": "feature",
@@ -10531,6 +12019,7 @@
    "cluster": -1,
    "cost_usd": 0.107814,
    "date": "2026-05-06",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00346",
    "intent": "other",
@@ -10547,6 +12036,11 @@
    "cluster": 5,
    "cost_usd": 0.094354,
    "date": "2026-05-05",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "copilot:00223",
    "intent": "devops",
@@ -10563,6 +12057,11 @@
    "cluster": -1,
    "cost_usd": 0.090898,
    "date": "2026-05-05",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1875,
    "id": "copilot:00112",
    "intent": "test",
@@ -10579,6 +12078,11 @@
    "cluster": 12,
    "cost_usd": 0.181122,
    "date": "2026-05-05",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.346667,
    "id": "claude_code:00245",
    "intent": "devops",
@@ -10595,6 +12099,9 @@
    "cluster": 9,
    "cost_usd": 0.0,
    "date": "2026-05-04",
+   "features": [
+    "length"
+   ],
    "friction": 0.35,
    "id": "cursor:00068",
    "intent": "bugfix",
@@ -10611,6 +12118,7 @@
    "cluster": -1,
    "cost_usd": 0.131983,
    "date": "2026-05-04",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00107",
    "intent": "other",
@@ -10627,6 +12135,11 @@
    "cluster": -1,
    "cost_usd": 0.036627,
    "date": "2026-05-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00235",
    "intent": "devops",
@@ -10643,6 +12156,11 @@
    "cluster": 7,
    "cost_usd": 0.032969,
    "date": "2026-05-01",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00396",
    "intent": "bugfix",
@@ -10659,6 +12177,9 @@
    "cluster": 9,
    "cost_usd": 0.022914,
    "date": "2026-05-01",
+   "features": [
+    "length"
+   ],
    "friction": 0.35,
    "id": "copilot:00062",
    "intent": "bugfix",
@@ -10675,6 +12196,11 @@
    "cluster": -1,
    "cost_usd": 0.06875,
    "date": "2026-04-30",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00389",
    "intent": "docs",
@@ -10691,6 +12217,9 @@
    "cluster": 13,
    "cost_usd": 0.035729,
    "date": "2026-04-30",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "cursor:00067",
    "intent": "refactor",
@@ -10707,6 +12236,10 @@
    "cluster": 13,
    "cost_usd": 0.093127,
    "date": "2026-04-28",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00243",
    "intent": "refactor",
@@ -10723,6 +12256,9 @@
    "cluster": 0,
    "cost_usd": 0.074596,
    "date": "2026-04-28",
+   "features": [
+    "length"
+   ],
    "friction": 0.383333,
    "id": "copilot:00307",
    "intent": "bugfix",
@@ -10739,6 +12275,10 @@
    "cluster": 18,
    "cost_usd": 0.061164,
    "date": "2026-04-28",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.158333,
    "id": "copilot:00177",
    "intent": "other",
@@ -10755,6 +12295,10 @@
    "cluster": 10,
    "cost_usd": 0.109143,
    "date": "2026-04-28",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "claude_code:00313",
    "intent": "feature",
@@ -10771,6 +12315,10 @@
    "cluster": 10,
    "cost_usd": 0.018651,
    "date": "2026-04-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00150",
    "intent": "feature",
@@ -10787,6 +12335,9 @@
    "cluster": 0,
    "cost_usd": 0.054475,
    "date": "2026-04-27",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "cursor:00335",
    "intent": "explain",
@@ -10803,6 +12354,10 @@
    "cluster": 16,
    "cost_usd": 0.072336,
    "date": "2026-04-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.216667,
    "id": "cursor:00029",
    "intent": "explain",
@@ -10819,6 +12374,9 @@
    "cluster": 18,
    "cost_usd": 0.0,
    "date": "2026-04-27",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00064",
    "intent": "other",
@@ -10835,6 +12393,11 @@
    "cluster": 11,
    "cost_usd": 0.177345,
    "date": "2026-04-27",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00028",
    "intent": "explain",
@@ -10851,6 +12414,10 @@
    "cluster": 2,
    "cost_usd": 0.090696,
    "date": "2026-04-26",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00384",
    "intent": "other",
@@ -10867,6 +12434,11 @@
    "cluster": -1,
    "cost_usd": 0.094995,
    "date": "2026-04-25",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00055",
    "intent": "bugfix",
@@ -10883,6 +12455,10 @@
    "cluster": -1,
    "cost_usd": 0.092652,
    "date": "2026-04-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "opencode:00166",
    "intent": "bugfix",
@@ -10899,6 +12475,10 @@
    "cluster": 0,
    "cost_usd": 0.039506,
    "date": "2026-04-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.275,
    "id": "copilot:00336",
    "intent": "feature",
@@ -10915,6 +12495,10 @@
    "cluster": 0,
    "cost_usd": 0.065882,
    "date": "2026-04-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "copilot:00316",
    "intent": "feature",
@@ -10931,6 +12515,10 @@
    "cluster": -1,
    "cost_usd": 0.057694,
    "date": "2026-04-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "cursor:00123",
    "intent": "explain",
@@ -10947,6 +12535,11 @@
    "cluster": 7,
    "cost_usd": 0.029784,
    "date": "2026-04-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00257",
    "intent": "bugfix",
@@ -10963,6 +12556,11 @@
    "cluster": 17,
    "cost_usd": 0.040702,
    "date": "2026-04-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00074",
    "intent": "test",
@@ -10979,6 +12577,11 @@
    "cluster": 15,
    "cost_usd": 0.02732,
    "date": "2026-04-20",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00127",
    "intent": "docs",
@@ -10995,6 +12598,10 @@
    "cluster": 2,
    "cost_usd": 0.035987,
    "date": "2026-04-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00103",
    "intent": "refactor",
@@ -11011,6 +12618,10 @@
    "cluster": -1,
    "cost_usd": 0.01546,
    "date": "2026-04-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "copilot:00087",
    "intent": "explain",
@@ -11027,6 +12638,7 @@
    "cluster": -1,
    "cost_usd": 0.165805,
    "date": "2026-04-20",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00380",
    "intent": "other",
@@ -11043,6 +12655,11 @@
    "cluster": -1,
    "cost_usd": 0.060502,
    "date": "2026-04-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00015",
    "intent": "bugfix",
@@ -11059,6 +12676,10 @@
    "cluster": 19,
    "cost_usd": 0.038424,
    "date": "2026-04-18",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00225",
    "intent": "bugfix",
@@ -11075,6 +12696,11 @@
    "cluster": 7,
    "cost_usd": 0.021775,
    "date": "2026-04-18",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00014",
    "intent": "bugfix",
@@ -11091,6 +12717,10 @@
    "cluster": 10,
    "cost_usd": 0.090468,
    "date": "2026-04-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "cursor:00369",
    "intent": "feature",
@@ -11107,6 +12737,11 @@
    "cluster": 19,
    "cost_usd": 0.069017,
    "date": "2026-04-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.183333,
    "id": "copilot:00218",
    "intent": "bugfix",
@@ -11123,6 +12758,10 @@
    "cluster": 10,
    "cost_usd": 0.029572,
    "date": "2026-04-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "copilot:00084",
    "intent": "feature",
@@ -11139,6 +12778,11 @@
    "cluster": 8,
    "cost_usd": 0.183609,
    "date": "2026-04-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00327",
    "intent": "devops",
@@ -11155,6 +12799,10 @@
    "cluster": 0,
    "cost_usd": 0.147474,
    "date": "2026-04-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00013",
    "intent": "docs",
@@ -11171,6 +12819,11 @@
    "cluster": -1,
    "cost_usd": 0.114598,
    "date": "2026-04-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "cursor:00128",
    "intent": "bugfix",
@@ -11187,6 +12840,9 @@
    "cluster": 0,
    "cost_usd": 0.143861,
    "date": "2026-04-16",
+   "features": [
+    "length"
+   ],
    "friction": 0.496667,
    "id": "cursor:00012",
    "intent": "bugfix",
@@ -11203,6 +12859,11 @@
    "cluster": -1,
    "cost_usd": 0.073191,
    "date": "2026-04-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00386",
    "intent": "feature",
@@ -11219,6 +12880,11 @@
    "cluster": 3,
    "cost_usd": 0.025898,
    "date": "2026-04-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00027",
    "intent": "devops",
@@ -11235,6 +12901,10 @@
    "cluster": -1,
    "cost_usd": 0.065115,
    "date": "2026-04-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00351",
    "intent": "devops",
@@ -11251,6 +12921,11 @@
    "cluster": -1,
    "cost_usd": 0.185703,
    "date": "2026-04-15",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.18,
    "id": "claude_code:00026",
    "intent": "other",
@@ -11267,6 +12942,10 @@
    "cluster": 19,
    "cost_usd": 0.038034,
    "date": "2026-04-15",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00011",
    "intent": "bugfix",
@@ -11283,6 +12962,7 @@
    "cluster": -1,
    "cost_usd": 0.160545,
    "date": "2026-04-15",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00184",
    "intent": "other",
@@ -11299,6 +12979,10 @@
    "cluster": -1,
    "cost_usd": 0.096972,
    "date": "2026-04-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "opencode:00010",
    "intent": "devops",
@@ -11315,6 +12999,11 @@
    "cluster": -1,
    "cost_usd": 0.088554,
    "date": "2026-04-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.05,
    "id": "claude_code:00339",
    "intent": "test",
@@ -11331,6 +13020,10 @@
    "cluster": 9,
    "cost_usd": 0.142884,
    "date": "2026-04-14",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.2125,
    "id": "claude_code:00323",
    "intent": "bugfix",
@@ -11347,6 +13040,11 @@
    "cluster": 2,
    "cost_usd": 0.106197,
    "date": "2026-04-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00286",
    "intent": "other",
@@ -11363,6 +13061,11 @@
    "cluster": 7,
    "cost_usd": 0.114222,
    "date": "2026-04-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "opencode:00009",
    "intent": "bugfix",
@@ -11379,6 +13082,10 @@
    "cluster": 20,
    "cost_usd": 0.03152,
    "date": "2026-04-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00330",
    "intent": "bugfix",
@@ -11395,6 +13102,11 @@
    "cluster": 1,
    "cost_usd": 0.060936,
    "date": "2026-04-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00392",
    "intent": "feature",
@@ -11411,6 +13123,11 @@
    "cluster": -1,
    "cost_usd": 0.093573,
    "date": "2026-04-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.05,
    "id": "claude_code:00262",
    "intent": "refactor",
@@ -11427,6 +13144,11 @@
    "cluster": 4,
    "cost_usd": 0.051093,
    "date": "2026-04-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00241",
    "intent": "refactor",
@@ -11443,6 +13165,9 @@
    "cluster": -1,
    "cost_usd": 0.093738,
    "date": "2026-04-13",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00220",
    "intent": "data",
@@ -11459,6 +13184,11 @@
    "cluster": -1,
    "cost_usd": 0.066084,
    "date": "2026-04-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00096",
    "intent": "bugfix",
@@ -11475,6 +13205,10 @@
    "cluster": 13,
    "cost_usd": 0.142851,
    "date": "2026-04-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.195833,
    "id": "claude_code:00008",
    "intent": "refactor",
@@ -11491,6 +13225,11 @@
    "cluster": -1,
    "cost_usd": 0.213543,
    "date": "2026-04-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.08,
    "id": "opencode:00007",
    "intent": "other",
@@ -11507,6 +13246,11 @@
    "cluster": 9,
    "cost_usd": 0.281724,
    "date": "2026-04-11",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.4375,
    "id": "claude_code:loop01",
    "intent": "bugfix",
@@ -11523,6 +13267,10 @@
    "cluster": -1,
    "cost_usd": 0.05937,
    "date": "2026-04-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.125,
    "id": "claude_code:00266",
    "intent": "explain",
@@ -11539,6 +13287,11 @@
    "cluster": 7,
    "cost_usd": 0.078986,
    "date": "2026-04-10",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.195833,
    "id": "cursor:00072",
    "intent": "bugfix",
@@ -11555,6 +13308,10 @@
    "cluster": 0,
    "cost_usd": 0.047851,
    "date": "2026-04-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "copilot:00006",
    "intent": "bugfix",
@@ -11571,6 +13328,11 @@
    "cluster": -1,
    "cost_usd": 0.072896,
    "date": "2026-04-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.2,
    "id": "copilot:00005",
    "intent": "refactor",
@@ -11587,6 +13349,10 @@
    "cluster": 13,
    "cost_usd": 0.100263,
    "date": "2026-04-09",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00135",
    "intent": "refactor",
@@ -11603,6 +13369,11 @@
    "cluster": 4,
    "cost_usd": 0.017736,
    "date": "2026-04-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00399",
    "intent": "refactor",
@@ -11619,6 +13390,11 @@
    "cluster": 15,
    "cost_usd": 0.020208,
    "date": "2026-04-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00251",
    "intent": "docs",
@@ -11635,6 +13411,10 @@
    "cluster": 6,
    "cost_usd": 0.047686,
    "date": "2026-04-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "cursor:00205",
    "intent": "bugfix",
@@ -11651,6 +13431,11 @@
    "cluster": 7,
    "cost_usd": 0.019274,
    "date": "2026-04-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00136",
    "intent": "bugfix",
@@ -11667,6 +13452,10 @@
    "cluster": 19,
    "cost_usd": 0.06831,
    "date": "2026-04-08",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "copilot:00004",
    "intent": "bugfix",
@@ -11683,6 +13472,11 @@
    "cluster": 4,
    "cost_usd": 0.022637,
    "date": "2026-04-07",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00350",
    "intent": "refactor",
@@ -11699,6 +13493,10 @@
    "cluster": -1,
    "cost_usd": 0.086904,
    "date": "2026-04-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00003",
    "intent": "bugfix",
@@ -11715,6 +13513,7 @@
    "cluster": -1,
    "cost_usd": 0.139593,
    "date": "2026-04-07",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00152",
    "intent": "other",
@@ -11731,6 +13530,10 @@
    "cluster": 10,
    "cost_usd": 0.103905,
    "date": "2026-04-06",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00002",
    "intent": "feature",
@@ -11747,6 +13550,11 @@
    "cluster": 16,
    "cost_usd": 0.101135,
    "date": "2026-04-06",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.345833,
    "id": "copilot:00381",
    "intent": "bugfix",
@@ -11763,6 +13571,9 @@
    "cluster": 18,
    "cost_usd": 0.024862,
    "date": "2026-04-05",
+   "features": [
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00390",
    "intent": "other",
@@ -11779,6 +13590,10 @@
    "cluster": 5,
    "cost_usd": 0.076461,
    "date": "2026-04-03",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.1,
    "id": "opencode:00378",
    "intent": "bugfix",
@@ -11795,6 +13610,10 @@
    "cluster": 10,
    "cost_usd": 0.082953,
    "date": "2026-04-03",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.158333,
    "id": "opencode:00156",
    "intent": "feature",
@@ -11811,6 +13630,11 @@
    "cluster": -1,
    "cost_usd": 0.054218,
    "date": "2026-04-03",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00025",
    "intent": "feature",
@@ -11827,6 +13651,10 @@
    "cluster": -1,
    "cost_usd": 0.039688,
    "date": "2026-04-03",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "copilot:00158",
    "intent": "refactor",
@@ -11843,6 +13671,9 @@
    "cluster": 0,
    "cost_usd": 0.169638,
    "date": "2026-04-03",
+   "features": [
+    "length"
+   ],
    "friction": 0.345833,
    "id": "claude_code:00024",
    "intent": "docs",
@@ -11859,6 +13690,10 @@
    "cluster": 10,
    "cost_usd": 0.030582,
    "date": "2026-04-01",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00290",
    "intent": "feature",
@@ -11875,6 +13710,11 @@
    "cluster": 17,
    "cost_usd": 0.028479,
    "date": "2026-04-01",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00105",
    "intent": "test",
@@ -11891,6 +13731,10 @@
    "cluster": 19,
    "cost_usd": 0.073116,
    "date": "2026-03-31",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "claude_code:00348",
    "intent": "bugfix",
@@ -11907,6 +13751,10 @@
    "cluster": -1,
    "cost_usd": 0.095364,
    "date": "2026-03-30",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00208",
    "intent": "feature",
@@ -11923,6 +13771,11 @@
    "cluster": -1,
    "cost_usd": 0.075822,
    "date": "2026-03-29",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00249",
    "intent": "bugfix",
@@ -11939,6 +13792,10 @@
    "cluster": -1,
    "cost_usd": 0.083814,
    "date": "2026-03-27",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "opencode:00332",
    "intent": "refactor",
@@ -11955,6 +13812,9 @@
    "cluster": 0,
    "cost_usd": 0.05721,
    "date": "2026-03-27",
+   "features": [
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00168",
    "intent": "other",
@@ -11971,6 +13831,11 @@
    "cluster": -1,
    "cost_usd": 0.070668,
    "date": "2026-03-26",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "opencode:00314",
    "intent": "explain",
@@ -11987,6 +13852,10 @@
    "cluster": 13,
    "cost_usd": 0.071695,
    "date": "2026-03-25",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "cursor:00372",
    "intent": "refactor",
@@ -12003,6 +13872,11 @@
    "cluster": 1,
    "cost_usd": 0.020453,
    "date": "2026-03-24",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00276",
    "intent": "feature",
@@ -12019,6 +13893,11 @@
    "cluster": 17,
    "cost_usd": 0.041829,
    "date": "2026-03-23",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00328",
    "intent": "test",
@@ -12035,6 +13914,10 @@
    "cluster": -1,
    "cost_usd": 0.057666,
    "date": "2026-03-23",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.158333,
    "id": "claude_code:00295",
    "intent": "data",
@@ -12051,6 +13934,11 @@
    "cluster": 4,
    "cost_usd": 0.04747,
    "date": "2026-03-22",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00023",
    "intent": "refactor",
@@ -12067,6 +13955,11 @@
    "cluster": 4,
    "cost_usd": 0.042078,
    "date": "2026-03-22",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00089",
    "intent": "refactor",
@@ -12083,6 +13976,10 @@
    "cluster": 12,
    "cost_usd": 0.239712,
    "date": "2026-03-22",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.333333,
    "id": "claude_code:00022",
    "intent": "devops",
@@ -12099,6 +13996,11 @@
    "cluster": -1,
    "cost_usd": 0.261789,
    "date": "2026-03-21",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.175,
    "id": "claude_code:00281",
    "intent": "bugfix",
@@ -12115,6 +14017,10 @@
    "cluster": 10,
    "cost_usd": 0.023081,
    "date": "2026-03-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00143",
    "intent": "feature",
@@ -12131,6 +14037,10 @@
    "cluster": -1,
    "cost_usd": 0.094473,
    "date": "2026-03-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.05,
    "id": "claude_code:00342",
    "intent": "bugfix",
@@ -12147,6 +14057,10 @@
    "cluster": -1,
    "cost_usd": 0.093792,
    "date": "2026-03-20",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00176",
    "intent": "docs",
@@ -12163,6 +14077,7 @@
    "cluster": -1,
    "cost_usd": 0.197043,
    "date": "2026-03-20",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00085",
    "intent": "other",
@@ -12179,6 +14094,11 @@
    "cluster": 4,
    "cost_usd": 0.016202,
    "date": "2026-03-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "cursor:00163",
    "intent": "refactor",
@@ -12195,6 +14115,11 @@
    "cluster": -1,
    "cost_usd": 0.108381,
    "date": "2026-03-19",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.233333,
    "id": "claude_code:00261",
    "intent": "data",
@@ -12211,6 +14136,7 @@
    "cluster": -1,
    "cost_usd": 0.147225,
    "date": "2026-03-19",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00115",
    "intent": "other",
@@ -12227,6 +14153,10 @@
    "cluster": -1,
    "cost_usd": 0.115845,
    "date": "2026-03-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.083333,
    "id": "opencode:00109",
    "intent": "explain",
@@ -12243,6 +14173,11 @@
    "cluster": 15,
    "cost_usd": 0.046626,
    "date": "2026-03-17",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00366",
    "intent": "docs",
@@ -12259,6 +14194,10 @@
    "cluster": 20,
    "cost_usd": 0.036243,
    "date": "2026-03-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00213",
    "intent": "bugfix",
@@ -12275,6 +14214,10 @@
    "cluster": 2,
    "cost_usd": 0.090195,
    "date": "2026-03-17",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00098",
    "intent": "bugfix",
@@ -12291,6 +14234,11 @@
    "cluster": -1,
    "cost_usd": 0.054554,
    "date": "2026-03-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00310",
    "intent": "refactor",
@@ -12307,6 +14255,10 @@
    "cluster": -1,
    "cost_usd": 0.082488,
    "date": "2026-03-16",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "claude_code:00365",
    "intent": "explain",
@@ -12323,6 +14275,11 @@
    "cluster": -1,
    "cost_usd": 0.104031,
    "date": "2026-03-16",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.1,
    "id": "claude_code:00318",
    "intent": "test",
@@ -12339,6 +14296,11 @@
    "cluster": 3,
    "cost_usd": 0.037596,
    "date": "2026-03-14",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00293",
    "intent": "devops",
@@ -12355,6 +14317,11 @@
    "cluster": 9,
    "cost_usd": 0.214824,
    "date": "2026-03-13",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.35,
    "id": "opencode:00210",
    "intent": "bugfix",
@@ -12371,6 +14338,10 @@
    "cluster": -1,
    "cost_usd": 0.05976,
    "date": "2026-03-13",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00097",
    "intent": "refactor",
@@ -12387,6 +14358,7 @@
    "cluster": -1,
    "cost_usd": 0.194416,
    "date": "2026-03-13",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00138",
    "intent": "other",
@@ -12403,6 +14375,10 @@
    "cluster": -1,
    "cost_usd": 0.060696,
    "date": "2026-03-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00088",
    "intent": "feature",
@@ -12419,6 +14395,10 @@
    "cluster": 2,
    "cost_usd": 0.072525,
    "date": "2026-03-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00234",
    "intent": "feature",
@@ -12435,6 +14415,10 @@
    "cluster": 6,
    "cost_usd": 0.060039,
    "date": "2026-03-12",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00211",
    "intent": "feature",
@@ -12451,6 +14435,11 @@
    "cluster": -1,
    "cost_usd": 0.115779,
    "date": "2026-03-12",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.258333,
    "id": "claude_code:00151",
    "intent": "bugfix",
@@ -12467,6 +14456,10 @@
    "cluster": 0,
    "cost_usd": 0.072022,
    "date": "2026-03-11",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.25,
    "id": "cursor:00233",
    "intent": "refactor",
@@ -12483,6 +14476,10 @@
    "cluster": 10,
    "cost_usd": 0.054027,
    "date": "2026-03-10",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00321",
    "intent": "feature",
@@ -12499,6 +14496,11 @@
    "cluster": 2,
    "cost_usd": 0.044192,
    "date": "2026-03-09",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00120",
    "intent": "test",
@@ -12515,6 +14517,11 @@
    "cluster": 15,
    "cost_usd": 0.12522,
    "date": "2026-03-08",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "claude_code:00255",
    "intent": "docs",
@@ -12531,6 +14538,10 @@
    "cluster": 0,
    "cost_usd": 0.078234,
    "date": "2026-03-07",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.275,
    "id": "claude_code:00246",
    "intent": "explain",
@@ -12547,6 +14558,7 @@
    "cluster": -1,
    "cost_usd": 0.217785,
    "date": "2026-03-06",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00215",
    "intent": "other",
@@ -12563,6 +14575,9 @@
    "cluster": 13,
    "cost_usd": 0.026628,
    "date": "2026-03-05",
+   "features": [
+    "length"
+   ],
    "friction": 0.2,
    "id": "claude_code:00060",
    "intent": "refactor",
@@ -12579,6 +14594,10 @@
    "cluster": -1,
    "cost_usd": 0.061434,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "opencode:00355",
    "intent": "feature",
@@ -12595,6 +14614,10 @@
    "cluster": -1,
    "cost_usd": 0.124903,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "cursor:00374",
    "intent": "refactor",
@@ -12611,6 +14634,10 @@
    "cluster": 5,
    "cost_usd": 0.074429,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.075,
    "id": "cursor:00153",
    "intent": "docs",
@@ -12627,6 +14654,9 @@
    "cluster": 9,
    "cost_usd": 0.03174,
    "date": "2026-03-04",
+   "features": [
+    "length"
+   ],
    "friction": 0.35,
    "id": "cursor:00061",
    "intent": "bugfix",
@@ -12643,6 +14673,11 @@
    "cluster": 8,
    "cost_usd": 0.129478,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.15,
    "id": "copilot:00190",
    "intent": "data",
@@ -12659,6 +14694,10 @@
    "cluster": -1,
    "cost_usd": 0.053919,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00048",
    "intent": "bugfix",
@@ -12675,6 +14714,10 @@
    "cluster": -1,
    "cost_usd": 0.050731,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.0,
    "id": "copilot:00047",
    "intent": "bugfix",
@@ -12691,6 +14734,11 @@
    "cluster": 7,
    "cost_usd": 0.036399,
    "date": "2026-03-04",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.0,
    "id": "claude_code:00125",
    "intent": "bugfix",
@@ -12707,6 +14755,10 @@
    "cluster": -1,
    "cost_usd": 0.060869,
    "date": "2026-03-02",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.15,
    "id": "cursor:00344",
    "intent": "refactor",
@@ -12723,6 +14775,11 @@
    "cluster": -1,
    "cost_usd": 0.101976,
    "date": "2026-03-02",
+   "features": [
+    "specificity",
+    "constraints",
+    "length"
+   ],
    "friction": 0.25,
    "id": "cursor:00259",
    "intent": "feature",
@@ -12739,6 +14796,10 @@
    "cluster": 0,
    "cost_usd": 0.041043,
    "date": "2026-03-02",
+   "features": [
+    "specificity",
+    "length"
+   ],
    "friction": 0.225,
    "id": "claude_code:00134",
    "intent": "bugfix",
@@ -12755,6 +14816,7 @@
    "cluster": -1,
    "cost_usd": 0.119379,
    "date": "2026-03-02",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00221",
    "intent": "other",
@@ -12771,6 +14833,7 @@
    "cluster": -1,
    "cost_usd": 0.118188,
    "date": "2026-03-02",
+   "features": [],
    "friction": 0.0,
    "id": "antigravity:00170",
    "intent": "other",

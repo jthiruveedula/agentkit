@@ -20,16 +20,16 @@ describe("mindmap tree", () => {
     expect(web.children.map((s) => s.session).sort()).toEqual(["a", "b"]);
     expect(bug.friction).toBeCloseTo(0.4); expect(bug.applied).toBe(0.5);
   });
-  it("caps children at 6 and folds the rest into one +N more node; opening the parent lifts the cap", () => {
+  it("caps sessions at 4 (projects at 6) and folds the rest into one +N more node; opening the parent lifts the cap", () => {
     const many = Array.from({ length: 10 }, (_, i) => row({ id: `s${i}`, prompts: 10 - i }));
     const t = buildTree(many, "prompts");
     const proj = t.children[0].children[0].children[0];
-    expect(proj.children).toHaveLength(7);
-    const more = proj.children[6];
-    expect(more.kind).toBe("more"); expect(more.label).toBe("+4 more"); expect(more.value).toBe(4 + 3 + 2 + 1);
+    expect(proj.children).toHaveLength(5);
+    const more = proj.children[4];
+    expect(more.kind).toBe("more"); expect(more.label).toBe("+6 more"); expect(more.value).toBe(6 + 5 + 4 + 3 + 2 + 1);
     expect(proj.children[0].session).toBe("s0");   // biggest first
     expect(buildTree(many, "prompts", new Set([proj.id])).children[0].children[0].children[0].children).toHaveLength(10);
-    expect(buildTree(Array.from({ length: 7 }, (_, i) => row({ id: `t${i}` }))).children[0].children[0].children[0].children).toHaveLength(7);   // +1 more is never worth a node
+    expect(buildTree(Array.from({ length: 5 }, (_, i) => row({ id: `t${i}` }))).children[0].children[0].children[0].children).toHaveLength(5);   // +1 more is never worth a node
   });
   it("an empty project keeps the parent filter, and visible() follows the open set", () => {
     const t = buildTree([row({ project: "" })]);

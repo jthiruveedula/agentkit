@@ -1,25 +1,70 @@
 WEBVTT
 
-00:00.000 --> 00:04.500
-Where do your AI coding hours go? Your prompts are scattered across five assistants.
+00:00.000 --> 00:03.000
+Where do your AI coding hours go? Prompt Analytics shows you, locally.
 
-00:04.500 --> 00:09.500
-Claude Code, Copilot, Cursor, Antigravity and opencode converge into one local view.
+00:03.000 --> 00:08.500
+Totals, trend and what needs attention, at a glance.
 
-00:09.500 --> 00:14.500
-Sessions, prompts, tokens and estimated cost count up, with deltas.
+00:08.500 --> 00:11.500
+Which assistant handles which kind of work: the router matrix.
 
-00:14.500 --> 00:21.000
-A calendar heatmap of 164 active days ripples out, with spend by tool.
+00:11.500 --> 00:14.700
+Activity calendar and hour of week.
 
-00:21.000 --> 00:27.000
-A funnel shows where prompts stall, and friction rates show corrections and retries.
+00:14.700 --> 00:17.900
+Flip it to 3D, then drag to orbit.
 
-00:27.000 --> 00:33.000
-Secrets and PII are found and masked. Redacted before anything is stored.
+00:17.900 --> 00:20.300
+Same data, new angle.
 
-00:33.000 --> 00:38.000
-Click any bar or cluster to drill into the prompts behind it.
+00:20.300 --> 00:23.100
+Hour of week, flat.
 
-00:38.000 --> 00:42.000
+00:23.100 --> 00:25.600
+Or as a 3D terrain of your working rhythm.
+
+00:25.600 --> 00:29.400
+Where prompts stall, and which tool switches follow.
+
+00:29.400 --> 00:33.400
+Friction by tool and by intent.
+
+00:33.400 --> 00:36.600
+The loop breaker flags retry loops.
+
+00:36.600 --> 00:39.600
+A playbook distilled from the prompts that succeeded.
+
+00:39.600 --> 00:43.800
+Secrets and PII are found and masked, never stored raw.
+
+00:43.800 --> 00:47.000
+Every session in a table. Page ten rows, or more.
+
+00:47.000 --> 00:49.800
+Twenty-five rows. Switch density to fit more.
+
+00:49.800 --> 00:52.000
+Compact rows.
+
+00:52.000 --> 00:54.300
+Export what you see.
+
+00:54.300 --> 00:56.800
+CSV, JSON or xlsx.
+
+00:56.800 --> 01:00.300
+A 3D mind map of your topics.
+
+01:00.300 --> 01:03.100
+Only use one assistant? The dashboard adapts.
+
+01:03.100 --> 01:05.900
+Sections reshape to your tool.
+
+01:05.900 --> 01:08.900
+Press Cmd+K to jump anywhere.
+
+01:08.900 --> 01:12.900
 Know where your hours go. Run uvx prompt-analytics run.

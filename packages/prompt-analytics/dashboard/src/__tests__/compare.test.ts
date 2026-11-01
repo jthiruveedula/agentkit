@@ -33,7 +33,7 @@ describe("compare", () => {
   });
   it("cost per applied skips unpriced sessions and counts them", () => {
     const r = costPerApplied([row({ cost_usd: 2 }), row({ cost_usd: 4, applied: false }), row({ cost_usd: null })]);
-    expect(r).toEqual({ value: 6, excluded: 1 });
+    expect(r).toMatchObject({ value: 6, excluded: 1, cost: 6, pricedApplied: 1, applied: 2 });
   });
   it("month projection runs the month-to-date rate to month end", () => {
     const p = monthProjection([row({ date: "2026-03-05", cost_usd: 10 })], "2026-03-10")!;

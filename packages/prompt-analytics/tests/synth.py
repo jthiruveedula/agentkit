@@ -816,7 +816,34 @@ def make_db(
         ),
         tmp_dir,
     )
+    if profile.startswith("single-"):
+        only_source(con, SINGLE[profile])
     return {"sessions": len(g.rows["sessions"]), "turns": len(g.rows["turns"])}
+
+
+SINGLE = {"single-claude": "claude_code", "single-copilot": "copilot"}
+UNPRICED = {
+    "copilot"
+}  # single-source profiles drop prices for these, like a real Copilot log
+
+
+def only_source(con: duckdb.DuckDBPyConnection, source: str) -> None:
+    """Keep one tool's rows, as if only that tool were installed. Unpriced tools lose cost_usd."""
+    keep = "(SELECT session_id FROM sessions WHERE source = ?)"
+    for t in ("turns", "tool_calls", "code_edits", "exposures"):
+        con.execute(f"DELETE FROM {t} WHERE session_id NOT IN {keep}", [source])
+    con.execute(
+        f"DELETE FROM outcomes WHERE session_id IS NOT NULL AND session_id NOT IN {keep}",
+        [source],
+    )
+    con.execute("DELETE FROM sessions WHERE source <> ?", [source])
+    con.execute(
+        "UPDATE source_health SET status = 'missing', sessions_found = 0 WHERE source <> ?",
+        [source],
+    )
+    if source in UNPRICED:
+        con.execute("UPDATE sessions SET cost_usd = NULL")
+        con.execute("UPDATE turns SET cost_usd = NULL")
 
 
 @functools.lru_cache(maxsize=4)
@@ -845,12 +872,14 @@ def sample_json(path: Path, profile: str = "default", mode: str | None = "ml") -
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", required=True, type=Path)
-    ap.add_argument("--profile", choices=["default", "demo"], default="default")
+    ap.add_argument(
+        "--profile", choices=["default", "demo", *SINGLE], default="default"
+    )
     ap.add_argument("--mode", choices=["auto", "basic", "ml", "deep"], default="ml")
     a = ap.parse_args()
     sample_json(a.out, a.profile, a.mode)
     print(f"wrote {a.out}")
     dash = Path(__file__).resolve().parents[1] / "dashboard" / "src" / "data"
-    if dash.is_dir():
+    if dash.is_dir() and a.profile in ("default", "demo"):
         shutil.copyfile(a.out, dash / "sample.json")
         print(f"wrote {dash / 'sample.json'}")

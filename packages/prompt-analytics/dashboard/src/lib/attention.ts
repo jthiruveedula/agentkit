@@ -42,7 +42,7 @@ export function attention(d: DashboardData, v: Views, f: Filter, ids: Set<string
   if (lp >= TH.loops) out.push({ id: "loops", rank: 4, sev: "warn", date: v.rows.filter((r) => r.loops >= MAX_LOOPS).map((r) => r.date).sort().at(-1) ?? "",
     headline: `${lp} sessions with ${MAX_LOOPS}+ rephrase loops`, num: String(lp), action: { kind: "drill", filter: { loops: MAX_LOOPS }, list: true } });
   // 5 degraded or missing sources
-  for (const s of d.sources.filter((x) => x.status === "degraded" || x.status === "missing"))
+  for (const s of d.sources.filter((x) => (x.status === "degraded" || x.status === "missing") && (x.status === "degraded" || new Set(d.sessions.map((r) => r.source)).size > 1)))   // a tool you never used is not "missing" in a single-tool export
     out.push({ id: `src-${s.source}`, rank: 6, sev: "info", date: "", headline: `${srcLabel(s.source)} data is ${s.status}`, num: s.status, action: { kind: "scroll", id: "s-tools" } });
   // 6 abandoned-heavy tool
   const ab = d.friction.rates.filter((r) => (!f.source || r.source === f.source) && r.abandoned >= TH.abandoned && r.n >= TH.cell).sort((a, b) => b.abandoned - a.abandoned)[0];
