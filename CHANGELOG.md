@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/jthiruveedula/agentkit/compare/v0.19.0...v0.20.0) (2026-11-01)
+
+
+### Features
+
+* **video:** add AudioCraft music bed to prompt analytics video ([#98](https://github.com/jthiruveedula/agentkit/issues/98)) ([e513a11](https://github.com/jthiruveedula/agentkit/commit/e513a11546f2b3322cadffcf5dc781d1bbf6526e))
+
 ## [0.19.0](https://github.com/jthiruveedula/agentkit/compare/v0.18.0...v0.19.0) (2026-11-01)
 
 
