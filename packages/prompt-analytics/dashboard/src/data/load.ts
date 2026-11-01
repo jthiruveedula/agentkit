@@ -137,7 +137,7 @@ export async function loadData(): Promise<DashboardData | null> {
     if (want === "single-copilot") return normalize((await import("./sample-single-copilot.json")).default);
     const m = await import("./sample.dev.json");
     const { SHAPES } = await import("./shapes");
-    const shape = want ? SHAPES[want] : undefined;
+    const shape = want && Object.hasOwn(SHAPES, want) ? SHAPES[want] : undefined;
     return normalize(shape ? shape(m.default as never) : m.default);
   }
   return null;

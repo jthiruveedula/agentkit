@@ -45,7 +45,7 @@ describe("serializers", () => {
     expect(csvCell(null)).toBe('""');
     const out = toCsv([row({ cost_usd: null, title: '=HYPERLINK("x")' })]).split("\n");
     expect(out[0]).toBe('"date","tool","project","intent","title","prompts","tokens","cost_usd","friction","applied"');
-    expect(out[1]).toContain(`"'=HYPERLINK(""x"")"`); expect(out[1]).toContain('"","0.25"'.replace('"0.25"', '"0.25"'));
+    expect(out[1]).toContain(`"'=HYPERLINK(""x"")"`); expect(out[1]).toContain('"","0.25"');
     expect(out[1].split(",")[7]).toBe('""');   // unpriced stays empty, never 0
   });
   it("json is a pretty object with meta and null cost", () => {
