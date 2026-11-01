@@ -1,0 +1,401 @@
+{
+ "viewport": [
+  1440,
+  900
+ ],
+ "shots": [
+  {
+   "file": "shots/overview.png",
+   "name": "overview",
+   "note": "",
+   "boxes": {
+    "kpis": {
+     "x": 204,
+     "y": 183,
+     "w": 1205,
+     "h": 156
+    },
+    "trend": {
+     "x": 204,
+     "y": 383,
+     "w": 798,
+     "h": 406
+    },
+    "attention": {
+     "x": 1018,
+     "y": 383,
+     "w": 391,
+     "h": 406
+    }
+   }
+  },
+  {
+   "file": "shots/tools.png",
+   "name": "tools",
+   "note": "",
+   "boxes": {
+    "router": {
+     "x": 204,
+     "y": 100,
+     "w": 696,
+     "h": 556
+    }
+   }
+  },
+  {
+   "file": "shots/time-2d.png",
+   "name": "time-2d",
+   "note": "",
+   "boxes": {
+    "cal": {
+     "x": 204,
+     "y": 173,
+     "w": 798,
+     "h": 304
+    },
+    "tog3": {
+     "x": 942,
+     "y": 186,
+     "w": 43,
+     "h": 28
+    },
+    "hours": {
+     "x": 1018,
+     "y": 173,
+     "w": 391,
+     "h": 304
+    }
+   }
+  },
+  {
+   "file": "shots/time-cal3d.png",
+   "name": "time-cal3d",
+   "note": "",
+   "boxes": {
+    "cal": {
+     "x": 204,
+     "y": 171,
+     "w": 798,
+     "h": 386
+    },
+    "tog3": {
+     "x": 942,
+     "y": 184,
+     "w": 43,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/time-cal3d-orbit.png",
+   "name": "time-cal3d-orbit",
+   "note": "",
+   "boxes": {
+    "cal": {
+     "x": 204,
+     "y": 171,
+     "w": 798,
+     "h": 386
+    },
+    "stage": {
+     "x": 221,
+     "y": 224,
+     "w": 764,
+     "h": 320
+    }
+   }
+  },
+  {
+   "file": "shots/time-hours-2d.png",
+   "name": "time-hours-2d",
+   "note": "",
+   "boxes": {
+    "hours": {
+     "x": 1018,
+     "y": 180,
+     "w": 391,
+     "h": 304
+    },
+    "seg3d": {
+     "x": 1359,
+     "y": 218,
+     "w": 32,
+     "h": 26
+    }
+   }
+  },
+  {
+   "file": "shots/time-terrain3d.png",
+   "name": "time-terrain3d",
+   "note": "",
+   "boxes": {
+    "hours": {
+     "x": 1018,
+     "y": 178,
+     "w": 391,
+     "h": 410
+    },
+    "seg3d": {
+     "x": 1358,
+     "y": 216,
+     "w": 33,
+     "h": 26
+    }
+   }
+  },
+  {
+   "file": "shots/funnel.png",
+   "name": "funnel",
+   "note": "",
+   "boxes": {
+    "stages": {
+     "x": 204,
+     "y": 173,
+     "w": 595,
+     "h": 358
+    },
+    "switches": {
+     "x": 815,
+     "y": 171,
+     "w": 595,
+     "h": 358
+    }
+   }
+  },
+  {
+   "file": "shots/friction.png",
+   "name": "friction",
+   "note": "",
+   "boxes": {
+    "signals": {
+     "x": 204,
+     "y": 173,
+     "w": 696,
+     "h": 448
+    },
+    "byIntent": {
+     "x": 916,
+     "y": 171,
+     "w": 493,
+     "h": 448
+    }
+   }
+  },
+  {
+   "file": "shots/loopbreak.png",
+   "name": "loopbreak",
+   "note": "",
+   "boxes": {
+    "loop": {
+     "x": 204,
+     "y": 130,
+     "w": 798,
+     "h": 394
+    }
+   }
+  },
+  {
+   "file": "shots/works.png",
+   "name": "works",
+   "note": "",
+   "boxes": {
+    "playbook": {
+     "x": 204,
+     "y": 171,
+     "w": 1205,
+     "h": 580
+    }
+   }
+  },
+  {
+   "file": "shots/exposure.png",
+   "name": "exposure",
+   "note": "",
+   "boxes": {
+    "findings": {
+     "x": 204,
+     "y": 173,
+     "w": 696,
+     "h": 304
+    },
+    "kinds": {
+     "x": 916,
+     "y": 171,
+     "w": 493,
+     "h": 304
+    },
+    "queue": {
+     "x": 204,
+     "y": 494,
+     "w": 1205,
+     "h": 2058
+    }
+   }
+  },
+  {
+   "file": "shots/sessions-10.png",
+   "name": "sessions-10",
+   "note": "",
+   "boxes": {
+    "pager": {
+     "x": 221,
+     "y": 763,
+     "w": 1171,
+     "h": 40
+    },
+    "rows": {
+     "x": 578,
+     "y": 775,
+     "w": 63,
+     "h": 28
+    },
+    "dens": {
+     "x": 656,
+     "y": 775,
+     "w": 176,
+     "h": 28
+    },
+    "exp": {
+     "x": 1257,
+     "y": 184,
+     "w": 135,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/sessions-25.png",
+   "name": "sessions-25",
+   "note": "",
+   "boxes": {
+    "pager": {
+     "x": 221,
+     "y": 830,
+     "w": 1171,
+     "h": 40
+    },
+    "rows": {
+     "x": 578,
+     "y": 842,
+     "w": 63,
+     "h": 28
+    },
+    "dens": {
+     "x": 656,
+     "y": 842,
+     "w": 176,
+     "h": 28
+    },
+    "exp": {
+     "x": 1257,
+     "y": 106,
+     "w": 135,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/sessions-compact.png",
+   "name": "sessions-compact",
+   "note": "",
+   "boxes": {
+    "pager": {
+     "x": 221,
+     "y": 830,
+     "w": 1171,
+     "h": 40
+    },
+    "dens": {
+     "x": 656,
+     "y": 842,
+     "w": 175,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/sessions-pre-export.png",
+   "name": "sessions-pre-export",
+   "note": "",
+   "boxes": {
+    "exp": {
+     "x": 1257,
+     "y": 184,
+     "w": 135,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/sessions-export.png",
+   "name": "sessions-export",
+   "note": "",
+   "boxes": {
+    "menu": {
+     "x": 1216,
+     "y": 216,
+     "w": 176,
+     "h": 181
+    },
+    "exp": {
+     "x": 1257,
+     "y": 184,
+     "w": 135,
+     "h": 28
+    }
+   }
+  },
+  {
+   "file": "shots/map.png",
+   "name": "map",
+   "note": "",
+   "boxes": {
+    "map": {
+     "x": 204,
+     "y": 136,
+     "w": 1205,
+     "h": 748
+    }
+   }
+  },
+  {
+   "file": "shots/palette.png",
+   "name": "palette",
+   "note": "",
+   "boxes": {
+    "palette": {
+     "x": 441,
+     "y": 108,
+     "w": 544,
+     "h": 630
+    }
+   }
+  },
+  {
+   "file": "shots/single-top.png",
+   "name": "single-top",
+   "note": "",
+   "boxes": {
+    "kpis": {
+     "x": 204,
+     "y": 245,
+     "w": 1205,
+     "h": 134
+    }
+   }
+  },
+  {
+   "file": "shots/single-tools.png",
+   "name": "single-tools",
+   "note": "",
+   "boxes": {
+    "tools": {
+     "x": 204,
+     "y": 104,
+     "w": 1205,
+     "h": 609
+    }
+   }
+  }
+ ]
+}
