@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/jthiruveedula/agentkit/compare/v0.17.1...v0.18.0) (2026-11-01)
+
+
+### Features
+
+* **prompt-analytics:** local-first prompt analytics with dashboard, site page and demo video ([#93](https://github.com/jthiruveedula/agentkit/issues/93)) ([d46d1fa](https://github.com/jthiruveedula/agentkit/commit/d46d1fa207d49ab6638be069baa86013586f2440))
+
 ## [0.17.1](https://github.com/jthiruveedula/agentkit/compare/v0.17.0...v0.17.1) (2026-10-31)
 
 
