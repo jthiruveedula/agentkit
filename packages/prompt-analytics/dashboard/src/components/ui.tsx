@@ -1,5 +1,5 @@
-import { type CSSProperties, type ReactNode } from "react";
-import { useRoving } from "../lib/hooks";
+import { type CSSProperties, type ReactNode, useLayoutEffect, useRef } from "react";
+import { onReveal, reducedNow, useRoving } from "../lib/hooks";
 import { fmtInt } from "../lib/format";
 
 export type Span = 3 | 4 | 5 | 6 | 7 | 8 | 12;
@@ -31,6 +31,34 @@ export function Card({ title, meta, span = 6, actions, children, id }: { title: 
   );
 }
 
+/** A number that counts up (~800 ms, ease-out) when its section scrolls into view and morphs to new values on filter changes.
+ *  The text node always holds the final string, so format is preserved and jsdom / reduced motion see it at once. */
+export function Count({ text, className, as: Tag = "span" }: { text: string; className?: string; as?: "span" | "b" }) {
+  const ref = useRef<HTMLElement>(null), shown = useRef<number | null>(null), seen = useRef(false);
+  useLayoutEffect(() => {
+    const node = ref.current?.firstChild, m = /^(.*?)(-?\d[\d,]*)(\.\d+)?(.*)$/.exec(text);
+    if (!ref.current || !node || !m || reducedNow()) return;
+    const target = parseFloat(`${m[2].replace(/,/g, "")}${m[3] ?? ""}`), dec = m[3] ? m[3].length - 1 : 0, comma = m[2].includes(",");
+    const fmt = (n: number) => `${m[1]}${comma ? n.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : n.toFixed(dec)}${m[4]}`;
+    let raf = 0, off = () => {};
+    const run = () => {
+      seen.current = true;
+      const from = shown.current ?? 0, t0 = performance.now(), dur = from === 0 && shown.current === null ? 800 : 450;
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - t0) / dur), cur = from + (target - from) * (1 - (1 - p) ** 3);
+        node.nodeValue = p < 1 ? fmt(cur) : text; shown.current = p < 1 ? cur : target;
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    if (seen.current) run();
+    else if (document.documentElement.classList.contains("fx")) { node.nodeValue = fmt(0); off = onReveal(ref.current, run); }
+    return () => { cancelAnimationFrame(raf); off(); };
+  }, [text]);
+  const T = Tag as "span";
+  return <T ref={ref as never} className={className}>{text}</T>;
+}
+
 export const Empty = ({ children = "Nothing in this selection" }: { children?: ReactNode }) => <p className="empty">{children}</p>;
 export const Note = ({ children }: { children: ReactNode }) => <p className="note">{children}</p>;
 
@@ -43,13 +71,13 @@ export interface BarRowData {
 
 /** Horizontal bars, one button per row. The row is the drill target; numbers are always printed.
  *  When any row is active the others dim (Tableau highlight), but stay clickable so the selection can switch. */
-export function BarList({ rows, max, label }: { rows: BarRowData[]; max?: number; label: string }) {
+export function BarList({ rows, max, label, cascade }: { rows: BarRowData[]; max?: number; label: string; cascade?: boolean }) {
   const top = max ?? Math.max(...rows.map((r) => r.value), 0);
   const sel = rows.some((r) => r.active);
   return (
-    <ul className="bars" aria-label={label} data-sel={sel || undefined}>
-      {rows.map((r) => (
-        <li key={r.key}>
+    <ul className="bars" aria-label={label} data-sel={sel || undefined} data-cascade={cascade || undefined}>
+      {rows.map((r, i) => (
+        <li key={r.key} style={{ "--i": i } as CSSProperties}>
           <button type="button" className="bar-row" aria-pressed={r.onClick ? !!r.active : undefined} aria-label={r.aria} onClick={r.onClick} disabled={!r.onClick}
             style={{ "--w": top > 0 ? Math.max(r.value > 0 ? 0.01 : 0, r.value / top) : 0, ...(r.color ? { "--c": r.color } : {}), ...(r.mark !== undefined ? { "--m": r.mark } : {}) } as CSSProperties}>
             <span className="bar-l" title={typeof r.label === "string" ? r.label : undefined}>{r.label}</span>
@@ -101,8 +129,8 @@ export function Cols({ cols, label, height, max }: { cols: ColData[]; label: str
         const bars = c.segs.map((s, j) => (s.v > 0 ? <i key={j} style={{ height: `${top > 0 ? Math.max(2, (s.v / top) * 100) : 0}%`, "--c": s.color } as CSSProperties} /> : null));
         // inert columns are plain divs: they may sit inside another button (funnel minis)
         return c.onClick
-          ? <button key={c.key} type="button" className="col" aria-pressed={!!c.active} aria-label={c.aria} title={c.aria} onClick={c.onClick} {...mark(i)}>{bars}</button>
-          : <div key={c.key} className="col" role="img" aria-label={c.aria} title={c.aria}>{bars}</div>;
+          ? <button key={c.key} type="button" className="col" style={{ "--i": i } as CSSProperties} aria-pressed={!!c.active} aria-label={c.aria} title={c.aria} onClick={c.onClick} {...mark(i)}>{bars}</button>
+          : <div key={c.key} className="col" style={{ "--i": i } as CSSProperties} role="img" aria-label={c.aria} title={c.aria}>{bars}</div>;
       })}
     </div>
   );

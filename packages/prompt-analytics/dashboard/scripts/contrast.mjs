@@ -1,7 +1,7 @@
-// WCAG contrast check for the OKLCH tokens in src/styles.css (light base + dark override). Exit 1 on failure.
+// WCAG contrast check for the OKLCH tokens in src/styles.css. Exit 1 on failure.
 import { readFileSync } from "node:fs";
 const css = readFileSync(new URL("../src/styles.css", import.meta.url), "utf8");
-const blocks = [css.match(/\n:root \{([\s\S]*?)\n\}/)[1], css.match(/:root\[data-theme="dark"\] \{([\s\S]*?)\n\}/)[1]];
+const block = css.match(/\n:root \{([\s\S]*?)\n\}/)[1];
 const srgbToOklch = (hex) => { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
   const l = Math.cbrt(0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2]), m = Math.cbrt(0.2119034982 * c[0] + 0.6806995451 * c[1] + 0.1073969566 * c[2]), s = Math.cbrt(0.0883024619 * c[0] + 0.2817188376 * c[1] + 0.6299787005 * c[2]);
   const L = 0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s, a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s, b = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s;
@@ -23,13 +23,10 @@ const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface",
   ["bad", "bg", 3], ["good", "bg", 3], ["warn", "surface", 4.5], ["prior", "surface", 3], ["warn", "bg", 3],
   ...["claude_code", "copilot", "cursor", "opencode", "antigravity", "other"].flatMap((s) => [[`src-${s}`, "surface", 3], [`src-${s}`, "bg", 3]]), ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => [`t${i}`, "surface", 3])];
 let bad = 0;
-["light", "dark"].forEach((name, i) => {
-  const t = parse(blocks[i]);
-  const all = i ? { ...parse(blocks[0]), ...t } : t;   // dark overrides the light base
-  for (const [fg, bg, min] of pairs) {
-    const r = ratio(all[fg], all[bg]);
-    if (r < min) { bad++; console.log(`FAIL ${name} ${fg} on ${bg}: ${r.toFixed(2)} < ${min}`); }
-  }
-});
+const all = parse(block);
+for (const [fg, bg, min] of pairs) {
+  const r = ratio(all[fg], all[bg]);
+  if (r < min) { bad++; console.log(`FAIL ${fg} on ${bg}: ${r.toFixed(2)} < ${min}`); }
+}
 console.log(bad ? `${bad} failing pairs` : "contrast ok");
 process.exit(bad ? 1 : 0);

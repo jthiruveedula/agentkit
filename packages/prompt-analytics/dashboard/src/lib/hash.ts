@@ -4,7 +4,7 @@ import type { Filter } from "./filter";
 import type { Cmp } from "./compare";
 
 export interface Nav { f: Filter; sel?: string; list: boolean; cmp: Cmp }
-export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure", "s-recs", "s-sessions"];
+export const SECTIONS = ["s-overview", "s-map", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure", "s-recs", "s-sessions"];
 
 export function toHash(n: Nav, sec = "s-overview"): string {
   const p = new URLSearchParams(), f = n.f;

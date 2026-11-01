@@ -39,7 +39,7 @@ function Scorecard() {
             <th scope="col" className="hide-s">Trend</th><th scope="col" className="hide-s">Status</th>
           </tr></thead>
           <tbody>{sorted.map((r) => (
-            <tr key={r.key} data-sel={f.source === r.key || undefined}>
+            <tr key={r.key} data-sel={f.source === r.key || undefined} style={{ "--i": sorted.indexOf(r) } as React.CSSProperties}>
               <th scope="row"><button type="button" aria-pressed={f.source === r.key} onClick={() => drill({ source: r.key as never })} aria-label={`${srcLabel(r.key)}: ${r.t.sessions} sessions. Filter to this tool`}>
                 <span className="sw" style={{ "--c": srcColor(r.key) } as React.CSSProperties} />{srcLabel(r.key)}</button></th>
               <td>{fmtInt(r.t.sessions)}</td><td className="hide-s">{fmtInt(r.t.prompts)}</td><td className="hide-s">{fmtCompact(r.t.tokens)}</td>
@@ -91,7 +91,7 @@ function Matrix() {
                   if (!x) return <span key={s} className="cell none" aria-hidden="true" />;
                   const on = f.source === s && f.intent === i;
                   return (
-                    <button key={s} type="button" className="cell" data-low={x.n < LOW_N || undefined} aria-pressed={on} style={{ "--v": x.val / peak } as React.CSSProperties}
+                    <button key={s} type="button" className="cell" data-low={x.n < LOW_N || undefined} aria-pressed={on} style={{ "--v": x.val / peak, "--d": r + c } as React.CSSProperties}
                       aria-label={`${srcLabel(s)} on ${i}: ${label.toLowerCase()} ${x.text}, n=${x.n}${x.n < LOW_N ? ", low sample" : ""}. Filter`} title={`${srcLabel(s)} / ${i}: ${x.text}, n=${x.n}${x.n < LOW_N ? " (low n)" : ""}`}
                       onClick={() => drill({ source: s, intent: i as never })} {...mark(r * srcs.length + c)}>{x.text}</button>
                   );

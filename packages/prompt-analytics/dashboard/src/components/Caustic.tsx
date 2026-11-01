@@ -24,10 +24,9 @@ export function Caustic() {
     const ctx = cv?.getContext?.("2d");   // null in jsdom / no canvas: the paper stands alone
     if (!cv || !ctx || typeof matchMedia !== "function") return;
     const mq = matchMedia("(prefers-reduced-motion: reduce)");
-    const dark = matchMedia("(prefers-color-scheme: dark)");
     let w = 0, h = 0, scale = 6, img: ImageData, rgb = [0, 0, 0], maxA = 40, raf = 0, rs = 0, t = 0, last = 0, reduced = mq.matches;
 
-    const theme = () => {
+    const colors = () => {
       const cs = getComputedStyle(document.documentElement);
       const hex = cs.getPropertyValue("--fx").trim();
       rgb = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) || 0);
@@ -62,20 +61,16 @@ export function Caustic() {
       if (reduced || document.hidden) return frame();
       last = performance.now(); raf = requestAnimationFrame(loop);
     };
-    const redraw = () => { theme(); frame(); };
     const onResize = () => { if (!rs) rs = requestAnimationFrame(() => { rs = 0; size(); frame(); }); };
     const onMotion = (e: MediaQueryListEvent) => { reduced = e.matches; run(); };
-    const mo = new MutationObserver(redraw);
-    mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     addEventListener("resize", onResize);
     document.addEventListener("visibilitychange", run);
     mq.addEventListener("change", onMotion);
-    dark.addEventListener("change", redraw);
-    theme(); size(); run();
+    colors(); size(); run();
     return () => {
-      cancelAnimationFrame(raf); cancelAnimationFrame(rs); mo.disconnect();
+      cancelAnimationFrame(raf); cancelAnimationFrame(rs);
       removeEventListener("resize", onResize); document.removeEventListener("visibilitychange", run);
-      mq.removeEventListener("change", onMotion); dark.removeEventListener("change", redraw);
+      mq.removeEventListener("change", onMotion);
     };
   }, []);
   return <canvas ref={ref} className="caustic" aria-hidden="true" />;

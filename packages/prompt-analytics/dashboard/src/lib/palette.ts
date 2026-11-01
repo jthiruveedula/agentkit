@@ -1,4 +1,4 @@
-// Labels and CSS-variable handles. Colour values live only in styles.css (OKLCH, light + dark);
+// Labels and CSS-variable handles. Colour values live only in styles.css (OKLCH);
 // canvas code resolves them at draw time with `cssVar`. Contrast is checked by scripts/contrast.mjs.
 import type { Intent, Source } from "../data/types";
 

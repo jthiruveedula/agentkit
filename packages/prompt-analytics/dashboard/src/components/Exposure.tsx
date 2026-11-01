@@ -1,7 +1,7 @@
 import { useStore } from "../state";
 import { fmtInt, fmtPct } from "../lib/format";
 import { srcColor, srcLabel, SOURCES } from "../lib/palette";
-import { Card, Cols, DataTable, Empty, Section } from "./ui";
+import { Card, Count, Cols, DataTable, Empty, Section } from "./ui";
 import { ReviewQueue } from "./ReviewQueue";
 
 type Cat = "secret" | "pii" | "phi";
@@ -33,7 +33,7 @@ export function Exposure() {
             <li key={c.id}>
               <button type="button" className="tile" aria-pressed={exCat === c.id} style={{ "--c": c.color } as React.CSSProperties} onClick={() => setExCat(exCat === c.id ? "all" : c.id)}
                 aria-label={`${c.name}: ${per(c.id)} sessions. Show only ${c.name} in the review queue`}>
-                <b>{fmtInt(per(c.id))}</b><span>{c.name}</span><small>{ex.by_category.find((x) => x.category === c.id)?.advice ?? ""}</small>
+                <Count as="b" text={fmtInt(per(c.id))} /><span>{c.name}</span><small>{ex.by_category.find((x) => x.category === c.id)?.advice ?? ""}</small>
               </button>
             </li>
           ))}

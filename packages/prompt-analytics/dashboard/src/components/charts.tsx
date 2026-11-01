@@ -1,7 +1,8 @@
 // Inline-SVG charts. No chart library: marks are plain elements, every mark is keyboard-reachable (roving tabindex)
 // and activates through the same callback a click does. Each chart is paired with an sr-only DataTable by its caller.
+import type React from "react";
 import { useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
-import { press, useRoving, useSize } from "../lib/hooks";
+import { press, useMorph, useRoving, useSize } from "../lib/hooks";
 import { fmtDate } from "../lib/format";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
 import type { Week } from "../lib/filter";
@@ -12,7 +13,7 @@ export function Spark({ values, w = 120, h = 24 }: { values: number[]; w?: numbe
   const top = Math.max(...values, 0), bw = w / Math.max(values.length, 1);
   return (
     <svg className="spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {values.map((v, i) => { const bh = top > 0 && v > 0 ? Math.max(1.5, (v / top) * (h - 1)) : 0; return <rect key={i} x={i * bw + 0.5} y={h - bh} width={Math.max(1, bw - 1)} height={bh} />; })}
+      {values.map((v, i) => { const bh = top > 0 && v > 0 ? Math.max(1.5, (v / top) * (h - 1)) : 0; return <rect key={i} style={{ "--i": i } as React.CSSProperties} x={i * bw + 0.5} y={h - bh} width={Math.max(1, bw - 1)} height={bh} />; })}
     </svg>
   );
 }
@@ -32,8 +33,11 @@ interface LineProps {
   rings?: number[];
 }
 /** Line chart on a shared x axis. Lines[0] is the primary series; a prior-period line is drawn grey and dashed. */
-export function LineChart({ lines, labels, fmt, label, height = 190, onPick, onBrush, rings = [] }: LineProps) {
+export function LineChart({ lines: target, labels, fmt, label, height = 190, onPick, onBrush, rings = [] }: LineProps) {
   const n = labels.length;
+  const mv = useMorph(target.flatMap((l) => l.values));
+  let o = 0;
+  const lines = target.map((l) => ({ ...l, values: mv.slice(o, (o += l.values.length)) }));   // drawn (morphing) series; `target` feeds the labels
   const { group, mark } = useRoving(n);
   const { w } = useSize(group.ref as unknown as RefObject<HTMLElement>);
   const drag = useRef<{ x0: number; moved: boolean } | null>(null);
@@ -62,13 +66,13 @@ export function LineChart({ lines, labels, fmt, label, height = 190, onPick, onB
           {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
           {[0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map((i, k, a) => <text key={i} className="ax" x={x(i)} y={height - 6} textAnchor={k === 0 ? "start" : k === a.length - 1 ? "end" : "middle"}>{labels[i]}</text>)}
           {brush && <rect className="brush" x={x(Math.min(...brush)) - step / 2} y={PAD.t} width={Math.abs(x(brush[1]) - x(brush[0])) + step} height={ih} />}
-          {[...lines].reverse().map((l) => <polyline key={l.name} className="line" fill="none" stroke={l.color} strokeDasharray={l.dashed ? "4 3" : undefined} points={l.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} />)}
-          {n <= 40 && lines[0].values.map((v, i) => <circle key={i} className="dot" cx={x(i)} cy={y(v)} r={2.5} fill={lines[0].color} />)}
+          {[...lines].reverse().map((l) => <polyline key={l.name} className={l.dashed ? "line fade" : "line draw"} pathLength={l.dashed ? undefined : 1} fill="none" stroke={l.color} strokeDasharray={l.dashed ? "4 3" : undefined} points={l.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} />)}
+          {n <= 40 && lines[0].values.map((v, i) => <circle key={i} className="dot pt" style={{ "--i": i } as React.CSSProperties} cx={x(i)} cy={y(v)} r={2.5} fill={lines[0].color} />)}
           {rings.map((i) => <circle key={`r${i}`} className="ring" cx={x(i)} cy={y(lines[0].values[i] ?? 0)} r={7} />)}
           {labels.map((l, i) => (
-            <rect key={i} className="hit" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} role="button" aria-label={`${l}: ${lines.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(", ")}${rings.includes(i) ? ", unusual" : ""}. Select`}
+            <rect key={i} className="hit" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} role="button" aria-label={`${l}: ${target.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(", ")}${rings.includes(i) ? ", unusual" : ""}. Select`}
               {...mark(i)} onClick={() => { if (swallow.current) { swallow.current = false; return; } onPick(i); }} onKeyDown={key(() => onPick(i))}>
-              <title>{`${l}: ${lines.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(" · ")}`}</title>
+              <title>{`${l}: ${target.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(" · ")}`}</title>
             </rect>
           ))}
         </svg>
@@ -85,15 +89,17 @@ export function River({ weeks, sel, onBand, onWeek, activeWeek, fmt, label, heig
   const n = weeks.length, m = srcs.length + n;
   const { group, mark } = useRoving(m);
   const { w } = useSize(group.ref as unknown as RefObject<HTMLElement>);
-  const total = weeks.map((x) => srcs.reduce((a, s) => a + (x.bySource[s] ?? 0), 0));
+  const mv = useMorph(srcs.flatMap((s) => weeks.map((x) => x.bySource[s] ?? 0)));
+  const ser = srcs.map((_, k) => mv.slice(k * n, (k + 1) * n));   // per-tool weekly values, morphing toward the data
+  const total = weeks.map((_, i) => ser.reduce((a, v) => a + (v[i] ?? 0), 0));
   const max = Math.max(...total, 0) || 1;
   const iw = Math.max(1, w - PAD.l - PAD.r), ih = height - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
   const step = n > 1 ? iw / (n - 1) : iw;
   const base = weeks.map(() => 0);
-  const bands = srcs.map((s) => {
-    const lo = [...base], hi = weeks.map((wk, i) => (base[i] += wk.bySource[s] ?? 0));
+  const bands = srcs.map((s, k) => {
+    const lo = [...base], hi = weeks.map((_, i) => (base[i] += ser[k][i] ?? 0));
     return { s, d: `M${hi.map((v, i) => `${x(i)},${y(v)}`).join("L")}L${lo.map((v, i) => `${x(i)},${y(v)}`).reverse().join("L")}Z` };
   });
   const ok = n >= 2 && srcs.length > 0;
@@ -104,7 +110,7 @@ export function River({ weeks, sel, onBand, onWeek, activeWeek, fmt, label, heig
         <svg width={w} height={height} role="group" aria-label={label}>
           {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
           <text className="ax" x={PAD.l} y={height - 6}>{fmtDate(weeks[0].week)}</text><text className="ax" x={w - PAD.r} y={height - 6} textAnchor="end">{fmtDate(weeks[n - 1].week)}</text>
-          <g data-sel={sel ? "1" : undefined}>
+          <g className="rise" data-sel={sel ? "1" : undefined}>
             {bands.map((b, i) => (
               <path key={b.s} className="band" d={b.d} fill={srcColor(b.s)} data-on={sel === b.s || undefined} role="button" aria-label={`${srcLabel(b.s)} cost band. Filter to this tool`} aria-pressed={sel === b.s}
                 {...mark(i)} {...press(() => onBand(b.s))}><title>{srcLabel(b.s)}</title></path>

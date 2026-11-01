@@ -13,7 +13,7 @@ function Stages() {
   const top = v.funnel[0] ?? 0;
   return top === 0 ? <Empty /> : (
     <>
-      <BarList label="Sessions reaching each funnel stage" rows={STAGES.map((s, i) => {
+      <BarList cascade label="Sessions reaching each funnel stage" rows={STAGES.map((s, i) => {
         const n = v.funnel[i] ?? 0, prev = i ? v.funnel[i - 1] ?? 0 : n;
         return { key: s, label: s, value: n, color: "var(--accent)", active: f.stage === i + 1, text: `${fmtInt(n)} · ${pct(n, top)}`, sub: i ? `${pct(n, prev)} of ${STAGES[i - 1].toLowerCase()}` : undefined,
           aria: `${s}: ${n} sessions, ${pct(n, top)} of all. Filter to sessions that reached ${s.toLowerCase()}`, onClick: () => drill({ stage: i + 1 }) };
@@ -71,7 +71,7 @@ function Switches() {
                 {srcs.map((b, c) => {
                   const n = get(a, b);
                   return n === 0 ? <span key={b} className="cell none" aria-hidden="true" /> : (
-                    <button key={b} type="button" className="cell" aria-pressed={f.source === a} style={{ "--v": n / peak } as React.CSSProperties} title={`${srcLabel(a)} to ${srcLabel(b)}: ${n}`}
+                    <button key={b} type="button" className="cell" aria-pressed={f.source === a} style={{ "--v": n / peak, "--d": r + c } as React.CSSProperties} title={`${srcLabel(a)} to ${srcLabel(b)}: ${n}`}
                       aria-label={`${srcLabel(a)} to ${srcLabel(b)}: ${n} switches. Filter to sessions that started in ${srcLabel(a)}`} onClick={() => drill({ source: a })} {...mark(r * srcs.length + c)}>{n}</button>
                   );
                 })}

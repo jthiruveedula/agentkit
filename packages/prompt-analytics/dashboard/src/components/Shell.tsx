@@ -4,7 +4,6 @@ import { addDays } from "../lib/filter";
 import { fmtDate, fmtInt } from "../lib/format";
 import { INTENTS, SOURCES, srcLabel } from "../lib/palette";
 import type { Cmp } from "../lib/compare";
-import type { Theme } from "../lib/theme";
 import type { DashboardData } from "../data/types";
 import { EnginePill } from "./Engine";
 import { Segmented } from "./ui";
@@ -13,14 +12,14 @@ type Period = "30" | "90" | "all" | "custom";
 
 export const NAV: { group: string; items: { id: string; text: string; go?: string }[] }[] = [
   { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-attention", text: "Needs attention" }] },
-  { group: "Investigate", items: [{ id: "s-tools", text: "Tools" }, { id: "s-time", text: "Time" }, { id: "s-funnel", text: "Funnel" }, { id: "s-friction", text: "Friction" }] },
+  { group: "Investigate", items: [{ id: "s-map", text: "Map" }, { id: "s-tools", text: "Tools" }, { id: "s-time", text: "Time" }, { id: "s-funnel", text: "Funnel" }, { id: "s-friction", text: "Friction" }] },
   { group: "Optimise", items: [{ id: "s-works", text: "What works" }, { id: "s-recs", text: "Recommendations" }] },
   { group: "Govern", items: [{ id: "s-exposure", text: "Exposure" }, { id: "s-sessions", text: "Sessions" }] },
 ];
 const BAR = ["s-overview", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure"];
 const TEXT = new Map(NAV.flatMap((g) => g.items.map((i) => [i.id, i.text])));
 
-export function Header({ d, onData, theme, toggleTheme }: { d: DashboardData; onData: (d: DashboardData) => void; theme: Theme; toggleTheme: () => void }) {
+export function Header({ d, onData }: { d: DashboardData; onData: (d: DashboardData) => void }) {
   const { f, set, v, cmp, setCmp, crumbs, clearAfter, clear, openList } = useStore();
   const ref = useRef<HTMLElement>(null);
   const [custom, setCustom] = useState(false);
@@ -50,7 +49,6 @@ export function Header({ d, onData, theme, toggleTheme }: { d: DashboardData; on
         <h1>Prompt Analytics</h1>
         <Segmented label="Period" value={period} onChange={pickPeriod} options={[{ id: "30", text: "30d" }, { id: "90", text: "90d" }, { id: "all", text: "All" }, { id: "custom", text: "Custom" }]} />
         <span className="grow" />
-        <button type="button" className="btn" aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`} onClick={toggleTheme}>{theme === "dark" ? "Light" : "Dark"}</button>
       </div>
       <form className="filters" aria-label="Filters" onSubmit={(e) => e.preventDefault()}>
         <label className="field"><span>Tool</span>

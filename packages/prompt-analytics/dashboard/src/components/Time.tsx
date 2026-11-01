@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useStore } from "../state";
 import { addDays, weekStart } from "../lib/filter";
 import { bucketSeries, buckets, cumulative, METRICS, monthProjection } from "../lib/compare";
@@ -16,6 +16,7 @@ const FMT: Record<M, (n: number) => string> = { sessions: fmtInt, prompts: fmtCo
 function CalGrid() {
   const { d, v, f, drill, apply } = useStore();
   const [m, setM] = useState<M>("sessions");
+  const [three, setThree] = useState(false);
   const [anchor, setAnchor] = useState<string | null>(null);
   const end = d.range.end;
   const first = addDays(weekStart(end), -(WEEKS - 1) * 7);
@@ -27,12 +28,21 @@ function CalGrid() {
   const pick = (dt: string, shift: boolean) => {
     if (shift && anchor) { const [a, b] = anchor < dt ? [anchor, dt] : [dt, anchor]; apply({ from: a, to: b }); } else { setAnchor(dt); drill({ from: dt, to: dt }); }
   };
+  // the hovered or focused day's week column lifts a little (direct DOM: no re-render of 189 buttons)
+  const stage = useRef<HTMLDivElement | null>(null);
+  const unlift = () => stage.current?.querySelectorAll("[data-wk]").forEach((e) => e.removeAttribute("data-wk"));
+  const lift = (e: React.SyntheticEvent) => {
+    const c = (e.target as Element).closest?.<HTMLElement>(".cal .cell");
+    unlift(); if (c?.dataset.w) stage.current?.querySelectorAll(`.cal [data-w="${c.dataset.w}"]`).forEach((x) => x.setAttribute("data-wk", ""));
+  };
   const months = days.filter((x) => x.i % 7 === 0 && x.date.slice(8, 10) <= "07");
   return (
     <Card title="Activity calendar" meta="click a day, shift-click to extend" span={8}
-      actions={<Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, { id: "cost", text: "Cost" }]} />}>
+      actions={<><Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, { id: "cost", text: "Cost" }]} />
+        <button type="button" className="btn tog3" aria-pressed={three} onClick={() => setThree(!three)} title="Raise each day into a column, height by value">3D</button></>}>
       {v.calendar.length === 0 ? <Empty /> : (
         <>
+          <div className="cal-stage" ref={stage} data-3d={three || undefined} onPointerOver={lift} onPointerLeave={unlift} onFocus={lift} onBlur={unlift}>
           <div className="cal-wrap">
             <div className="cal-m" style={{ "--w": WEEKS } as React.CSSProperties}>{months.map((x) => <span key={x.date} style={{ gridColumn: x.i / 7 + 1 }}>{new Date(`${x.date}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })}</span>)}</div>
             <div className="cal-d" aria-hidden="true">{DOW.map((x, i) => <span key={x}>{i % 2 === 0 ? x : ""}</span>)}</div>
@@ -41,12 +51,13 @@ function CalGrid() {
                 if (x.date > end) return <span key={x.i} className="cell none" aria-hidden="true" />;
                 const c = byDay.get(x.date), val = c ? c[m] : 0;
                 return (
-                  <button key={x.i} type="button" className="cell" data-zero={!val || undefined} data-sel={inSel(x.date) || undefined} aria-pressed={inSel(x.date)} style={{ "--v": val / peak } as React.CSSProperties}
+                  <button key={x.i} type="button" className="cell" data-zero={!val || undefined} data-sel={inSel(x.date) || undefined} aria-pressed={inSel(x.date)} style={{ "--v": val / peak, "--d": Math.floor(x.i / 7) + (x.i % 7), "--wk": Math.floor(x.i / 7) } as React.CSSProperties} data-w={Math.floor(x.i / 7)}
                     aria-label={`${fmtDate(x.date)}: ${FMT[m](val)} ${m}. Filter to this day`} title={`${fmtDate(x.date)}: ${FMT[m](val)}`}
                     onClick={(e) => pick(x.date, e.shiftKey)} {...mark(x.i)} />
                 );
               })}
             </div>
+          </div>
           </div>
           <DataTable caption={`Daily ${m}`} head={["Day", m]} rows={v.calendar.filter((c) => c.date >= first).map((c) => [c.date, +c[m].toFixed(2)])} />
         </>
@@ -70,7 +81,7 @@ function HourWeek() {
       {d.hour_week.length === 0 ? <Empty /> : (
         <>
           <div className="hw" role="img" aria-label={`Prompts by hour and weekday. Busiest: ${DOW[best.dow]} ${best.hour}:00, ${best.prompts} prompts`}>
-            {grid.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((p, h) => <i key={h} className="cell" data-zero={!p || undefined} style={{ "--v": p / peak } as React.CSSProperties} title={`${DOW[r]} ${h}:00, ${p} prompts`} />)}</div>)}
+            {grid.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((p, h) => <i key={h} className="cell" data-zero={!p || undefined} style={{ "--v": p / peak, "--d": r + h } as React.CSSProperties} title={`${DOW[r]} ${h}:00, ${p} prompts`} />)}</div>)}
             <span /><span className="hw-x" style={{ gridColumn: "2 / -1" }}><b>0h</b><b>6h</b><b>12h</b><b>18h</b><b>23h</b></span>
           </div>
           <p className="note">Busiest: {DOW[best.dow]} {best.hour}:00 ({fmtInt(best.prompts)} prompts). Hover only; ignores filters.</p>

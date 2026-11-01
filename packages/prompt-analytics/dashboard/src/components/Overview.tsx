@@ -3,7 +3,7 @@ import { useStore } from "../state";
 import { attention, THRESHOLDS, type Item } from "../lib/attention";
 import { bucketSeries, buckets, dayDiff, delta, isWide, METRICS, pointDelta, sparkSeries, wilson } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
-import { Card, DataTable, Delta, Empty, Section, Segmented } from "./ui";
+import { Card, Count, DataTable, Delta, Empty, Section, Segmented } from "./ui";
 import { LineChart, Spark } from "./charts";
 
 type Metric = "sessions" | "prompts" | "cost";
@@ -31,11 +31,11 @@ function Kpis({ setMetric }: { setMetric: (m: Metric) => void }) {
   ];
   return (
     <ul className="kpis" aria-label="Totals for the current selection">
-      {cards.map((c) => (
-        <li key={c.id}>
+      {cards.map((c, i) => (
+        <li key={c.id} style={{ "--i": i } as React.CSSProperties}>
           <button type="button" className="kpi" data-kpi={c.id} onClick={c.go} aria-label={`${c.label}: ${c.value}. Jump to details`}>
             <span className="lbl">{c.label}</span>
-            <span className="val">{c.value}</span>
+            <Count className="val" text={c.value} />
             <span className="chips">{c.chip}{c.sub ? <span className="sub" data-low={c.low || undefined}>{c.sub}</span> : null}</span>
             <Spark values={c.spark} />
             <span className="cap">{cap}</span>

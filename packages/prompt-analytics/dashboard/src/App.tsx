@@ -4,9 +4,9 @@ import { loadData, normalize, readInline } from "./data/load";
 import { StoreProvider, useStore } from "./state";
 import type { Filter } from "./lib/filter";
 import { SECTIONS } from "./lib/hash";
-import { useTheme } from "./lib/theme";
 import { Header, Nav } from "./components/Shell";
 import { Overview } from "./components/Overview";
+import { MindMap } from "./components/MindMap";
 import { Tools } from "./components/Tools";
 import { Time } from "./components/Time";
 import { Funnel } from "./components/Funnel";
@@ -16,6 +16,7 @@ import { Exposure } from "./components/Exposure";
 import { Recommend } from "./components/Recommend";
 import { Sessions } from "./components/Sessions";
 import { Panel } from "./components/Detail";
+import { useReveal } from "./lib/hooks";
 import { Caustic } from "./components/Caustic";
 
 type State = { kind: "loading" } | { kind: "empty" } | { kind: "error"; msg: string } | { kind: "ready"; d: DashboardData };
@@ -32,7 +33,7 @@ function initial(): State {
 
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
   const { d, panel, crumbs, closePanel, clearAfter, setSection } = useStore();
-  const [theme, toggleTheme] = useTheme();
+  useReveal();
 
   useEffect(() => {   // Esc: close the panel first, else drop the last selection
     const on = (e: KeyboardEvent) => {
@@ -56,12 +57,12 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
     <div className="app" data-panel={panel}>
       <Caustic />
       <a className="skip" href="#main">Skip to content</a>
-      <Header d={d} onData={onData} theme={theme} toggleTheme={toggleTheme} />
+      <Header d={d} onData={onData} />
       {d.engine.mode === "basic" && <div className="banner" role="status">Basic mode: topics are grouped by keywords. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to cluster by meaning.</> : null}</div>}
       <div className="frame">
         <Nav />
         <main id="main" tabIndex={-1}>
-          <Overview /><Tools /><Time /><Funnel /><Friction /><Works /><Exposure /><Recommend /><Sessions />
+          <Overview /><MindMap /><Tools /><Time /><Funnel /><Friction /><Works /><Exposure /><Recommend /><Sessions />
         </main>
       </div>
       <Panel />
