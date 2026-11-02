@@ -115,8 +115,8 @@ export function Funnel() {
         {by === "all" ? <Stages /> : <Minis by={by} />}
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />
       </Card>
-      <StepRates />
       {switches && <Switches />}
+      <StepRates />
     </Section>
   );
 }

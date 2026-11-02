@@ -167,6 +167,7 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .bar-row[aria-pressed="true"] { background: var(--accent-soft); }
 .bar-row:disabled { opacity: 1; cursor: default; }
 .bar-l { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 699px) { .bar-row { grid-template-columns: minmax(96px, 36%) minmax(0, 1fr) auto; } .bar-l { white-space: normal; overflow-wrap: anywhere; } }
 .bar-t { position: relative; height: 8px; background: var(--sunk); border-radius: 4px; }
 .bar-t i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--w) * 100%); background: var(--c, var(--accent)); border-radius: 4px; }
 .bar-t[data-mark]::after { content: ""; position: absolute; left: calc(var(--m) * 100%); top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
@@ -194,7 +195,7 @@ button.cell:hover { box-shadow: 0 0 0 1px var(--ink); }
 .cell[data-low] { background-image: var(--hatch); background-color: color-mix(in oklch, var(--accent) calc(var(--v, 0) * 55%), var(--sunk)); }
 .mx { display: grid; grid-template-columns: 76px repeat(var(--cols), minmax(0, 1fr)); gap: 2px; align-items: center; }
 .mx .cell { height: 26px; line-height: 26px; }
-.rt .cell { height: 40px; line-height: 14px; display: grid; place-content: center; gap: 1px; overflow: hidden; padding: 0 2px; }
+.rt .cell { height: auto; min-height: 40px; line-height: 14px; display: grid; place-content: center; gap: 1px; overflow: hidden; overflow-wrap: anywhere; padding: 2px; }
 .rt .cell b { font-weight: 600; } .rt .cell small { font-size: 12px; color: var(--ink); opacity: 0.8; }
 .rt .cell[data-low] small { color: var(--muted); opacity: 1; font-style: italic; }
 .rt .cell[data-best] { box-shadow: inset 0 0 0 2px var(--ink); }
@@ -655,7 +656,7 @@ g[data-hl] > .hit { fill: color-mix(in oklch, var(--accent) 14%, transparent); s
 }
 
 
-.wk-strip { fill: var(--sunk); stroke: var(--line-2); cursor: pointer; }
+.wk-strip { fill: transparent; stroke: none; cursor: pointer; }   /* a hover target, not a row of empty boxes */
 .wk-strip:hover, g[data-hl] > .wk-strip, .wk-strip[data-on] { fill: var(--accent); stroke: var(--accent); }
 g[data-dim] > .wk-strip { opacity: 0.5; }
 
@@ -768,6 +769,8 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 /* compact sizing; widgets reflow on the width of <main> (container query), so zoom and an open panel both fit */
 .sec { scroll-margin-top: calc(var(--hh) + 12px); }
 .card { padding: var(--s3); scroll-margin-top: calc(var(--hh) + 12px); }
+@media (max-width: 699px) { .sec, .card { scroll-margin-top: 64px; } }   /* --hh is 0 here: only the 45px toolbar row sticks */
+.grid > .card { align-self: start; }   /* glass cards hug their content instead of stretching beside a taller neighbour */
 .grid { gap: var(--s3); }
 .kpis { gap: var(--s2); }
 .sec-h h2 { font-size: 18px; line-height: 24px; }
@@ -785,6 +788,7 @@ html.fx .mini[data-on] { background: var(--accent-soft); }
 html.fx .top { background: oklch(1 0 0 / 0.3); -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); border-bottom-color: var(--rim); box-shadow: 0 8px 24px -20px oklch(0.4 0.05 262 / 0.5); }
 html.fx .rail { background: linear-gradient(180deg, oklch(1 0 0 / 0.4), oklch(0.97 0.02 262 / 0.18)); -webkit-backdrop-filter: blur(22px) saturate(1.4); backdrop-filter: blur(22px) saturate(1.4); border-right-color: var(--rim); }
 html.fx :is(.btn, .seg, select, input[type="date"]) { background: oklch(1 0 0 / 0.62); }
+html.fx .btn.primary { background: var(--accent); }   /* the glass fill above outranks .btn.primary: white label on a white box */
 html.fx .side a[aria-current] { background: oklch(1 0 0 / 0.75); }
 @media (max-width: 819px) { html.fx .rail { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (max-width: 699px) { html.fx .top-tools { background: oklch(1 0 0 / 0.55); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); } }

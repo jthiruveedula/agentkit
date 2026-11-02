@@ -89,7 +89,7 @@ function Router() {
   const title = byProject ? "Where each kind of change lands" : pair ? `${pair}, by intent` : "Tool router";
   const meta = byProject ? `applied rate by intent and project in your ${caps.names} sessions${v.projects.length > PROJECT_COLS ? `, top ${PROJECT_COLS} projects` : ""}` : "applied rate by tool and intent, cross-filtered";
   return (
-    <Card src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={byProject || !caps.hasCost ? 12 : 7}>
+    <Card src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
       {srcs.length === 0 || ints.length === 0 ? <Empty /> : (
         <>
           <p className="rt-best">{best.length ? <>{byProject ? "Lands best in" : pair ? "Clear edge" : "Best tool"}: {best.map(({ i, c }, k) => <span key={i}>{k > 0 && "; "}<b>{i}</b> {colName(c.source)} {fmtPct(c.rate)}</span>)}.</>
@@ -107,7 +107,7 @@ function Router() {
                     <button key={s} type="button" className="cell" data-low={!c.enough || undefined} data-thin={(c.enough && c.n < MIN_N) || undefined} data-best={isBest || undefined} aria-pressed={on} style={{ "--v": c.enough ? c.rate / peak : 0, "--d": r + col } as React.CSSProperties}
                       aria-label={`${colName(s)} on ${i}: ${c.enough ? cellText(c) : `not enough data, n=${c.n}`}${isBest ? `, best ${what} for this intent` : ""}. Filter`} title={`${colName(s)} / ${i}: ${c.enough ? cellText(c) : `not enough data (n=${c.n} < ${ROUTER_MIN_N})`}`}
                       onClick={() => drill(fl)} {...mark(r * srcs.length + col)}>
-                      {c.enough ? <><b>{fmtPct(c.rate)}</b><small>{c.loops.toFixed(1)} mean loops</small></> : <small aria-hidden="true">–</small>}
+                      {c.enough ? <><b>{fmtPct(c.rate)}</b><small>{c.loops.toFixed(1)} loops</small></> : <small aria-hidden="true">–</small>}
                     </button>
                   );
                 })}

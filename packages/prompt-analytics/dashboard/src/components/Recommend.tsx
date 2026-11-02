@@ -30,7 +30,7 @@ export function Recommend() {
                     <h4>{r.title}</h4>
                     <p>{r.action}</p>
                     <div className="chips"><span className="tag good">{r.impact}</span>{e && <span className="tag">n={fmtInt(e.evidence.n)}</span>}</div>
-                    {e && <p className="meta">{e.claim}. {e.metric}: {fmtValue(e.value, e.unit)}{e.evidence.ci ? ` · CI ${fmtValue(e.evidence.ci[0], e.unit)} to ${fmtValue(e.evidence.ci[1], e.unit)}` : ""} · {e.evidence.method}</p>}
+                    {e && <p className="meta">{e.claim}. {e.metric}: {fmtValue(e.value, e.unit)}{e.evidence.ci ? ` · CI ${fmtValue(e.evidence.ci[0] * (e.unit === "%" ? 100 : 1), e.unit)} to ${fmtValue(e.evidence.ci[1] * (e.unit === "%" ? 100 : 1), e.unit)}` : ""} · {e.evidence.method}</p>}
                   </div>
                   {e && <button type="button" className={i ? "btn" : "btn primary"} aria-label={`Show evidence for: ${r.title}`} onClick={() => apply(e.drill.filter, { list: true })}>Show evidence</button>}
                 </li>
