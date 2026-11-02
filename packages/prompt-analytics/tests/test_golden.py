@@ -38,6 +38,22 @@ def _cmp(a, b, path="$"):
         assert a == b, f"{path}: {a!r} != {b!r}"
 
 
+def _cpu_sensitive(d: dict) -> dict:
+    """Split out cluster assignments. PCA + HDBSCAN land on different leaves when
+    BLAS kernels differ (CI runner CPUs vary), so these are checked for shape only.
+    Measured by adding 2e-6 noise to the PCA output: nothing else in the export moves."""
+    d = json.loads(json.dumps(d))
+    g = d.pop("galaxy")
+    for rows in (d["sessions"], d["repeats"]):
+        for r in rows:
+            r.pop("cluster", None)
+    return {
+        "clusters": [sorted(c) for c in g["clusters"]],
+        "points": {k: len(v) for k, v in g["points"].items()},
+        "rest": d,
+    }
+
+
 def test_golden():
     cfg, con, _ = synth.build_analyzed(backend="tfidf")
     got = json.loads(export.serialize(export.build(con, cfg)))
@@ -47,7 +63,11 @@ def test_golden():
     if os.environ.get("UPDATE_GOLDEN") or not GOLDEN.exists():
         GOLDEN.parent.mkdir(exist_ok=True)
         GOLDEN.write_text(json.dumps(got, indent=1, sort_keys=True) + "\n")
-    _cmp(got, json.loads(GOLDEN.read_text()))
+    a, b = _cpu_sensitive(got), _cpu_sensitive(json.loads(GOLDEN.read_text()))
+    _cmp(a["rest"], b["rest"])
+    assert a["points"] == b["points"]
+    assert abs(len(a["clusters"]) - len(b["clusters"])) <= 3, "cluster count drifted"
+    assert set(map(tuple, a["clusters"])) == set(map(tuple, b["clusters"]))
 
 
 @pytest.mark.skipif(not os.environ.get("PA_PERF"), reason="slow: set PA_PERF=1")
