@@ -9,6 +9,7 @@ import { EnginePill } from "./Engine";
 import { Pulse } from "./Pulse";
 import { Segmented } from "./ui";
 import { openPalette } from "./Palette";
+import { ACCENTS, GLASS, applySettings, loadSettings, saveSettings, type Settings } from "../lib/settings";
 
 type Period = "30" | "90" | "all" | "custom";
 
@@ -128,6 +129,7 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
           <div className="top-tools">
           <Segmented label="Period" value={period} onChange={pickPeriod} options={[{ id: "30", text: "30d" }, { id: "90", text: "90d" }, { id: "all", text: "All" }, { id: "custom", text: "Custom" }]} />
           <button type="button" className="btn fbtn" aria-expanded={fopen} aria-controls="hdr-filters" onClick={() => setFopen(!fopen)}>Filters{scoped > 0 && <b className="badge">{scoped}</b>}</button>
+          <Prefs />
           <button type="button" className="btn kbd" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K" onClick={openPalette}>{/Mac|iP/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</button>
           </div>
         </div>
@@ -161,6 +163,40 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
         </div>
       </header>
     </div>
+  );
+}
+
+/** Display settings: accent preset and glass strength, saved per browser. Esc or the button closes it. */
+export function Prefs() {
+  const [open, setOpen] = useState(false);
+  const [s, setS] = useState(loadSettings);
+  const btn = useRef<HTMLButtonElement>(null), box = useRef<HTMLDivElement>(null);
+  const put = (n: Partial<Settings>) => { const next = { ...s, ...n }; setS(next); applySettings(next); saveSettings(next); };
+  useEffect(() => {
+    if (!open) return;
+    box.current?.querySelector<HTMLElement>("input:checked")?.focus();
+    const on = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); btn.current?.focus(); } };
+    window.addEventListener("keydown", on, true); return () => window.removeEventListener("keydown", on, true);
+  }, [open]);
+  return (
+    <>
+      <button ref={btn} type="button" className="btn setbtn" aria-label="Display settings" aria-expanded={open} aria-controls={open ? "prefs" : undefined} onClick={() => setOpen(!open)}>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+      </button>
+      {open && (
+        <div id="prefs" ref={box} className="prefs" role="dialog" aria-label="Display settings">
+          <fieldset><legend>Accent</legend>
+            <div className="sw">{ACCENTS.map(([id, text]) => (
+              <label key={id}><input type="radio" name="pa-accent" value={id} checked={s.accent === id} onChange={() => put({ accent: id })} />{text}</label>
+            ))}</div>
+          </fieldset>
+          <label><span>Glass</span>
+            <input type="range" min={0} max={GLASS.length - 1} step={1} value={s.glass} aria-valuetext={GLASS[s.glass][1]} onChange={(e) => put({ glass: +e.target.value })} />
+            <output>{GLASS[s.glass][1]}</output>
+          </label>
+        </div>
+      )}
+    </>
   );
 }
 
