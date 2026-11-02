@@ -27,11 +27,16 @@ const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface",
 const dist = (a, b) => Math.hypot(a[0] - b[0], 0.5 * (a[1] * Math.cos(a[2] * Math.PI / 180) - b[1] * Math.cos(b[2] * Math.PI / 180)) , 0.5 * (a[1] * Math.sin(a[2] * Math.PI / 180) - b[1] * Math.sin(b[2] * Math.PI / 180)));
 const apart = [["src-antigravity", "src-claude_code", 0.15]];
 let bad = 0;
-const all = parse(block);
-for (const [fg, bg, min] of pairs) {
-  const r = ratio(all[fg], all[bg]);
-  if (r < min) { bad++; console.log(`FAIL ${fg} on ${bg}: ${r.toFixed(2)} < ${min}`); }
+const base = parse(block);
+// every accent preset (:root[data-accent="x"]) is checked as its overrides over the base tokens
+const themes = [["default", base], ...[...css.matchAll(/\n:root\[data-accent="(\w+)"\] \{([^}]*)\}/g)].map((m) => [m[1], { ...base, ...parse(m[2]) }])];
+for (const [name, all] of themes) {
+  for (const [fg, bg, min] of pairs) {
+    const r = ratio(all[fg], all[bg]);
+    if (r < min) { bad++; console.log(`FAIL [${name}] ${fg} on ${bg}: ${r.toFixed(2)} < ${min}`); }
+  }
+  for (const [a, b, min] of apart) { const d = dist(all[a], all[b]); if (d < min) { bad++; console.log(`FAIL [${name}] ${a} vs ${b}: distance ${d.toFixed(2)} < ${min}`); } }
 }
-for (const [a, b, min] of apart) { const d = dist(all[a], all[b]); if (d < min) { bad++; console.log(`FAIL ${a} vs ${b}: distance ${d.toFixed(2)} < ${min}`); } }
+console.log(`themes: ${themes.map(([n]) => n).join(", ")}`);
 console.log(bad ? `${bad} failing pairs` : "contrast ok");
 process.exit(bad ? 1 : 0);
