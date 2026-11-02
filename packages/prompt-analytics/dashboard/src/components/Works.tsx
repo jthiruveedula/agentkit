@@ -1,9 +1,11 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { playbook, PLAYBOOK_MIN_SESSIONS, type Play } from "../lib/playbook";
 import { useStore } from "../state";
-import { fmtInt, fmtPct, fmtSigned } from "../lib/format";
+import { fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
 import { intentColor, srcLabel } from "../lib/palette";
+import { ToolLogo } from "./Shell";
 import { BarList, Card, DataTable, Empty, Section, Segmented } from "./ui";
+import "./govern.css";
 
 const pts = (x: number) => `${fmtSigned(x * 100)} pts`;
 
@@ -15,7 +17,9 @@ function Ci({ p, lim }: { p: Play; lim: number }) {
 
 function PlayCard({ p, lim, on, onPick, copySlot }: { p: Play; lim: number; on: boolean; onPick: () => void; copySlot: boolean }) {
   const [copied, setCopied] = useState(false);
-  const copy = () => { if (!p.snippet) return; navigator.clipboard?.writeText(p.snippet).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }, () => {}); };
+  const tm = useRef(0);
+  useEffect(() => () => clearTimeout(tm.current), []);
+  const copy = () => { if (!p.snippet) return; navigator.clipboard?.writeText(p.snippet).then(() => { setCopied(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setCopied(false), 1500); }, () => {}); };
   return (
     <li className="play" data-dir={p.dir} data-on={on || undefined} data-copy={copySlot || undefined}>
       <button type="button" className="play-b" aria-pressed={on} onClick={onPick}
@@ -44,7 +48,7 @@ function Playbook() {
     </div>
   );
   return (
-    <Card id="s-playbook" title="Prompt playbook" meta={d.what_works_tested ? `${fmtInt(b.tested)} tested · ${fmtInt(b.pass)} pass FDR 10% · all sessions. Click a card to filter to its topic` : "all sessions"} span={12}>
+    <Card id="s-playbook" src="what_works · overlapping groups" title="Prompt playbook" meta={d.what_works_tested ? `${fmtInt(b.tested)} tested · ${fmtInt(b.pass)} pass FDR 10% · all sessions. Click a card to filter to its topic` : "all sessions"} span={12}>
       {d.what_works_tested === 0 ? <Empty>No prompt effects were tested yet. The ml or deep analysis tier runs them once there are enough sessions.</Empty>
         : cards.length === 0 ? <Empty>{`None of the ${fmtInt(b.tested)} tested effects passes the false-discovery check (Benjamini-Hochberg, 10%), so there is no advice to give yet.`}</Empty> : (
           <>
@@ -91,7 +95,7 @@ function Topics() {
   const flat = d.galaxy.points.x.length === 0, up = d.engine.upgrade;
   const rows = cl.map((k) => ({ k, n: v.legacy ? k.size : v.clusterCounts.get(k.id) ?? 0 })).sort((a, b) => b.n - a.n).slice(0, 12);
   return (
-    <Card title={flat ? "Topics, grouped by keywords" : "Topics"} span={5}
+    <Card title={flat ? "Topics, grouped by keywords" : "Topics"} src="galaxy.clusters · sessions per topic" span={5}
       meta={flat ? <>Install the ml extra to cluster by meaning.{up ? <> <code>{up.command}</code></> : null}</> : "sessions per topic, live"}>
       {rows.length === 0 ? <Empty>No topics yet</Empty> : (
         <BarList label="Topics. Each filters its sessions" rows={rows.map(({ k, n }) => ({
@@ -104,20 +108,47 @@ function Topics() {
   );
 }
 
+const R = 80, XY = (i: number, n: number, r: number) => [Math.cos(-Math.PI / 2 + (i * 2 * Math.PI) / n) * r, Math.sin(-Math.PI / 2 + (i * 2 * Math.PI) / n) * r];
+const poly = (v: number[], k = 1) => v.map((x, i) => XY(i, v.length, R * k * Math.min(1, Math.max(0, x))).map((c) => c.toFixed(1)).join(",")).join(" ");
+
+/** Radar of the quality axes: you (filled) against the top-outcome tercile (dashed). Axis count follows the export. */
 function Quality({ wide }: { wide: boolean }) {
   const { d, caps } = useStore();
   const { axes, you, top, by_source: bs, validation: val } = d.quality;
   const [tool, setTool] = useState("all");
   const mine = tool === "all" ? you : bs.find((b) => b.source === tool)?.values ?? you;
   if (!(you.length === axes.length && you.length > 0)) return null;
+  const n = axes.length, one = Array(n).fill(1);
   return (
-    <Card title="Prompt quality" meta="you against the top-outcome tercile" span={wide ? 12 : 7}
+    <Card title="Quality profile" src="quality.you vs quality.top" meta="you against the top-outcome tercile" span={wide ? 12 : 7}
       actions={caps.multiTool && bs.length > 1 ? <Segmented label="Quality by tool" value={tool} onChange={setTool} options={[{ id: "all", text: "All" }, ...bs.map((b) => ({ id: b.source as string, text: srcLabel(b.source) }))]} /> : undefined}>
-      <BarList label="Prompt quality sub-scores" max={1} rows={axes.map((a, i) => ({
-        key: a, label: a, value: mine[i] ?? 0, color: "var(--accent)", mark: top[i] ?? 0, text: fmtPct(mine[i] ?? 0), sub: `top ${fmtPct(top[i] ?? 0)}`,
-        aria: `${a}: you ${fmtPct(mine[i] ?? 0)}, top tercile ${fmtPct(top[i] ?? 0)}`,
-      }))} />
-      <p className="note">Tick = top tercile. {val.spearman !== null ? `Score vs outcome: Spearman ${val.spearman.toFixed(2)}, n=${fmtInt(val.n)}.` : "Score validation unavailable."} Aggregate, ignores filters.</p>
+      <svg className="radar" viewBox="-150 -105 300 210" role="img" aria-label={`Prompt quality radar. ${axes.map((a, i) => `${a}: you ${fmtPct(mine[i] ?? 0)}, top tercile ${fmtPct(top[i] ?? 0)}`).join("; ")}`}>
+        <g className="rg"><polygon points={poly(one)} /><polygon points={poly(one, 0.5)} /></g>
+        <polygon className="rtop" points={poly(top)} /><polygon className="ryou" points={poly(mine)} />
+        <g className="rl">{axes.map((a, i) => { const [x, y] = XY(i, n, R + 11); return <text key={a} x={x} y={y + 4} textAnchor={Math.abs(x) < 6 ? "middle" : x > 0 ? "start" : "end"}>{a}</text>; })}</g>
+      </svg>
+      <ul className="legend rl-key"><li className="lk-you">You</li><li className="lk-top">Your best</li></ul>
+      <p className="note">{val.spearman !== null ? `Score vs outcome: Spearman ${val.spearman.toFixed(2)}, n=${fmtInt(val.n)}.` : "Score validation unavailable."} Aggregate, ignores filters.</p>
+    </Card>
+  );
+}
+
+/** The cleanest resolved sessions in this view: applied, no retry loops, cheapest first. A copy-this shortlist. */
+function Best() {
+  const { v, openSession } = useStore();
+  const top = useMemo(() => v.rows.filter((r) => r.prompts > 0 && r.applied && r.loops === 0 && r.cost_usd !== null).sort((a, b) => (a.cost_usd as number) - (b.cost_usd as number) || a.friction - b.friction).slice(0, 5), [v.rows]);
+  if (top.length === 0) return null;
+  return (
+    <Card title="Best sessions to copy" src="sessions · top resolved" meta="applied, no retries, cheapest first" span={12}>
+      <div className="tw"><table className="best">
+        <thead><tr><th scope="col">Session</th><th scope="col">Project</th><th scope="col">Intent</th><th scope="col" className="n">Cost</th></tr></thead>
+        <tbody>{top.map((r) => (
+          <tr key={r.id}>
+            <td><button type="button" className="link" aria-label={`Open session: ${r.title}`} onClick={() => openSession(r.id)}><ToolLogo source={r.source} size={16} />{r.title}</button></td>
+            <td>{r.project}</td><td>{r.intent}</td><td className="n">{r.cost_usd === null ? "unpriced" : fmtUSD(r.cost_usd)}</td>
+          </tr>
+        ))}</tbody>
+      </table></div>
     </Card>
   );
 }
@@ -133,7 +164,7 @@ export function Works() {
           ? "The prompt playbook appears once enough sessions exist to test prompt habits against outcomes."
           : <>The prompt playbook and topic map need the ML engine.{up ? <> Run <code>{up.command}</code> to unlock them.</> : null}</>}</p>
       )}
-      {topics && <Topics />}<Quality wide={!topics} />
+      {topics && <Topics />}<Quality wide={!topics} /><Best />
     </Section>
   );
 }

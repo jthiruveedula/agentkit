@@ -11,6 +11,7 @@ import { fmtCompact, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { intentColor, srcColor, srcLabel } from "../lib/palette";
 import { useSize } from "../lib/hooks";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
+import "./govern.css";
 import { Orbit } from "./Orbit";
 
 const NARROW = 560;
@@ -87,11 +88,11 @@ export function MindMap() {
   const sameDepth = rows.filter((x) => x.depth === sel.depth);
   const announce = `${nameOf(sel.node)}, ${sel.node.kind}, ${FMT[metric](sel.node.value)} ${metric}, friction ${sel.node.friction.toFixed(2)}. ${sel.node.children.length ? (open.has(curId) ? "Expanded" : "Collapsed") : "No children"}. Level ${sel.depth + 1}, ${sameDepth.findIndex((x) => x.node.id === curId) + 1} of ${sameDepth.length}.`;
 
-  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card title="Mind map" span={12}><Empty /></Card></Section>;
+  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
 
   return (
     <Section id="s-map" title="Mind map" q="How does your AI work branch?">
-      <Card title="Constellation" meta="tool, intent, project, session" span={12}
+      <Card title="How your work connects" src={`sessions graph · n ${fmtInt(v.rows.length)}`} meta="tool, intent, project, session. Drag to rotate, dot size = sessions" span={12}
         actions={<Segmented label="Size nodes by" value={metric} onChange={setMetric} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, { id: "cost", text: "Cost" }]} />}>
         <div className="mm-bar">
           <nav className="mm-path" aria-label="Expanded path">

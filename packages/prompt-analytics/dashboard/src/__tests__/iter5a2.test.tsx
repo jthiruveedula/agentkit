@@ -31,9 +31,9 @@ describe("screenFit", () => {
 });
 
 describe("5a-2 UI", () => {
-  it("Exposure and Recommendations say they ignore filters", () => {
+  it("Exposure says previews are masked, Recommendations say they ignore filters", () => {
     mount();
-    expect(el.querySelector("#s-exposure")?.textContent).toMatch(/whole export/);
+    expect(el.querySelector("#s-exposure")?.textContent).toMatch(/masked/);
     expect(el.querySelector("#s-recs")?.textContent).toMatch(/whole export/);
   });
   it("header keeps the palette button and the toolbar row is its own sticky group", () => {

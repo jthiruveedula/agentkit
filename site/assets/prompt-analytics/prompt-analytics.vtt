@@ -1,69 +1,57 @@
 WEBVTT
 
 00:00.000 --> 00:03.000
-Where do your AI coding hours go? Prompt Analytics shows you, locally.
+What changed in your AI coding, why, and what next?
 
-00:03.000 --> 00:08.500
-Totals, trend and what needs attention, at a glance.
+00:03.000 --> 00:11.400
+The briefing leads: more sessions are struggling.
 
-00:08.500 --> 00:11.500
-Which assistant handles which kind of work: the router matrix.
+00:11.400 --> 00:15.600
+Why: mostly billing-api and bugfix.
 
-00:11.500 --> 00:14.700
-Activity calendar and hour of week.
+00:15.600 --> 00:19.600
+Which tool lands the work, and at what cost.
 
-00:14.700 --> 00:17.900
-Flip it to 3D, then drag to orbit.
+00:19.600 --> 00:23.000
+When the work happens.
 
-00:17.900 --> 00:20.300
-Same data, new angle.
+00:23.000 --> 00:26.000
+Flip it to 3D.
 
-00:20.300 --> 00:23.100
-Hour of week, flat.
+00:26.000 --> 00:29.400
+Or a 3D terrain of your rhythm.
 
-00:23.100 --> 00:25.600
-Or as a 3D terrain of your working rhythm.
+00:29.400 --> 00:32.400
+How long sessions take to resolve.
 
-00:25.600 --> 00:29.400
-Where prompts stall, and which tool switches follow.
+00:32.400 --> 00:36.400
+Where sessions stall on the way to resolved.
 
-00:29.400 --> 00:33.400
-Friction by tool and by intent.
+00:36.400 --> 00:40.000
+The signals behind the struggle.
 
-00:33.400 --> 00:36.600
-The loop breaker flags retry loops.
+00:40.000 --> 00:43.000
+Rephrase loops: when to stop and restart.
 
-00:36.600 --> 00:39.600
-A playbook distilled from the prompts that succeeded.
+00:43.000 --> 00:46.800
+Is the model sized to the task?
 
-00:39.600 --> 00:43.800
-Secrets and PII are found and masked, never stored raw.
+00:46.800 --> 00:50.200
+Habits that pay off, backed by tests.
 
-00:43.800 --> 00:47.000
-Every session in a table. Page ten rows, or more.
+00:50.200 --> 00:53.200
+Your quality profile and best sessions.
 
-00:47.000 --> 00:49.800
-Twenty-five rows. Switch density to fit more.
+00:53.200 --> 00:56.800
+What to do next, in order.
 
-00:49.800 --> 00:52.000
-Compact rows.
+00:56.800 --> 01:01.800
+Secrets and PII are masked in the review queue.
 
-00:52.000 --> 00:54.300
-Export what you see.
+01:01.800 --> 01:05.800
+How your work connects, in 3D.
 
-00:54.300 --> 00:56.800
-CSV, JSON or xlsx.
-
-00:56.800 --> 01:00.300
-A 3D mind map of your topics.
-
-01:00.300 --> 01:03.100
-Only use one assistant? The dashboard adapts.
-
-01:03.100 --> 01:05.900
-Sections reshape to your tool.
-
-01:05.900 --> 01:08.900
+01:05.800 --> 01:08.900
 Press Cmd+K to jump anywhere.
 
 01:08.900 --> 01:12.900

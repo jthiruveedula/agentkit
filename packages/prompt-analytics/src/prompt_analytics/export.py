@@ -24,9 +24,7 @@ MAX_ANOMALIES = 6  # per metric
 MIN_COST_SPIKE = 5.0  # USD; smaller days are never "spikes"
 MAX_SESSIONS = 5000  # newest first; per-session rows for dashboard drilldowns
 
-SCHEMA = (
-    "1.2"  # 1.1: hour_week[].sessions / .applied; 1.2: repeats[], sessions[].features
-)
+SCHEMA = "1.3"  # 1.1: hour_week[].sessions/.applied; 1.2: repeats[], sessions[].features; 1.3: sessions[].ttr_min/.model
 MAX_POINTS = 20000
 SNIPPET = 160
 PLACEHOLDER = '<script type="application/json" id="pa-data">null</script>'
@@ -557,6 +555,10 @@ def _sessions(
                 "friction": float(x.get("friction") or 0.0),
                 "cluster": int(cl.get(r["session_id"], -1)),
                 "features": feats.get(r["session_id"], []),
+                "ttr_min": None
+                if x.get("ttr_s") is None
+                else round(float(x["ttr_s"]) / 60.0, 2),
+                "model": (r["model"] or "")[:60] or None,
                 "title": (red.redact(" ".join(t.split())) or "")[:SNIPPET] if t else "",
             }
         )

@@ -23,7 +23,6 @@ export function loopCurve(rows: SessionRow[], minN = LOOP_MIN_N): LoopBucket[] {
   });
 }
 
-const reph = (k: number) => `${k} rephrase${k === 1 ? "" : "s"}`;
 /** Peak = the fewest rephrases whose CI still overlaps the best bucket's (so noise never pushes the peak right).
  *  Stop = the first later bucket whose rate is clearly below the peak bucket's: the CI of the DIFFERENCE (Newcombe, stop minus peak) is entirely below 0, i.e. CI compared to CI, not to a point.
  *  `significant` is false when no such bucket exists: the UI then names no peak. null when no bucket has enough data. */

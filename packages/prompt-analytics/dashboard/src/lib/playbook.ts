@@ -51,8 +51,6 @@ const HAS: Record<string, (t: string) => boolean> = {
 };
 export const hasFeature = (text: string, feature: string) => !!HAS[feature.toLowerCase()]?.(text);
 
-/** CI strictly on one side of zero. */
-export const clearOfZero = (r: Pick<Row, "ci">) => r.ci[0] > 0 || r.ci[1] < 0;
 
 /** Standard normal CDF (Abramowitz-Stegun 7.1.26, |error| < 1.5e-7). */
 export function phi(z: number): number {

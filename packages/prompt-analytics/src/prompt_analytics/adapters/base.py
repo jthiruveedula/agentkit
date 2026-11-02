@@ -60,15 +60,19 @@ def home() -> Path:
 def user_data_dirs(app: str) -> list[Path]:
     """VS Code-family ``User`` dir candidates for ``app`` on this OS.
 
-    ``PA_HOME`` overrides the home dir so tests can point at fixtures.
+    ``PA_HOME`` overrides the home dir so tests can point at fixtures; it
+    also wins over ``APPDATA``/``XDG_CONFIG_HOME``, which CI runners set.
     """
     h = home()
+    pinned = bool(os.environ.get("PA_HOME"))
     if sys.platform == "darwin":
         base = h / "Library" / "Application Support"
     elif sys.platform.startswith("win"):
-        base = Path(os.environ.get("APPDATA") or h / "AppData" / "Roaming")
+        base = Path(
+            (not pinned and os.environ.get("APPDATA")) or h / "AppData" / "Roaming"
+        )
     else:
-        base = Path(os.environ.get("XDG_CONFIG_HOME") or h / ".config")
+        base = Path((not pinned and os.environ.get("XDG_CONFIG_HOME")) or h / ".config")
     return [base / app / "User"]
 
 

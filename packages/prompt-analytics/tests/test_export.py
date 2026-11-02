@@ -47,7 +47,7 @@ def built():
 
 def test_contract_shape(built):
     _, d = built
-    assert set(d) == KEYS and d["schema"] == "1.2"
+    assert set(d) == KEYS and d["schema"] == "1.3"
     g = d["galaxy"]
     assert len(g["points"]["x"]) <= 20000 and all(
         0 <= v <= 1 for v in g["points"]["x"] + g["points"]["y"]
@@ -124,7 +124,7 @@ def test_write_gate_escape_and_perms(built, tmp_path):
         and "<!--" not in html.split('id="pa-data"')[1].split("</script>")[0]
     )
     blob = html.split('id="pa-data">')[1].split("</script>")[0]
-    assert json.loads(blob)["schema"] == "1.2"
+    assert json.loads(blob)["schema"] == "1.3"
     assert stat.S_IMODE(os.stat(out).st_mode) == 0o600
     assert stat.S_IMODE(os.stat(tmp_path / "o" / "dashboard.json").st_mode) == 0o600
 
@@ -168,6 +168,8 @@ def test_sessions_rows(built):
         "cluster",
         "title",
         "features",
+        "ttr_min",
+        "model",
     }
     assert all(
         set(r) == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS

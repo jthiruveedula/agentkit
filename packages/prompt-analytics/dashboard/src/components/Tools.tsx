@@ -3,13 +3,16 @@ import { useStore } from "../state";
 import { costPerApplied, sparkSeries, METRICS } from "../lib/compare";
 import { router, ROUTER_MIN_N, type RouterCell } from "../lib/econ";
 import { fmtCompact, fmtInt, fmtPct, fmtUSD } from "../lib/format";
-import { INTENTS, SOURCES, srcColor, srcLabel } from "../lib/palette";
+import { INTENTS, SOURCES, srcLabel } from "../lib/palette";
 import { useRoving } from "../lib/hooks";
 import { linkProps } from "../lib/motion";
 import { BarList, Card, DataTable, Empty, Section } from "./ui";
 import { Ramp, Spark } from "./charts";
 import { MIN_N, ciText } from "../lib/stats";
 import { unpricedNote } from "../lib/capabilities";
+import { struggledRate } from "../lib/metrics";
+import { toolName } from "./Time";
+import "./investigate.css";
 
 type Col = "sessions" | "prompts" | "tokens" | "cost" | "cpa" | "applied" | "friction" | "ttr";
 const COLS: { id: Col; text: string; hide?: boolean }[] = [
@@ -47,7 +50,7 @@ function Scorecard() {
           <tbody>{sorted.map((r) => (
             <tr key={r.key} {...linkProps(`tool:${r.key}`)} data-sel={f.source === r.key || undefined} style={{ "--i": sorted.indexOf(r) } as React.CSSProperties}>
               <th scope="row"><button type="button" aria-pressed={f.source === r.key} onClick={() => drill({ source: r.key as never })} aria-label={`${srcLabel(r.key)}: ${r.t.sessions} sessions. Filter to this tool`}>
-                <span className="sw" style={{ "--c": srcColor(r.key) } as React.CSSProperties} />{srcLabel(r.key)}</button></th>
+                {toolName(r.key)}</button></th>
               <td>{fmtInt(r.t.sessions)}</td><td className="hide-s">{fmtInt(r.t.prompts)}</td><td className="hide-s">{fmtCompact(r.t.tokens)}</td>
               {on("cost") && <td>{r.t.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(r.t.cost)}{r.est ? <span className="tag">estimate</span> : null}</>}</td>}
               {on("cpa") && <td className="hide-s">{r.cpa === null ? "-" : fmtUSD(r.cpa)}</td>}
@@ -86,7 +89,7 @@ function Router() {
   const title = byProject ? "Where each kind of change lands" : pair ? `${pair}, by intent` : "Tool router";
   const meta = byProject ? `applied rate by intent and project in your ${caps.names} sessions${v.projects.length > PROJECT_COLS ? `, top ${PROJECT_COLS} projects` : ""}` : "applied rate by tool and intent, cross-filtered";
   return (
-    <Card id="s-router" title={title} meta={meta} span={byProject || !caps.hasCost ? 12 : 7}>
+    <Card src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
       {srcs.length === 0 || ints.length === 0 ? <Empty /> : (
         <>
           <p className="rt-best">{best.length ? <>{byProject ? "Lands best in" : pair ? "Clear edge" : "Best tool"}: {best.map(({ i, c }, k) => <span key={i}>{k > 0 && "; "}<b>{i}</b> {colName(c.source)} {fmtPct(c.rate)}</span>)}.</>
@@ -104,7 +107,7 @@ function Router() {
                     <button key={s} type="button" className="cell" data-low={!c.enough || undefined} data-thin={(c.enough && c.n < MIN_N) || undefined} data-best={isBest || undefined} aria-pressed={on} style={{ "--v": c.enough ? c.rate / peak : 0, "--d": r + col } as React.CSSProperties}
                       aria-label={`${colName(s)} on ${i}: ${c.enough ? cellText(c) : `not enough data, n=${c.n}`}${isBest ? `, best ${what} for this intent` : ""}. Filter`} title={`${colName(s)} / ${i}: ${c.enough ? cellText(c) : `not enough data (n=${c.n} < ${ROUTER_MIN_N})`}`}
                       onClick={() => drill(fl)} {...mark(r * srcs.length + col)}>
-                      {c.enough ? <><b>{fmtPct(c.rate)}</b><small>{c.loops.toFixed(1)} mean loops</small></> : <small aria-hidden="true">–</small>}
+                      {c.enough ? <><b>{fmtPct(c.rate)}</b><small>{c.loops.toFixed(1)} loops</small></> : <small aria-hidden="true">–</small>}
                     </button>
                   );
                 })}
@@ -121,20 +124,33 @@ function Router() {
   );
 }
 
-function CostShare() {
-  const { v, f, drill } = useStore();
-  const rows = v.sources.filter((t) => t.cost !== null);
-  const unpriced = v.sources.filter((t) => t.cost === null);
+/** Resolved rate, cost per resolved and struggled share, one bar per tool. Rows filter that tool; unpriced tools show a dash, never $0. */
+function ByTool() {
+  const { v, f, drill, caps } = useStore();
+  const rows = useMemo(() => v.sources.map((t) => { const mine = v.rows.filter((r) => r.source === t.key); return { t, c: costPerApplied(mine), s: struggledRate(mine) }; }), [v]);
+  const row = (x: (typeof rows)[number], value: number, text: string, sub: string, say: string) => ({
+    key: x.t.key, label: toolName(x.t.key), value, color: "var(--accent)", active: f.source === x.t.key, text, sub, ent: `tool:${x.t.key}` as const,
+    aria: `${srcLabel(x.t.key)}: ${say}. Filter to this tool`, onClick: () => drill({ source: x.t.key as never }),
+  });
+  const low = (n: number) => (n < MIN_N ? " \u00b7 low n" : "");
+  const priced = rows.filter((x) => x.t.cost !== null);
   return (
-    <Card title="Cost by tool" meta="priced tools only" span={5}>
-      {rows.length === 0 ? <Empty>No priced sessions here.</Empty> : (
-        <BarList label="Cost by tool. Each filters that tool" rows={rows.map((t) => ({
-          key: t.key, label: srcLabel(t.key), value: t.cost as number, color: srcColor(t.key), active: f.source === t.key, text: fmtUSD(t.cost as number), sub: `${fmtInt(t.sessions)} sessions`,
-          ent: `tool:${t.key}`, aria: `${srcLabel(t.key)}: ${fmtUSD(t.cost as number)}. Filter to this tool`, onClick: () => drill({ source: t.key as never }),
-        }))} />
+    <>
+      <Card src={`sessions.outcome \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.t.asked, 0))}`} title="Resolved rate" meta="share of sessions resolved" span={12}>
+        <BarList label="Resolved rate by tool. Each filters that tool" rows={rows.filter((x) => x.t.asked).map((x) => { const p = x.t.applied / x.t.asked;
+          return row(x, p, fmtPct(p), `${x.t.applied} of ${x.t.asked}${low(x.t.asked)}`, `${fmtPct(p)} resolved of ${x.t.asked}`); })} />
+      </Card>
+      {caps.hasCost && (
+        <Card src={`cost_usd \u00f7 resolved \u00b7 n ${priced.reduce((a, x) => a + x.c.pricedApplied, 0)} priced`} title="Cost / resolved" meta="lower is better" span={6}>
+          <BarList label="Cost per resolved session by tool. Each filters that tool" rows={rows.map((x) => { const c = x.c.value;
+            return row(x, c ?? 0, c === null ? "\u2014" : fmtUSD(c), x.t.cost === null ? "no price" : `${x.c.pricedApplied} priced${low(x.c.pricedApplied)}`, c === null ? "no cost per resolved" : `${fmtUSD(c)} per resolved`); })} />
+          {unpricedNote(caps) && <p className="note">{unpricedNote(caps)} Unpriced sessions are left out, not shown as $0.</p>}
+        </Card>
       )}
-      {unpriced.length > 0 && <p className="note">Not priced: {unpriced.map((t) => srcLabel(t.key)).join(", ")}. These record no price, so they are left out rather than shown as $0.</p>}
-    </Card>
+      <Card src={`friction.rates \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.s.n, 0))}`} title="Struggled by tool" meta="3+ retry loops or friction 0.5+" span={caps.hasCost ? 6 : 12}>
+        <BarList label="Share of sessions that struggled, by tool. Each filters that tool" rows={rows.filter((x) => x.s.n).map((x) => ({ ...row(x, x.s.p ?? 0, fmtPct(x.s.p ?? 0, 1), `${x.s.k} / ${x.s.n}${low(x.s.n)}`, `${fmtPct(x.s.p ?? 0, 1)} struggled, ${x.s.k} of ${x.s.n}`), color: "var(--bad)" }))} />
+      </Card>
+    </>
   );
 }
 
@@ -151,7 +167,8 @@ export function Tools() {
     const one = caps.names || "this tool";
     return (
       <Section id="s-tools" title="Tools" q={`How does ${one} land your work?`}>
-        <Card title={`Tool: ${one}, click to clear`} meta="filtered to one tool" span={12}><Scorecard /></Card>
+        {null /* keeps the scorecard mounted when a row filters to one tool */}
+        <Card src="totals.by_source" title={`Tool: ${one}, click to clear`} meta="filtered to one tool" span={12}><Scorecard /></Card>
         <Router />
       </Section>
     );
@@ -159,9 +176,10 @@ export function Tools() {
   const pair = caps.sourceCount === 2 ? `${srcLabel(caps.sources[0])} or ${srcLabel(caps.sources[1])}` : "";
   return (
     <Section id="s-tools" title="Tools" q={caps.hasCost ? (pair ? `${pair}: which earns its cost?` : "Which tool earns its cost?") : (pair ? `${pair}: which lands the work?` : "Which tool lands the work?")}>
-      <Card title={pair ? `${pair}, side by side` : "Tool scorecard"} meta="click a row to filter" span={12}><Scorecard /></Card>
+      <ByTool />
+      <Card src="totals.by_source" title={pair ? `${pair}, side by side` : "Tool scorecard"} meta="click a row to filter" span={12}><Scorecard /></Card>
       <Router />
-      {caps.hasCost && <CostShare />}
+      
     </Section>
   );
 }

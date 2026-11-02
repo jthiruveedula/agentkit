@@ -22,6 +22,8 @@ export interface Caps {
   hasHourApplied: boolean;    // hour_week carries sessions/applied (schema 1.1)
   hasExposure: boolean;       // at least one finding
   hasTtr: boolean;
+  hasTtrRows: boolean;        // per-session ttr_min present (1.3+)
+  hasModels: boolean;         // per-session model present (1.3+)
   hasFunnel: boolean;
   days: number;               // calendar span of the rows in view, inclusive
   enoughForTrend: boolean;    // >= MIN_DAYS of span
@@ -62,6 +64,8 @@ export function capabilities(d: DashboardData, v: Views): Caps {
     hasHourApplied: d.hour_week.some((h) => h.sessions !== undefined && h.applied !== undefined),
     hasExposure: d.exposure.sessions > 0,
     hasTtr: d.ttr.some((t) => sources.includes(t.source)),
+    hasTtrRows: v.rows.some((r) => r.ttr_min != null),
+    hasModels: v.rows.some((r) => !!r.model),
     hasFunnel: v.funnel[0] > 0,
     days, enoughForTrend: days >= MIN_DAYS,
     tooSmall: n > 0 && (days < MIN_DAYS || n < MIN_SESSIONS),
@@ -78,6 +82,7 @@ export function sectionsFor(c: Caps, d: DashboardData, v: Views): Set<string> {
   if (d.recommendations.length) s.add("s-recs");
   if (c.tooSmall) return s;
   s.add("s-time"); s.add("s-friction"); s.add("s-works");
+  if (c.hasModels) s.add("s-models");
   s.add("s-tools");           // single tool: pivots to intent x project instead of comparing tools
   if (c.hasFunnel) s.add("s-funnel");
   if (v.rows.length) s.add("s-map");

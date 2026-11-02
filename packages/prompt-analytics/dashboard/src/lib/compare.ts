@@ -1,7 +1,7 @@
 // Derived metrics for the one-page dashboard: prior period, deltas, Wilson CI, run-rate, tool x intent tally,
 // outliers, distributions, cohorts. Pure functions over `SessionRow[]` and `DashboardData`; no DOM, no React.
 import type { DashboardData, Intent, SessionRow, Source } from "../data/types";
-import { addDays, views, weekStart, type Filter, type Views } from "./filter";
+import { addDays, views, type Filter, type Views } from "./filter";
 
 export type Cmp = "prev" | "yoy" | "off";
 /** A prior period with fewer sessions than this gets no delta chip. */
@@ -100,16 +100,6 @@ export const quantile = (xs: number[], p: number): number => {
 };
 export const median = (xs: number[]) => quantile(xs, 0.5);
 
-/** Robust z of each active day against the previous `win` calendar days (median/MAD, inactive days count as 0). */
-export function rollingZ(series: { date: string; value: number }[], win = 28): { date: string; value: number; z: number }[] {
-  const by = new Map(series.map((s) => [s.date, s.value]));
-  return series.map((s) => {
-    const base = Array.from({ length: win }, (_, i) => by.get(addDays(s.date, -(i + 1))) ?? 0);
-    const med = median(base), mad = median(base.map((x) => Math.abs(x - med)));
-    const z = mad > 0 ? (0.6745 * (s.value - med)) / mad : s.value > med ? 10 : 0;
-    return { ...s, z };
-  });
-}
 
 type NumKey = "friction" | "prompts" | "tokens" | "cost_usd";
 /** Top-N sessions by a numeric field; `minPrompts` keeps one-prompt sessions out of friction rankings. */
@@ -117,8 +107,6 @@ export function topBy(rows: SessionRow[], key: NumKey, n: number, minPrompts = 0
   return rows.filter((r) => r.prompts >= minPrompts && (r[key] ?? -1) >= 0)
     .sort((a, b) => (b[key] ?? -1) - (a[key] ?? -1) || a.id.localeCompare(b.id)).slice(0, n);
 }
-/** Upper Tukey fence (Q3 + 1.5 IQR). */
-export function iqrFence(xs: number[]): number { const q1 = quantile(xs, 0.25), q3 = quantile(xs, 0.75); return q3 + 1.5 * (q3 - q1); }
 
 export interface Hist { edges: number[]; counts: number[] }
 /** Equal-width histogram over [lo, hi]; the top edge is inclusive. */
@@ -126,12 +114,6 @@ export function histogram(xs: number[], bins: number, lo: number, hi: number): H
   const edges = Array.from({ length: bins + 1 }, (_, i) => lo + ((hi - lo) * i) / bins), counts = new Array<number>(bins).fill(0);
   for (const x of xs) { if (x < lo || x > hi) continue; counts[Math.min(bins - 1, Math.floor(((x - lo) / (hi - lo)) * bins))]++; }
   return { edges, counts };
-}
-/** Histogram over log10(x + 1), for heavy-tailed counts (prompts, tokens per session). */
-export function logHistogram(xs: number[], bins: number): Hist {
-  const l = xs.map((x) => Math.log10(Math.max(0, x) + 1)), hi = Math.max(...l, 1e-9);
-  const h = histogram(l, bins, 0, hi);
-  return { edges: h.edges.map((e) => 10 ** e - 1), counts: h.counts };
 }
 
 export interface Bucket { from: string; to: string; i: number }
@@ -158,31 +140,3 @@ export function sparkSeries(rows: SessionRow[], win: Win, val: (rs: SessionRow[]
 
 export const cumulative = (xs: number[]) => xs.reduce<number[]>((a, x) => (a.push((a.at(-1) ?? 0) + x), a), []);
 
-export interface WeekShare { week: string; total: number; by: Partial<Record<Source, number>> }
-/** Sessions per tool per week; shares are by / total. */
-export function shareByWeek(rows: SessionRow[]): WeekShare[] {
-  const m = new Map<string, WeekShare>();
-  for (const r of rows) {
-    const w = weekStart(r.date), x = m.get(w) ?? { week: w, total: 0, by: {} };
-    x.total++; x.by[r.source] = (x.by[r.source] ?? 0) + 1; m.set(w, x);
-  }
-  return [...m.values()].sort((a, b) => a.week.localeCompare(b.week));
-}
-/** Weekly new vs returning projects. `all` supplies each project's first-seen date (min date over every session). */
-export function newVsReturning(rows: SessionRow[], all: SessionRow[]): { week: string; fresh: number; returning: number }[] {
-  const first = new Map<string, string>();
-  for (const r of all) if (r.project && (first.get(r.project) ?? "9999") > r.date) first.set(r.project, r.date);
-  const m = new Map<string, { week: string; fresh: Set<string>; returning: Set<string> }>();
-  for (const r of rows) {
-    if (!r.project) continue;
-    const w = weekStart(r.date), x = m.get(w) ?? { week: w, fresh: new Set<string>(), returning: new Set<string>() };
-    (weekStart(first.get(r.project) ?? r.date) === w ? x.fresh : x.returning).add(r.project); m.set(w, x);
-  }
-  return [...m.values()].sort((a, b) => a.week.localeCompare(b.week)).map((x) => ({ week: x.week, fresh: x.fresh.size, returning: x.returning.size }));
-}
-/** Applied % per week per tool; null where fewer than `minN` sessions had a prompt. */
-export function appliedByWeek(rows: SessionRow[], minN = 5): { week: string; by: Partial<Record<Source, number | null>> }[] {
-  const m = new Map<string, Map<Source, SessionRow[]>>();
-  for (const r of rows) if (r.prompts > 0) { const w = weekStart(r.date), g = m.get(w) ?? new Map(); g.set(r.source, [...(g.get(r.source) ?? []), r]); m.set(w, g); }
-  return [...m].sort(([a], [b]) => a.localeCompare(b)).map(([week, g]) => ({ week, by: Object.fromEntries([...g].map(([s, rs]) => [s, rs.length >= minN ? rs.filter((r) => r.applied).length / rs.length : null])) }));
-}

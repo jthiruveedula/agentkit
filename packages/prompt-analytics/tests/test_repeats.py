@@ -58,7 +58,7 @@ def test_deterministic():
 def test_export_repeats_are_redacted_and_features_valid():
     cfg, con, _ = synth.build_analyzed(backend="tfidf")
     d = export.build(con, cfg)
-    assert d["schema"] == "1.2" and len(d["repeats"]) <= rp.MAX_REPEATS
+    assert d["schema"] == "1.3" and len(d["repeats"]) <= rp.MAX_REPEATS
     ids = {s["id"] for s in d["sessions"]}
     for r in d["repeats"]:
         assert set(r) == {"cluster", "count", "exemplar", "sessions"}

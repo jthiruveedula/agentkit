@@ -3,6 +3,7 @@
 // Requires: `cd packages/prompt-analytics/dashboard && npx vite --port 5330` (mock data only).
 const ROOT = "__ROOT__";
 const BASE = "http://localhost:5330/";
+const W30 = "s-overview?from=2026-09-26"; // 30d window: briefing reads 3.9% -> 11.0%
 const fs = await import("node:fs/promises");
 await fs.mkdir(`${ROOT}/shots`, { recursive: true });
 
@@ -21,7 +22,7 @@ async function tag(spec, id) {
     const vis = (e) => e.getBoundingClientRect().width > 0;
     if (typeof spec === "string") el = [...document.querySelectorAll(spec)].find(vis);
     else if (spec.card) {
-      el = [...document.querySelectorAll(".card")].find((c) => (c.querySelector("h2,h3")?.textContent || "").trim().startsWith(spec.card));
+      el = [...document.querySelectorAll(".card")].find((c) => (c.querySelector(".card-h h3, .card-h h2")?.textContent || "").trim().startsWith(spec.card));
       if (el && spec.btn) el = [...el.querySelectorAll("button")].find((b) => b.textContent.trim() === spec.btn);
     } else if (spec.btn) el = [...document.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(spec.btn) && vis(b));
     if (!el) return false;
@@ -37,13 +38,14 @@ async function scrollTo(spec, pad = 104) {
     const r = document.querySelector(sel).getBoundingClientRect();
     scrollTo({ top: scrollY + r.top - pad, behavior: "instant" });
   }, { sel, pad });
-  await wait(700);
+  await wait(1700); // sections fade in on reveal
 }
 async function box(spec, id) {
   const sel = await tag(spec, id);
   return page.evaluate((sel) => {
     const r = document.querySelector(sel).getBoundingClientRect();
-    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+    const x = Math.max(0, r.x), y = Math.max(0, r.y), x2 = Math.min(1440, r.right), y2 = Math.min(900, r.bottom);
+    return { x: Math.round(x), y: Math.round(y), w: Math.round(x2 - x), h: Math.round(y2 - y) };
   }, sel);
 }
 async function click(spec, id) {
@@ -61,99 +63,83 @@ async function snap(name, boxes = {}, note = "") {
 async function open(hash = "", q = "") {
   await page.goto(`${BASE}${q || "?cap=" + Date.now()}#/${hash}`);
   await page.waitForSelector(".sec", { state: "visible" });
-  await wait(1800);
+  await wait(2200);
   await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
   await wait(900);
   await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
   await wait(400);
 }
 
-// 1 Overview
-await open("s-overview");
-await snap("overview", { kpis: 'ul[aria-label^="Totals"]', trend: "#s-trend", attention: "#s-attention" });
+const C = (t, btn) => (btn ? { card: t, btn } : { card: t });
+// 1 Overview: briefing strip, KPIs, per-week trend, needs attention
+await open(W30);
+await snap("overview", { brief: ".brief", kpis: ".kpis", trend: "#s-trend", attention: "#s-attention" });
+await scrollTo("#s-driver", 110);
+await snap("driver", { driver: "#s-driver" });
 
-// 2 Tools (router matrix)
-await scrollTo("#s-router", 100);
-await snap("tools", { router: "#s-router" });
+// 2 Tools
+await scrollTo("#s-tools", 98);
+await snap("tools", { resolved: C("Resolved rate"), struggled: C("Struggled by tool"), cost: C("Cost / resolved") });
 
-// 3 Time: calendar 2D -> 3D, hour-of-week 2D -> 3D terrain
-await scrollTo("#s-time");
-await snap("time-2d", { cal: { card: "Activity calendar" }, tog3: { card: "Activity calendar", btn: "3D" }, hours: "#s-golden" });
-await click({ card: "Activity calendar", btn: "3D" }, "click");
-await snap("time-cal3d", { cal: { card: "Activity calendar" }, tog3: { card: "Activity calendar", btn: "3D" } });
-{ // orbit: drag across the 3D calendar
-  const c = await box(".tog3 ~ *, [aria-label^='3D calendar']", "orb");
-  const x = c.x + c.w / 2, y = c.y + c.h / 2;
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  for (let i = 1; i <= 12; i++) await page.mouse.move(x + i * 14, y - i * 3);
-  await page.mouse.up();
-  await wait(900);
-  await snap("time-cal3d-orbit", { cal: { card: "Activity calendar" }, stage: "[aria-label^='3D calendar']" });
-}
-await click({ card: "Activity calendar", btn: "3D" }, "click"); // back to 2D
-await scrollTo("#s-golden", 180);
-await snap("time-hours-2d", { hours: "#s-golden", seg3d: { card: "Hour by weekday", btn: "3D" } });
-await click({ card: "Hour by weekday", btn: "3D" }, "click");
-await wait(1500);
-await snap("time-terrain3d", { hours: "#s-golden", seg3d: { card: "Hour by weekday", btn: "3D" } });
+// 3 Time: calendar 2D -> 3D, hour-of-week 3D terrain, time to resolve
+await scrollTo("#s-time", 98);
+await snap("time-2d", { cal: C("Activity calendar"), tog3: C("Activity calendar", "3D"), hours: "#s-golden" });
+await click(C("Activity calendar", "3D"), "click");
+await wait(2200);
+await snap("time-cal3d", { cal: C("Activity calendar"), tog3: C("Activity calendar", "3D") });
+await click(C("Activity calendar", "3D"), "click"); // back to 2D
+await click(C("Hour by weekday", "3D"), "click");
+await wait(1800);
+await snap("time-terrain3d", { hours: "#s-golden", seg3d: C("Hour by weekday", "3D") });
+await scrollTo(C("Time to resolve"), 110);
+await snap("time-resolve", { resolve: C("Time to resolve") });
 
 // 4 Funnel
-await scrollTo("#s-funnel");
-await snap("funnel", { stages: { card: "Stages" }, switches: { card: "Tool switches" } });
+await scrollTo("#s-funnel", 98);
+await snap("funnel", { stages: C("Session to resolved"), steps: C("Step rates"), switches: C("Tool switches") });
 
-// 5 Friction (loop breaker)
-await scrollTo("#s-friction");
-await snap("friction", { signals: { card: "Signals by tool" }, byIntent: { card: "Friction by intent" } });
-await scrollTo("#s-loopbreak", 130);
+// 5 Friction
+await scrollTo("#s-friction", 98);
+await snap("friction", { signals: C("Signals behind struggle"), byIntent: C("Retries by intent") });
+await scrollTo("#s-loopbreak", 110);
 await snap("loopbreak", { loop: "#s-loopbreak" });
 
-// 6 What works (playbook)
-await scrollTo("#s-works");
+// 6 Model fit
+await scrollTo("#s-models", 98);
+await snap("models", { grid: C("Task size"), change: C("What to change") });
+
+// 7 What works
+await scrollTo("#s-works", 98);
 await snap("works", { playbook: "#s-playbook" });
+await scrollTo(C("Quality profile"), 110);
+await snap("works-radar", { radar: C("Quality profile"), topics: C("Topics") });
 
-// 7 Exposure
-await scrollTo("#s-exposure");
-await snap("exposure", { findings: { card: "Findings by category" }, kinds: { card: "Kinds by tool" }, queue: { card: "Review queue" } });
+// 8 Recommendations
+await scrollTo("#s-recs", 98);
+await snap("recs", { next: C("Do next, in order") });
 
-// 8 Sessions: 10 rows -> 25 rows -> compact -> export menu
-await scrollTo("#s-sessions");
-await snap("sessions-10", { pager: ".pager", rows: ".pager select", dens: '[aria-label="Row density"]', exp: { btn: "Export" } });
-await page.selectOption(await tag(".pager select", "rows"), "25");
-await wait(900);
-await page.evaluate(() => { const r = document.querySelector(".pager").getBoundingClientRect(); scrollTo({ top: scrollY + r.bottom - 870, behavior: "instant" }); });
-await wait(600);
-await snap("sessions-25", { pager: ".pager", rows: ".pager select", dens: '[aria-label="Row density"]', exp: { btn: "Export" } });
-await click({ btn: "Compact" }, "click");
-await wait(500);
-await page.evaluate(() => { const r = document.querySelector(".pager").getBoundingClientRect(); scrollTo({ top: scrollY + r.bottom - 870, behavior: "instant" }); });
-await wait(600);
-await snap("sessions-compact", { pager: ".pager", dens: '[aria-label="Row density"]' });
-await scrollTo("#s-sessions");
-await snap("sessions-pre-export", { exp: { btn: "Export" } });
-await click({ btn: "Export" }, "click");
-await snap("sessions-export", { menu: '[role="menu"]', exp: { btn: "Export" } });
-await page.keyboard.press("Escape");
+// 9 Exposure review queue (masked previews)
+await scrollTo("#s-exposure", 98);
+await snap("exposure", { queue: C("Review queue") });
 
-// 9 Mind map (3D)
-await open("s-map");
-await scrollTo({ card: "Constellation" }, 98);
+// 10 Sessions drilldown (billing-api / bugfix) for the site
+await open("s-sessions?from=2026-09-26&prj=billing-api&int=bugfix");
+await scrollTo("#s-sessions", 98);
+await snap("drilldown", { list: C("All sessions in view") });
+
+// 11 Mind map (3D)
+await open(W30.replace("s-overview", "s-map"));
+await scrollTo(C("How your work connects"), 98);
 await wait(2500);
-await snap("map", { map: { card: "Constellation" } });
+await snap("map", { map: C("How your work connects") });
 
-// 10 Command palette
-await open("s-overview");
+// 12 Command palette
+await open(W30);
 await page.keyboard.press("ControlOrMeta+k");
-await page.waitForSelector('[role="dialog"][aria-label="Command palette"]', { state: "visible" });
+await page.waitForSelector('[role="dialog"]', { state: "visible" });
 await wait(600);
-await snap("palette", { palette: '[role="dialog"][aria-label="Command palette"]' });
+await snap("palette", { palette: '[role="dialog"]' });
 await page.keyboard.press("Escape");
-
-// 11 Single-tool sample
-await open("s-tools", "?sample=single-claude");
-await snap("single-top", { kpis: 'ul[aria-label^="Totals"]' });
-await scrollTo("#s-tools");
-await snap("single-tools", { tools: "#s-tools" });
 
 await fs.writeFile(`${ROOT}/shots.json`, JSON.stringify({ viewport: [1440, 900], shots }, null, 1));
 console.log("done", shots.length);
