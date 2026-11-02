@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/jthiruveedula/agentkit/compare/v0.20.0...v0.21.0) (2026-11-02)
+
+
+### Features
+
+* **prompt-analytics:** liquid-glass briefing dashboard with model fit ([#100](https://github.com/jthiruveedula/agentkit/issues/100)) ([9e89e1a](https://github.com/jthiruveedula/agentkit/commit/9e89e1a157b078af271cc80bfd5fef58c4ae9bf1))
+
 ## [0.20.0](https://github.com/jthiruveedula/agentkit/compare/v0.19.0...v0.20.0) (2026-11-01)
 
 
