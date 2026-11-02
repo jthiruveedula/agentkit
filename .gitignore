@@ -23,3 +23,6 @@ manifest.json
 .coverage
 .claude/worktrees/
 external/updates.json
+
+# prompt-analytics rebuild: internal review notes, wireframes and shots stay local
+docs/prompt-analytics/rebuild/

@@ -1,4 +1,5 @@
-// Shared rate metrics for the Briefing. Pure. Definitions: docs/prompt-analytics/rebuild/11-metrics.md, decisions 1-2 of 20-build-plan.md.
+// Shared rate metrics for the Briefing. Pure.
+// Struggled = sessions with a prompt where loops >= 3 or friction >= 0.5.
 import type { SessionRow } from "../data/types";
 import { diffCI } from "./stats";
 
@@ -23,7 +24,7 @@ export function diffRate(a: Rate, b: Rate): { diff: number; lo: number; hi: numb
   return { diff, lo, hi };
 }
 
-/** Decision #2: a change is real when the CI excludes 0 and it moved >= 3 pts and >= 10% relative to before. */
+/** A change is real when the CI excludes 0 and it moved >= 3 pts and >= 10% relative to before. */
 export function isReal(a: Rate, b: Rate): boolean {
   const d = diffRate(a, b);
   if (!d || b.p === null) return false;

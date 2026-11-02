@@ -1,4 +1,4 @@
-// Shift-share attribution of a struggled-rate change (docs 11-metrics.md section 3, decision #3). Pure.
+// Shift-share attribution of a struggled-rate change: mix vs rate per segment, sums exact. Pure.
 // M = sum_k w_k r_k with w_k = D_k/D (sessions with a prompt), r_k = struggled share of segment k.
 // Per segment: mix = (w1-w0)(r0-M0), rate = w1(r1-r0); sum over all segments (Other included) = M1-M0 exactly.
 // New segment: r0 := r1 (rate 0, all mix). Vanished: r1 := r0.
