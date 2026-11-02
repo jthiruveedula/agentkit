@@ -6,7 +6,7 @@ import { fxOn } from "./lib/hooks";
 import { StoreProvider, useStore } from "./state";
 import type { Filter } from "./lib/filter";
 import { SECTIONS, spyLocked } from "./lib/hash";
-import { Header, Nav } from "./components/Shell";
+import { Header, Nav, Rail, railCollapsed } from "./components/Shell";
 import { Overview } from "./components/Overview";
 import { MindMap } from "./components/MindMap";
 import { Tools } from "./components/Tools";
@@ -14,6 +14,7 @@ import { Time } from "./components/Time";
 import { Funnel } from "./components/Funnel";
 import { Friction } from "./components/Friction";
 import { Works } from "./components/Works";
+import { ModelFit } from "./components/ModelFit";
 import { Exposure } from "./components/Exposure";
 import { Recommend } from "./components/Recommend";
 import { Sessions } from "./components/Sessions";
@@ -41,12 +42,28 @@ function initial(): State {
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
   const { d, panel, crumbs, closePanel, clearAfter, setSection, secs, caps } = useStore();
   useReveal();
+  const [col, setCol] = useState(railCollapsed);
+  const [menu, setMenu] = useState(false);
+
+  useEffect(() => {   // liquid-glass specular follows the mouse over a card (html.fx only; one rAF per move)
+    let raf = 0, e: PointerEvent | null = null;
+    const frame = () => {
+      raf = 0; const t = (e?.target as Element | null)?.closest?.<HTMLElement>(".card, .kpi");
+      if (!e || !t || !fxOn()) return;
+      const r = t.getBoundingClientRect();
+      t.style.setProperty("--mx", `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
+      t.style.setProperty("--my", `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
+    };
+    const move = (ev: PointerEvent) => { if (ev.pointerType !== "mouse" || !fxOn()) return; e = ev; if (!raf) raf = requestAnimationFrame(frame); };
+    document.addEventListener("pointermove", move, { passive: true });
+    return () => { document.removeEventListener("pointermove", move); cancelAnimationFrame(raf); };
+  }, []);
 
   useEffect(() => {   // Esc: close the panel first, else drop the last selection
     const on = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       const t = e.target as Element | null;
-      if (t?.closest?.("select, input, .pop, .palette, .wrap, .menu") || document.querySelector(".rq-box")) return;
+      if (t?.closest?.("select, input, .pop, .palette, .wrap, .menu") || document.querySelector(".mk.on")) return;
       if (panel !== "none") closePanel(); else if (crumbs.length) clearAfter(crumbs.length - 2);
     };
     window.addEventListener("keydown", on);
@@ -78,20 +95,25 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
   return (
     <div className="app" data-panel={panel}>
       <a className="skip" href="#main">Skip to content</a>
-      <Header d={d} onData={onData} />
-      {d.engine.mode === "basic" && !caps.empty && <div className="banner" role="status">Basic mode: topics are grouped by keywords; the Playbook and topic views need the ML engine. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to unlock them.</> : null}</div>}
-      <div className="frame">
-        <Nav />
-        <main id="main" tabIndex={-1}>
-          {caps.empty ? <EmptyState /> : <>
-            <OtherTools />
-            {caps.tooSmall && <p className="hint unlock" role="status">{unlockText(caps, secs.has("s-time"))}</p>}
-            {secs.has("s-overview") && <Overview />}{secs.has("s-tools") && <Tools />}{secs.has("s-time") && <Time />}{secs.has("s-funnel") && <Funnel />}
-            {secs.has("s-friction") && <Friction />}{secs.has("s-works") && <Works />}{secs.has("s-exposure") && <Exposure />}{secs.has("s-recs") && <Recommend />}
-            {secs.has("s-sessions") && <Sessions />}{secs.has("s-map") && <MindMap />}
-          </>}
-        </main>
+      <div className="shell" data-col={col || undefined}>
+        <Rail col={col} setCol={setCol} open={menu} setOpen={setMenu} />
+        <div className="content">
+          <Header d={d} onData={onData} onMenu={() => setMenu(!menu)} menuOpen={menu} />
+          {d.engine.mode === "basic" && !caps.empty && <div className="banner" role="status">Basic mode: topics are grouped by keywords; the Playbook and topic views need the ML engine. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to unlock them.</> : null}</div>}
+          <div className="frame">
+            <main id="main" tabIndex={-1}>
+              {caps.empty ? <EmptyState /> : <>
+                <OtherTools />
+                {caps.tooSmall && <p className="hint unlock" role="status">{unlockText(caps, secs.has("s-time"))}</p>}
+                {secs.has("s-overview") && <Overview />}{secs.has("s-tools") && <Tools />}{secs.has("s-time") && <Time />}{secs.has("s-funnel") && <Funnel />}
+                {secs.has("s-friction") && <Friction />}{secs.has("s-works") && <Works />}{secs.has("s-models") && <ModelFit />}{secs.has("s-exposure") && <Exposure />}{secs.has("s-recs") && <Recommend />}
+                {secs.has("s-sessions") && <Sessions />}{secs.has("s-map") && <MindMap />}
+              </>}
+            </main>
+          </div>
+        </div>
       </div>
+      <Nav part="bar" />
       <Panel />
       <Palette /><WrappedHost /><Toaster /><FxHost />
     </div>

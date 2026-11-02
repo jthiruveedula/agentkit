@@ -6,7 +6,7 @@ import type { Cmp } from "./compare";
 /** Sessions table view state, all optional so a bare hash means: page 1, 10 rows, comfortable, default sort.
  *  pg = page (1-based), pgs = rows per page (0 = All), dens = "c" for compact, so = sort token ("cost-d"). */
 export interface Nav { f: Filter; sel?: string; list: boolean; cmp: Cmp; pg?: number; pgs?: number; dens?: "c"; so?: string }
-export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure", "s-recs", "s-sessions", "s-map"];
+export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-models", "s-exposure", "s-recs", "s-sessions", "s-map"];
 /** Card anchors inside a section: linkable and scroll targets, but the nav / scroll-spy highlight their section. */
 export const ANCHORS: Record<string, string> = { "s-trend": "s-overview", "s-attention": "s-overview", "s-playbook": "s-works", "s-loopbreak": "s-friction" };
 /** Scroll-spy lock: goto() pins the active nav item to the clicked section until the smooth scroll ends (scrollend, or ~900 ms). */
@@ -39,7 +39,7 @@ export function fromHash(h: string): { nav: Nav; sec: string } {
   const str = (k: string) => p.get(k) || undefined;
   const f: Filter = {};
   const put = <K extends keyof Filter>(k: K, v: Filter[K]) => { if (v !== undefined) f[k] = v; };
-  put("source", str("src") as never); put("intent", str("int") as never); put("project", str("prj")); put("from", str("from")); put("to", str("to"));
+  put("source", str("src") as never); put("intent", str("int") as never); put("project", p.get("prj") ?? undefined); put("from", str("from")); put("to", str("to"));
   put("cluster", num("cl")); put("q", str("q")?.slice(0, 80)); put("stage", num("st")); put("stageExact", num("sx")); put("loops", num("lp"));
   if (p.get("ap") === "1" || p.get("ap") === "0") f.applied = p.get("ap") === "1";
   const fr = /^([\d.]+)-([\d.]+)$/.exec(p.get("fr") ?? "");

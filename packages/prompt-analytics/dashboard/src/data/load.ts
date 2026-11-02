@@ -68,7 +68,7 @@ export function normalize(raw: unknown): DashboardData {
   const cut = (k: string) => nums(gp[k]).slice(0, n);
 
   return {
-    schema: "1.0",
+    schema: (["1.0", "1.1", "1.2", "1.3"].includes(schema) ? schema : "1.3") as DashboardData["schema"],
     generated_at: String(raw.generated_at ?? ""),
     range: { start: String(range.start ?? ""), end: String(range.end ?? "") },
     engine: normEngine(raw.engine),
@@ -113,6 +113,8 @@ export function normalize(raw: unknown): DashboardData {
       reached_stage: num(r.reached_stage), applied: !!r.applied, loops: num(r.loops), friction: num(r.friction),
       cluster: num(r.cluster, -1), title: String(r.title ?? "").slice(0, 160),
       ...(Array.isArray(r.features) ? { features: r.features.map(String) } : {}),
+      ...("ttr_min" in r ? { ttr_min: typeof r.ttr_min === "number" && Number.isFinite(r.ttr_min) && r.ttr_min >= 0 ? r.ttr_min : null } : {}),
+      ...("model" in r ? { model: typeof r.model === "string" && r.model ? r.model : null } : {}),
     })),
     ...(Array.isArray(raw.repeats) ? { repeats: normRepeats(raw.repeats) } : {}),
     insights: arr(raw.insights),

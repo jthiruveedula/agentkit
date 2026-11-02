@@ -19,9 +19,9 @@ export function Section({ id, title, q, actions, children }: { id: string; title
 }
 
 /** Titled block on the grid. `meta` is the one-line method/scope caption ("all sessions" marks aggregates that ignore filters). */
-export function Card({ title, meta, span = 6, actions, children, id }: { title: string; meta?: ReactNode; span?: Span; actions?: ReactNode; children: ReactNode; id?: string }) {
+export function Card({ title, meta, span = 6, actions, children, id, src }: { title: string; meta?: ReactNode; span?: Span; actions?: ReactNode; children: ReactNode; id?: string; src?: string }) {
   return (
-    <div className={`card s${span}`} id={id} role="group" aria-label={title}>
+    <div className={`card s${span}`} id={id} role="group" aria-label={title} data-src={src}>
       <header className="card-h">
         <h3>{title}</h3>
         {meta ? <span className="meta">{meta}</span> : null}
@@ -66,7 +66,6 @@ export function Count({ text, className, as: Tag = "span", quick }: { text: stri
 }
 
 export const Empty = ({ children = "Nothing in this selection" }: { children?: ReactNode }) => <p className="empty">{children}</p>;
-export const Note = ({ children }: { children: ReactNode }) => <p className="note">{children}</p>;
 
 export interface BarRowData {
   key: string; label: ReactNode; value: number; text: ReactNode; sub?: ReactNode;
@@ -122,7 +121,6 @@ export function Segmented<T extends string>({ label, options, value, onChange, q
 }
 
 export const pct = (n: number, total: number) => (total > 0 ? `${Math.round((n / total) * 100)}%` : "0%");
-export const nOf = (n: number) => `n=${fmtInt(n)}`;
 
 export interface ColData { ent?: Ent; key: string; label: string; segs: { v: number; color: string }[]; active?: boolean; onClick?: () => void; aria: string }
 /** Vertical stacked columns, one button each (roving tabindex: one tab stop, arrows move). Heights are relative to the tallest column. */

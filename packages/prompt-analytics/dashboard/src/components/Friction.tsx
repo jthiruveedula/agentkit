@@ -3,86 +3,50 @@ import { useStore } from "../state";
 import { MAX_LOOPS } from "../lib/filter";
 import { histogram, median, quantile, topBy } from "../lib/compare";
 import { fmtDate, fmtInt, fmtPct } from "../lib/format";
-import { SOURCES, srcColor, srcLabel } from "../lib/palette";
-import { useRoving } from "../lib/hooks";
+import { srcColor } from "../lib/palette";
 import { BarList, Card, Cols, DataTable, Empty, Section, Segmented } from "./ui";
 import { loopCurve, loopHeadline, LOOP_MIN_N, rephraseEffect, stopRule } from "../lib/loops";
 import { useSize } from "../lib/hooks";
 import { pts } from "../lib/stats";
 import { Repeats } from "./Repeats";
+import { Dumb } from "./Time";
+import type { SessionRow } from "../data/types";
+import "./investigate.css";
 
 const SIGNALS = [
   { id: "correction", text: "Correction" }, { id: "frustration", text: "Frustration" }, { id: "rephrase", text: "Rephrase" },
   { id: "abandoned", text: "Abandoned" }, { id: "interrupted", text: "Interrupted" },
 ] as const;
 
-/** One tool in view: its own signal rates as bars, no tool comparison. */
-function SignalsOne() {
+/** Share of prompts with each friction signal, pooled over the tools in view (weighted by prompts). Bars scale to the largest. */
+function Signals() {
   const { d, caps } = useStore();
-  const x = d.friction.rates.find((r) => r.source === caps.sources[0]);
-  if (!x) return null;
+  const rs = d.friction.rates.filter((r) => caps.sources.includes(r.source)), n = rs.reduce((a, r) => a + r.n, 0);
   return (
-    <Card title="Friction signals" meta={`share of your ${caps.names} prompts with each signal, all sessions`} span={7}>
-      <BarList label="Friction signals" rows={SIGNALS.map((sg) => ({ key: sg.id, label: sg.text, value: x[sg.id], color: "var(--accent)", text: fmtPct(x[sg.id], 1), aria: `${sg.text}: ${fmtPct(x[sg.id], 1)} of ${fmtInt(x.n)} prompts` }))} />
-      <p className="note">n={fmtInt(x.n)} prompts. Ignores filters.</p>
+    <Card src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={7}>
+      {n === 0 ? <Empty /> : (
+        <BarList label="Friction signals" rows={SIGNALS.map((sg) => { const x = rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n;
+          return { key: sg.id, label: sg.text, value: x, color: sg.id === "rephrase" ? "var(--bad)" : "var(--accent)", text: fmtPct(x, 1), aria: `${sg.text}: ${fmtPct(x, 1)} of ${fmtInt(n)} prompts` }; })} />
+      )}
     </Card>
   );
 }
 
-function Signals() {
-  const { caps } = useStore();
-  return caps.multiTool ? <SignalsMany /> : <SignalsOne />;
-}
-
-function SignalsMany() {
-  const { d, f, drill, caps } = useStore();
-  const rates = d.friction.rates.filter((r) => caps.sources.includes(r.source));
-  const srcs = SOURCES.filter((s) => rates.some((r) => r.source === s));
-  const peak = Math.max(...rates.flatMap((r) => SIGNALS.map((s) => r[s.id])), 0.01);
-  const { group, mark } = useRoving(SIGNALS.length * srcs.length, 1, Math.max(1, srcs.length));
+/** Mean rephrase loops per session by intent, previous period against now. More retries = red. */
+function ByIntent() {
+  const { v, prior } = useStore();
+  const mean = (rows: SessionRow[], k: string) => { const xs = rows.filter((r) => r.intent === k && r.prompts > 0); return xs.length ? xs.reduce((a, r) => a + r.loops, 0) / xs.length : null; };
+  const rows = v.frictionByIntent.map((x) => ({ k: x.intent, n: x.n, b: mean(v.rows, x.intent) ?? 0, a: prior ? mean(prior.v.rows, x.intent) : null }));
+  const max = Math.max(...rows.flatMap((x) => [x.a ?? 0, x.b]), 0.5) * 1.15;
   return (
-    <Card title="Signals by tool" meta="share of prompts with each signal, all sessions" span={7}>
-      {rates.length === 0 ? <Empty /> : (
+    <Card src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={5}>
+      {rows.length === 0 ? <Empty /> : (
         <>
-          <div className="strips" role="group" aria-label="Friction signals by tool. Each dot filters that tool" {...group} data-sel={f.source ? "1" : undefined}>
-            {SIGNALS.map((sg, r) => (
-              <div key={sg.id} className="strip">
-                <span className="strip-l">{sg.text}</span>
-                <span className="strip-t">
-                  {srcs.map((s, c) => {
-                    const x = rates.find((q) => q.source === s)!, val = x[sg.id];
-                    return (
-                      <button key={s} type="button" className="dot" data-on={f.source === s || undefined} aria-pressed={f.source === s} style={{ left: `${(val / peak) * 100}%`, "--c": srcColor(s) } as React.CSSProperties}
-                        aria-label={`${srcLabel(s)}, ${sg.text.toLowerCase()}: ${fmtPct(val, 1)} of ${fmtInt(x.n)} prompts. Filter to this tool`} title={`${srcLabel(s)}: ${fmtPct(val, 1)}`}
-                        onClick={() => drill({ source: s })} {...mark(r * srcs.length + c)} />
-                    );
-                  })}
-                </span>
-              </div>
-            ))}
-            <div className="strip"><span className="strip-l" /><span className="strip-x"><b>0%</b><b>{fmtPct(peak)}</b></span></div>
-          </div>
-          <ul className="legend">{srcs.map((s) => <li key={s} style={{ "--c": srcColor(s) } as React.CSSProperties}>{srcLabel(s)}</li>)}</ul>
-          <DataTable caption="Friction signals by tool" head={["Tool", ...SIGNALS.map((s) => s.text), "Prompts"]} rows={rates.map((r) => [srcLabel(r.source), ...SIGNALS.map((s) => fmtPct(r[s.id], 1)), r.n])} />
+          <Dumb max={max} rows={rows.map((x) => ({ k: x.k, label: x.k, name: x.k, a: x.a, b: x.b, fa: x.a === null ? "" : x.a.toFixed(1), fb: x.b.toFixed(1), bad: x.a !== null && Math.abs(x.b - x.a) >= 0.15 ? x.b > x.a : null }))} />
+          <p className="note">Sessions: {rows.map((x) => `${x.k} ${x.n}`).join(", ")}.</p>
+          <DataTable caption="Mean retries per session by intent" head={["Intent", "Now", "Before"]} rows={rows.map((x) => [x.k, x.b.toFixed(2), x.a === null ? "-" : x.a.toFixed(2)])} />
         </>
       )}
-    </Card>
-  );
-}
-
-function ByIntent() {
-  const { d, v, f, drill } = useStore();
-  const rows = v.frictionByIntent, tot = rows.reduce((a, r) => a + r.n, 0);
-  const mean = tot ? rows.reduce((a, r) => a + r.friction * r.n, 0) / tot : 0;
-  return (
-    <Card title="Friction by intent" meta={d.engine.methods.friction ?? "mean friction, 0 to 1"} span={5}>
-      {rows.length === 0 ? <Empty /> : (
-        <BarList label="Friction by intent" max={1} rows={rows.map((x) => ({
-          key: x.intent, label: x.intent, value: x.friction, color: "var(--accent)", active: f.intent === x.intent, text: x.friction.toFixed(2), sub: `n=${fmtInt(x.n)}`, mark: mean,
-          aria: `${x.intent}: friction ${x.friction.toFixed(2)}, n=${x.n}. Filter to this intent`, onClick: () => drill({ intent: x.intent as never }),
-        }))} />
-      )}
-      {rows.length > 0 && <p className="note">Tick = overall mean {mean.toFixed(2)}.</p>}
     </Card>
   );
 }

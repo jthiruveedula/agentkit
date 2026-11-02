@@ -1,7 +1,8 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import "./investigate.css";
 import { useStore } from "../state";
 import { addDays, weekStart } from "../lib/filter";
-import { bucketSeries, buckets, cumulative, METRICS, monthProjection } from "../lib/compare";
+import { bucketSeries, buckets, cumulative, median, METRICS, monthProjection } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { golden, GOLD_MIN_N } from "../lib/econ";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
@@ -9,9 +10,52 @@ import { useRoving } from "../lib/hooks";
 import { billboard, clampPitch, fitScale, DEFAULT_VIEW, describeView, edgeFade, inertia, nearestYaw, viewTransform, wrapYaw, zoomAround } from "../lib/calorbit";
 import type { TCell } from "./Terrain";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
-import { LineChart, Ramp, River } from "./charts";
+import { LineChart, River } from "./charts";
 import { tokensPerApplied } from "../lib/compare";
 import { unpricedNote } from "../lib/capabilities";
+import { ToolLogo } from "./Shell";
+import type { SessionRow } from "../data/types";
+
+export const toolName = (k: string) => <><ToolLogo source={k} size={18} />{srcLabel(k)}</>;
+
+export interface DumbRow { k: string; label: ReactNode; a: number | null; b: number; fa: string; fb: string; bad?: boolean | null; name: string }
+/** Dumbbell: grey dot = before, coloured dot = now. `a` null = no prior period, now only. bad: true red, false green, null neutral. */
+export function Dumb({ rows, max }: { rows: DumbRow[]; max: number }) {
+  return (
+    <div className="dbs">{rows.map((r) => {
+      const tn = r.bad == null ? "" : r.bad ? "bad" : "good", pa = ((r.a ?? r.b) / max) * 100, pb = (r.b / max) * 100;
+      return (
+        <div key={r.k} className="db"><span>{r.label}</span>
+          <div className="dbt" role="img" aria-label={r.a === null ? `${r.name}: ${r.fb}` : `${r.name}: ${r.fa} before, ${r.fb} now`}>
+            {r.a !== null && <><i className={`seg ${tn}`} style={{ left: `${Math.min(pa, pb)}%`, width: `${Math.abs(pb - pa)}%` }} /><i className="p" style={{ left: `${pa}%` }} /></>}
+            <i className={`c ${tn}`} style={{ left: `${pb}%` }} />
+          </div>
+          <b>{r.a === null ? r.fb : `${r.fa} \u2192 ${r.fb}`}</b>
+        </div>
+      );
+    })}</div>
+  );
+}
+
+const ttrMed = (rows: SessionRow[]) => { const xs = rows.filter((r) => r.applied && r.ttr_min != null).map((r) => r.ttr_min as number); return xs.length ? { m: median(xs), n: xs.length } : null; };
+/** Median minutes to the last applied edit, resolved sessions only, now against the previous period. Slower = red. */
+function TimeToResolve() {
+  const { v, prior, caps } = useStore();
+  const rows = useMemo(() => {
+    const keys = caps.multiTool ? v.sources.map((t) => t.key) : [];
+    return [{ k: "all", label: "All resolved", name: "All resolved", sel: (_: SessionRow) => true }, ...keys.map((k) => ({ k, label: toolName(k), name: srcLabel(k), sel: (r: SessionRow) => r.source === k }))]
+      .map((x) => ({ ...x, now: ttrMed(v.rows.filter(x.sel)), was: prior ? ttrMed(prior.v.rows.filter(x.sel)) : null })).filter((x) => x.now);
+  }, [v, prior, caps.multiTool]);
+  const max = Math.max(...rows.flatMap((x) => [x.now!.m, x.was?.m ?? 0]), 1) * 1.15;
+  return (
+    <Card src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={12}>
+      {rows.length === 0 ? <Empty>No resolved session with a time in view.</Empty> : (
+        <Dumb max={max} rows={rows.map((x) => ({ k: x.k, label: x.label, name: x.name, a: x.was?.m ?? null, b: x.now!.m, fa: x.was ? x.was.m.toFixed(1) : "", fb: x.now!.m.toFixed(1),
+          bad: x.was && Math.abs(x.now!.m - x.was.m) > x.was.m * 0.05 ? x.now!.m > x.was.m : null }))} />
+      )}
+    </Card>
+  );
+}
 
 const Terrain = lazy(() => import("./Terrain"));
 type M = "sessions" | "prompts" | "cost";
@@ -173,7 +217,7 @@ function CalGrid() {
   useEffect(() => { const st = stage.current; if (!st) return; const on = (e: Event) => setAct((e as CustomEvent<boolean>).detail); st.addEventListener("cal-active", on); return () => { st.removeEventListener("cal-active", on); setAct(false); }; }, [three]);
   const months = days.filter((x) => x.i % 7 === 0 && x.date.slice(8, 10) <= "07");
   return (
-    <Card title="Activity calendar" meta="click a day, shift-click to extend" span={8}
+    <Card src="calendar \u00b7 sessions per day" title="Activity calendar" meta="click a day, shift-click to extend" span={8}
       actions={<><Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, ...(caps.hasCost ? [{ id: "cost" as const, text: "Cost" }] : [])]} />
         <button type="button" className="btn tog3" aria-pressed={three} onClick={() => setThree(!three)} title="Raise each day into a column, height by value">3D</button></>}>
       {v.calendar.length === 0 ? <Empty /> : (
@@ -210,7 +254,7 @@ function CalGrid() {
 
 function Calendar() {
   const { d } = useStore();
-  return d.range.end ? <CalGrid /> : <Card title="Activity calendar" span={8}><Empty /></Card>;
+  return d.range.end ? <CalGrid /> : <Card src="calendar" title="Activity calendar" span={8}><Empty /></Card>;
 }
 
 function HourWeek() {
@@ -234,7 +278,7 @@ function HourWeek() {
     </Suspense>
   );
   return (
-    <Card id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
+    <Card src="hour_week \u00b7 all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
       actions={<>{gold && <Segmented quiet label="Heatmap shows" value={mode} onChange={setMode} options={[{ id: "prompts", text: "Prompts" }, { id: "success", text: "Success" }]} />}
         <span className="tog3d"><Segmented quiet label="Heatmap view" value={view} onChange={setView} options={[{ id: "2d", text: "2D" }, { id: "3d", text: "3D" }]} /></span></>}>
       {d.hour_week.length === 0 ? <Empty /> : succ ? (
@@ -280,7 +324,7 @@ function Spend() {
   const unpriced = SOURCES.filter((s) => v.sources.some((t) => t.key === s && t.cost === null));
   const weeks = v.weeks;
   return (
-    <Card title={caps.multiTool ? "Cost by tool, weekly" : "Cost, weekly"} meta={caps.multiTool ? "priced tools only" : `your ${caps.names} sessions`} span={7}>
+    <Card src="cost_river \u00b7 priced only" title={caps.multiTool ? "Cost by tool, weekly" : "Cost, weekly"} meta={caps.multiTool ? "priced tools only" : `your ${caps.names} sessions`} span={7}>
       <River weeks={weeks} sel={f.source} label="Weekly cost by tool. Click a band to filter a tool, a column to filter a week" fmt={fmtUSD} height={200}
         onBand={(s) => drill({ source: s as never })} onWeek={(i) => drill({ from: weeks[i].week, to: addDays(weeks[i].week, 6) })} activeWeek={(i) => f.from === weeks[i].week} />
       {caps.multiTool && <ul className="legend">
@@ -301,7 +345,7 @@ function Cumulative() {
   const labels = bks.map((b) => fmtDate(b.from));
   const priced = cur.length > 0 && cur[cur.length - 1] > 0;
   return (
-    <Card title="Cumulative cost" meta="this period against the previous one" span={5}>
+    <Card src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={5}>
       {!priced ? <Empty>No priced sessions in this period.</Empty> : (
         <>
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
@@ -322,7 +366,7 @@ function TokenEfficiency() {
   const cur = useMemo(() => bucketSeries(v.rows, win, 7, (rs) => tokensPerApplied(rs) ?? 0), [v.rows, win]);
   const labels = bks.map((b) => fmtDate(b.from));
   return (
-    <Card id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={12}>
+    <Card src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={12}>
       {cur.every((x) => x === 0) ? <Empty>No session applied a change in this period.</Empty> : (
         <>
           <LineChart label="Tokens per applied change by week. Click a week to filter it" labels={labels} fmt={fmtCompact} height={180}
@@ -339,7 +383,7 @@ export function Time() {
   const { caps } = useStore();
   return (
     <Section id="s-time" title="Time" q={caps.hasCost ? "When and how much?" : "When does the work happen?"}>
-      <Calendar /><HourWeek />{caps.hasCost ? <><Spend /><Cumulative /></> : <TokenEfficiency />}
+      <Calendar /><HourWeek />{caps.hasCost ? <><Spend /><Cumulative /></> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
     </Section>
   );
 }

@@ -1,0 +1,91 @@
+/* Govern / Optimise / Explore sections: What works, Recommendations, Exposure review queue, Mind map. Locked preview look; light only.
+   Glass edges come from the global .card rule; effects here are gated on prefers-reduced-motion. */
+
+/* shared: glass tags and buttons inside these sections */
+.todo .tag, .xs .tag, .best .link { border: 1px solid var(--rim); background: oklch(1 0 0 / 0.55); box-shadow: inset 0 1px 0 #fff; }
+.todo .tag, .xs .tag { height: auto; padding: 1px 8px; border-radius: 999px; }
+.tag.good { color: var(--good); border-color: color-mix(in oklch, var(--good) 35%, transparent); background: color-mix(in oklch, var(--good) 10%, oklch(1 0 0 / 0.6)); }
+.xs .tag[data-cat] { border-color: color-mix(in oklch, var(--c) 45%, transparent); background: color-mix(in oklch, var(--c) 10%, oklch(1 0 0 / 0.6)); color: var(--ink); }
+[data-cat="secret"] { --c: var(--warn-secret); } [data-cat="pii"] { --c: var(--warn-pii); } [data-cat="phi"] { --c: var(--warn-phi); }
+
+/* Recommendations: ordered actions */
+.todo { display: grid; gap: var(--s2); counter-reset: n; }
+.todo li { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: 10px var(--s3); border-radius: 16px; border: 1px solid var(--rim);
+  background: linear-gradient(160deg, oklch(1 0 0 / 0.3), oklch(1 0 0 / 0.06)); box-shadow: inset 0 1px 0 #fff; }
+.todo .ic { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: #fff;
+  background: linear-gradient(135deg, oklch(0.66 0.09 var(--hue)), oklch(0.54 0.11 calc(var(--hue) + 25))); box-shadow: inset 0 1px 0 #fff8, 0 6px 14px -8px oklch(0.5 0.2 var(--hue)); }
+.todo .ic svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.todo h4 { font: 600 14px/20px var(--sans); }
+.todo p { overflow-wrap: anywhere; }
+.todo .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.todo .meta { margin-top: 2px; }
+.todo .btn { justify-self: end; }
+.todo .btn.primary { background: linear-gradient(180deg, oklch(0.64 0.2 268), oklch(0.5 0.22 270)); border-color: oklch(0.7 0.15 268 / 0.6); color: #fff; font-weight: 600; }
+
+/* What works */
+.radar { display: block; width: 100%; max-width: 380px; margin: 0 auto; overflow: visible; }
+.radar .rg polygon { fill: none; stroke: var(--line-2); }
+.radar .rtop { fill: none; stroke: var(--prior); stroke-width: 2; stroke-dasharray: 5 4; }
+.radar .ryou { fill: color-mix(in oklch, var(--accent) 22%, transparent); stroke: var(--accent); stroke-width: 2.5; }
+.radar .rl text { font-size: 11px; fill: var(--muted); text-transform: capitalize; }
+.rl-key { justify-content: center; }
+.rl-key li::before { display: none; }
+.rl-key li::after { content: ""; width: 18px; border-top: 3px solid var(--accent); }
+.rl-key .lk-top::after { border-top: 2px dashed var(--prior); }
+.best { width: 100%; }
+.best th { text-align: left; font: 600 12px var(--sans); color: var(--muted); padding: 4px 8px; }
+.best td { padding: 8px; border-top: 1px solid oklch(1 0 0 / 0.7); }
+.best .n { text-align: right; }
+.best .link { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; text-decoration: none; text-align: left; white-space: normal; }
+.best .link:hover { border-color: var(--accent); }
+.best .lg { flex: none; }
+.tw { overflow-x: auto; }
+
+/* Exposure: summary bar, filters, session groups */
+.xsum { display: flex; height: 16px; border-radius: 999px; overflow: hidden; background: oklch(1 0 0 / 0.4); box-shadow: inset 0 2px 4px oklch(0.4 0.04 262 / 0.22), 0 1px 0 #fff; }
+.xsum i { display: block; height: 100%; background: var(--c); box-shadow: inset 0 1px 0 #fff7, inset 0 -2px 2px oklch(0.2 0.05 262 / 0.18); }
+.xl { display: flex; flex-wrap: wrap; gap: var(--s4); margin: 0 0 var(--s3); font-size: 13px; color: var(--muted); }
+.xl b { color: var(--ink); }
+.xl i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.xf { display: flex; flex-wrap: wrap; gap: 10px; }
+.seg3 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: oklch(1 0 0 / 0.3); border: 1px solid var(--rim); box-shadow: inset 0 1px 2px oklch(0.4 0.04 262 / 0.14); }
+.fp { font-size: 13px; color: var(--muted); border: 1px solid transparent; border-radius: 999px; padding: 4px 12px; min-height: 30px; }
+.fp:hover { color: var(--ink); }
+.fp[aria-pressed="true"] { color: var(--ink); font-weight: 600; background: linear-gradient(180deg, oklch(1 0 0 / 0.85), oklch(0.95 0.02 262 / 0.55)); border-color: var(--rim); box-shadow: inset 0 1px 0 #fff, 0 3px 8px -4px oklch(0.4 0.05 262 / 0.4); }
+.xs { margin-top: var(--s3); padding: 12px 14px; border-radius: 18px; border: 1px solid var(--rim); background: linear-gradient(155deg, oklch(1 0 0 / 0.34), oklch(1 0 0 / 0.1)); box-shadow: var(--gshadow); }
+.xh { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.xh .tt { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 0 1 auto; }
+.xh .m { color: var(--muted); font-size: 13px; }
+.xh .tag { display: inline-flex; align-items: center; gap: 6px; }
+.xh .btn { margin-left: auto; }
+.xl1 { margin-top: var(--s2); }
+.xf1 { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid oklch(1 0 0 / 0.7); }
+.xf1.done { opacity: 0.6; }
+.xk { display: flex; flex-wrap: wrap; gap: 4px; }
+.xm { min-width: 0; display: grid; gap: 4px; justify-items: start; }
+.mk { max-width: 100%; padding: 3px 8px; border-radius: 8px; font: 13px var(--mono); overflow-wrap: anywhere; background: oklch(1 0 0 / 0.45); border: 1px solid var(--rim); filter: blur(4.5px); user-select: none; }
+.mk.on { filter: none; user-select: text; }
+.mk .chip { margin: 0 2px; }
+.xbox { max-width: 100%; display: grid; gap: 4px; }
+.xbox p { overflow-wrap: anywhere; padding: var(--s2); background: var(--sunk); border-radius: var(--r2); font: 13px var(--mono); }
+.xbox mark { background: color-mix(in oklch, var(--warn-secret) 25%, transparent); color: inherit; padding: 0 var(--s0); }
+.xnone, .xnote { color: var(--muted); }
+.xa { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.xb { font-size: 12.5px; padding: 3px 11px; min-height: 28px; border-radius: 999px; border: 1px solid var(--rim); background: linear-gradient(180deg, oklch(1 0 0 / 0.5), oklch(1 0 0 / 0.16)); box-shadow: inset 0 1px 0 #fff, 0 2px 8px -4px oklch(0.4 0.05 262 / 0.25); }
+.xb[aria-pressed="true"] { background: linear-gradient(180deg, oklch(0.96 0.03 262 / 0.9), oklch(0.92 0.05 262 / 0.55)); font-weight: 600; border-color: var(--accent); }
+.xb:disabled { cursor: default; }
+.xe { padding: 18px; text-align: center; color: var(--muted); }
+@media (max-width: 640px) { .xf1 { grid-template-columns: 1fr; } .xa { justify-content: flex-start; } .xh .tt { flex: 1 1 8rem; } }
+
+/* Mind map */
+.mm { background: linear-gradient(155deg, oklch(1 0 0 / 0.45), oklch(1 0 0 / 0.12)); border-color: var(--rim); border-radius: 18px; box-shadow: inset 0 2px 6px oklch(0.4 0.04 262 / 0.12); }
+.mm-hots .chip { background: oklch(1 0 0 / 0.55); border-color: var(--rim); box-shadow: inset 0 1px 0 #fff; }
+@media (max-width: 820px) { .todo li { grid-template-columns: 34px minmax(0, 1fr); padding: 7px 10px; border-radius: 14px; } .todo .ic { width: 32px; height: 32px; border-radius: 10px; } .todo .btn { grid-column: 2; justify-self: start; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fp, .xb { transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
+  .xf1 { transition: opacity 0.35s; }
+  .mk { transition: filter 0.25s; }
+  html.fx .todo li { transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1.2); }
+  html.fx .todo li:hover { transform: translateY(-2px); }
+}

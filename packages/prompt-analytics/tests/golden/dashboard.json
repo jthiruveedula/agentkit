@@ -5368,7 +5368,7 @@
    ]
   }
  },
- "generated_at": "2026-11-01T05:38:11Z",
+ "generated_at": "2026-11-02T02:37:55Z",
  "hour_week": [
   {
    "applied": 1,
@@ -6840,7 +6840,7 @@
    ]
   }
  ],
- "schema": "1.2",
+ "schema": "1.3",
  "sessions": [
   {
    "applied": true,
@@ -6856,12 +6856,14 @@
    "id": "opencode:00242",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "feature in mobile-app",
-   "tokens": 10682
+   "tokens": 10682,
+   "ttr_min": 32.5
   },
   {
    "applied": true,
@@ -6876,12 +6878,14 @@
    "id": "cursor:00077",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in webapp",
-   "tokens": 3226
+   "tokens": 3226,
+   "ttr_min": 34.93
   },
   {
    "applied": false,
@@ -6895,12 +6899,14 @@
    "id": "copilot:00066",
    "intent": "devops",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 3,
    "source": "copilot",
    "title": "devops in mobile-app",
-   "tokens": 7229
+   "tokens": 7229,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -6912,12 +6918,14 @@
    "id": "antigravity:00359",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "mobile-app",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "test in mobile-app",
-   "tokens": 31678
+   "tokens": 31678,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -6929,12 +6937,14 @@
    "id": "antigravity:00296",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "explain in api-server",
-   "tokens": 48698
+   "tokens": 48698,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -6950,12 +6960,14 @@
    "id": "copilot:00071",
    "intent": "docs",
    "loops": 1,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "docs in infra",
-   "tokens": 16575
+   "tokens": 16575,
+   "ttr_min": 20.0
   },
   {
    "applied": true,
@@ -6969,12 +6981,14 @@
    "id": "cursor:00287",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 17141
+   "tokens": 17141,
+   "ttr_min": 8.25
   },
   {
    "applied": false,
@@ -6989,12 +7003,14 @@
    "id": "copilot:00337",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 10317
+   "tokens": 10317,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7006,12 +7022,14 @@
    "id": "antigravity:00116",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in docs-site",
-   "tokens": 71827
+   "tokens": 71827,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7027,12 +7045,14 @@
    "id": "claude_code:00122",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "refactor in api-server",
-   "tokens": 2541
+   "tokens": 2541,
+   "ttr_min": 34.62
   },
   {
    "applied": true,
@@ -7048,12 +7068,14 @@
    "id": "opencode:00312",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "data in webapp",
-   "tokens": 14304
+   "tokens": 14304,
+   "ttr_min": 14.27
   },
   {
    "applied": true,
@@ -7069,12 +7091,14 @@
    "id": "copilot:00206",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in webapp",
-   "tokens": 10317
+   "tokens": 10317,
+   "ttr_min": 29.3
   },
   {
    "applied": true,
@@ -7089,12 +7113,14 @@
    "id": "cursor:00130",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "feature in docs-site",
-   "tokens": 10041
+   "tokens": 10041,
+   "ttr_min": 11.5
   },
   {
    "applied": false,
@@ -7108,12 +7134,14 @@
    "id": "copilot:00201",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 14792
+   "tokens": 14792,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7129,12 +7157,14 @@
    "id": "opencode:00277",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "devops in docs-site",
-   "tokens": 12685
+   "tokens": 12685,
+   "ttr_min": 16.97
   },
   {
    "applied": false,
@@ -7149,12 +7179,14 @@
    "id": "copilot:00278",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 5,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in webapp",
-   "tokens": 33715
+   "tokens": 33715,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7170,12 +7202,14 @@
    "id": "claude_code:00175",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 5945
+   "tokens": 5945,
+   "ttr_min": 17.45
   },
   {
    "applied": true,
@@ -7191,12 +7225,14 @@
    "id": "cursor:00275",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 7678
+   "tokens": 7678,
+   "ttr_min": 9.65
   },
   {
    "applied": true,
@@ -7211,12 +7247,14 @@
    "id": "cursor:00070",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
    "title": "feature in webapp",
-   "tokens": 8860
+   "tokens": 8860,
+   "ttr_min": 12.73
   },
   {
    "applied": false,
@@ -7230,12 +7268,14 @@
    "id": "claude_code:00119",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in docs-site",
-   "tokens": 3290
+   "tokens": 3290,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7247,12 +7287,14 @@
    "id": "antigravity:00146",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in webapp",
-   "tokens": 67702
+   "tokens": 67702,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7267,12 +7309,14 @@
    "id": "claude_code:00270",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 5,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 23588
+   "tokens": 23588,
+   "ttr_min": 9.7
   },
   {
    "applied": true,
@@ -7287,12 +7331,14 @@
    "id": "cursor:00377",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in infra",
-   "tokens": 23587
+   "tokens": 23587,
+   "ttr_min": 17.73
   },
   {
    "applied": true,
@@ -7307,12 +7353,14 @@
    "id": "claude_code:00268",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "devops in api-server",
-   "tokens": 26942
+   "tokens": 26942,
+   "ttr_min": 11.85
   },
   {
    "applied": false,
@@ -7326,12 +7374,14 @@
    "id": "claude_code:00124",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in webapp",
-   "tokens": 10865
+   "tokens": 10865,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7347,12 +7397,14 @@
    "id": "claude_code:00099",
    "intent": "explain",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 7,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 43738
+   "tokens": 43738,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7368,12 +7420,14 @@
    "id": "cursor:00393",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in ml-pipeline",
-   "tokens": 15626
+   "tokens": 15626,
+   "ttr_min": 6.5
   },
   {
    "applied": true,
@@ -7388,12 +7442,14 @@
    "id": "claude_code:00214",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 32963
+   "tokens": 32963,
+   "ttr_min": 22.63
   },
   {
    "applied": true,
@@ -7409,12 +7465,14 @@
    "id": "claude_code:00180",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in infra",
-   "tokens": 18970
+   "tokens": 18970,
+   "ttr_min": 18.73
   },
   {
    "applied": false,
@@ -7429,12 +7487,14 @@
    "id": "claude_code:00149",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in api-server",
-   "tokens": 4464
+   "tokens": 4464,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7449,12 +7509,14 @@
    "id": "claude_code:00054",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 21104
+   "tokens": 21104,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7470,12 +7532,14 @@
    "id": "opencode:00129",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "feature in mobile-app",
-   "tokens": 6659
+   "tokens": 6659,
+   "ttr_min": 39.77
   },
   {
    "applied": true,
@@ -7490,12 +7554,14 @@
    "id": "claude_code:00240",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "data in ml-pipeline",
-   "tokens": 16326
+   "tokens": 16326,
+   "ttr_min": 16.02
   },
   {
    "applied": true,
@@ -7511,12 +7577,14 @@
    "id": "opencode:00114",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
    "title": "feature in infra",
-   "tokens": 19916
+   "tokens": 19916,
+   "ttr_min": 15.58
   },
   {
    "applied": true,
@@ -7532,12 +7600,14 @@
    "id": "opencode:00073",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 6,
    "source": "opencode",
    "title": "feature in ml-pipeline",
-   "tokens": 23688
+   "tokens": 23688,
+   "ttr_min": 18.7
   },
   {
    "applied": false,
@@ -7553,12 +7623,14 @@
    "id": "claude_code:00395",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "docs in infra",
-   "tokens": 27360
+   "tokens": 27360,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7574,12 +7646,14 @@
    "id": "claude_code:00229",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 12624
+   "tokens": 12624,
+   "ttr_min": 12.17
   },
   {
    "applied": true,
@@ -7595,12 +7669,14 @@
    "id": "copilot:00203",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in infra",
-   "tokens": 32104
+   "tokens": 32104,
+   "ttr_min": 36.17
   },
   {
    "applied": false,
@@ -7615,12 +7691,14 @@
    "id": "claude_code:00199",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in api-server",
-   "tokens": 21605
+   "tokens": 21605,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7635,12 +7713,14 @@
    "id": "claude_code:00391",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in infra",
-   "tokens": 16784
+   "tokens": 16784,
+   "ttr_min": 19.23
   },
   {
    "applied": true,
@@ -7655,12 +7735,14 @@
    "id": "claude_code:00322",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 17868
+   "tokens": 17868,
+   "ttr_min": 7.87
   },
   {
    "applied": true,
@@ -7676,12 +7758,14 @@
    "id": "cursor:00360",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in ml-pipeline",
-   "tokens": 16241
+   "tokens": 16241,
+   "ttr_min": 22.42
   },
   {
    "applied": true,
@@ -7697,12 +7781,14 @@
    "id": "cursor:00100",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 5141
+   "tokens": 5141,
+   "ttr_min": 9.38
   },
   {
    "applied": true,
@@ -7718,12 +7804,14 @@
    "id": "claude_code:00189",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in ml-pipeline",
-   "tokens": 7209
+   "tokens": 7209,
+   "ttr_min": 38.2
   },
   {
    "applied": true,
@@ -7737,12 +7825,14 @@
    "id": "opencode:00131",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "explain in ml-pipeline",
-   "tokens": 12821
+   "tokens": 12821,
+   "ttr_min": 23.58
   },
   {
    "applied": false,
@@ -7758,12 +7848,14 @@
    "id": "cursor:00349",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 4,
    "source": "cursor",
    "title": "data in mobile-app",
-   "tokens": 5302
+   "tokens": 5302,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7779,12 +7871,14 @@
    "id": "claude_code:00340",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 7668
+   "tokens": 7668,
+   "ttr_min": 15.78
   },
   {
    "applied": true,
@@ -7800,12 +7894,14 @@
    "id": "claude_code:00256",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in infra",
-   "tokens": 13826
+   "tokens": 13826,
+   "ttr_min": 20.48
   },
   {
    "applied": true,
@@ -7820,12 +7916,14 @@
    "id": "cursor:00053",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in api-server",
-   "tokens": 11099
+   "tokens": 11099,
+   "ttr_min": 12.92
   },
   {
    "applied": true,
@@ -7840,12 +7938,14 @@
    "id": "copilot:00358",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "copilot",
    "title": "feature in ml-pipeline",
-   "tokens": 10455
+   "tokens": 10455,
+   "ttr_min": 31.07
   },
   {
    "applied": false,
@@ -7861,12 +7961,14 @@
    "id": "copilot:00338",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in docs-site",
-   "tokens": 15606
+   "tokens": 15606,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7881,12 +7983,14 @@
    "id": "copilot:00167",
    "intent": "devops",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "devops in api-server",
-   "tokens": 13477
+   "tokens": 13477,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -7901,12 +8005,14 @@
    "id": "opencode:00284",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
    "title": "bugfix in docs-site",
-   "tokens": 11996
+   "tokens": 11996,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -7921,12 +8027,14 @@
    "id": "copilot:00352",
    "intent": "explain",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
    "title": "explain in webapp",
-   "tokens": 9513
+   "tokens": 9513,
+   "ttr_min": 25.13
   },
   {
    "applied": true,
@@ -7941,12 +8049,14 @@
    "id": "claude_code:00196",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 15350
+   "tokens": 15350,
+   "ttr_min": 24.7
   },
   {
    "applied": true,
@@ -7961,12 +8071,14 @@
    "id": "cursor:00227",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 30565
+   "tokens": 30565,
+   "ttr_min": 9.27
   },
   {
    "applied": true,
@@ -7981,12 +8093,14 @@
    "id": "cursor:00159",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in webapp",
-   "tokens": 15515
+   "tokens": 15515,
+   "ttr_min": 30.35
   },
   {
    "applied": true,
@@ -8001,12 +8115,14 @@
    "id": "opencode:00126",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "opencode",
    "title": "bugfix in ml-pipeline",
-   "tokens": 24738
+   "tokens": 24738,
+   "ttr_min": 9.88
   },
   {
    "applied": true,
@@ -8022,12 +8138,14 @@
    "id": "cursor:00331",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 18424
+   "tokens": 18424,
+   "ttr_min": 8.85
   },
   {
    "applied": true,
@@ -8043,12 +8161,14 @@
    "id": "copilot:00144",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 14955
+   "tokens": 14955,
+   "ttr_min": 37.2
   },
   {
    "applied": true,
@@ -8064,12 +8184,14 @@
    "id": "claude_code:00370",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 10811
+   "tokens": 10811,
+   "ttr_min": 51.75
   },
   {
    "applied": true,
@@ -8084,12 +8206,14 @@
    "id": "cursor:00080",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 5,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 29023
+   "tokens": 29023,
+   "ttr_min": 12.73
   },
   {
    "applied": false,
@@ -8103,12 +8227,14 @@
    "id": "claude_code:00095",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 19616
+   "tokens": 19616,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8123,12 +8249,14 @@
    "id": "opencode:00283",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
    "title": "explain in mobile-app",
-   "tokens": 13514
+   "tokens": 13514,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8143,12 +8271,14 @@
    "id": "cursor:00400",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 26493
+   "tokens": 26493,
+   "ttr_min": 15.78
   },
   {
    "applied": false,
@@ -8163,12 +8293,14 @@
    "id": "claude_code:00219",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 21857
+   "tokens": 21857,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8184,12 +8316,14 @@
    "id": "claude_code:00164",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "data in api-server",
-   "tokens": 8015
+   "tokens": 8015,
+   "ttr_min": 19.82
   },
   {
    "applied": false,
@@ -8204,12 +8338,14 @@
    "id": "opencode:00319",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 4,
    "source": "opencode",
    "title": "explain in webapp",
-   "tokens": 5499
+   "tokens": 5499,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8224,12 +8360,14 @@
    "id": "claude_code:00325",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in ml-pipeline",
-   "tokens": 13233
+   "tokens": 13233,
+   "ttr_min": 32.48
   },
   {
    "applied": true,
@@ -8244,12 +8382,14 @@
    "id": "cursor:00056",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in infra",
-   "tokens": 21482
+   "tokens": 21482,
+   "ttr_min": 15.97
   },
   {
    "applied": false,
@@ -8265,12 +8405,14 @@
    "id": "copilot:00051",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in webapp",
-   "tokens": 18109
+   "tokens": 18109,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8282,12 +8424,14 @@
    "id": "antigravity:00252",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "refactor in api-server",
-   "tokens": 56635
+   "tokens": 56635,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8303,12 +8447,14 @@
    "id": "claude_code:00311",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in docs-site",
-   "tokens": 16246
+   "tokens": 16246,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8323,12 +8469,14 @@
    "id": "claude_code:00244",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "docs in api-server",
-   "tokens": 5338
+   "tokens": 5338,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8343,12 +8491,14 @@
    "id": "opencode:00394",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
    "title": "feature in infra",
-   "tokens": 3384
+   "tokens": 3384,
+   "ttr_min": 15.35
   },
   {
    "applied": true,
@@ -8364,12 +8514,14 @@
    "id": "claude_code:00161",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 15804
+   "tokens": 15804,
+   "ttr_min": 21.13
   },
   {
    "applied": true,
@@ -8383,12 +8535,14 @@
    "id": "claude_code:00272",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "devops in mobile-app",
-   "tokens": 8092
+   "tokens": 8092,
+   "ttr_min": 21.45
   },
   {
    "applied": true,
@@ -8402,12 +8556,14 @@
    "id": "claude_code:00367",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in webapp",
-   "tokens": 4446
+   "tokens": 4446,
+   "ttr_min": 16.13
   },
   {
    "applied": true,
@@ -8422,12 +8578,14 @@
    "id": "claude_code:00046",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 7273
+   "tokens": 7273,
+   "ttr_min": 20.75
   },
   {
    "applied": false,
@@ -8439,12 +8597,14 @@
    "id": "antigravity:00145",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in api-server",
-   "tokens": 52522
+   "tokens": 52522,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8456,12 +8616,14 @@
    "id": "antigravity:00263",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "mobile-app",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in mobile-app",
-   "tokens": 67456
+   "tokens": 67456,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8477,12 +8639,14 @@
    "id": "cursor:00397",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in webapp",
-   "tokens": 5672
+   "tokens": 5672,
+   "ttr_min": 10.78
   },
   {
    "applied": true,
@@ -8498,12 +8662,14 @@
    "id": "claude_code:00309",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in docs-site",
-   "tokens": 14440
+   "tokens": 14440,
+   "ttr_min": 36.38
   },
   {
    "applied": false,
@@ -8517,12 +8683,14 @@
    "id": "opencode:00308",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
    "title": "refactor in webapp",
-   "tokens": 17589
+   "tokens": 17589,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8538,12 +8706,14 @@
    "id": "opencode:00075",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
    "title": "test in ml-pipeline",
-   "tokens": 25531
+   "tokens": 25531,
+   "ttr_min": 32.05
   },
   {
    "applied": true,
@@ -8558,12 +8728,14 @@
    "id": "copilot:00388",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in ml-pipeline",
-   "tokens": 9284
+   "tokens": 9284,
+   "ttr_min": 33.73
   },
   {
    "applied": false,
@@ -8578,12 +8750,14 @@
    "id": "claude_code:00209",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "data in mobile-app",
-   "tokens": 24332
+   "tokens": 24332,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8599,12 +8773,14 @@
    "id": "cursor:00353",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "feature in api-server",
-   "tokens": 12453
+   "tokens": 12453,
+   "ttr_min": 22.7
   },
   {
    "applied": false,
@@ -8619,12 +8795,14 @@
    "id": "copilot:00110",
    "intent": "other",
    "loops": 1,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in infra",
-   "tokens": 34371
+   "tokens": 34371,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8639,12 +8817,14 @@
    "id": "copilot:00086",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 28149
+   "tokens": 28149,
+   "ttr_min": 21.28
   },
   {
    "applied": true,
@@ -8660,12 +8840,14 @@
    "id": "claude_code:00306",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in docs-site",
-   "tokens": 5570
+   "tokens": 5570,
+   "ttr_min": 21.93
   },
   {
    "applied": false,
@@ -8680,12 +8862,14 @@
    "id": "claude_code:00117",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 27210
+   "tokens": 27210,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8700,12 +8884,14 @@
    "id": "claude_code:00289",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in api-server",
-   "tokens": 21215
+   "tokens": 21215,
+   "ttr_min": 39.37
   },
   {
    "applied": true,
@@ -8720,12 +8906,14 @@
    "id": "claude_code:00193",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 20794
+   "tokens": 20794,
+   "ttr_min": 15.23
   },
   {
    "applied": false,
@@ -8737,12 +8925,14 @@
    "id": "antigravity:00333",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "mobile-app",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "data in mobile-app",
-   "tokens": 66841
+   "tokens": 66841,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8756,12 +8946,14 @@
    "id": "cursor:00045",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 16905
+   "tokens": 16905,
+   "ttr_min": 8.0
   },
   {
    "applied": true,
@@ -8776,12 +8968,14 @@
    "id": "claude_code:00356",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in mobile-app",
-   "tokens": 17185
+   "tokens": 17185,
+   "ttr_min": 18.75
   },
   {
    "applied": false,
@@ -8796,12 +8990,14 @@
    "id": "claude_code:00044",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in mobile-app",
-   "tokens": 19815
+   "tokens": 19815,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8817,12 +9013,14 @@
    "id": "copilot:00197",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 20403
+   "tokens": 20403,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8837,12 +9035,14 @@
    "id": "claude_code:00254",
    "intent": "devops",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in mobile-app",
-   "tokens": 33637
+   "tokens": 33637,
+   "ttr_min": 11.55
   },
   {
    "applied": false,
@@ -8857,12 +9057,14 @@
    "id": "copilot:00198",
    "intent": "data",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "data in api-server",
-   "tokens": 23176
+   "tokens": 23176,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -8878,12 +9080,14 @@
    "id": "cursor:00282",
    "intent": "test",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
    "title": "test in ml-pipeline",
-   "tokens": 20089
+   "tokens": 20089,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -8899,12 +9103,14 @@
    "id": "copilot:00300",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 3866
+   "tokens": 3866,
+   "ttr_min": 27.93
   },
   {
    "applied": true,
@@ -8919,12 +9125,14 @@
    "id": "claude_code:00139",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "explain in mobile-app",
-   "tokens": 3133
+   "tokens": 3133,
+   "ttr_min": 12.07
   },
   {
    "applied": true,
@@ -8938,12 +9146,14 @@
    "id": "opencode:00361",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
    "title": "devops in api-server",
-   "tokens": 21127
+   "tokens": 21127,
+   "ttr_min": 27.58
   },
   {
    "applied": true,
@@ -8958,12 +9168,14 @@
    "id": "cursor:00271",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 18930
+   "tokens": 18930,
+   "ttr_min": 18.87
   },
   {
    "applied": true,
@@ -8978,12 +9190,14 @@
    "id": "copilot:00248",
    "intent": "explain",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "explain in ml-pipeline",
-   "tokens": 10540
+   "tokens": 10540,
+   "ttr_min": 12.02
   },
   {
    "applied": true,
@@ -8999,12 +9213,14 @@
    "id": "claude_code:00368",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in infra",
-   "tokens": 17037
+   "tokens": 17037,
+   "ttr_min": 26.62
   },
   {
    "applied": true,
@@ -9020,12 +9236,14 @@
    "id": "claude_code:00236",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 7444
+   "tokens": 7444,
+   "ttr_min": 16.22
   },
   {
    "applied": true,
@@ -9040,12 +9258,14 @@
    "id": "opencode:00154",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 5,
    "source": "opencode",
    "title": "data in mobile-app",
-   "tokens": 19416
+   "tokens": 19416,
+   "ttr_min": 13.0
   },
   {
    "applied": true,
@@ -9059,12 +9279,14 @@
    "id": "cursor:00093",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 17033
+   "tokens": 17033,
+   "ttr_min": 8.23
   },
   {
    "applied": true,
@@ -9079,12 +9301,14 @@
    "id": "cursor:00079",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 6,
    "reached_stage": 6,
    "source": "cursor",
    "title": "feature in webapp",
-   "tokens": 39882
+   "tokens": 39882,
+   "ttr_min": 17.05
   },
   {
    "applied": false,
@@ -9098,12 +9322,14 @@
    "id": "cursor:00179",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 17658
+   "tokens": 17658,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9115,12 +9341,14 @@
    "id": "antigravity:00157",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in api-server",
-   "tokens": 39502
+   "tokens": 39502,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9132,12 +9360,14 @@
    "id": "antigravity:00111",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in docs-site",
-   "tokens": 85119
+   "tokens": 85119,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9153,12 +9383,14 @@
    "id": "cursor:00364",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in webapp",
-   "tokens": 24398
+   "tokens": 24398,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9173,12 +9405,14 @@
    "id": "cursor:00043",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 9434
+   "tokens": 9434,
+   "ttr_min": 8.32
   },
   {
    "applied": true,
@@ -9193,12 +9427,14 @@
    "id": "claude_code:00226",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in docs-site",
-   "tokens": 21664
+   "tokens": 21664,
+   "ttr_min": 37.85
   },
   {
    "applied": false,
@@ -9213,12 +9449,14 @@
    "id": "claude_code:00042",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 11491
+   "tokens": 11491,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9233,12 +9471,14 @@
    "id": "copilot:00132",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "refactor in ml-pipeline",
-   "tokens": 10058
+   "tokens": 10058,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9250,12 +9490,14 @@
    "id": "antigravity:00173",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "ml-pipeline",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "docs in ml-pipeline",
-   "tokens": 36619
+   "tokens": 36619,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9270,12 +9512,14 @@
    "id": "claude_code:00078",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in mobile-app",
-   "tokens": 3820
+   "tokens": 3820,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9289,12 +9533,14 @@
    "id": "copilot:00304",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in webapp",
-   "tokens": 11554
+   "tokens": 11554,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9309,12 +9555,14 @@
    "id": "claude_code:00172",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in ml-pipeline",
-   "tokens": 14369
+   "tokens": 14369,
+   "ttr_min": 8.38
   },
   {
    "applied": false,
@@ -9330,12 +9578,14 @@
    "id": "cursor:00202",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "devops in infra",
-   "tokens": 20943
+   "tokens": 20943,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9351,12 +9601,14 @@
    "id": "claude_code:00101",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 12522
+   "tokens": 12522,
+   "ttr_min": 19.53
   },
   {
    "applied": true,
@@ -9372,12 +9624,14 @@
    "id": "claude_code:00195",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in ml-pipeline",
-   "tokens": 10603
+   "tokens": 10603,
+   "ttr_min": 33.77
   },
   {
    "applied": true,
@@ -9392,12 +9646,14 @@
    "id": "opencode:00133",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
    "title": "explain in infra",
-   "tokens": 8378
+   "tokens": 8378,
+   "ttr_min": 12.93
   },
   {
    "applied": false,
@@ -9412,12 +9668,14 @@
    "id": "copilot:00155",
    "intent": "other",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in docs-site",
-   "tokens": 15410
+   "tokens": 15410,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9432,12 +9690,14 @@
    "id": "claude_code:00288",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 13302
+   "tokens": 13302,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9452,12 +9712,14 @@
    "id": "claude_code:00142",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "docs in docs-site",
-   "tokens": 23221
+   "tokens": 23221,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9473,12 +9735,14 @@
    "id": "claude_code:00182",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in docs-site",
-   "tokens": 5678
+   "tokens": 5678,
+   "ttr_min": 31.63
   },
   {
    "applied": true,
@@ -9493,12 +9757,14 @@
    "id": "claude_code:00376",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in ml-pipeline",
-   "tokens": 7213
+   "tokens": 7213,
+   "ttr_min": 29.07
   },
   {
    "applied": false,
@@ -9512,12 +9778,14 @@
    "id": "cursor:00315",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in mobile-app",
-   "tokens": 21752
+   "tokens": 21752,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9532,12 +9800,14 @@
    "id": "cursor:00186",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in ml-pipeline",
-   "tokens": 16000
+   "tokens": 16000,
+   "ttr_min": 18.0
   },
   {
    "applied": false,
@@ -9553,12 +9823,14 @@
    "id": "claude_code:00379",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in webapp",
-   "tokens": 16682
+   "tokens": 16682,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9573,12 +9845,14 @@
    "id": "claude_code:00324",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "refactor in ml-pipeline",
-   "tokens": 16929
+   "tokens": 16929,
+   "ttr_min": 37.17
   },
   {
    "applied": true,
@@ -9594,12 +9868,14 @@
    "id": "opencode:00121",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
    "title": "refactor in infra",
-   "tokens": 9059
+   "tokens": 9059,
+   "ttr_min": 39.1
   },
   {
    "applied": true,
@@ -9615,12 +9891,14 @@
    "id": "cursor:00041",
    "intent": "test",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "test in docs-site",
-   "tokens": 16766
+   "tokens": 16766,
+   "ttr_min": 5.75
   },
   {
    "applied": true,
@@ -9636,12 +9914,14 @@
    "id": "claude_code:00040",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 13916
+   "tokens": 13916,
+   "ttr_min": 22.13
   },
   {
    "applied": false,
@@ -9653,12 +9933,14 @@
    "id": "antigravity:00160",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "ml-pipeline",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "data in ml-pipeline",
-   "tokens": 41899
+   "tokens": 41899,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9670,12 +9952,14 @@
    "id": "antigravity:00104",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in webapp",
-   "tokens": 82440
+   "tokens": 82440,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9690,12 +9974,14 @@
    "id": "claude_code:00181",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 28824
+   "tokens": 28824,
+   "ttr_min": 16.87
   },
   {
    "applied": true,
@@ -9710,12 +9996,14 @@
    "id": "cursor:00298",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "feature in ml-pipeline",
-   "tokens": 8619
+   "tokens": 8619,
+   "ttr_min": 31.7
   },
   {
    "applied": true,
@@ -9730,12 +10018,14 @@
    "id": "claude_code:00076",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in mobile-app",
-   "tokens": 14018
+   "tokens": 14018,
+   "ttr_min": 16.58
   },
   {
    "applied": true,
@@ -9751,12 +10041,14 @@
    "id": "cursor:00385",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in webapp",
-   "tokens": 19185
+   "tokens": 19185,
+   "ttr_min": 12.93
   },
   {
    "applied": false,
@@ -9772,12 +10064,14 @@
    "id": "claude_code:00230",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "refactor in webapp",
-   "tokens": 9700
+   "tokens": 9700,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -9793,12 +10087,14 @@
    "id": "opencode:00343",
    "intent": "test",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 6,
    "reached_stage": 4,
    "source": "opencode",
    "title": "test in api-server",
-   "tokens": 37382
+   "tokens": 37382,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9814,12 +10110,14 @@
    "id": "opencode:00299",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 5,
    "source": "opencode",
    "title": "bugfix in infra",
-   "tokens": 32763
+   "tokens": 32763,
+   "ttr_min": 31.88
   },
   {
    "applied": false,
@@ -9834,12 +10132,14 @@
    "id": "claude_code:00387",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 30387
+   "tokens": 30387,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9855,12 +10155,14 @@
    "id": "opencode:00237",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
    "title": "bugfix in ml-pipeline",
-   "tokens": 18005
+   "tokens": 18005,
+   "ttr_min": 15.8
   },
   {
    "applied": false,
@@ -9875,12 +10177,14 @@
    "id": "claude_code:00113",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in infra",
-   "tokens": 10085
+   "tokens": 10085,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9895,12 +10199,14 @@
    "id": "claude_code:00291",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 19954
+   "tokens": 19954,
+   "ttr_min": 22.83
   },
   {
    "applied": true,
@@ -9916,12 +10222,14 @@
    "id": "cursor:00039",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
    "title": "feature in ml-pipeline",
-   "tokens": 12676
+   "tokens": 12676,
+   "ttr_min": 14.0
   },
   {
    "applied": true,
@@ -9937,12 +10245,14 @@
    "id": "copilot:00191",
    "intent": "docs",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
    "title": "docs in api-server",
-   "tokens": 17737
+   "tokens": 17737,
+   "ttr_min": 10.78
   },
   {
    "applied": false,
@@ -9958,12 +10268,14 @@
    "id": "copilot:00141",
    "intent": "other",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "test in webapp",
-   "tokens": 27533
+   "tokens": 27533,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -9978,12 +10290,14 @@
    "id": "claude_code:00057",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 13726
+   "tokens": 13726,
+   "ttr_min": 13.7
   },
   {
    "applied": true,
@@ -9999,12 +10313,14 @@
    "id": "claude_code:00038",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "test in ml-pipeline",
-   "tokens": 3704
+   "tokens": 3704,
+   "ttr_min": 16.68
   },
   {
    "applied": true,
@@ -10019,12 +10335,14 @@
    "id": "cursor:00239",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 13584
+   "tokens": 13584,
+   "ttr_min": 18.0
   },
   {
    "applied": true,
@@ -10040,12 +10358,14 @@
    "id": "cursor:00224",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "test in mobile-app",
-   "tokens": 8414
+   "tokens": 8414,
+   "ttr_min": 14.05
   },
   {
    "applied": true,
@@ -10060,12 +10380,14 @@
    "id": "cursor:00280",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 20744
+   "tokens": 20744,
+   "ttr_min": 9.82
   },
   {
    "applied": false,
@@ -10080,12 +10402,14 @@
    "id": "claude_code:00171",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 5311
+   "tokens": 5311,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10101,12 +10425,14 @@
    "id": "claude_code:00264",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in webapp",
-   "tokens": 17742
+   "tokens": 17742,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10122,12 +10448,14 @@
    "id": "claude_code:00222",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in api-server",
-   "tokens": 6413
+   "tokens": 6413,
+   "ttr_min": 35.18
   },
   {
    "applied": false,
@@ -10139,12 +10467,14 @@
    "id": "antigravity:00341",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "infra",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "refactor in infra",
-   "tokens": 83076
+   "tokens": 83076,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10158,12 +10488,14 @@
    "id": "opencode:00383",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 5,
    "source": "opencode",
    "title": "devops in docs-site",
-   "tokens": 10128
+   "tokens": 10128,
+   "ttr_min": 24.53
   },
   {
    "applied": true,
@@ -10179,12 +10511,14 @@
    "id": "claude_code:00362",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 7248
+   "tokens": 7248,
+   "ttr_min": 19.17
   },
   {
    "applied": true,
@@ -10199,12 +10533,14 @@
    "id": "claude_code:00303",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "explain in mobile-app",
-   "tokens": 12547
+   "tokens": 12547,
+   "ttr_min": 29.73
   },
   {
    "applied": true,
@@ -10220,12 +10556,14 @@
    "id": "claude_code:00204",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 3249
+   "tokens": 3249,
+   "ttr_min": 15.7
   },
   {
    "applied": true,
@@ -10241,12 +10579,14 @@
    "id": "claude_code:00021",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 386613
+   "tokens": 386613,
+   "ttr_min": 9.58
   },
   {
    "applied": true,
@@ -10262,12 +10602,14 @@
    "id": "claude_code:00020",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 270421
+   "tokens": 270421,
+   "ttr_min": 47.15
   },
   {
    "applied": true,
@@ -10283,12 +10625,14 @@
    "id": "claude_code:00019",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 281676
+   "tokens": 281676,
+   "ttr_min": 15.65
   },
   {
    "applied": true,
@@ -10304,12 +10648,14 @@
    "id": "claude_code:00018",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 2,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 67941
+   "tokens": 67941,
+   "ttr_min": 21.75
   },
   {
    "applied": true,
@@ -10325,12 +10671,14 @@
    "id": "claude_code:00017",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 232078
+   "tokens": 232078,
+   "ttr_min": 18.45
   },
   {
    "applied": true,
@@ -10346,12 +10694,14 @@
    "id": "claude_code:00016",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 469378
+   "tokens": 469378,
+   "ttr_min": 15.48
   },
   {
    "applied": false,
@@ -10363,12 +10713,14 @@
    "id": "antigravity:00247",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "explain in webapp",
-   "tokens": 83112
+   "tokens": 83112,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10382,12 +10734,14 @@
    "id": "cursor:00174",
    "intent": "refactor",
    "loops": 2,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 6,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in ml-pipeline",
-   "tokens": 40098
+   "tokens": 40098,
+   "ttr_min": 14.7
   },
   {
    "applied": false,
@@ -10402,12 +10756,14 @@
    "id": "copilot:00094",
    "intent": "docs",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "docs in infra",
-   "tokens": 17907
+   "tokens": 17907,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10422,12 +10778,14 @@
    "id": "claude_code:00253",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 28491
+   "tokens": 28491,
+   "ttr_min": 20.25
   },
   {
    "applied": false,
@@ -10443,12 +10801,14 @@
    "id": "opencode:00082",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 5,
    "reached_stage": 4,
    "source": "opencode",
    "title": "bugfix in mobile-app",
-   "tokens": 33737
+   "tokens": 33737,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10463,12 +10823,14 @@
    "id": "cursor:00037",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in api-server",
-   "tokens": 22309
+   "tokens": 22309,
+   "ttr_min": 19.3
   },
   {
    "applied": true,
@@ -10483,12 +10845,14 @@
    "id": "claude_code:00036",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "explain in api-server",
-   "tokens": 18488
+   "tokens": 18488,
+   "ttr_min": 23.15
   },
   {
    "applied": false,
@@ -10504,12 +10868,14 @@
    "id": "cursor:00326",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 4,
    "source": "cursor",
    "title": "data in api-server",
-   "tokens": 9234
+   "tokens": 9234,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10525,12 +10891,14 @@
    "id": "cursor:00106",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "explain in webapp",
-   "tokens": 20771
+   "tokens": 20771,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10544,12 +10912,14 @@
    "id": "cursor:00069",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 0
+   "tokens": 0,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10564,12 +10934,14 @@
    "id": "copilot:00357",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 24719
+   "tokens": 24719,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10585,12 +10957,14 @@
    "id": "cursor:00294",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "bugfix in ml-pipeline",
-   "tokens": 17820
+   "tokens": 17820,
+   "ttr_min": 17.58
   },
   {
    "applied": true,
@@ -10606,12 +10980,14 @@
    "id": "cursor:00258",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 12388
+   "tokens": 12388,
+   "ttr_min": 13.02
   },
   {
    "applied": true,
@@ -10626,12 +11002,14 @@
    "id": "copilot:00334",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in docs-site",
-   "tokens": 17108
+   "tokens": 17108,
+   "ttr_min": 10.77
   },
   {
    "applied": true,
@@ -10646,12 +11024,14 @@
    "id": "copilot:00140",
    "intent": "devops",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
    "title": "devops in infra",
-   "tokens": 13274
+   "tokens": 13274,
+   "ttr_min": 15.72
   },
   {
    "applied": false,
@@ -10666,12 +11046,14 @@
    "id": "copilot:00052",
    "intent": "bugfix",
    "loops": 2,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in ml-pipeline",
-   "tokens": 16216
+   "tokens": 16216,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10687,12 +11069,14 @@
    "id": "claude_code:00212",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "test in api-server",
-   "tokens": 9277
+   "tokens": 9277,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10708,12 +11092,14 @@
    "id": "claude_code:00058",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 9539
+   "tokens": 9539,
+   "ttr_min": 12.05
   },
   {
    "applied": true,
@@ -10729,12 +11115,14 @@
    "id": "cursor:00081",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "data in api-server",
-   "tokens": 15936
+   "tokens": 15936,
+   "ttr_min": 7.88
   },
   {
    "applied": true,
@@ -10749,12 +11137,14 @@
    "id": "opencode:00137",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 5,
    "source": "opencode",
    "title": "explain in webapp",
-   "tokens": 9024
+   "tokens": 9024,
+   "ttr_min": 12.2
   },
   {
    "applied": true,
@@ -10770,12 +11160,14 @@
    "id": "copilot:00183",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 26394
+   "tokens": 26394,
+   "ttr_min": 15.47
   },
   {
    "applied": true,
@@ -10790,12 +11182,14 @@
    "id": "claude_code:00185",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "refactor in api-server",
-   "tokens": 4631
+   "tokens": 4631,
+   "ttr_min": 36.1
   },
   {
    "applied": false,
@@ -10811,12 +11205,14 @@
    "id": "claude_code:00108",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 17501
+   "tokens": 17501,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10828,12 +11224,14 @@
    "id": "antigravity:00320",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "explain in api-server",
-   "tokens": 52177
+   "tokens": 52177,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10845,12 +11243,14 @@
    "id": "antigravity:00274",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "mobile-app",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in mobile-app",
-   "tokens": 86612
+   "tokens": 86612,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -10864,12 +11264,14 @@
    "id": "copilot:00063",
    "intent": "explain",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
    "title": "explain in ml-pipeline",
-   "tokens": 4106
+   "tokens": 4106,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10885,12 +11287,14 @@
    "id": "claude_code:00178",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 15047
+   "tokens": 15047,
+   "ttr_min": 17.2
   },
   {
    "applied": false,
@@ -10905,12 +11309,14 @@
    "id": "opencode:00192",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 4,
    "source": "opencode",
    "title": "feature in docs-site",
-   "tokens": 31139
+   "tokens": 31139,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -10926,12 +11332,14 @@
    "id": "opencode:00187",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "bugfix in docs-site",
-   "tokens": 5878
+   "tokens": 5878,
+   "ttr_min": 19.93
   },
   {
    "applied": true,
@@ -10946,12 +11354,14 @@
    "id": "cursor:00250",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in docs-site",
-   "tokens": 16269
+   "tokens": 16269,
+   "ttr_min": 18.7
   },
   {
    "applied": true,
@@ -10967,12 +11377,14 @@
    "id": "cursor:00035",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in webapp",
-   "tokens": 5593
+   "tokens": 5593,
+   "ttr_min": 31.47
   },
   {
    "applied": false,
@@ -10986,12 +11398,14 @@
    "id": "claude_code:00162",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "test in ml-pipeline",
-   "tokens": 12162
+   "tokens": 12162,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11006,12 +11420,14 @@
    "id": "claude_code:00083",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "bugfix in infra",
-   "tokens": 11952
+   "tokens": 11952,
+   "ttr_min": 29.67
   },
   {
    "applied": true,
@@ -11025,12 +11441,14 @@
    "id": "claude_code:00034",
    "intent": "devops",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in webapp",
-   "tokens": 33992
+   "tokens": 33992,
+   "ttr_min": 29.93
   },
   {
    "applied": true,
@@ -11045,12 +11463,14 @@
    "id": "claude_code:00090",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 10768
+   "tokens": 10768,
+   "ttr_min": 17.83
   },
   {
    "applied": false,
@@ -11065,12 +11485,14 @@
    "id": "cursor:00373",
    "intent": "other",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 6,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in mobile-app",
-   "tokens": 38349
+   "tokens": 38349,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11086,12 +11508,14 @@
    "id": "copilot:00302",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 5,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 36729
+   "tokens": 36729,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11103,12 +11527,14 @@
    "id": "antigravity:00238",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "data in api-server",
-   "tokens": 41701
+   "tokens": 41701,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11123,12 +11549,14 @@
    "id": "cursor:00050",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "bugfix in webapp",
-   "tokens": 21797
+   "tokens": 21797,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11144,12 +11572,14 @@
    "id": "copilot:00267",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in infra",
-   "tokens": 12276
+   "tokens": 12276,
+   "ttr_min": 9.18
   },
   {
    "applied": true,
@@ -11164,12 +11594,14 @@
    "id": "cursor:00273",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in webapp",
-   "tokens": 7243
+   "tokens": 7243,
+   "ttr_min": 17.55
   },
   {
    "applied": true,
@@ -11185,12 +11617,14 @@
    "id": "cursor:00092",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 26715
+   "tokens": 26715,
+   "ttr_min": 14.93
   },
   {
    "applied": true,
@@ -11206,12 +11640,14 @@
    "id": "claude_code:00345",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 34268
+   "tokens": 34268,
+   "ttr_min": 12.17
   },
   {
    "applied": true,
@@ -11226,12 +11662,14 @@
    "id": "claude_code:00194",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in mobile-app",
-   "tokens": 26193
+   "tokens": 26193,
+   "ttr_min": 18.1
   },
   {
    "applied": false,
@@ -11247,12 +11685,14 @@
    "id": "claude_code:00305",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 15871
+   "tokens": 15871,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11268,12 +11708,14 @@
    "id": "claude_code:00292",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "docs in webapp",
-   "tokens": 9919
+   "tokens": 9919,
+   "ttr_min": 11.02
   },
   {
    "applied": false,
@@ -11285,12 +11727,14 @@
    "id": "antigravity:00188",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "explain in docs-site",
-   "tokens": 85211
+   "tokens": 85211,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11302,12 +11746,14 @@
    "id": "antigravity:00200",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in docs-site",
-   "tokens": 88693
+   "tokens": 88693,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11322,12 +11768,14 @@
    "id": "cursor:00033",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in mobile-app",
-   "tokens": 7282
+   "tokens": 7282,
+   "ttr_min": 7.47
   },
   {
    "applied": true,
@@ -11342,12 +11790,14 @@
    "id": "claude_code:00049",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 26063
+   "tokens": 26063,
+   "ttr_min": 35.95
   },
   {
    "applied": true,
@@ -11363,12 +11813,14 @@
    "id": "claude_code:00032",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "docs in mobile-app",
-   "tokens": 6705
+   "tokens": 6705,
+   "ttr_min": 25.62
   },
   {
    "applied": false,
@@ -11380,12 +11832,14 @@
    "id": "antigravity:00231",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in webapp",
-   "tokens": 82456
+   "tokens": 82456,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11401,12 +11855,14 @@
    "id": "claude_code:00232",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 22286
+   "tokens": 22286,
+   "ttr_min": 33.67
   },
   {
    "applied": true,
@@ -11421,12 +11877,14 @@
    "id": "claude_code:00265",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in webapp",
-   "tokens": 10472
+   "tokens": 10472,
+   "ttr_min": 38.65
   },
   {
    "applied": true,
@@ -11442,12 +11900,14 @@
    "id": "copilot:00260",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in webapp",
-   "tokens": 19955
+   "tokens": 19955,
+   "ttr_min": 17.57
   },
   {
    "applied": false,
@@ -11463,12 +11923,14 @@
    "id": "claude_code:00382",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 23564
+   "tokens": 23564,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11483,12 +11945,14 @@
    "id": "cursor:00269",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in ml-pipeline",
-   "tokens": 22159
+   "tokens": 22159,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11504,12 +11968,14 @@
    "id": "cursor:00285",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in infra",
-   "tokens": 9351
+   "tokens": 9351,
+   "ttr_min": 21.6
   },
   {
    "applied": false,
@@ -11525,12 +11991,14 @@
    "id": "cursor:00102",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 5,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in ml-pipeline",
-   "tokens": 26492
+   "tokens": 26492,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11546,12 +12014,14 @@
    "id": "claude_code:00347",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 8130
+   "tokens": 8130,
+   "ttr_min": 39.6
   },
   {
    "applied": true,
@@ -11567,12 +12037,14 @@
    "id": "claude_code:00329",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 4609
+   "tokens": 4609,
+   "ttr_min": 32.43
   },
   {
    "applied": true,
@@ -11587,12 +12059,14 @@
    "id": "claude_code:00297",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in api-server",
-   "tokens": 19637
+   "tokens": 19637,
+   "ttr_min": 33.15
   },
   {
    "applied": false,
@@ -11604,12 +12078,14 @@
    "id": "antigravity:00207",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in docs-site",
-   "tokens": 71301
+   "tokens": 71301,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11623,12 +12099,14 @@
    "id": "cursor:00065",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
    "title": "test in mobile-app",
-   "tokens": 0
+   "tokens": 0,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11643,12 +12121,14 @@
    "id": "claude_code:00398",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 12737
+   "tokens": 12737,
+   "ttr_min": 23.1
   },
   {
    "applied": false,
@@ -11664,12 +12144,14 @@
    "id": "claude_code:00165",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in mobile-app",
-   "tokens": 23941
+   "tokens": 23941,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11681,12 +12163,14 @@
    "id": "antigravity:00148",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "ml-pipeline",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in ml-pipeline",
-   "tokens": 23181
+   "tokens": 23181,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11701,12 +12185,14 @@
    "id": "copilot:00301",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in mobile-app",
-   "tokens": 32356
+   "tokens": 32356,
+   "ttr_min": 36.08
   },
   {
    "applied": true,
@@ -11722,12 +12208,14 @@
    "id": "claude_code:00217",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "explain in webapp",
-   "tokens": 24202
+   "tokens": 24202,
+   "ttr_min": 19.18
   },
   {
    "applied": false,
@@ -11739,12 +12227,14 @@
    "id": "antigravity:00216",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "ml-pipeline",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "test in ml-pipeline",
-   "tokens": 82890
+   "tokens": 82890,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11760,12 +12250,14 @@
    "id": "cursor:00279",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in api-server",
-   "tokens": 15753
+   "tokens": 15753,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -11781,12 +12273,14 @@
    "id": "cursor:00228",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
    "title": "feature in infra",
-   "tokens": 13328
+   "tokens": 13328,
+   "ttr_min": 18.03
   },
   {
    "applied": true,
@@ -11802,12 +12296,14 @@
    "id": "copilot:00354",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in infra",
-   "tokens": 9395
+   "tokens": 9395,
+   "ttr_min": 37.08
   },
   {
    "applied": true,
@@ -11822,12 +12318,14 @@
    "id": "claude_code:00371",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 5,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in api-server",
-   "tokens": 30730
+   "tokens": 30730,
+   "ttr_min": 22.65
   },
   {
    "applied": true,
@@ -11843,12 +12341,14 @@
    "id": "copilot:00147",
    "intent": "data",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "data in api-server",
-   "tokens": 10088
+   "tokens": 10088,
+   "ttr_min": 16.88
   },
   {
    "applied": true,
@@ -11863,12 +12363,14 @@
    "id": "cursor:00031",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in infra",
-   "tokens": 6927
+   "tokens": 6927,
+   "ttr_min": 26.55
   },
   {
    "applied": true,
@@ -11884,12 +12386,14 @@
    "id": "claude_code:00317",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 7999
+   "tokens": 7999,
+   "ttr_min": 38.68
   },
   {
    "applied": true,
@@ -11904,12 +12408,14 @@
    "id": "claude_code:00030",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in infra",
-   "tokens": 24845
+   "tokens": 24845,
+   "ttr_min": 19.42
   },
   {
    "applied": true,
@@ -11924,12 +12430,14 @@
    "id": "claude_code:00169",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 8695
+   "tokens": 8695,
+   "ttr_min": 11.95
   },
   {
    "applied": false,
@@ -11945,12 +12453,14 @@
    "id": "copilot:00363",
    "intent": "other",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in ml-pipeline",
-   "tokens": 19618
+   "tokens": 19618,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11966,12 +12476,14 @@
    "id": "claude_code:00091",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 31368
+   "tokens": 31368,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -11986,12 +12498,14 @@
    "id": "claude_code:00375",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "refactor in ml-pipeline",
-   "tokens": 31155
+   "tokens": 31155,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12007,12 +12521,14 @@
    "id": "claude_code:00118",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in webapp",
-   "tokens": 24409
+   "tokens": 24409,
+   "ttr_min": 14.98
   },
   {
    "applied": false,
@@ -12024,12 +12540,14 @@
    "id": "antigravity:00346",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "infra",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "data in infra",
-   "tokens": 38504
+   "tokens": 38504,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12045,12 +12563,14 @@
    "id": "copilot:00223",
    "intent": "devops",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "devops in ml-pipeline",
-   "tokens": 25911
+   "tokens": 25911,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12066,12 +12586,14 @@
    "id": "copilot:00112",
    "intent": "test",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
    "title": "test in mobile-app",
-   "tokens": 26899
+   "tokens": 26899,
+   "ttr_min": 32.23
   },
   {
    "applied": false,
@@ -12087,12 +12609,14 @@
    "id": "claude_code:00245",
    "intent": "devops",
    "loops": 2,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 5,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in api-server",
-   "tokens": 31406
+   "tokens": 31406,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12106,12 +12630,14 @@
    "id": "cursor:00068",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
    "title": "bugfix in api-server",
-   "tokens": 0
+   "tokens": 0,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12123,12 +12649,14 @@
    "id": "antigravity:00107",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in docs-site",
-   "tokens": 43861
+   "tokens": 43861,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12144,12 +12672,14 @@
    "id": "claude_code:00235",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in docs-site",
-   "tokens": 9261
+   "tokens": 9261,
+   "ttr_min": 15.67
   },
   {
    "applied": true,
@@ -12165,12 +12695,14 @@
    "id": "cursor:00396",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in infra",
-   "tokens": 4033
+   "tokens": 4033,
+   "ttr_min": 14.65
   },
   {
    "applied": false,
@@ -12184,12 +12716,14 @@
    "id": "copilot:00062",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 3,
    "source": "copilot",
    "title": "bugfix in infra",
-   "tokens": 5198
+   "tokens": 5198,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12205,12 +12739,14 @@
    "id": "cursor:00389",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
    "title": "docs in api-server",
-   "tokens": 11302
+   "tokens": 11302,
+   "ttr_min": 18.08
   },
   {
    "applied": false,
@@ -12224,12 +12760,14 @@
    "id": "cursor:00067",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 3,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 7451
+   "tokens": 7451,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12244,12 +12782,14 @@
    "id": "cursor:00243",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in api-server",
-   "tokens": 22591
+   "tokens": 22591,
+   "ttr_min": 10.68
   },
   {
    "applied": true,
@@ -12263,12 +12803,14 @@
    "id": "copilot:00307",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 21970
+   "tokens": 21970,
+   "ttr_min": 7.85
   },
   {
    "applied": false,
@@ -12283,12 +12825,14 @@
    "id": "copilot:00177",
    "intent": "other",
    "loops": 1,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 19932
+   "tokens": 19932,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12303,12 +12847,14 @@
    "id": "claude_code:00313",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 16617
+   "tokens": 16617,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12323,12 +12869,14 @@
    "id": "opencode:00150",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
    "title": "feature in webapp",
-   "tokens": 4821
+   "tokens": 4821,
+   "ttr_min": 27.2
   },
   {
    "applied": false,
@@ -12342,12 +12890,14 @@
    "id": "cursor:00335",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
    "title": "explain in infra",
-   "tokens": 13670
+   "tokens": 13670,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12362,12 +12912,14 @@
    "id": "cursor:00029",
    "intent": "explain",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in docs-site",
-   "tokens": 19816
+   "tokens": 19816,
+   "ttr_min": 12.82
   },
   {
    "applied": false,
@@ -12381,12 +12933,14 @@
    "id": "copilot:00064",
    "intent": "other",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 2,
    "source": "copilot",
    "title": "feature in api-server",
-   "tokens": 0
+   "tokens": 0,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12402,12 +12956,14 @@
    "id": "claude_code:00028",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in docs-site",
-   "tokens": 28955
+   "tokens": 28955,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12422,12 +12978,14 @@
    "id": "claude_code:00384",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 22644
+   "tokens": 22644,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12443,12 +13001,14 @@
    "id": "claude_code:00055",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 15541
+   "tokens": 15541,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12463,12 +13023,14 @@
    "id": "opencode:00166",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "bugfix in mobile-app",
-   "tokens": 16772
+   "tokens": 16772,
+   "ttr_min": 25.93
   },
   {
    "applied": true,
@@ -12483,12 +13045,14 @@
    "id": "copilot:00336",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in webapp",
-   "tokens": 15276
+   "tokens": 15276,
+   "ttr_min": 33.52
   },
   {
    "applied": false,
@@ -12503,12 +13067,14 @@
    "id": "copilot:00316",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in infra",
-   "tokens": 19025
+   "tokens": 19025,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12523,12 +13089,14 @@
    "id": "cursor:00123",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "explain in ml-pipeline",
-   "tokens": 13479
+   "tokens": 13479,
+   "ttr_min": 17.83
   },
   {
    "applied": true,
@@ -12544,12 +13112,14 @@
    "id": "cursor:00257",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
    "title": "bugfix in ml-pipeline",
-   "tokens": 8678
+   "tokens": 8678,
+   "ttr_min": 33.5
   },
   {
    "applied": true,
@@ -12565,12 +13135,14 @@
    "id": "cursor:00074",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "test in ml-pipeline",
-   "tokens": 7003
+   "tokens": 7003,
+   "ttr_min": 16.45
   },
   {
    "applied": true,
@@ -12586,12 +13158,14 @@
    "id": "copilot:00127",
    "intent": "docs",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "docs in docs-site",
-   "tokens": 10198
+   "tokens": 10198,
+   "ttr_min": 17.17
   },
   {
    "applied": false,
@@ -12606,12 +13180,14 @@
    "id": "copilot:00103",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "refactor in docs-site",
-   "tokens": 12589
+   "tokens": 12589,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12626,12 +13202,14 @@
    "id": "copilot:00087",
    "intent": "explain",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 2,
    "source": "copilot",
    "title": "explain in api-server",
-   "tokens": 5153
+   "tokens": 5153,
+   "ttr_min": 14.38
   },
   {
    "applied": false,
@@ -12643,12 +13221,14 @@
    "id": "antigravity:00380",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "test in api-server",
-   "tokens": 47799
+   "tokens": 47799,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12664,12 +13244,14 @@
    "id": "copilot:00015",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in infra",
-   "tokens": 18184
+   "tokens": 18184,
+   "ttr_min": 13.2
   },
   {
    "applied": true,
@@ -12684,12 +13266,14 @@
    "id": "cursor:00225",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 9942
+   "tokens": 9942,
+   "ttr_min": 19.72
   },
   {
    "applied": true,
@@ -12705,12 +13289,14 @@
    "id": "cursor:00014",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 3129
+   "tokens": 3129,
+   "ttr_min": 29.27
   },
   {
    "applied": false,
@@ -12725,12 +13311,14 @@
    "id": "cursor:00369",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
    "title": "feature in ml-pipeline",
-   "tokens": 18823
+   "tokens": 18823,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12746,12 +13334,14 @@
    "id": "copilot:00218",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in ml-pipeline",
-   "tokens": 21715
+   "tokens": 21715,
+   "ttr_min": 29.45
   },
   {
    "applied": true,
@@ -12766,12 +13356,14 @@
    "id": "copilot:00084",
    "intent": "feature",
    "loops": 1,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in ml-pipeline",
-   "tokens": 11305
+   "tokens": 11305,
+   "ttr_min": 17.1
   },
   {
    "applied": false,
@@ -12787,12 +13379,14 @@
    "id": "claude_code:00327",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in docs-site",
-   "tokens": 33455
+   "tokens": 33455,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12807,12 +13401,14 @@
    "id": "claude_code:00013",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "docs in infra",
-   "tokens": 24902
+   "tokens": 24902,
+   "ttr_min": 46.8
   },
   {
    "applied": true,
@@ -12828,12 +13424,14 @@
    "id": "cursor:00128",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "bugfix in docs-site",
-   "tokens": 25589
+   "tokens": 25589,
+   "ttr_min": 38.12
   },
   {
    "applied": false,
@@ -12847,12 +13445,14 @@
    "id": "cursor:00012",
    "intent": "bugfix",
    "loops": 2,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 5,
    "reached_stage": 4,
    "source": "cursor",
    "title": "bugfix in mobile-app",
-   "tokens": 28790
+   "tokens": 28790,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -12868,12 +13468,14 @@
    "id": "claude_code:00386",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in webapp",
-   "tokens": 15409
+   "tokens": 15409,
+   "ttr_min": 16.65
   },
   {
    "applied": true,
@@ -12889,12 +13491,14 @@
    "id": "cursor:00027",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
    "title": "devops in ml-pipeline",
-   "tokens": 4651
+   "tokens": 4651,
+   "ttr_min": 22.73
   },
   {
    "applied": false,
@@ -12909,12 +13513,14 @@
    "id": "claude_code:00351",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in infra",
-   "tokens": 14885
+   "tokens": 14885,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12930,12 +13536,14 @@
    "id": "claude_code:00026",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 5,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "test in ml-pipeline",
-   "tokens": 34533
+   "tokens": 34533,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12950,12 +13558,14 @@
    "id": "claude_code:00011",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in infra",
-   "tokens": 9190
+   "tokens": 9190,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12967,12 +13577,14 @@
    "id": "antigravity:00184",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "data in webapp",
-   "tokens": 55242
+   "tokens": 55242,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -12987,12 +13599,14 @@
    "id": "opencode:00010",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
    "title": "devops in webapp",
-   "tokens": 19136
+   "tokens": 19136,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13008,12 +13622,14 @@
    "id": "claude_code:00339",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in infra",
-   "tokens": 14314
+   "tokens": 14314,
+   "ttr_min": 18.48
   },
   {
    "applied": false,
@@ -13028,12 +13644,14 @@
    "id": "claude_code:00323",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 28188
+   "tokens": 28188,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13049,12 +13667,14 @@
    "id": "claude_code:00286",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in mobile-app",
-   "tokens": 21459
+   "tokens": 21459,
+   "ttr_min": 38.72
   },
   {
    "applied": true,
@@ -13070,12 +13690,14 @@
    "id": "opencode:00009",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
    "title": "bugfix in api-server",
-   "tokens": 23210
+   "tokens": 23210,
+   "ttr_min": 18.02
   },
   {
    "applied": true,
@@ -13090,12 +13712,14 @@
    "id": "copilot:00330",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in infra",
-   "tokens": 8347
+   "tokens": 8347,
+   "ttr_min": 7.8
   },
   {
    "applied": true,
@@ -13111,12 +13735,14 @@
    "id": "claude_code:00392",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 12320
+   "tokens": 12320,
+   "ttr_min": 17.37
   },
   {
    "applied": true,
@@ -13132,12 +13758,14 @@
    "id": "claude_code:00262",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "refactor in docs-site",
-   "tokens": 18787
+   "tokens": 18787,
+   "ttr_min": 38.53
   },
   {
    "applied": false,
@@ -13153,12 +13781,14 @@
    "id": "claude_code:00241",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "refactor in api-server",
-   "tokens": 10291
+   "tokens": 10291,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13172,12 +13802,14 @@
    "id": "claude_code:00220",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "data in mobile-app",
-   "tokens": 13842
+   "tokens": 13842,
+   "ttr_min": 20.08
   },
   {
    "applied": true,
@@ -13193,12 +13825,14 @@
    "id": "claude_code:00096",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 11884
+   "tokens": 11884,
+   "ttr_min": 8.97
   },
   {
    "applied": false,
@@ -13213,12 +13847,14 @@
    "id": "claude_code:00008",
    "intent": "refactor",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "refactor in webapp",
-   "tokens": 30025
+   "tokens": 30025,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13234,12 +13870,14 @@
    "id": "opencode:00007",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 5,
    "reached_stage": 6,
    "source": "opencode",
    "title": "test in infra",
-   "tokens": 37489
+   "tokens": 37489,
+   "ttr_min": 15.98
   },
   {
    "applied": false,
@@ -13255,12 +13893,14 @@
    "id": "claude_code:loop01",
    "intent": "bugfix",
    "loops": 5,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 8,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 54276
+   "tokens": 54276,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13275,12 +13915,14 @@
    "id": "claude_code:00266",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in api-server",
-   "tokens": 10670
+   "tokens": 10670,
+   "ttr_min": 15.55
   },
   {
    "applied": true,
@@ -13296,12 +13938,14 @@
    "id": "cursor:00072",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
    "title": "bugfix in webapp",
-   "tokens": 21735
+   "tokens": 21735,
+   "ttr_min": 20.2
   },
   {
    "applied": true,
@@ -13316,12 +13960,14 @@
    "id": "copilot:00006",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in ml-pipeline",
-   "tokens": 15476
+   "tokens": 15476,
+   "ttr_min": 32.62
   },
   {
    "applied": true,
@@ -13337,12 +13983,14 @@
    "id": "copilot:00005",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in docs-site",
-   "tokens": 20602
+   "tokens": 20602,
+   "ttr_min": 24.85
   },
   {
    "applied": true,
@@ -13357,12 +14005,14 @@
    "id": "claude_code:00135",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "refactor in api-server",
-   "tokens": 15181
+   "tokens": 15181,
+   "ttr_min": 28.67
   },
   {
    "applied": true,
@@ -13378,12 +14028,14 @@
    "id": "cursor:00399",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in ml-pipeline",
-   "tokens": 5098
+   "tokens": 5098,
+   "ttr_min": 9.62
   },
   {
    "applied": true,
@@ -13399,12 +14051,14 @@
    "id": "cursor:00251",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "docs in api-server",
-   "tokens": 5992
+   "tokens": 5992,
+   "ttr_min": 24.05
   },
   {
    "applied": false,
@@ -13419,12 +14073,14 @@
    "id": "cursor:00205",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
    "title": "bugfix in webapp",
-   "tokens": 11917
+   "tokens": 11917,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13440,12 +14096,14 @@
    "id": "cursor:00136",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
    "title": "bugfix in ml-pipeline",
-   "tokens": 4355
+   "tokens": 4355,
+   "ttr_min": 11.27
   },
   {
    "applied": true,
@@ -13460,12 +14118,14 @@
    "id": "copilot:00004",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
    "title": "bugfix in infra",
-   "tokens": 17486
+   "tokens": 17486,
+   "ttr_min": 53.02
   },
   {
    "applied": true,
@@ -13481,12 +14141,14 @@
    "id": "copilot:00350",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in mobile-app",
-   "tokens": 5360
+   "tokens": 5360,
+   "ttr_min": 18.62
   },
   {
    "applied": true,
@@ -13501,12 +14163,14 @@
    "id": "claude_code:00003",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in ml-pipeline",
-   "tokens": 17456
+   "tokens": 17456,
+   "ttr_min": 15.78
   },
   {
    "applied": false,
@@ -13518,12 +14182,14 @@
    "id": "antigravity:00152",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "api-server",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "explain in api-server",
-   "tokens": 32813
+   "tokens": 32813,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13538,12 +14204,14 @@
    "id": "opencode:00002",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "feature in api-server",
-   "tokens": 18959
+   "tokens": 18959,
+   "ttr_min": 12.88
   },
   {
    "applied": false,
@@ -13559,12 +14227,14 @@
    "id": "copilot:00381",
    "intent": "bugfix",
    "loops": 1,
+   "model": "gpt-5",
    "project": "ml-pipeline",
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
    "title": "bugfix in ml-pipeline",
-   "tokens": 24954
+   "tokens": 24954,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -13578,12 +14248,14 @@
    "id": "copilot:00390",
    "intent": "other",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in webapp",
-   "tokens": 5912
+   "tokens": 5912,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -13598,12 +14270,14 @@
    "id": "opencode:00378",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
    "title": "bugfix in mobile-app",
-   "tokens": 14787
+   "tokens": 14787,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -13618,12 +14292,14 @@
    "id": "opencode:00156",
    "intent": "feature",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
    "title": "feature in api-server",
-   "tokens": 16675
+   "tokens": 16675,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13639,12 +14315,14 @@
    "id": "cursor:00025",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "feature in api-server",
-   "tokens": 14099
+   "tokens": 14099,
+   "ttr_min": 7.67
   },
   {
    "applied": true,
@@ -13659,12 +14337,14 @@
    "id": "copilot:00158",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "refactor in webapp",
-   "tokens": 13325
+   "tokens": 13325,
+   "ttr_min": 48.22
   },
   {
    "applied": true,
@@ -13678,12 +14358,14 @@
    "id": "claude_code:00024",
    "intent": "docs",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "docs in api-server",
-   "tokens": 30318
+   "tokens": 30318,
+   "ttr_min": 22.2
   },
   {
    "applied": true,
@@ -13698,12 +14380,14 @@
    "id": "copilot:00290",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in mobile-app",
-   "tokens": 9722
+   "tokens": 9722,
+   "ttr_min": 11.13
   },
   {
    "applied": true,
@@ -13719,12 +14403,14 @@
    "id": "claude_code:00105",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "test in mobile-app",
-   "tokens": 7269
+   "tokens": 7269,
+   "ttr_min": 48.65
   },
   {
    "applied": true,
@@ -13739,12 +14425,14 @@
    "id": "claude_code:00348",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 13104
+   "tokens": 13104,
+   "ttr_min": 9.67
   },
   {
    "applied": true,
@@ -13759,12 +14447,14 @@
    "id": "claude_code:00208",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in docs-site",
-   "tokens": 17516
+   "tokens": 17516,
+   "ttr_min": 21.7
   },
   {
    "applied": true,
@@ -13780,12 +14470,14 @@
    "id": "opencode:00249",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
    "title": "bugfix in infra",
-   "tokens": 14082
+   "tokens": 14082,
+   "ttr_min": 13.6
   },
   {
    "applied": true,
@@ -13800,12 +14492,14 @@
    "id": "opencode:00332",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "refactor in webapp",
-   "tokens": 12330
+   "tokens": 12330,
+   "ttr_min": 29.97
   },
   {
    "applied": false,
@@ -13819,12 +14513,14 @@
    "id": "claude_code:00168",
    "intent": "other",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 11714
+   "tokens": 11714,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -13840,12 +14536,14 @@
    "id": "opencode:00314",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "explain in docs-site",
-   "tokens": 13464
+   "tokens": 13464,
+   "ttr_min": 11.9
   },
   {
    "applied": true,
@@ -13860,12 +14558,14 @@
    "id": "cursor:00372",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 19609
+   "tokens": 19609,
+   "ttr_min": 5.6
   },
   {
    "applied": true,
@@ -13881,12 +14581,14 @@
    "id": "copilot:00276",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 5,
    "source": "copilot",
    "title": "feature in webapp",
-   "tokens": 6547
+   "tokens": 6547,
+   "ttr_min": 14.08
   },
   {
    "applied": true,
@@ -13902,12 +14604,14 @@
    "id": "claude_code:00328",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "test in webapp",
-   "tokens": 8335
+   "tokens": 8335,
+   "ttr_min": 27.33
   },
   {
    "applied": true,
@@ -13922,12 +14626,14 @@
    "id": "claude_code:00295",
    "intent": "data",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "data in mobile-app",
-   "tokens": 13298
+   "tokens": 13298,
+   "ttr_min": 22.8
   },
   {
    "applied": true,
@@ -13943,12 +14649,14 @@
    "id": "cursor:00023",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
    "title": "refactor in webapp",
-   "tokens": 10495
+   "tokens": 10495,
+   "ttr_min": 9.13
   },
   {
    "applied": false,
@@ -13964,12 +14672,14 @@
    "id": "claude_code:00089",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "refactor in ml-pipeline",
-   "tokens": 9922
+   "tokens": 9922,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -13984,12 +14694,14 @@
    "id": "claude_code:00022",
    "intent": "devops",
    "loops": 2,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 6,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "devops in webapp",
-   "tokens": 42344
+   "tokens": 42344,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14005,12 +14717,14 @@
    "id": "claude_code:00281",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 6,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 44363
+   "tokens": 44363,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14025,12 +14739,14 @@
    "id": "copilot:00143",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
    "title": "feature in mobile-app",
-   "tokens": 8563
+   "tokens": 8563,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14045,12 +14761,14 @@
    "id": "claude_code:00342",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 18147
+   "tokens": 18147,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14065,12 +14783,14 @@
    "id": "claude_code:00176",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "docs in ml-pipeline",
-   "tokens": 19648
+   "tokens": 19648,
+   "ttr_min": 21.12
   },
   {
    "applied": false,
@@ -14082,12 +14802,14 @@
    "id": "antigravity:00085",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "devops in docs-site",
-   "tokens": 59726
+   "tokens": 59726,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14103,12 +14825,14 @@
    "id": "cursor:00163",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 3003
+   "tokens": 3003,
+   "ttr_min": 10.42
   },
   {
    "applied": true,
@@ -14124,12 +14848,14 @@
    "id": "claude_code:00261",
    "intent": "data",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "data in api-server",
-   "tokens": 18355
+   "tokens": 18355,
+   "ttr_min": 22.43
   },
   {
    "applied": false,
@@ -14141,12 +14867,14 @@
    "id": "antigravity:00115",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "docs-site",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in docs-site",
-   "tokens": 35759
+   "tokens": 35759,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14161,12 +14889,14 @@
    "id": "opencode:00109",
    "intent": "explain",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "opencode",
    "title": "explain in ml-pipeline",
-   "tokens": 19863
+   "tokens": 19863,
+   "ttr_min": 32.65
   },
   {
    "applied": false,
@@ -14182,12 +14912,14 @@
    "id": "claude_code:00366",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "docs in infra",
-   "tokens": 7382
+   "tokens": 7382,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14202,12 +14934,14 @@
    "id": "claude_code:00213",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in docs-site",
-   "tokens": 4109
+   "tokens": 4109,
+   "ttr_min": 14.92
   },
   {
    "applied": true,
@@ -14222,12 +14956,14 @@
    "id": "claude_code:00098",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "bugfix in api-server",
-   "tokens": 15889
+   "tokens": 15889,
+   "ttr_min": 26.37
   },
   {
    "applied": true,
@@ -14243,12 +14979,14 @@
    "id": "copilot:00310",
    "intent": "refactor",
    "loops": 0,
+   "model": "gpt-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
    "title": "refactor in docs-site",
-   "tokens": 13272
+   "tokens": 13272,
+   "ttr_min": 33.3
   },
   {
    "applied": false,
@@ -14263,12 +15001,14 @@
    "id": "claude_code:00365",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "explain in webapp",
-   "tokens": 13988
+   "tokens": 13988,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14284,12 +15024,14 @@
    "id": "claude_code:00318",
    "intent": "test",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "test in ml-pipeline",
-   "tokens": 21753
+   "tokens": 21753,
+   "ttr_min": 34.45
   },
   {
    "applied": true,
@@ -14305,12 +15047,14 @@
    "id": "claude_code:00293",
    "intent": "devops",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "devops in infra",
-   "tokens": 7428
+   "tokens": 7428,
+   "ttr_min": 26.07
   },
   {
    "applied": false,
@@ -14326,12 +15070,14 @@
    "id": "opencode:00210",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 6,
    "reached_stage": 4,
    "source": "opencode",
    "title": "bugfix in mobile-app",
-   "tokens": 39708
+   "tokens": 39708,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14346,12 +15092,14 @@
    "id": "opencode:00097",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "refactor in docs-site",
-   "tokens": 10164
+   "tokens": 10164,
+   "ttr_min": 43.18
   },
   {
    "applied": false,
@@ -14363,12 +15111,14 @@
    "id": "antigravity:00138",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "refactor in webapp",
-   "tokens": 70251
+   "tokens": 70251,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14383,12 +15133,14 @@
    "id": "copilot:00088",
    "intent": "feature",
    "loops": 0,
+   "model": "gpt-5",
    "project": "infra",
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
    "title": "feature in infra",
-   "tokens": 17592
+   "tokens": 17592,
+   "ttr_min": 19.88
   },
   {
    "applied": true,
@@ -14403,12 +15155,14 @@
    "id": "claude_code:00234",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in infra",
-   "tokens": 12295
+   "tokens": 12295,
+   "ttr_min": 11.68
   },
   {
    "applied": true,
@@ -14423,12 +15177,14 @@
    "id": "claude_code:00211",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
    "title": "feature in mobile-app",
-   "tokens": 13953
+   "tokens": 13953,
+   "ttr_min": 24.22
   },
   {
    "applied": true,
@@ -14444,12 +15200,14 @@
    "id": "claude_code:00151",
    "intent": "bugfix",
    "loops": 1,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 17725
+   "tokens": 17725,
+   "ttr_min": 31.22
   },
   {
    "applied": true,
@@ -14464,12 +15222,14 @@
    "id": "cursor:00233",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in docs-site",
-   "tokens": 17549
+   "tokens": 17549,
+   "ttr_min": 12.02
   },
   {
    "applied": true,
@@ -14484,12 +15244,14 @@
    "id": "claude_code:00321",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "feature in ml-pipeline",
-   "tokens": 8369
+   "tokens": 8369,
+   "ttr_min": 18.2
   },
   {
    "applied": false,
@@ -14505,12 +15267,14 @@
    "id": "copilot:00120",
    "intent": "test",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
    "title": "test in webapp",
-   "tokens": 13763
+   "tokens": 13763,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14526,12 +15290,14 @@
    "id": "claude_code:00255",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "docs in infra",
-   "tokens": 21348
+   "tokens": 21348,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14546,12 +15312,14 @@
    "id": "claude_code:00246",
    "intent": "explain",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "mobile-app",
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
    "title": "explain in mobile-app",
-   "tokens": 14858
+   "tokens": 14858,
+   "ttr_min": 16.03
   },
   {
    "applied": false,
@@ -14563,12 +15331,14 @@
    "id": "antigravity:00215",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "ml-pipeline",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "feature in ml-pipeline",
-   "tokens": 76847
+   "tokens": 76847,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14582,12 +15352,14 @@
    "id": "claude_code:00060",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "docs-site",
    "prompts": 1,
    "reached_stage": 3,
    "source": "claude_code",
    "title": "refactor in docs-site",
-   "tokens": 7092
+   "tokens": 7092,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14602,12 +15374,14 @@
    "id": "opencode:00355",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
    "title": "feature in api-server",
-   "tokens": 9450
+   "tokens": 9450,
+   "ttr_min": 31.7
   },
   {
    "applied": true,
@@ -14622,12 +15396,14 @@
    "id": "cursor:00374",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "infra",
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in infra",
-   "tokens": 30875
+   "tokens": 30875,
+   "ttr_min": 9.85
   },
   {
    "applied": true,
@@ -14642,12 +15418,14 @@
    "id": "cursor:00153",
    "intent": "docs",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
    "title": "docs in ml-pipeline",
-   "tokens": 14524
+   "tokens": 14524,
+   "ttr_min": 20.07
   },
   {
    "applied": false,
@@ -14661,12 +15439,14 @@
    "id": "cursor:00061",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "ml-pipeline",
    "prompts": 1,
    "reached_stage": 3,
    "source": "cursor",
    "title": "bugfix in ml-pipeline",
-   "tokens": 4817
+   "tokens": 4817,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14682,12 +15462,14 @@
    "id": "copilot:00190",
    "intent": "data",
    "loops": 0,
+   "model": "gpt-5",
    "project": "mobile-app",
    "prompts": 6,
    "reached_stage": 5,
    "source": "copilot",
    "title": "data in mobile-app",
-   "tokens": 43116
+   "tokens": 43116,
+   "ttr_min": 26.12
   },
   {
    "applied": true,
@@ -14702,12 +15484,14 @@
    "id": "copilot:00048",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in webapp",
-   "tokens": 18015
+   "tokens": 18015,
+   "ttr_min": 15.72
   },
   {
    "applied": true,
@@ -14722,12 +15506,14 @@
    "id": "copilot:00047",
    "intent": "bugfix",
    "loops": 0,
+   "model": "gpt-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
    "title": "bugfix in api-server",
-   "tokens": 17212
+   "tokens": 17212,
+   "ttr_min": 31.47
   },
   {
    "applied": false,
@@ -14743,12 +15529,14 @@
    "id": "claude_code:00125",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 9381
+   "tokens": 9381,
+   "ttr_min": null
   },
   {
    "applied": true,
@@ -14763,12 +15551,14 @@
    "id": "cursor:00344",
    "intent": "refactor",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
    "title": "refactor in api-server",
-   "tokens": 13806
+   "tokens": 13806,
+   "ttr_min": 9.58
   },
   {
    "applied": true,
@@ -14784,12 +15574,14 @@
    "id": "cursor:00259",
    "intent": "feature",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "api-server",
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
    "title": "feature in api-server",
-   "tokens": 24890
+   "tokens": 24890,
+   "ttr_min": 20.35
   },
   {
    "applied": false,
@@ -14804,12 +15596,14 @@
    "id": "claude_code:00134",
    "intent": "bugfix",
    "loops": 0,
+   "model": "claude-sonnet-5",
    "project": "webapp",
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
    "title": "bugfix in webapp",
-   "tokens": 6101
+   "tokens": 6101,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14821,12 +15615,14 @@
    "id": "antigravity:00221",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "webapp",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "docs in webapp",
-   "tokens": 40039
+   "tokens": 40039,
+   "ttr_min": null
   },
   {
    "applied": false,
@@ -14838,12 +15634,14 @@
    "id": "antigravity:00170",
    "intent": "other",
    "loops": 0,
+   "model": "gemini-3",
    "project": "infra",
    "prompts": 0,
    "reached_stage": 0,
    "source": "antigravity",
    "title": "bugfix in infra",
-   "tokens": 45000
+   "tokens": 45000,
+   "ttr_min": null
   }
  ],
  "sources": [

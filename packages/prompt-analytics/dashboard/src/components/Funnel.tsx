@@ -6,6 +6,8 @@ import { intentColor, SOURCES, srcColor, srcLabel } from "../lib/palette";
 import { useRoving } from "../lib/hooks";
 import { linkProps } from "../lib/motion";
 import { BarList, Card, Cols, DataTable, Empty, Section, Segmented, pct } from "./ui";
+import { Dumb } from "./Time";
+import "./investigate.css";
 
 type By = "all" | "tool" | "intent";
 
@@ -54,6 +56,20 @@ function Minis({ by }: { by: By }) {
   );
 }
 
+/** Each stage as a share of the one before, previous period against now. A step moves "clearly" at 2+ pts; fewer reads neutral. */
+function StepRates() {
+  const { v, prior } = useStore();
+  const r = (fn: number[], i: number): number | null => (fn[i - 1] ? ((fn[i] ?? 0) / fn[i - 1]) * 100 : null);
+  if (!v.funnel[0]) return null;
+  const rows = STAGES.slice(1).map((s, k) => { const i = k + 1, b = r(v.funnel, i), a = prior?.v.funnel[0] ? r(prior.v.funnel, i) : null;
+    return { k: s, label: s, name: s, a, b: b ?? 0, fa: a === null ? "" : `${Math.round(a)}%`, fb: b === null ? "n/a" : `${Math.round(b)}%`, bad: a !== null && b !== null && Math.abs(b - a) >= 2 ? b < a : null }; });
+  return (
+    <Card src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0])}${prior ? ` vs ${fmtInt(prior.v.funnel[0])}` : ""}`} title="Step rates" meta={prior ? "before \u2192 now, share of the step before" : "share of the step before"} span={12}>
+      <Dumb rows={rows} max={100} />
+    </Card>
+  );
+}
+
 function Switches() {
   const { d, drill, f } = useStore();
   const srcs = SOURCES.filter((s) => d.tool_switch.some((t) => t.from === s || t.to === s));
@@ -61,7 +77,7 @@ function Switches() {
   const peak = Math.max(...d.tool_switch.map((t) => t.count), 1);
   const { group, mark } = useRoving(srcs.length * srcs.length, 1, Math.max(1, srcs.length));
   return (
-    <Card title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
+    <Card src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
           <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
@@ -94,11 +110,12 @@ export function Funnel() {
   const switches = caps.multiTool && d.tool_switch.some((t) => t.from !== t.to && caps.sources.includes(t.from) && caps.sources.includes(t.to));
   return (
     <Section id="s-funnel" title="Funnel" q="Where do sessions stop?">
-      <Card title="Stages" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 6 : 12}
+      <Card src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0] ?? 0)}`} title="Session to resolved" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 6 : 12}
         actions={<Segmented label="Break funnel down by" value={by} onChange={setBy} options={[{ id: "all", text: "All" }, ...(caps.multiTool ? [{ id: "tool" as const, text: "Tool" }] : []), { id: "intent", text: "Intent" }]} />}>
         {by === "all" ? <Stages /> : <Minis by={by} />}
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />
       </Card>
+      <StepRates />
       {switches && <Switches />}
     </Section>
   );

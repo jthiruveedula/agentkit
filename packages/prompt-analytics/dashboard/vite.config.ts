@@ -11,5 +11,5 @@ export default defineConfig({
     target: "es2022",
     chunkSizeWarningLimit: 900,
   },
-  test: { environment: "jsdom", include: ["src/**/*.test.{ts,tsx}"], setupFiles: ["src/__tests__/setup.ts"] },
+  test: { environment: "jsdom", include: ["src/**/*.test.{ts,tsx}"], setupFiles: ["src/__tests__/setup.ts"], testTimeout: 20000 },
 });

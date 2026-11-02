@@ -54,7 +54,7 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   }
   if (f.source) out.push({ keys: ["source"], label: srcLabel(f.source) });
   if (f.intent) out.push({ keys: ["intent"], label: f.intent });
-  if (f.project) out.push({ keys: ["project"], label: f.project });
+  if (f.project !== undefined) out.push({ keys: ["project"], label: f.project || "(no project)" });
   if (f.cluster !== undefined) out.push({ keys: ["cluster"], label: f.cluster < 0 ? "No topic" : `Topic: ${clusterLabel?.(f.cluster) ?? f.cluster}` });
   if (f.stage) out.push({ keys: ["stage"], label: `Reached ${STAGES[f.stage - 1]?.toLowerCase()}` });
   if (f.loops !== undefined) out.push({ keys: ["loops"], label: `${f.loops >= MAX_LOOPS ? `${MAX_LOOPS}+` : f.loops} rephrase loops` });

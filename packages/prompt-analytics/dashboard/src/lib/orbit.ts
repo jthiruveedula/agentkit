@@ -16,11 +16,7 @@ const GOLD = Math.PI * (3 - Math.sqrt(5));
 export const CAM_D = 1200;
 export const ZOOM_MIN = 0.4, ZOOM_MAX = 5;
 
-const add = (a: V3, b: V3): V3 => ({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z });
-const mul = (a: V3, k: number): V3 => ({ x: a.x * k, y: a.y * k, z: a.z * k });
-const dot = (a: V3, b: V3) => a.x * b.x + a.y * b.y + a.z * b.z;
 export const len = (a: V3) => Math.hypot(a.x, a.y, a.z);
-const norm = (a: V3): V3 => { const l = len(a) || 1; return mul(a, 1 / l); };
 export const clamp = (x: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, x));
 
 /** i-th of n evenly spread unit vectors on a sphere. */

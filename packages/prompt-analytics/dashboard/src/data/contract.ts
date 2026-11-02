@@ -28,13 +28,17 @@ export interface SessionRow {
   cluster: number; title: string;
   /** (1.2+) Prompt-quality features (what_works ids) at least one prompt in the session showed. Absent in older exports. */
   features?: string[];
+  /** (1.3+) Minutes from session start to the last applied edit. null = nothing applied. Absent in older exports. */
+  ttr_min?: number | null;
+  /** (1.3+) Dominant model id. null = unknown. Absent in older exports. */
+  model?: string | null;
 }
 
 /** (1.2+) A prompt typed again in other sessions. `exemplar` is redacted, <= 160 chars; `sessions` are ids only, newest first. */
 export interface Repeat { cluster: number; count: number; exemplar: string; sessions: string[] }
 
 export interface DashboardData {
-  schema: "1.0" | "1.1" | "1.2";                // 1.1 adds hour_week[].sessions / .applied; 1.2 adds repeats[] and sessions[].features
+  schema: "1.0" | "1.1" | "1.2" | "1.3";                // 1.1 adds hour_week[].sessions / .applied; 1.2 adds repeats[] and sessions[].features; 1.3 adds sessions[].ttr_min/.model
   generated_at: string;                         // ISO UTC
   range: { start: string; end: string };        // ISO dates
   sources: { source: Source; status: "ok" | "degraded" | "missing" | "unsupported"; sessions: number; note?: string }[];

@@ -2,8 +2,9 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { getApi } from "../data/api";
 import type { ExposureItem, RevealFinding, Source } from "../data/types";
 import { fmtDate, fmtInt } from "../lib/format";
-import { SOURCES, srcColor, srcLabel } from "../lib/palette";
-import { Segmented } from "./ui";
+import { SOURCES, srcLabel } from "../lib/palette";
+import { ToolLogo } from "./Shell";
+import "./govern.css";
 
 type Status = ExposureItem["status"];
 type Cat = ExposureItem["category"];
@@ -12,6 +13,12 @@ const REVEAL_MS = 30_000;
 const CAT_NAME: Record<Cat, string> = { secret: "Secrets", pii: "PII", phi: "PHI" };
 const STATUS_NAME: Record<Status, string> = { open: "Open", reviewed: "Reviewed", false_positive: "Not sensitive" };
 const name = (s: string) => s.replace(/_/g, " ");
+const CATS = Object.keys(CAT_NAME) as Cat[];
+
+/** Pressed-state filter group (one choice at a time). */
+function Seg<T extends string>({ label, value, onChange, options }: { label: string; value: T; onChange: (v: T) => void; options: { id: T; text: string }[] }) {
+  return <div className="seg3" role="group" aria-label={label}>{options.map((o) => <button key={o.id} type="button" className="fp" aria-pressed={o.id === value} onClick={() => onChange(o.id)}>{o.text}</button>)}</div>;
+}
 
 /** Renders a masked preview, turning ⟦kind⟧ tokens into chips. Text nodes only. */
 function Masked({ text }: { text: string }) {
@@ -62,11 +69,11 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
     const t = window.setTimeout(() => hide(), REVEAL_MS);
     const key = (e: KeyboardEvent) => { if (e.key === "Escape") hide(true); };
     const vis = () => { if (document.hidden) hide(); };
-    const io = new IntersectionObserver(([e]) => { if (!e.isIntersecting) hide(); });
-    if (li.current) io.observe(li.current);
+    const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(([e]) => { if (!e.isIntersecting) hide(); });
+    if (li.current) io?.observe(li.current);
     document.addEventListener("keydown", key);
     document.addEventListener("visibilitychange", vis);
-    return () => { clearTimeout(t); io.disconnect(); document.removeEventListener("keydown", key); document.removeEventListener("visibilitychange", vis); };
+    return () => { clearTimeout(t); io?.disconnect(); document.removeEventListener("keydown", key); document.removeEventListener("visibilitychange", vis); };
   }, [shown]);
 
   const toggle = async () => {
@@ -76,37 +83,31 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
     try { setFound(await api.reveal(it.id)); } catch { setErr("Could not load the original."); } finally { setBusy(false); }
   };
 
+  const tog = (to: Status) => review(status === to ? "open" : to);
   return (
-    <li ref={li} className="rq-row" data-status={status}>
-      <div className="rq-kinds">{it.kinds.map((k, i) => <span key={`${i}-${k}`} className="chip" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="chip" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</div>
-      {found ? (
-        <div className="rq-box" role="group" aria-label="Sensitive original, revealed">
-          {found.map((f, i) => <p key={i}>{f.before}<mark>{f.value}</mark>{f.after}</p>)}
-        </div>
-      ) : it.preview ? (
-        <>
-          <p className={`rq-prev ${shown ? "" : "blur"}`} aria-hidden={!shown}><Masked text={it.preview} /></p>
-          {!shown && <span className="sr-only">Preview hidden. Use the reveal button.</span>}
-        </>
-      ) : <p className="rq-prev rq-none">No preview stored</p>}
-      {peek && <p className="rq-note" role="status">Run prompt-analytics serve to view originals.</p>}
-      {found && <p className="sr-only" role="status">Original revealed. It hides again in 30 seconds.</p>}
-      {err && <p className="rq-note" role="alert">{err}</p>}
-      <div className="rq-acts">
-        <button type="button" ref={btn} className="btn" disabled={busy} aria-expanded={shown}
-          aria-label={`${shown ? "Hide" : "Reveal"} sensitive prompt from ${when}`} onClick={toggle}>{busy ? "Loading" : shown ? "Hide" : "Reveal"}</button>
-        {status === "open" ? (
+    <li ref={li} className={`xf1${status === "open" ? "" : " done"}`}>
+      <span className="xk">{it.kinds.map((k, i) => <span key={`${i}-${k}`} className="tag" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="tag" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</span>
+      <div className="xm">
+        {found ? (
+          <div className="xbox" role="group" aria-label="Sensitive original, revealed">
+            {found.map((f, i) => <p key={i}>{f.before}<mark>{f.value}</mark>{f.after}</p>)}
+          </div>
+        ) : it.preview ? (
           <>
-            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as reviewed`} onClick={() => review("reviewed")}>Reviewed</button>
-            <button type="button" className="btn" disabled={!api} aria-label={`Mark prompt from ${when} as not sensitive`} onClick={() => review("false_positive")}>Not sensitive</button>
+            <span className={`mk${shown ? " on" : ""}`} aria-hidden={!shown}><Masked text={it.preview} /></span>
+            {!shown && <span className="sr-only">Preview hidden. Use the reveal button.</span>}
           </>
-        ) : (
-          <>
-            <span className="chip status">{STATUS_NAME[status]}</span>
-            <button type="button" className="btn" disabled={!api} aria-label={`Undo, reopen prompt from ${when}`} onClick={() => review("open")}>Undo</button>
-          </>
-        )}
+        ) : <span className="xnone">No preview stored</span>}
+        {peek && <p className="xnote" role="status">Run prompt-analytics serve to view originals.</p>}
+        {found && <p className="sr-only" role="status">Original revealed. It hides again in 30 seconds.</p>}
+        {err && <p className="xnote" role="alert">{err}</p>}
       </div>
+      <span className="xa">
+        <button type="button" ref={btn} className="xb" disabled={busy} aria-pressed={shown}
+          aria-label={`Reveal sensitive prompt from ${when}`} onClick={toggle}>{busy ? "Loading" : "Reveal"}</button>
+        <button type="button" className="xb" disabled={!api} aria-pressed={status === "reviewed"} aria-label={`Reviewed: prompt from ${when}`} onClick={() => tog("reviewed")}>Reviewed</button>
+        <button type="button" className="xb" disabled={!api} aria-pressed={status === "false_positive"} aria-label={`Not sensitive: prompt from ${when}`} onClick={() => tog("false_positive")}>Not sensitive</button>
+      </span>
     </li>
   );
 }
@@ -139,35 +140,36 @@ export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat:
 
   const markAll = (g: Group, status: Status) => g.items.forEach((i) => { if ((over[i.id] ?? i.status) === "open") void review(i.id, status); });
 
+  const count = CATS.map((c) => items.filter((i) => i.category === c).length), total = items.length || 1;
   return (
     <div className="rq">
-      <div className="rq-filters">
-        <Segmented label="Category" value={cat} onChange={f(setCat)} options={[{ id: "all", text: "All kinds" }, ...(["secret", "pii", "phi"] as Cat[]).map((c) => ({ id: c, text: CAT_NAME[c] }))]} />
-        <Segmented label="Source" value={src} onChange={f(setSrc)} options={[{ id: "all", text: "All sources" }, ...present.map((s) => ({ id: s, text: srcLabel(s) }))]} />
-        <Segmented label="Status" value={st} onChange={f(setSt)} options={[{ id: "all", text: "Any status" }, ...(Object.keys(STATUS_NAME) as Status[]).map((s) => ({ id: s, text: STATUS_NAME[s] }))]} />
+      <div className="xsum" role="img" aria-label={`${items.length} findings: ${CATS.map((c, i) => `${count[i]} ${CAT_NAME[c]}`).join(", ")}`}>{CATS.map((c, i) => <i key={c} data-cat={c} style={{ width: `${(count[i] / total) * 100}%` }} />)}</div>
+      <p className="xl">{CATS.map((c, i) => <span key={c}><i data-cat={c} />{CAT_NAME[c]} <b>{count[i]}</b></span>)}<span>Total <b>{items.length}</b></span></p>
+      <div className="xf">
+        <Seg label="Kind" value={cat} onChange={f(setCat)} options={[{ id: "all", text: "All kinds" }, ...CATS.map((c) => ({ id: c, text: CAT_NAME[c] }))]} />
+        <Seg label="Source" value={src} onChange={f(setSrc)} options={[{ id: "all", text: "All sources" }, ...present.map((s) => ({ id: s, text: srcLabel(s) }))]} />
+        <Seg label="Status" value={st} onChange={f(setSt)} options={[{ id: "all", text: "Any status" }, ...(Object.keys(STATUS_NAME) as Status[]).map((s) => ({ id: s, text: STATUS_NAME[s] }))]} />
       </div>
-      {!api && <p className="rq-note">Viewing a static export. Reveal and review need <code>prompt-analytics serve</code>.</p>}
+      {!api && <p className="xnote">Viewing a static export. Reveal and review need <code>prompt-analytics serve</code>.</p>}
       <p className="sr-only" role="status">{msg}</p>
-      {slice.length === 0 ? <p className="empty">Nothing matches these filters</p> : (
-        <ul className="rq-list rows">{slice.map((g) => {
-          const open = g.items.filter((i) => (over[i.id] ?? i.status) === "open").length;
-          return (
-            <li key={g.key} className="rq-group">
-              <div className="rq-gh">
-                <span className="tag"><span className="sw" style={{ "--c": srcColor(g.source) } as React.CSSProperties} />{srcLabel(g.source)}</span>
-                <time dateTime={g.date}>{fmtDate(g.date)}</time>
-                <span className="grow" title={g.title ?? undefined}>{g.title ?? "Untitled session"}</span>
-                <span className="meta">{g.items.length} {g.items.length === 1 ? "finding" : "findings"}</span>
-                {open > 1 && api ? <button type="button" className="btn" aria-label={`Mark all ${open} open findings in ${g.title ?? "this session"} as reviewed`} onClick={() => markAll(g, "reviewed")}>Reviewed all</button> : null}
-              </div>
-              <ul>{collapse(g.items).map((its) => {
-                const sts = its.map((i) => over[i.id] ?? i.status);
-                return <Row key={its[0].id} its={its} api={api} status={sts.includes("open") ? "open" : sts[0]} onReview={review} />;
-              })}</ul>
-            </li>
-          );
-        })}</ul>
-      )}
+      {slice.length === 0 ? <p className="xe">No findings match these filters.</p> : slice.map((g) => {
+        const open = g.items.filter((i) => (over[i.id] ?? i.status) === "open").length;
+        return (
+          <section key={g.key} className="xs" aria-label={g.title ?? "Untitled session"}>
+            <div className="xh">
+              <span className="tag"><ToolLogo source={g.source} size={16} />{srcLabel(g.source)}</span>
+              <time className="m" dateTime={g.date}>{fmtDate(g.date)}</time>
+              <span className="tt" title={g.title ?? undefined}>{g.title ?? "Untitled session"}</span>
+              <span className="m">{g.items.length} {g.items.length === 1 ? "finding" : "findings"}</span>
+              {open > 1 && api ? <button type="button" className="btn" aria-label={`Mark all ${open} open findings in ${g.title ?? "this session"} as reviewed`} onClick={() => markAll(g, "reviewed")}>Reviewed all</button> : null}
+            </div>
+            <ul className="xl1">{collapse(g.items).map((its) => {
+              const sts = its.map((i) => over[i.id] ?? i.status);
+              return <Row key={its[0].id} its={its} api={api} status={sts.includes("open") ? "open" : sts[0]} onReview={review} />;
+            })}</ul>
+          </section>
+        );
+      })}
       {list.length > PAGE && (
         <nav className="rq-pages" aria-label="Review queue pages">
           <button type="button" className="btn" disabled={cur === 0} onClick={() => setPage(cur - 1)}>Previous</button>

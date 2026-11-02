@@ -1,5 +1,17 @@
 // Generates src/data/sample.dev.json: synthetic data conforming to contract.ts.
 // Deterministic (seeded). Dev/screenshot use only; never bundled into production.
+//
+// Planted scenarios (LAST 28 days only: 2026-09-28..2026-10-25; prior 28: 2026-08-31..2026-09-27):
+//  A. Latency + friction regression in project "billing-api", intent "bugfix".
+//     Re-labels 8 prompted sessions from elsewhere into the combo, then every billing-api/bugfix
+//     session with >=4 prompts in the window gets +1..2 loops (friction +0.13 per loop) and ttr_min x1.6.
+//     Expected: median ttr_min of the combo ~2x the prior 28 (measured 2.1x, n=15 vs 7); mean loops up ~1.2.
+//  B. Cost mix shift: claude_code share of sessions rises ~15 pts in the window (about 50% -> 65%).
+//     ~26 prompted copilot/cursor/opencode sessions in the window are re-labelled claude_code and priced
+//     at the claude_code rate. Per-session cost rate per tool is unchanged; total spend rises.
+// Mechanism: scenarios re-label/adjust existing rows (no change to the main rnd() sampling), and draw
+// from their own LCGs (rndPlant, rndTtr). The legacy `ttr` gate uses pre-plant counts so its rnd() draws
+// are unchanged. All aggregates are derived after planting.
 // Per-session rows are generated first and every aggregate is derived from them, so the
 // dashboard's client-side cross-filtering and the legacy aggregate fields agree.
 import { writeFileSync } from "node:fs";
@@ -46,8 +58,80 @@ for (let i = 0; i < days; i++) {
   }
 }
 // two outlier days: one moderate cost spike, one absurd z (real data produces these)
-sessions.push({ ...sessions[sessions.length - 1], id: "s9001", date: "2026-09-21", source: "claude_code", prompts: 64, tokens: 910000, cost_usd: 143.9, title: "Rewrite billing-api ledger in one sitting" });
+sessions.push({ ...sessions[sessions.length - 1], id: "s9001", date: "2026-08-12", source: "claude_code", prompts: 64, tokens: 910000, cost_usd: 143.9, title: "Rewrite billing-api ledger in one sitting" });
 sessions.push({ ...sessions[0], id: "s9002", date: "2026-06-15", source: "claude_code", prompts: 41, tokens: 600000, cost_usd: 91.4, title: "Migrate users table across tenants" });
+
+// ---- Planted scenarios and per-session ttr_min. Separate LCGs: the rnd() sequence above is untouched. ----
+const lcg = (seed) => () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+const rndPlant = lcg(9157); // scenario selection / re-labelling
+const rndTtr = lcg(7301);   // ttr_min noise
+const gaussTtr = () => Math.sqrt(-2 * Math.log(rndTtr() + 1e-9)) * Math.cos(2 * Math.PI * rndTtr());
+const shuffle = (a, r) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const pickP = (a) => a[Math.floor(rndPlant() * a.length)];
+const lastStart = iso(new Date(start.getTime() + (days - 28) * 864e5));
+const inLast = (x) => x.date >= lastStart;
+const gatePre = new Map(); // (source|intent) counts before planting, gates the legacy ttr rows
+for (const x of sessions) { const k = `${x.source}|${x.intent}`; gatePre.set(k, (gatePre.get(k) ?? 0) + 1); }
+
+// Scenario B: claude_code mix +15 pts in the last 28 days (re-label, priced at the claude_code rate)
+const K_MIX = Math.round(0.15 * sessions.filter(inLast).length);
+const mixPool = shuffle(sessions.filter((x) => inLast(x) && x.prompts > 0 && ["copilot", "cursor", "opencode"].includes(x.source)), rndPlant).slice(0, K_MIX);
+for (const x of mixPool) { x.source = "claude_code"; x.cost_usd = r2(x.prompts * costPer.claude_code * (0.04 + rndPlant() * 0.09)); }
+
+// Scenario A: billing-api / bugfix regression in the last 28 days
+const REG = { project: "billing-api", intent: "bugfix" };
+const bugfixClusters = [0, 4, 7, 1, 6, 0, 5, 7, 0, 2, 6, 3].map((x, j) => (INT[x] === REG.intent ? j : -1)).filter((j) => j >= 0);
+const regressed = (x) => inLast(x) && x.project === REG.project && x.intent === REG.intent && x.prompts >= 4;
+const relabel = shuffle(sessions.filter((x) => inLast(x) && x.prompts >= 4 && !(x.project === REG.project && x.intent === REG.intent)), rndPlant).slice(0, 8);
+for (const x of relabel) {
+  x.project = REG.project;
+  x.intent = REG.intent;
+  if (x.cluster !== -1) x.cluster = bugfixClusters[Math.floor(rndPlant() * bugfixClusters.length)];
+  x.title = `${pickP(VERBS.bugfix)} ${pickP(THINGS)} in ${REG.project}`;
+}
+// Prior window gets the same combo at equal volume (baseline behaviour) so the segment passes the n>=15 guard in both windows.
+const priorStart = iso(new Date(start.getTime() + (days - 56) * 864e5));
+const inPrior = (x) => x.date >= priorStart && x.date < lastStart;
+const relabelPrior = shuffle(sessions.filter((x) => inPrior(x) && x.prompts >= 4 && !(x.project === REG.project && x.intent === REG.intent)), rndPlant).slice(0, 8);
+for (const x of relabelPrior) { x.project = REG.project; x.intent = REG.intent; x.title = `${pickP(VERBS.bugfix)} ${pickP(THINGS)} in ${REG.project}`; }
+for (const x of sessions.filter(regressed)) {
+  const extra = 2 + Math.floor(rndPlant() * 2);
+  x.loops = Math.min(8, x.loops + extra);
+  x.friction = r2(Math.min(1, x.friction + 0.13 * extra), 3);
+}
+// The regression must clear the significance rule: every current combo session struggles, and the prior window keeps only 2 stray struggles outside the combo.
+const struggled = (x) => x.loops >= 3 || x.friction >= 0.5;
+for (const x of sessions.filter(regressed)) { x.loops = Math.max(x.loops, 3); x.friction = Math.max(x.friction, 0.5); }
+sessions.filter((x) => x.prompts && inPrior(x) && struggled(x) && !(x.project === REG.project && x.intent === REG.intent)).slice(2).forEach((x) => { x.loops = Math.min(x.loops, 2); x.friction = Math.min(x.friction, 0.4); });
+// Latency attribution needs n>=15 resolved in both windows, so the combo sessions in both windows resolve.
+for (const x of sessions) {
+  if (x.prompts && x.project === REG.project && x.intent === REG.intent && (inLast(x) || inPrior(x))) {
+    x.applied = true;
+    x.reached_stage = Math.max(x.reached_stage, 5);
+  }
+}
+
+// ttr_min: minutes from first prompt to last activity. Log-normal; median ~12, tail capped at 180. Null when nothing applied (as export.py).
+const TTR_INTENT = { bugfix: 1.3, devops: 1.3, feature: 1.0, refactor: 1.0, test: 1.0, data: 1.0, other: 0.9, explain: 0.7, docs: 0.7 };
+const r1 = (n) => +n.toFixed(1);
+for (const x of sessions) {
+  if (!x.prompts || !x.applied) { x.ttr_min = null; continue; }
+  const m = 11 * TTR_INTENT[x.intent] * Math.exp(0.2 * x.loops) * (x.applied ? 0.85 : 1) * Math.pow(x.prompts / 5, 0.3) * Math.exp(0.85 * gaussTtr()) * (regressed(x) ? 1.8 : 1);
+  x.ttr_min = Math.min(180, r1(m));
+}
+// model: dominant model id per session, own LCG so no other draw changes. Tier mix differs by tool.
+const rndModel = lcg(4421);
+const MODELS = {
+  claude_code: [["claude-sonnet-4-5", 0.68], ["claude-opus-4-1", 0.17], ["claude-haiku-4-5", 0.15]],
+  copilot: [["gpt-5", 0.5], ["gpt-5-mini", 0.33], ["o3", 0.17]],
+  cursor: [["claude-sonnet-4-5", 0.4], ["gpt-5", 0.25], ["gemini-2.5-pro", 0.25], ["gpt-5-mini", 0.1]],
+  opencode: [["gemini-2.5-flash", 0.45], ["claude-sonnet-4-5", 0.3], ["gemini-2.5-pro", 0.25]],
+  antigravity: [["gemini-2.5-flash", 0.55], ["gemini-2.5-pro", 0.45]],
+};
+for (const x of sessions) {
+  const u = rndModel(); let a = 0;
+  x.model = x.prompts ? (MODELS[x.source].find(([, w]) => u < (a += w)) ?? MODELS[x.source][0])[0] : null;
+}
 sessions.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id < b.id ? 1 : -1)); // newest first, as export.py does
 
 const sum = (a, f) => a.reduce((t, x) => t + f(x), 0);
@@ -92,7 +176,7 @@ for (const [metric, f] of [["cost", (c) => c.cost_usd], ["prompts", (c) => c.pro
   calendar.map((c) => ({ date: c.date, value: f(c), z: r2((0.6745 * (f(c) - med)) / mad, 1) })).filter((r) => r.z > 3).sort((a, b) => b.z - a.z).slice(0, 4).forEach((r) => anomalies.push({ date: r.date, metric, value: r2(r.value), z: r.z }));
 }
 const ttr = [];
-for (const source of SRC) for (const intent of INT) { const n = sessions.filter((x) => x.source === source && x.intent === intent).length; if (n >= 3) ttr.push({ source, intent, median_min: r2(6 + rnd() * 44), n }); }
+for (const source of SRC) for (const intent of INT) { const n = sessions.filter((x) => x.source === source && x.intent === intent).length; if ((gatePre.get(`${source}|${intent}`) ?? 0) >= 3) ttr.push({ source, intent, median_min: r2(6 + rnd() * 44), n }); }
 
 const stages = ["intent", "prompt", "response", "iterate", "applied", "outcome"];
 const counts = (g) => stages.map((_, i) => g.filter((x) => x.reached_stage >= i + 1).length);
@@ -218,7 +302,7 @@ const exposure = {
   items: items.sort((a, b) => (a.date < b.date ? 1 : -1)),
 };
 const data = {
-  schema: "1.2", generated_at: "2026-10-26T08:00:00Z", range: { start: iso(start), end: iso(new Date(start.getTime() + (days - 1) * 864e5)) }, sources,
+  schema: "1.3", generated_at: "2026-10-26T08:00:00Z", range: { start: iso(start), end: iso(new Date(start.getTime() + (days - 1) * 864e5)) }, sources,
   engine: { mode: "ml", requested: "auto", available: ["basic", "ml"], libs: { duckdb: "1.1.3", scikit_learn: "1.9.1", fastembed: null }, accel: "cpu", reason: "auto: scikit-learn 1.9.1 found, no embedding model", upgrade: { mode: "deep", command: "pip install 'prompt-analytics[deep]'" }, methods: { footprint: "Counted from session logs", time: "Rolling z-score plus IsolationForest on daily cost", funnel: "Rule-based stage detection per session", friction: "Loop and retry heuristics", works: "TF-IDF + KMeans clusters; logistic model with bootstrap CI", recommend: "Ranked from the strongest evidence" } },
   totals: { sessions: totSessions, prompts: totPrompts, tokens: totTokens, cost_usd: r2(totCost), active_days: calendar.length, longest_streak: longest, current_streak: cur, projects: PROJECTS.length, commits_linked: Math.round(totSessions * 0.34) },
   by_source, calendar, hour_week, cost_river, anomalies, ttr, funnel, tool_switch, friction,

@@ -133,10 +133,12 @@ describe("exposure grouping", () => {
   });
   it("queue renders one group per session", () => {
     mount();
-    const groups = el.querySelectorAll(".rq-group");
+    const groups = el.querySelectorAll(".xs");
     expect(groups.length).toBeGreaterThan(0);
     expect(groups.length).toBeLessThanOrEqual(8);
-    expect(el.querySelector(".rq-prev.blur")).not.toBeNull(); // masked + blurred until revealed
+    expect(el.querySelector(".mk:not(.on)")).not.toBeNull(); // masked + blurred until revealed
+    const b = el.querySelector<HTMLButtonElement>(".xs .xb");
+    expect(b?.getAttribute("aria-pressed")).toBe("false"); // Reveal is a toggle
   });
   it("cross-filter narrows the queue to the selected sessions", () => {
     const src = d.exposure.items[0].source;
@@ -147,7 +149,7 @@ describe("exposure grouping", () => {
     el = document.createElement("div"); document.body.append(el);
     root = createRoot(el);
     act(() => root!.render(<Dashboard d={d} initialFilter={{ source: src }} />));
-    expect(el.querySelectorAll(".rq-group").length).toBe(Math.min(8, want));
+    expect(el.querySelectorAll(".xs").length).toBe(Math.min(8, want));
   });
 });
 
