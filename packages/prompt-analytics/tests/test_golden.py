@@ -32,7 +32,8 @@ def _cmp(a, b, path="$"):
         for i, (x, y) in enumerate(zip(a, b)):
             _cmp(x, y, f"{path}[{i}]")
     elif isinstance(a, float) or isinstance(b, float):
-        assert math.isclose(a, b, rel_tol=1e-6, abs_tol=1e-9), f"{path}: {a} != {b}"
+        # export rounds to 6 dp; BLAS differences across OSes can flip the last digit
+        assert math.isclose(a, b, rel_tol=1e-6, abs_tol=1.5e-6), f"{path}: {a} != {b}"
     else:
         assert a == b, f"{path}: {a!r} != {b!r}"
 

@@ -555,7 +555,9 @@ def _sessions(
                 "friction": float(x.get("friction") or 0.0),
                 "cluster": int(cl.get(r["session_id"], -1)),
                 "features": feats.get(r["session_id"], []),
-                "ttr_min": None if x.get("ttr_s") is None else round(float(x["ttr_s"]) / 60.0, 2),
+                "ttr_min": None
+                if x.get("ttr_s") is None
+                else round(float(x["ttr_s"]) / 60.0, 2),
                 "model": (r["model"] or "")[:60] or None,
                 "title": (red.redact(" ".join(t.split())) or "")[:SNIPPET] if t else "",
             }
