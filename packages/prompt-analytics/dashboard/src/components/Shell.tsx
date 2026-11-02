@@ -186,7 +186,7 @@ export function Prefs() {
       {open && (
         <div id="prefs" ref={box} className="prefs" role="dialog" aria-label="Display settings">
           <fieldset><legend>Accent</legend>
-            <div className="sw">{ACCENTS.map(([id, text]) => (
+            <div className="prefs-opts">{ACCENTS.map(([id, text]) => (
               <label key={id}><input type="radio" name="pa-accent" value={id} checked={s.accent === id} onChange={() => put({ accent: id })} />{text}</label>
             ))}</div>
           </fieldset>
