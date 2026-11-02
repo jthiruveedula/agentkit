@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.22.0](https://github.com/jthiruveedula/agentkit/compare/v0.21.0...v0.22.0) (2026-11-02)
+
+
+### Features
+
+* **prompt-analytics:** display settings for accent theme and glass strength ([#102](https://github.com/jthiruveedula/agentkit/issues/102)) ([53b8834](https://github.com/jthiruveedula/agentkit/commit/53b883447325b6778b02f94d66427bd2e9118cf5))
+
+
+### Bug Fixes
+
+* **prompt-analytics:** settings panel layout and legibility ([#104](https://github.com/jthiruveedula/agentkit/issues/104)) ([8ef8d10](https://github.com/jthiruveedula/agentkit/commit/8ef8d10c5be598d0cc0b44094a73bb8e7a4a99d7))
+
 ## [0.21.0](https://github.com/jthiruveedula/agentkit/compare/v0.20.0...v0.21.0) (2026-11-02)
 
 
