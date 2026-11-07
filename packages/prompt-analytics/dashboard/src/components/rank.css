@@ -1,0 +1,11 @@
+/* Feature 1: signal-ranked sections. A quiet section collapses to one row; a promoted one gets a reason line. */
+.sec.quiet { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); margin-block: var(--s2); border: 1px dashed var(--line); border-radius: var(--r2); background: var(--surface); }
+.sec.quiet h2 { font: 600 16px/24px var(--sans); }
+.sec.quiet .meta { font-size: 13px; line-height: 20px; color: var(--muted); }
+.sec.quiet .link { margin-left: auto; min-height: 24px; }
+.why-tag { margin-top: var(--s4); font-size: 12px; line-height: 16px; color: var(--muted); }
+.why-tag b { color: var(--accent); }
+.side a[data-quiet]:not([aria-current]) { opacity: 0.6; color: var(--muted); }
+/* a jump to a promoted section keeps its reason line in view under the sticky header (mirrors the .sec scroll-margin in styles.css, + the tag) */
+.why-tag + .sec { scroll-margin-top: calc(var(--hh) + 44px); }
+@media (max-width: 699px) { .why-tag + .sec { scroll-margin-top: 96px; } }

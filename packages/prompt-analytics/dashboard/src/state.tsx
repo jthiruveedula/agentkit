@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { DashboardData } from "./data/types";
-import { chips, patchFilter, same, views, isEmpty, type Filter, type FilterKey, type Views } from "./lib/filter";
+import { chips, openExposure, patchFilter, same, views, isEmpty, type Filter, type FilterKey, type Views } from "./lib/filter";
 import { priorViews, windowOf, type Cmp, type Prior, type Win } from "./lib/compare";
 import { fromHash, lockSpy, sectionOf, toHash, type Nav } from "./lib/hash";
 import { capabilities, sectionsFor, type Caps } from "./lib/capabilities";
@@ -126,7 +126,7 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   const prior = useMemo(() => priorViews(d, f, cmp), [d, f, cmp]);
   const win = useMemo(() => windowOf(d, f), [d, f]);
   const ids = useMemo(() => (isEmpty(f) ? null : new Set(v.rows.map((r) => r.id))), [f, v.rows]);
-  const openIds = useMemo(() => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string)), [d]);
+  const openIds = useMemo(() => openExposure(d), [d]);
   const exposed = useMemo(() => new Set(v.rows.filter((r) => openIds.has(r.id)).map((r) => r.id)), [v.rows, openIds]);
 
   const crumbs = useMemo<Crumb[]>(() => {

@@ -203,7 +203,7 @@ export function Prefs() {
 /** True when the active section is only reachable from the mobile "More" menu (so More carries the active state). */
 export const underMore = (section: string) => !BAR_IDS.includes(section);
 
-export function Nav({ part }: { part: "side" | "bar" }) {
+export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string> }) {
   const { section, goto, href, secs, f, capsAll } = useStore();
   const groups = navFor(secs, capsAll.multiTool);
   const bar = BAR.filter(([id]) => secs.has(id));
@@ -223,7 +223,7 @@ export function Nav({ part }: { part: "side" | "bar" }) {
     return () => { document.removeEventListener("keydown", key); document.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); };
   }, [more]);
   const link = (id: string, text: string, cls?: string, icon?: boolean) => (
-    <a key={id} href={href(id)} className={cls} title={icon ? text : undefined} aria-current={id === section ? "location" : undefined}
+    <a key={id} href={href(id)} className={cls} data-quiet={quiet?.has(id) || undefined} title={icon ? text : undefined} aria-current={id === section ? "location" : undefined}
       onClick={(e) => { e.preventDefault(); setMore(false); goto(id); }}>
       {icon && <i className="ic"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={ICON[id] ?? ICON["s-overview"]} /></svg></i>}
       {icon ? <span className="nl">{text}</span> : text}
@@ -257,7 +257,7 @@ export const railCollapsed = () => { try { return localStorage.getItem(RAIL_KEY)
 const narrow = () => typeof matchMedia === "function" && matchMedia("(max-width: 819px)").matches;
 
 /** Left rail: the logo toggles collapsed / expanded on desktop and closes the drawer on mobile; the menu button in the top bar opens it. */
-export function Rail({ col, setCol, open, setOpen }: { col: boolean; setCol: (c: boolean) => void; open: boolean; setOpen: (o: boolean) => void }) {
+export function Rail({ col, setCol, open, setOpen, quiet }: { col: boolean; setCol: (c: boolean) => void; open: boolean; setOpen: (o: boolean) => void; quiet?: Set<string> }) {
   const box = useRef<HTMLElement>(null);
   const close = () => { setOpen(false); document.querySelector<HTMLElement>(".navbtn")?.focus(); };   // hand focus back to the menu button
   const toggle = () => {
@@ -277,7 +277,7 @@ export function Rail({ col, setCol, open, setOpen }: { col: boolean; setCol: (c:
         <button type="button" className="brand" aria-label="Toggle sidebar" aria-expanded={!col} aria-controls="rail" title="Show / hide sidebar" onClick={toggle}>
           <Glyph /><b>Prompt Analytics</b>
         </button>
-        <Nav part="side" />
+        <Nav part="side" quiet={quiet} />
       </aside>
       {open && <div className="rail-bd" aria-hidden="true" onClick={close} />}
     </>

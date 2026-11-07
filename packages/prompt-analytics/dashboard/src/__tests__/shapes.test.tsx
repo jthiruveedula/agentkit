@@ -16,7 +16,7 @@ type Raw = Record<string, unknown>;
 const raw = sample as unknown as Raw;
 let root: Root | null = null, el: HTMLDivElement;
 afterEach(() => { act(() => root?.unmount()); el?.remove(); root = null; location.hash = ""; try { localStorage.clear(); } catch { /* ignore */ } });
-const mount = (r: Raw) => { el = document.createElement("div"); document.body.append(el); root = createRoot(el); act(() => root!.render(<Dashboard d={normalize(r)} />)); };
+const mount = (r: Raw) => { el = document.createElement("div"); document.body.append(el); root = createRoot(el); act(() => root!.render(<Dashboard d={normalize(r)} />)); act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click()); };
 const caps = (r: Raw) => { const d = normalize(r); return capabilities(d, views(d, {})); };
 const navIds = () => [...el.querySelectorAll<HTMLAnchorElement>("nav.side a")].map((a) => a.getAttribute("href")!.match(/s-[a-z]+/)![0]);
 const has = (sel: string) => el.querySelector(sel) !== null;

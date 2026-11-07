@@ -11,7 +11,7 @@ import { srcLabel } from "./palette";
 import { pctChange, pts } from "./stats";
 import { PRICING_SHARE_TOL } from "./thresholds";
 
-export interface SummaryView { f: Filter; v: Views; win: Win; caps: Caps; prior: Prior | null; cmp: Cmp }
+export interface SummaryView { f: Filter; v: Views; win: Win; caps: Caps; prior: Prior | null; cmp: Cmp; /** the Brief's split label, when it compares last 4 weeks vs the rest */ basis?: string }
 
 const CHAPTERS = ["footprint", "time", "funnel", "friction", "works", "recommend"];
 export const chg = (cur: number, pr: number, pn: number) => { const x = delta(cur, pr, pn); if (!x) return ""; if (x.kind === "new") return "new vs prior"; const c = pctChange(x.pct); return c ? `${c} vs prior` : "flat vs prior"; };
@@ -82,7 +82,7 @@ export function summarize(d: DashboardData, view: SummaryView): string {
   const L: string[] = ["# Prompt Analytics summary", ""];
   L.push(`- Period: ${fmtRange(win.from, win.to) || "all data"} (${win.days} days)`);
   L.push(`- Filters: ${filters.length ? filters.join("; ") : "none"}`);
-  L.push(`- Comparison: ${prior ? `${cmp === "yoy" ? "year ago" : "previous period"}, ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)} (n=${fmtInt(pn)})` : cmp === "off" ? "off" : "none (needs a date range and enough history)"}`);
+  L.push(`- Comparison: ${view.basis ? view.basis : prior ? `${cmp === "yoy" ? "year ago" : "previous period"}, ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)} (n=${fmtInt(pn)})` : cmp === "off" ? "off" : "none (needs a date range and enough history)"}`);
   L.push(`- Data as of ${d.generated_at.slice(0, 10)}`, "");
   if (caps.empty || t.sessions === 0) return [...L, "No sessions in this view.", ""].join("\n");
 
