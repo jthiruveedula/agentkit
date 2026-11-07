@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState, type JSX } from "react";
 import type { DashboardData } from "./data/types";
 import { loadData, normalize, readInline, refreshData } from "./data/load";
 import { shouldRefresh } from "./lib/live";
 import { fxOn } from "./lib/hooks";
 import { StoreProvider, useStore } from "./state";
-import type { Filter } from "./lib/filter";
-import { SECTIONS, spyLocked } from "./lib/hash";
-import { Header, Nav, Rail, railCollapsed } from "./components/Shell";
+import { views, type Filter } from "./lib/filter";
+import { fromHash, sectionOf, spyLocked } from "./lib/hash";
+import { attention } from "./lib/attention";
+import { rankSections } from "./lib/rank";
+import { Header, Nav, Rail, railCollapsed, titleOf } from "./components/Shell";
 import { Overview } from "./components/Overview";
 import { MindMap } from "./components/MindMap";
 import { Tools } from "./components/Tools";
@@ -26,6 +28,12 @@ import { useReveal } from "./lib/hooks";
 import { FxHost } from "./components/Fx";
 import { SOURCES, srcLabel } from "./lib/palette";
 import { unlockText } from "./lib/capabilities";
+import "./components/rank.css";
+
+const COMP: Record<string, () => JSX.Element | null> = {
+  "s-overview": Overview, "s-tools": Tools, "s-time": Time, "s-funnel": Funnel, "s-friction": Friction, "s-works": Works,
+  "s-models": ModelFit, "s-exposure": Exposure, "s-recs": Recommend, "s-sessions": Sessions, "s-map": MindMap,
+};
 
 type State = { kind: "loading" } | { kind: "empty" } | { kind: "error"; msg: string } | { kind: "ready"; d: DashboardData };
 
@@ -40,7 +48,7 @@ function initial(): State {
 }
 
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
-  const { d, panel, crumbs, closePanel, clearAfter, setSection, secs, caps } = useStore();
+  const { d, f, panel, crumbs, closePanel, clearAfter, section, setSection, secs, caps, capsAll } = useStore();
   useReveal();
   const [col, setCol] = useState(railCollapsed);
   const [menu, setMenu] = useState(false);
@@ -70,8 +78,19 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
     return () => window.removeEventListener("keydown", on);
   }, [panel, crumbs.length, closePanel, clearAfter]);
 
-  const shown = SECTIONS.filter((id) => secs.has(id));
-  const shownKey = shown.join();
+  // Rank on the date window only, so drilling never reshuffles the page.
+  const wv = useMemo(() => views(d, { from: f.from, to: f.to }), [d, f.from, f.to]);
+  const ranked = useMemo(() => rankSections(secs, attention(d, wv, { from: f.from, to: f.to }, null), d, wv.rows), [secs, d, wv, f.from, f.to]);
+  const [open, setOpen] = useState(() => new Set([sectionOf(fromHash(typeof location === "undefined" ? "" : location.hash).sec)]));   // a shared link to a quiet section opens it
+  const expand = (id: string) => {
+    setOpen((s) => new Set(s).add(id));
+    requestAnimationFrame(() => { const h = document.getElementById(`${id}-h`) ?? document.querySelector<HTMLElement>(`#${id} h2`); if (h) { h.tabIndex = -1; h.focus(); } });
+  };
+  useEffect(() => {   // rail, palette or a KPI "Details" jump to a quiet section opens it (goto locks the spy; plain scrolling does not)
+    if (ranked.quiet.has(section) && !open.has(section) && spyLocked() === section) expand(section);
+  }, [section]);   // eslint-disable-line react-hooks/exhaustive-deps
+  const promoted = ranked.order.filter((id) => ranked.score[id] > 0);
+  const shownKey = ranked.order.join();
   useEffect(() => {   // the nav highlights the last section whose top passed 30% of the viewport (or the last one at the page end): always exactly one
     let raf = 0;
     const spy = () => {
@@ -96,7 +115,7 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
     <div className="app" data-panel={panel}>
       <a className="skip" href="#main">Skip to content</a>
       <div className="shell" data-col={col || undefined}>
-        <Rail col={col} setCol={setCol} open={menu} setOpen={setMenu} />
+        <Rail col={col} setCol={setCol} open={menu} setOpen={setMenu} quiet={ranked.quiet} />
         <div className="content">
           <Header d={d} onData={onData} onMenu={() => setMenu(!menu)} menuOpen={menu} />
           {d.engine.mode === "basic" && !caps.empty && <div className="banner" role="status">Basic mode: topics are grouped by keywords; the Playbook and topic views need the ML engine. {d.engine.upgrade ? <>Run <code>{d.engine.upgrade.command}</code> to unlock them.</> : null}</div>}
@@ -105,9 +124,11 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
               {caps.empty ? <EmptyState /> : <>
                 <OtherTools />
                 {caps.tooSmall && <p className="hint unlock" role="status">{unlockText(caps, secs.has("s-time"))}</p>}
-                {secs.has("s-overview") && <Overview />}{secs.has("s-tools") && <Tools />}{secs.has("s-time") && <Time />}{secs.has("s-funnel") && <Funnel />}
-                {secs.has("s-friction") && <Friction />}{secs.has("s-works") && <Works />}{secs.has("s-models") && <ModelFit />}{secs.has("s-exposure") && <Exposure />}{secs.has("s-recs") && <Recommend />}
-                {secs.has("s-sessions") && <Sessions />}{secs.has("s-map") && <MindMap />}
+                {ranked.order.map((id) => {
+                  const C = COMP[id], at = promoted.indexOf(id);
+                  if (ranked.quiet.has(id) && !open.has(id)) return <Quiet key={id} id={id} title={titleOf(id, capsAll.multiTool)} expand={() => expand(id)} />;
+                  return at < 0 ? <C key={id} /> : <Fragment key={id}><p className="why-tag"><b>#{at + 1}</b> {ranked.why[id]}</p><C /></Fragment>;
+                })}
               </>}
             </main>
           </div>
@@ -117,6 +138,17 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
       <Panel />
       <Palette /><WrappedHost /><Toaster /><FxHost />
     </div>
+  );
+}
+
+/** A middle section with nothing flagged: one row, expanded on demand. */
+function Quiet({ id, title, expand }: { id: string; title: string; expand: () => void }) {
+  return (
+    <section id={id} className="sec quiet" aria-labelledby={`${id}-qh`}>
+      <h2 id={`${id}-qh`}>{title}</h2>
+      <span className="meta">Quiet · nothing flagged</span>
+      <button type="button" className="link" aria-expanded="false" aria-label={`Show the ${title} section`} onClick={expand}>Show</button>
+    </section>
   );
 }
 

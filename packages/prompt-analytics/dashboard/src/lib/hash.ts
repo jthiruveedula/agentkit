@@ -1,5 +1,5 @@
 // URL hash is the only state store: `#/s-time?src=claude_code&int=bugfix&from=2026-09-01&sel=s0835&cmp=prev`.
-// Short keys map 1:1 to Filter, plus `fr` (friction band), `sel` (session), `pn` (list panel), `cmp`.
+// Short keys map 1:1 to Filter (sg = struggled, ex = exposed), plus `fr` (friction band), `sel` (session), `pn` (list panel), `cmp`.
 import type { Filter } from "./filter";
 import type { Cmp } from "./compare";
 
@@ -25,6 +25,7 @@ export function toHash(n: Nav, sec = "s-overview"): string {
   const set = (k: string, v: unknown) => { if (v !== undefined) p.set(k, String(v)); };
   set("src", f.source); set("int", f.intent); set("prj", f.project); set("from", f.from); set("to", f.to); set("cl", f.cluster); set("q", f.q);
   set("st", f.stage); set("sx", f.stageExact); set("lp", f.loops); set("ap", f.applied === undefined ? undefined : f.applied ? 1 : 0);
+  set("sg", f.struggled === undefined ? undefined : f.struggled ? 1 : 0); set("ex", f.exposed === undefined ? undefined : f.exposed ? 1 : 0);
   if (f.frictionMin !== undefined || f.frictionMax !== undefined) p.set("fr", `${f.frictionMin ?? 0}-${f.frictionMax ?? 1}`);
   set("sel", n.sel); if (n.list) p.set("pn", "list"); if (n.cmp !== "prev") p.set("cmp", n.cmp);
   if (n.pg && n.pg > 1) p.set("pg", String(n.pg)); if (n.pgs !== undefined && n.pgs !== 10) p.set("pgs", n.pgs === 0 ? "all" : String(n.pgs));
@@ -42,6 +43,8 @@ export function fromHash(h: string): { nav: Nav; sec: string } {
   put("source", str("src") as never); put("intent", str("int") as never); put("project", p.get("prj") ?? undefined); put("from", str("from")); put("to", str("to"));
   put("cluster", num("cl")); put("q", str("q")?.slice(0, 80)); put("stage", num("st")); put("stageExact", num("sx")); put("loops", num("lp"));
   if (p.get("ap") === "1" || p.get("ap") === "0") f.applied = p.get("ap") === "1";
+  if (p.get("sg") === "1" || p.get("sg") === "0") f.struggled = p.get("sg") === "1";
+  if (p.get("ex") === "1" || p.get("ex") === "0") f.exposed = p.get("ex") === "1";
   const fr = /^([\d.]+)-([\d.]+)$/.exec(p.get("fr") ?? "");
   if (fr) { f.frictionMin = +fr[1]; f.frictionMax = +fr[2]; }
   const cmp = p.get("cmp");

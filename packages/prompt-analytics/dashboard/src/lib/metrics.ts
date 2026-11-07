@@ -2,11 +2,12 @@
 // Struggled = sessions with a prompt where loops >= 3 or friction >= 0.5.
 import type { SessionRow } from "../data/types";
 import { diffCI } from "./stats";
+import { struggled } from "./filter";
 
 export interface Rate { k: number; n: number; p: number | null }
 
-/** Struggled (decision #1): a session with a prompt where loops >= 3 or friction >= 0.5. Sessions without a prompt are not in the base. */
-export const struggled = (r: SessionRow): boolean => r.prompts > 0 && (r.loops >= 3 || r.friction >= 0.5);
+/** Defined in filter.ts (the struggled filter key uses it); re-exported so metrics callers keep one import. */
+export { struggled };
 
 export const rateOf = (k: number, n: number): Rate => ({ k, n, p: n ? k / n : null });
 

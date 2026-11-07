@@ -15,6 +15,7 @@ describe("investigate sections", () => {
   it("cards carry data-src, tools have logos, dumbbells keep a text value", () => {
     el = document.createElement("div"); document.body.append(el); root = createRoot(el);
     act(() => root!.render(<Dashboard d={normalize(sample)} />));
+    act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click());   // the sample flags nothing on tools, so its section starts quiet
     for (const t of ["Resolved rate", "Struggled by tool", "Time to resolve", "Retries by intent", "Signals behind struggle", "Step rates"]) expect(card(t)?.dataset.src, t).toBeTruthy();
     expect(card("Resolved rate")!.querySelectorAll(".bar-l svg.lg").length).toBeGreaterThan(0);
     const db = card("Time to resolve")!.querySelector(".db");
