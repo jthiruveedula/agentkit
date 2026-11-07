@@ -11,19 +11,24 @@ import { TrendToggles, WeekChart, type Metric, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
 import { struggledRate } from "../lib/metrics";
-import { applyFilter } from "../lib/filter";
+import { applyFilter, openExposure } from "../lib/filter";
+import { story } from "../lib/story";
+import { movers } from "../lib/movers";
 import { whereDims } from "../lib/summary";
 import { listNames } from "../lib/capabilities";
 import { srcLabel } from "../lib/palette";
 import type { Source } from "../data/types";
+import "./story.css";
 
 const srcNames = (xs: Source[]) => listNames(xs.map(srcLabel));
 
 
 function Kpis({ b, setMetric }: { b: Briefing; setMetric: (m: Metric) => void }) {
-  const { d, v, prior, win, exposed, goto, caps } = useStore();
+  const { d, v, prior, win, exposed, goto, caps, apply, openList, setView } = useStore();
   const t = v.totals, p = prior?.v.totals, pn = p?.sessions ?? 0, st = b.struggled;
-  const open = useMemo(() => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string)), [d]);
+  const open = useMemo(() => openExposure(d), [d]);
+  const sorted = (so: string, list: () => void) => () => { list(); setView({ so }); };
+  const applied = () => apply({ applied: true }, { list: true });
   const pExposed = prior ? prior.v.rows.filter((r) => open.has(r.id)).length : 0;
   const cap = prior ? `vs ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)}` : "";
   const rate = t.asked ? t.applied / t.asked : 0, prate = p && p.asked ? p.applied / p.asked : 0;
@@ -39,34 +44,35 @@ function Kpis({ b, setMetric }: { b: Briefing; setMetric: (m: Metric) => void })
     ? { id: "cpa", primary: true, label: "Cost per applied change", value: cpa.value === null ? "–" : fmtUSD(cpa.value),
         sub: cpa.value === null ? "no priced session applied a change" : `per applied · ${fmtInt(cpa.pricedApplied)} priced of ${fmtInt(cpa.applied)} applied`,
         chip: <>{pcpa && cpa.value !== null && pcpa.value !== null && (() => { const x = delta(cpa.value, pcpa.value, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })()}{partial}</>,
-        spark: sp((rs) => costPerApplied(rs).value ?? 0), cap: true, go: () => goto("s-tools") }
+        spark: sp((rs) => costPerApplied(rs).value ?? 0), cap: true, go: () => goto("s-tools"), open: sorted("cost-d", applied) }
     : { id: "tpa", primary: true, label: "Tokens per applied change", value: tpa === null ? "–" : fmtCompact(tpa),
         sub: `${caps.unpriced.length ? `${srcNames(caps.unpriced)} ${caps.unpriced.length === 1 ? "doesn't" : "don't"} record prices` : "No prices recorded"}, so tokens stand in for cost`,
         chip: ptpa !== null && tpa !== null && (() => { const x = delta(tpa, ptpa, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(),
-        spark: sp((rs) => tokensPerApplied(rs) ?? 0), cap: true, go: () => goto("s-funnel") };
-  const cards: { id: string; label: string; value: string; sub?: string; chip: React.ReactNode; spark: number[]; low?: boolean; primary?: boolean; cap?: boolean; go: () => void }[] = [
+        spark: sp((rs) => tokensPerApplied(rs) ?? 0), cap: true, go: () => goto("s-funnel"), open: sorted("tokens-d", applied) };
+  const cards: { id: string; label: string; value: string; sub?: string; chip: React.ReactNode; spark: number[]; low?: boolean; primary?: boolean; cap?: boolean; go: () => void; open: () => void }[] = [
     { id: "struggled", primary: true, label: "Struggled", value: st.now === null ? "–" : fmtPct(st.now, 1), sub: st.now === null ? "no session had a prompt" : `${fmtInt(Math.round(st.now * st.n))} of ${fmtInt(st.n)} sessions with prompts`,
       chip: st.diff !== null && <Delta lowerBetter neutral={!st.real} pct={st.diff} text={Math.abs(st.diff * 100) < 0.05 ? "no change" : `${st.diff > 0 ? "+" : "-"}${Math.abs(st.diff * 100).toFixed(1)} pts${st.real ? "" : " · noise"}`} />,
-      spark: b.weekly.map((w) => (w.struggled ?? 0) * 100), go: () => { setMetric("struggled"); goto("s-trend"); } },
-    { id: "sessions", label: "Sessions", value: fmtInt(t.sessions), chip: p && (() => { const x = delta(t.sessions, p.sessions, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.sessions), go: () => { setMetric("sessions"); goto("s-trend"); } },
+      spark: b.weekly.map((w) => (w.struggled ?? 0) * 100), go: () => { setMetric("struggled"); goto("s-trend"); }, open: () => apply({ struggled: true }, { list: true }) },
+    { id: "sessions", label: "Sessions", value: fmtInt(t.sessions), chip: p && (() => { const x = delta(t.sessions, p.sessions, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.sessions), go: () => { setMetric("sessions"); goto("s-trend"); }, open: openList },
     effCard,
-    { id: "prompts", label: "Prompts", value: fmtCompact(t.prompts), sub: t.asked ? `${(t.prompts / t.asked).toFixed(1)} per session with prompts` : undefined, chip: p && (() => { const x = delta(t.prompts, p.prompts, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.prompts), go: () => { setMetric("prompts"); goto("s-trend"); } },
+    { id: "prompts", label: "Prompts", value: fmtCompact(t.prompts), sub: t.asked ? `${(t.prompts / t.asked).toFixed(1)} per session with prompts` : undefined, chip: p && (() => { const x = delta(t.prompts, p.prompts, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.prompts), go: () => { setMetric("prompts"); goto("s-trend"); }, open: sorted("prompts-d", openList) },
     { id: "applied", label: "Applied", value: t.asked ? fmtPct(rate) : "0%", sub: t.asked ? (isWide(t.applied, t.asked) ? `n=${fmtInt(t.asked)}, wide CI ${fmtPct(wilson(t.applied, t.asked)[0])}-${fmtPct(wilson(t.applied, t.asked)[1])}` : `${fmtInt(t.applied)} of ${fmtInt(t.asked)} sessions with prompts`) : undefined,
-      chip: p && p.asked > 0 && (() => { const x = dPts(rate, prate, 1); return x && <Delta pct={x.pct} text={x.text} />; })(), spark: sp(METRICS.applied), low: t.asked > 0 && isWide(t.applied, t.asked), go: () => goto("s-funnel") },
+      chip: p && p.asked > 0 && (() => { const x = dPts(rate, prate, 1); return x && <Delta pct={x.pct} text={x.text} />; })(), spark: sp(METRICS.applied), low: t.asked > 0 && isWide(t.applied, t.asked), go: () => goto("s-funnel"), open: applied },
     { id: "exposed", label: "Exposed", value: t.sessions ? fmtPct(exposed.size / t.sessions, 1) : "0%", sub: `${fmtInt(exposed.size)} sessions with open findings`,
-      chip: p && (() => { const x = delta(exposed.size, pExposed, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sparkSeries(v.rows, win, (rs) => rs.filter((r) => open.has(r.id)).length), go: () => goto("s-exposure") },
+      chip: p && (() => { const x = delta(exposed.size, pExposed, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sparkSeries(v.rows, win, (rs) => rs.filter((r) => open.has(r.id)).length), go: () => goto("s-exposure"), open: () => apply({ exposed: true }, { list: true }) },
   ];
   return (
     <ul className="kpis k6" aria-label="Totals for the current selection">
       {cards.map((c, i) => (
         <li key={c.id} data-primary={c.primary || undefined} style={{ "--i": i } as React.CSSProperties}>
-          <button type="button" className="kpi" data-kpi={c.id} data-primary={c.primary || undefined} onClick={c.go} aria-label={`${c.label}: ${c.value}. Jump to details`}>
+          <button type="button" className="kpi" data-kpi={c.id} data-primary={c.primary || undefined} onClick={c.open} aria-label={`${c.label}: ${c.value}. Open the sessions behind it`}>
             <span className="lbl">{c.label}</span>
             <Count className="val" text={c.value} />
             <span className="chips">{c.chip}{c.sub ? <span className="sub" data-low={c.low || undefined}>{c.sub}</span> : null}</span>
             <Spark values={c.spark} cap={c.cap} />
             {cap && <span className="cap">{cap}</span>}
           </button>
+          <button type="button" className="link kpi-go" onClick={c.go} aria-label={`Jump to the ${c.label} details`}>Details</button>
         </li>
       ))}
     </ul>
@@ -75,14 +81,20 @@ function Kpis({ b, setMetric }: { b: Briefing; setMetric: (m: Metric) => void })
 
 const DOT: Record<Item["sev"], string> = { bad: "var(--bad)", warn: "var(--warn)", info: "var(--muted)" };
 
-function Attention() {
-  const { d, v, f, ids, apply, goto, setExCat } = useStore();
-  const items = useMemo(() => attention(d, v, f, ids), [d, v, f, ids]);
-  const run = (it: Item) => {
+/** Run an attention item: a drill filters (and opens the list), a scroll jumps to its section. */
+function useRun() {
+  const { apply, goto, setExCat } = useStore();
+  return (it: Item) => {
     const a = it.action;
     if (a.kind === "drill") apply(a.filter, { list: a.list });
     else { if (a.exCat) setExCat(a.exCat); goto(a.id); }
   };
+}
+
+function Attention() {
+  const { d, v, f, ids } = useStore();
+  const items = useMemo(() => attention(d, v, f, ids), [d, v, f, ids]);
+  const run = useRun();
   return (
     <Panel id="s-attention" title="Needs attention" meta="ranked, one click to the cause" src="insights · ranked by sessions" span={4}>
       {items.length === 0 ? <Empty>Nothing needs attention. Checked: {THRESHOLDS}.</Empty> : (
@@ -161,6 +173,13 @@ function Brief({ b, nPrior, win }: { b: Briefing; nPrior: number; win: number })
   const head = s.now === null ? "No sessions with a prompt in this window" : s.prev === null ? "No earlier window to compare" : real ? (up ? "More sessions are struggling" : "Fewer sessions are struggling") : "Nothing changed significantly";
   const why = real ? b.drivers?.headline : null;
   const pct = (x: number) => fmtPct(x, 1);
+  const { d, v, f, ids, prior, apply } = useStore();
+  const run = useRun();
+  const first = useMemo(() => attention(d, v, f, ids)[0], [d, v, f, ids]);
+  const rec = d.recommendations[0], ev = rec ? d.insights.find((i) => i.id === rec.evidence_insight) : undefined;
+  const st = useMemo(() => story(b, v.rows, { rec: rec?.title, attention: first?.headline }), [b, v.rows, rec, first]);
+  const mv = useMemo(() => movers(v.rows, prior ? prior.v.rows : null), [v.rows, prior]);
+  const toneOf = (g: boolean | null) => (g === null ? "flat" : g ? "good" : "bad");
   return (
     <section className="s12 brief" aria-labelledby="ov-hd" data-tone={tone}>
       <p className="eyebrow">{real ? (up ? "Early sign" : "Improving") : "Steady"} · {win} days</p>
@@ -173,6 +192,26 @@ function Brief({ b, nPrior, win }: { b: Briefing; nPrior: number; win: number })
       )}
       {s.diff !== null && s.ci && <span className="ci">{pts(s.diff)} · 95% CI {pts(s.ci[0])} to {pts(s.ci[1])} · n {fmtInt(s.n)} vs {fmtInt(nPrior)}{real ? "" : " · within noise"}</span>}
       {why && <button type="button" className="link" onClick={() => document.getElementById("s-driver")?.scrollIntoView({ block: "start" })}>{Math.abs(why.total / (b.drivers?.delta || Infinity)) >= 0.5 ? "mostly" : "partly"} {why.key} · Why →</button>}
+      {(st.why || st.next) && (
+        <dl className="story">
+          {st.why && <div><dt>Why it matters</dt><dd>{st.why}</dd></div>}
+          {st.next && (
+            <div><dt>Do next</dt><dd>{st.next.text}
+              {st.next.kind === "rec" ? ev && <button type="button" className="link" onClick={() => apply(ev.drill.filter, { list: true })} aria-label={`Open the sessions behind: ${st.next.text}`}>Show evidence</button>
+                : first && <button type="button" className="link" onClick={() => run(first)} aria-label={first.action.kind === "drill" ? `Open the sessions behind: ${first.headline}` : `Jump to the details of: ${first.headline}`}>Open</button>}
+            </dd></div>
+          )}
+        </dl>
+      )}
+      {mv.length > 0 && (
+        <p className="movers"><span className="meta">Also moved</span>
+          {mv.map((m) => {
+            const body = <>{m.label} <b>{m.text}</b></>, mf = m.filter;
+            return mf ? <button key={m.id} type="button" className="tag" data-tone={toneOf(m.good)} onClick={() => apply(mf, { list: true })} aria-label={`${m.label} ${m.text} vs the earlier window. Open these sessions`}>{body}</button>
+              : <span key={m.id} className="tag" data-tone={toneOf(m.good)}>{body}</span>;
+          })}
+        </p>
+      )}
     </section>
   );
 }
@@ -188,13 +227,21 @@ function Drivers({ b }: { b: Briefing }) {
       {!rows.length ? <Empty>Needs an earlier window with prompts in both periods.</Empty> : (
         <>
           <ul className="drv" aria-label="Signed share of the change, in points">
-            {rows.map((r) => (
-              <li key={r.key} data-tone={r.total > 0 ? "bad" : r.total < 0 ? "good" : "flat"}>
+            {rows.map((r) => {
+              const body = <>
                 <span><b>{r.key === "Other" ? "All other work" : r.key}</b><small>{k(r.r1, r.n1)}/{fmtInt(r.n1)} vs {k(r.r0, r.n0)}/{fmtInt(r.n0)}</small></span>
                 <b className="n">{pts(r.total)}</b>
                 <span className="bar-t" aria-hidden="true"><i style={{ "--w": Math.abs(r.total) / top } as React.CSSProperties} /></span>
-              </li>
-            ))}
+              </>;
+              return (
+                <li key={r.key} data-tone={r.total > 0 ? "bad" : r.total < 0 ? "good" : "flat"}>
+                  {r.key !== "Other" && (r.project || r.intent) ? (
+                    <button type="button" onClick={() => apply({ ...(r.project ? { project: r.project } : {}), ...(r.intent ? { intent: r.intent as never } : {}) }, { list: true })}
+                      aria-label={`${r.key}: ${pts(r.total)} of the change. Open these sessions`}>{body}</button>
+                  ) : body}
+                </li>
+              );
+            })}
           </ul>
           {h && <button type="button" className="btn" onClick={() => apply({ project: h.project, ...(h.intent ? { intent: h.intent as never } : {}) }, { list: true })}>Open {fmtInt(h.n1)} sessions</button>}
         </>
@@ -208,7 +255,7 @@ export function Overview() {
   const [metric, setMetric] = useState<Metric>("struggled");
   const [view, setView] = useState<View>("area");
   const t = d.totals;
-  const b = useMemo(() => briefing(v.rows, prior ? prior.v.rows : null, { all: applyFilter(d.sessions, { ...f, from: undefined, to: undefined }), exposed: exposed.size }), [d, f, v, prior, exposed]);
+  const b = useMemo(() => briefing(v.rows, prior ? prior.v.rows : null, { all: applyFilter(d.sessions, { ...f, from: undefined, to: undefined }, openExposure(d)), exposed: exposed.size }), [d, f, v, prior, exposed]);
   const m: Metric = metric === "spend" && !caps.hasCost ? "struggled" : metric;
   const priced = v.rows.filter((r) => r.cost_usd !== null);
   const big: Record<Metric, string> = { struggled: b.struggled.now === null ? "–" : fmtPct(b.struggled.now, 1), sessions: fmtInt(b.sessions.now), prompts: fmtCompact(b.prompts.now), spend: priced.length ? `${priced.length < v.rows.length ? "≥ " : ""}${fmtUSD(priced.reduce((a, r) => a + (r.cost_usd ?? 0), 0))}` : "–" };

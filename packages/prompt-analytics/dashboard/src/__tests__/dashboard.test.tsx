@@ -16,6 +16,7 @@ const mount = () => {
   el = document.createElement("div"); document.body.append(el);
   root = createRoot(el);
   act(() => root!.render(<Dashboard d={d} />));
+  act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click());   // the sample flags nothing on tools, so its section starts quiet
 };
 afterEach(() => { act(() => root?.unmount()); el?.remove(); root = null; location.hash = ""; });
 const kpi = (name: string) => el.querySelector(`.kpi[data-kpi="${name}"] .val`)!.textContent!;
@@ -166,6 +167,7 @@ describe("iteration 3: unit economics and nav", () => {
     el = document.createElement("div"); document.body.append(el);
     root = createRoot(el);
     act(() => root!.render(<Dashboard d={data} />));
+    act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click());   // the sample flags nothing on tools, so its section starts quiet
   };
   it("basic tier renders hour-by-weekday without hour_week[].applied (schema 1.0)", () => {
     const raw = JSON.parse(JSON.stringify(sample));
