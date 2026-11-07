@@ -47,14 +47,23 @@ describe("review fixes", () => {
     }));
     return html(data(rows, { start: "2026-10-01", end: "2026-10-28" }), Overview, { from: "2026-10-15", to: "2026-10-28" });
   };
-  it("Overview chip reads no change when the struggled diff is ~0", () => {
-    expect(win([[4, 4], [4, 4], [4, 4]])).toMatch(/no change versus/);
+  it("Brief says struggling held, with could-be wording, when the struggled diff is ~0", () => {
+    const h = win([[4, 4], [4, 4], [4, 4]]);
+    expect(h).toMatch(/Within noise/);
+    expect(h).toMatch(/Struggling held at about 10\.0%/);
+    expect(h.replace(/<[^>]+>/g, "")).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
+    expect(h).toMatch(/±0 pts · could be -?\d+\.\d to \+\d+\.\d · n 120 vs 120/);
+    expect(h).toMatch(/>Show evidence</);   // no driver, so the top recommendation is Do next
+    expect(h).not.toMatch(/data-kpi="struggled"/);
   });
-  it("Brief says mostly for a dominant driver, partly for a spread one", () => {
-    expect(win([[4, 24], [4, 4], [4, 4]])).toMatch(/mostly p0/);
+  it("Brief names the driver once, with its counts and sessions button", () => {
+    const h = win([[4, 24], [4, 4], [4, 4]]);
+    expect(h).toMatch(/<b>p0 \/ bugfix<\/b>: 24 of its 40 sessions struggled, up from 4 of 40\./);
+    expect(h).toMatch(/>Open 40 sessions</);
+    expect(h).not.toMatch(/mostly|partly/);
     const spread = win([[4, 16], [4, 16], [4, 16]]);
-    expect(spread).toMatch(/partly p\d/);
-    expect(spread).not.toMatch(/mostly p\d/);
+    expect(spread.match(/sessions struggled, up from/g)).toHaveLength(1);
+    expect(spread).not.toMatch(/mostly|partly/);
   });
 
   it("empty project is labelled and survives the URL hash", () => {

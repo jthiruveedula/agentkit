@@ -51,9 +51,11 @@ describe("storytelling UI", () => {
     expect(el.querySelector("#s-models.quiet")).not.toBeNull();
   });
 
-  it("struggled KPI drills in place and opens the list", () => {
+  it("the brief number replaces the Struggled tile, drills in place and opens the list", () => {
     mount();
-    click(el.querySelector('button.kpi[data-kpi="struggled"]'));
+    expect(el.querySelector('button.kpi[data-kpi="struggled"]')).toBeNull();
+    expect(el.querySelectorAll(".kpis.k5 > li")).toHaveLength(5);
+    click(el.querySelector(".brief button.b-num"));
     expect(params().get("sg")).toBe("1");
     expect(params().get("pn")).toBe("list");
     expect(el.querySelector(".panel")!.getAttribute("data-mode")).toBe("list");
@@ -64,7 +66,7 @@ describe("storytelling UI", () => {
     const go = el.querySelectorAll("button.kpi-go");
     expect(go.length).toBeGreaterThan(0);
     for (const g of go) expect(g.closest("button.kpi")).toBeNull();
-    const ctl = el.querySelectorAll<HTMLButtonElement>("button.kpi, button.kpi-go, .drv li > button, p.movers button, dl.story button, section.quiet button");
+    const ctl = el.querySelectorAll<HTMLButtonElement>("button.kpi, button.kpi-go, .drv li > button, p.movers button, dl.story button, section.quiet button, .brief button");
     for (const b of ctl) {
       expect(b.getAttribute("type")).toBe("button");
       expect((b.getAttribute("aria-label") || b.textContent || "").trim()).not.toBe("");
@@ -81,13 +83,33 @@ describe("storytelling UI", () => {
     expect(params().get("pn")).toBe("list");
   });
 
-  it("story has both rows and Show evidence opens the list", () => {
+  it("story has both rows and the driver button opens its sessions", () => {
     mount();
     const dl = el.querySelector("dl.story")!;
-    expect(dl.textContent).toContain("Why it matters");
+    expect(dl.textContent).toContain("Why");
     expect(dl.textContent).toContain("Do next");
-    click([...dl.querySelectorAll("button")].find((b) => b.textContent === "Show evidence") ?? null);
+    expect([...dl.querySelectorAll("button")].some((b) => b.textContent === "Open")).toBe(true);   // the rec is not about the driver, so Do next is the top attention item
+    click(dl.querySelector(".btn.primary"));
+    expect(params().get("prj")).toBe("billing-api");
     expect(params().get("pn")).toBe("list");
+  });
+
+  it("All period: compares the last 4 weeks to the rest (acceptance numbers)", () => {
+    mount("#/s-overview");
+    const br = el.querySelector(".brief")!, txt = (s: string) => br.querySelector(s)!.textContent;
+    expect(txt(".eyebrow")).toBe("Clear rise");
+    expect(txt(".b-basis")).toBe("Last 4 weeks vs the 22 before · 182 days");
+    expect(txt("h3")).toBe("Struggling rose in the last 4 weeks");
+    expect(txt(".b-num")).toBe("11.0%");
+    expect(txt(".was")).toBe("was 2.6%");
+    expect(txt(".b-cap")).toBe("of sessions struggled: 1 in 9, up from 1 in 39");
+    expect(txt(".ci")).toBe("+8.4 pts · likely +4.2 to +14.2 · n 164 vs 623");
+    expect(txt("dl.story dd")).toMatch(/^billing-api \/ bugfix: 12 of its 15 sessions struggled, up from 4 of 37\. Open 15 sessions$/);
+    expect(el.querySelectorAll(".kpis.k5 > li")).toHaveLength(5);
+    expect(el.querySelector("#s-driver")!.textContent).not.toMatch(/Needs an earlier window/);
+    expect(el.querySelector("#s-driver .meta")!.textContent).toBe("Last 4 weeks vs the 22 before");
+    click(br.querySelector(".btn.primary"));
+    expect([params().get("prj"), params().get("int"), params().get("from"), params().get("pn")]).toEqual(["billing-api", "bugfix", "2026-09-28", "list"]);
   });
 
   it("movers row renders chips on the 30d window", () => {

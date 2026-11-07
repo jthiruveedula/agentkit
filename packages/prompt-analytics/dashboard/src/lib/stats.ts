@@ -23,10 +23,10 @@ export function diffCI(k1: number, n1: number, k0: number, n0: number): { diff: 
   return { diff, lo, hi, clear: lo > 0 || hi < 0 };
 }
 
-/** Points with the sign read off the ROUNDED value, so a -0.3 never prints "-0 pts". Zero prints "±0 pts". */
-export function pts(x: number): string {
-  const r = Math.round(x * 100);
-  return r === 0 ? "±0 pts" : `${r > 0 ? "+" : "-"}${Math.abs(r)} pts`;
+/** Points (to `d` decimals) with the sign read off the ROUNDED value, so a -0.3 never prints "-0 pts". Zero prints "±0 pts". */
+export function pts(x: number, d = 0): string {
+  const r = Math.round(x * 100 * 10 ** d) / 10 ** d;
+  return r === 0 ? "±0 pts" : `${r > 0 ? "+" : "-"}${Math.abs(r).toFixed(d)} pts`;
 }
 /** Percent change with the sign read off the rounded value; null for a rounded zero (callers print "flat"). */
 export function pctChange(x: number): string | null {
