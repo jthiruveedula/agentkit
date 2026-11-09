@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.24.0](https://github.com/jthiruveedula/agentkit/compare/v0.23.0...v0.24.0) (2026-11-09)
+
+
+### Features
+
+* **video:** show redesigned prompt analytics dashboard ([#109](https://github.com/jthiruveedula/agentkit/issues/109)) ([549931a](https://github.com/jthiruveedula/agentkit/commit/549931a58c6b7e13c4d714b2bea852d8b480823d))
+
 ## [0.23.0](https://github.com/jthiruveedula/agentkit/compare/v0.22.0...v0.23.0) (2026-11-09)
 
 
