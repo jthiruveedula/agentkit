@@ -33,7 +33,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper)}
 
 #stage-l{overflow:hidden}
 #stage{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0;border-radius:8px;background:#fff;box-shadow:0 30px 80px -30px rgba(20,60,90,.55);overflow:hidden}
-#stage img{position:absolute;left:0;top:0;width:1440px;height:900px;opacity:0}
+#stage img,#gl{position:absolute;left:0;top:0;width:1440px;height:900px;opacity:0}
 .fx{position:absolute;inset:0;pointer-events:none}
 .ring{position:absolute;border-radius:14px;border:4px solid var(--reg);box-shadow:0 0 0 6px rgba(10,95,196,.18),0 0 40px rgba(34,195,238,.5);opacity:0}
 .tag{position:absolute;padding:10px 22px;border-radius:999px;background:var(--reg);color:#fff;font:500 26px/1 var(--f2);white-space:nowrap;opacity:0;box-shadow:0 10px 24px -10px rgba(10,95,196,.7)}
@@ -54,7 +54,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:var(--paper)}
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="main" data-start="0" data-duration="72.9" data-width="1920" data-height="1080">
+<div id="root" data-composition-id="main" data-start="0" data-duration="72.9" data-width="1920" data-height="1080" data-motion-blur="on" data-motion-blur-shutter="180" data-motion-blur-events="on">
   <div id="bg" class="clip" data-layout-allow-overflow data-start="0" data-duration="72.9" data-track-index="0"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="ray"></div></div>
   <div id="stage-l" class="clip" data-layout-allow-overflow data-start="0" data-duration="72.9" data-track-index="1"><div id="stage"></div></div>
   <div id="fx" class="clip fx" data-layout-allow-overflow data-start="0" data-duration="72.9" data-track-index="2"></div>
@@ -85,6 +85,46 @@ const camFor = (b) => {
 const toRoot = (c, px, py) => [c.x + c.k * px, c.y + c.k * py];
 const imgs = {};
 S.forEach((s) => { if (s.shot && !imgs[s.shot]) { const i = document.createElement("img"); i.src = "shots/" + s.shot + ".png"; stage.appendChild(i); imgs[s.shot] = i; } });
+// Chapter breaks: a WebGL zoom-blur transition (shader adapted from the HyperFrames registry block
+// cinematic-zoom) between two shot PNGs. The canvas lives inside #stage, so it rides the camera.
+const CHAP = new Set(["tools", "models", "exposure", "map"]);
+const glc = document.createElement("canvas"); glc.id = "gl"; glc.width = 1440; glc.height = 900; stage.appendChild(glc);
+const gl = glc.getContext("webgl", { preserveDrawingBuffer: true });
+const zoomT = gl && (() => {
+  const sh = (src, type) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh("attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;v.y=1.-v.y;gl_Position=vec4(a,0,1);}", gl.VERTEX_SHADER));
+  gl.attachShader(prog, sh("precision mediump float;varying vec2 v;uniform sampler2D A,B;uniform float p;" +
+    "vec3 bl(sampler2D t,vec2 d,float s,float dir){vec3 c=vec3(0.);for(int i=0;i<16;i++){float f=float(i)/16.;" +
+    "c+=vec3(texture2D(t,v+dir*d*s*1.08*f).r,texture2D(t,v+dir*d*s*f).g,texture2D(t,v+dir*d*s*.92*f).b);}return c/16.;}" +
+    "void main(){vec2 d=v-vec2(.5);gl_FragColor=vec4(mix(bl(A,d,p*.22,-1.),bl(B,d,(1.-p)*.16,1.),smoothstep(.25,.75,p)),1.);}", gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "a"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.uniform1i(gl.getUniformLocation(prog, "A"), 0); gl.uniform1i(gl.getUniformLocation(prog, "B"), 1);
+  const uP = gl.getUniformLocation(prog, "p"), texs = new Map();
+  const tex = (img) => {
+    if (!texs.has(img)) {
+      const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+      for (const [k, v] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) gl.texParameteri(gl.TEXTURE_2D, k, v);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); texs.set(img, t);
+    }
+    return texs.get(img);
+  };
+  const draw = (a, b, p) => {
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex(a));
+    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, tex(b));
+    gl.uniform1f(uP, p); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  };
+  return (a, b, at, d) => {
+    const pr = { p: 0 };
+    tl.set(glc, { opacity: 1 }, at); tl.set(a, { opacity: 0 }, at);
+    tl.fromTo(pr, { p: 0 }, { p: 1, duration: d, ease: "power2.inOut", immediateRender: false, onUpdate: () => draw(a, b, pr.p) }, at);
+    tl.set(b, { opacity: 1 }, at + d); tl.set(glc, { opacity: 0 }, at + d);
+  };
+})();
+tl.set(glc, { opacity: 0 }, 0);
 const cur = mk("", fx, ""); cur.id = "cur";
 cur.innerHTML = '<svg viewBox="0 0 44 44" width="44" height="44"><path d="M4 2 L4 33 L12 26 L18 40 L24 37 L18 24 L29 24 Z" fill="#fff" stroke="#0E1F2C" stroke-width="2.4" stroke-linejoin="round"/></svg>';
 const stepEls = [], capEls = [];
@@ -109,8 +149,14 @@ S.forEach((s, si) => {
   tl.to(ch, { opacity: 0, duration: 0.25 }, end - 0.15);
   // shot crossfade
   const im = imgs[s.shot];
-  if (prevShot) { tl.set(imgs[prevShot], { opacity: 0 }, start + 0.35); tl.fromTo(im, { opacity: 0 }, { opacity: 1, duration: 0.3 }, start); }
-  else { tl.set(im, { opacity: 1 }, 0); tl.to(stage, { opacity: 1, duration: 0.6 }, start); }
+  if (prevShot && zoomT && CHAP.has(s.shot)) zoomT(imgs[prevShot], im, start, 0.9);
+  else if (prevShot) { tl.set(imgs[prevShot], { opacity: 0 }, start + 0.35); tl.fromTo(im, { opacity: 0 }, { opacity: 1, duration: 0.3 }, start); }
+  else {
+    // First entrance: the dashboard swings up out of 3D space.
+    tl.set(im, { opacity: 1 }, 0); tl.to(stage, { opacity: 1, duration: 0.6 }, start);
+    tl.fromTo("#stage-l", { transformPerspective: 2400, rotationX: 26, rotationY: -14, z: -380, transformOrigin: "50% 60%" },
+      { rotationX: 0, rotationY: 0, z: 0, duration: 1.3, ease: "power3.out" }, start);
+  }
   prevShot = s.shot;
   // camera segments
   const bx = P.boxes[s.shot]; let ts = start; const segs = [];
@@ -167,6 +213,7 @@ tl.from("#oh", { y: 40, opacity: 0, duration: 0.7, ease: "power3.out" }, O + 0.3
 tl.from("#oc", { y: 40, opacity: 0, scale: 0.94, duration: 0.7, ease: "back.out(1.5)" }, O + 0.9);
 tl.from("#op", { y: 20, opacity: 0, duration: 0.6 }, O + 1.5);
 tl.to(stage, { opacity: 0, duration: 0.6 }, O);
+tl.to("#stage-l", { rotationX: -18, rotationY: 10, z: -300, duration: 0.8, ease: "power2.in" }, O - 0.2);
 window.__timelines["main"] = tl;
 </script>
 </body>
