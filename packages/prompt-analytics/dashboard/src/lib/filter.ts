@@ -13,6 +13,9 @@ export interface Filter {
   frictionMin?: number;                // friction band [min, max); max >= 1 includes 1
   frictionMax?: number;
   q?: string;                          // session-title search: every word must appear (case-insensitive)
+  struggled?: boolean;                 // see struggled()
+  exposed?: boolean;                   // has an open exposure finding (needs the openExposure set)
+  model?: string;                      // dominant model id; "" = unknown (no model recorded)
 }
 export type FilterKey = keyof Filter;
 export const STAGES = ["Intent", "Prompt", "Response", "Iterate", "Applied", "Outcome"] as const;
@@ -25,7 +28,12 @@ const clean = (f: Filter): Filter => Object.fromEntries(Object.entries(f).filter
 export const patchFilter = (f: Filter, p: Filter): Filter => clean({ ...f, ...p });
 export const same = (a: Filter, b: Filter) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
 
-export function match(r: SessionRow, f: Filter): boolean {
+/** Struggled (decision #1): a session with a prompt where loops >= 3 or friction >= 0.5. Sessions without a prompt are not in the base. */
+export const struggled = (r: SessionRow): boolean => r.prompts > 0 && (r.loops >= 3 || r.friction >= 0.5);
+/** Ids of sessions with an open exposure finding. */
+export const openExposure = (d: DashboardData): Set<string> => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string));
+
+export function match(r: SessionRow, f: Filter, ex?: Set<string>): boolean {
   return (f.source === undefined || r.source === f.source)
     && (f.intent === undefined || r.intent === f.intent)
     && (f.project === undefined || r.project === f.project)
@@ -38,11 +46,14 @@ export function match(r: SessionRow, f: Filter): boolean {
     && (f.applied === undefined || r.applied === f.applied)
     && (f.frictionMin === undefined || r.friction >= f.frictionMin)
     && (f.frictionMax === undefined || f.frictionMax >= 1 || r.friction < f.frictionMax)
-    && (f.q === undefined || titleHas(r.title, f.q));
+    && (f.q === undefined || titleHas(r.title, f.q))
+    && (f.struggled === undefined || struggled(r) === f.struggled)
+    && (f.exposed === undefined || (ex?.has(r.id) ?? false) === f.exposed)
+    && (f.model === undefined || (r.model || "") === f.model);
 }
 /** Every whitespace-separated word of `q` appears in the title (case-insensitive). An empty query matches all. */
 export const titleHas = (title: string, q: string) => { const t = (title ?? "").toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w)); };
-export const applyFilter = (rows: SessionRow[], f: Filter) => (isEmpty(f) ? rows : rows.filter((r) => match(r, f)));
+export const applyFilter = (rows: SessionRow[], f: Filter, ex?: Set<string>) => (isEmpty(f) ? rows : rows.filter((r) => match(r, f, ex)));
 
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 /** Breadcrumb chips: the keys each chip clears, and its label. */
@@ -62,6 +73,9 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   if (f.stageExact) out.push({ keys: ["stageExact"], label: `Stopped at ${STAGES[f.stageExact - 1]?.toLowerCase()}` });
   if (f.frictionMin !== undefined || f.frictionMax !== undefined) out.push({ keys: ["frictionMin", "frictionMax"], label: `Friction ${(f.frictionMin ?? 0).toFixed(1)} to ${(f.frictionMax ?? 1).toFixed(1)}` });
   if (f.q) out.push({ keys: ["q"], label: `Title: ${f.q}` });
+  if (f.struggled !== undefined) out.push({ keys: ["struggled"], label: f.struggled ? "Struggled" : "Didn't struggle" });
+  if (f.exposed !== undefined) out.push({ keys: ["exposed"], label: f.exposed ? "Open findings" : "No open findings" });
+  if (f.model !== undefined) out.push({ keys: ["model"], label: `Model: ${f.model || "Unknown"}` });
   return out;
 }
 
@@ -121,7 +135,7 @@ function tally(rows: SessionRow[], key: (r: SessionRow) => string): Tally[] {
 
 export function views(d: DashboardData, f: Filter): Views {
   if (d.sessions.length === 0) return legacyViews(d);
-  const rows = applyFilter(d.sessions, f);
+  const rows = applyFilter(d.sessions, f, f.exposed !== undefined ? openExposure(d) : undefined);
   const st = streaks(rows.map((r) => r.date));
   const priced = rows.filter((r) => r.cost_usd !== null);
   const cal = new Map<string, { date: string; sessions: number; prompts: number; cost: number }>();

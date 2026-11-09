@@ -1,88 +1,43 @@
 import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { attention, THRESHOLDS, type Item } from "../lib/attention";
-import { costPerApplied, tokensPerApplied, delta, isWide, METRICS, MIN_PRIOR_N, pointDelta, sparkSeries, wilson } from "../lib/compare";
-import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
-import { Count, Delta, Empty, LowBase, Segmented } from "./ui";
-import { Spark } from "./charts";
+import { delta } from "../lib/compare";
+import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
+import { Empty, Segmented } from "./ui";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
-import { TrendToggles, WeekChart, type Metric, type View } from "./Trend";
+import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
-import { struggledRate } from "../lib/metrics";
-import { applyFilter } from "../lib/filter";
+import { struggledRate, type Rate } from "../lib/metrics";
+import { sumTotal } from "../lib/baseline";
+import { addDays, applyFilter, isEmpty, openExposure } from "../lib/filter";
+import { basis, oneIn, segCount, verdict, type Basis, type Verdict } from "../lib/brief";
+import { MIN_N, pts } from "../lib/stats";
+import { story } from "../lib/story";
+import { movers, type Mover } from "../lib/movers";
+import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
-import { listNames } from "../lib/capabilities";
-import { srcLabel } from "../lib/palette";
-import type { Source } from "../data/types";
-
-const srcNames = (xs: Source[]) => listNames(xs.map(srcLabel));
-
-
-function Kpis({ b, setMetric }: { b: Briefing; setMetric: (m: Metric) => void }) {
-  const { d, v, prior, win, exposed, goto, caps } = useStore();
-  const t = v.totals, p = prior?.v.totals, pn = p?.sessions ?? 0, st = b.struggled;
-  const open = useMemo(() => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string)), [d]);
-  const pExposed = prior ? prior.v.rows.filter((r) => open.has(r.id)).length : 0;
-  const cap = prior ? `vs ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)}` : "";
-  const rate = t.asked ? t.applied / t.asked : 0, prate = p && p.asked ? p.applied / p.asked : 0;
-  const pa = p?.asked ?? 0;
-  const dPts = (cur: number, pr: number, digits: number) => { const x = pointDelta(cur, pr, pa >= 30 ? pa : 0); if (x === null) return null; const m = Math.abs(x * 100).toFixed(digits); return { pct: x, text: (+m === 0 ? "±0 pts" : `${x > 0 ? "+" : "-"}${m} pts`) }; };   // guard n>=30; sign from the printed value
-  const sp = (fn: (r: typeof v.rows) => number) => sparkSeries(v.rows, win, fn);
-  const cpa = costPerApplied(v.rows), pcpa = prior ? costPerApplied(prior.v.rows) : null;
-  const tpa = tokensPerApplied(v.rows), ptpa = prior ? tokensPerApplied(prior.v.rows) : null;
-  const unShare = t.sessions ? t.unpriced / t.sessions : 0;
-  const partial = caps.hasCost && unShare > 0.2 ? <span className="tag" data-st="partial">{fmtPct(unShare)} unpriced, partial</span> : null;
-  // No price anywhere in view: never show $0; tokens per applied change carries the efficiency story instead.
-  const effCard = caps.hasCost
-    ? { id: "cpa", primary: true, label: "Cost per applied change", value: cpa.value === null ? "–" : fmtUSD(cpa.value),
-        sub: cpa.value === null ? "no priced session applied a change" : `per applied · ${fmtInt(cpa.pricedApplied)} priced of ${fmtInt(cpa.applied)} applied`,
-        chip: <>{pcpa && cpa.value !== null && pcpa.value !== null && (() => { const x = delta(cpa.value, pcpa.value, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })()}{partial}</>,
-        spark: sp((rs) => costPerApplied(rs).value ?? 0), cap: true, go: () => goto("s-tools") }
-    : { id: "tpa", primary: true, label: "Tokens per applied change", value: tpa === null ? "–" : fmtCompact(tpa),
-        sub: `${caps.unpriced.length ? `${srcNames(caps.unpriced)} ${caps.unpriced.length === 1 ? "doesn't" : "don't"} record prices` : "No prices recorded"}, so tokens stand in for cost`,
-        chip: ptpa !== null && tpa !== null && (() => { const x = delta(tpa, ptpa, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(),
-        spark: sp((rs) => tokensPerApplied(rs) ?? 0), cap: true, go: () => goto("s-funnel") };
-  const cards: { id: string; label: string; value: string; sub?: string; chip: React.ReactNode; spark: number[]; low?: boolean; primary?: boolean; cap?: boolean; go: () => void }[] = [
-    { id: "struggled", primary: true, label: "Struggled", value: st.now === null ? "–" : fmtPct(st.now, 1), sub: st.now === null ? "no session had a prompt" : `${fmtInt(Math.round(st.now * st.n))} of ${fmtInt(st.n)} sessions with prompts`,
-      chip: st.diff !== null && <Delta lowerBetter neutral={!st.real} pct={st.diff} text={Math.abs(st.diff * 100) < 0.05 ? "no change" : `${st.diff > 0 ? "+" : "-"}${Math.abs(st.diff * 100).toFixed(1)} pts${st.real ? "" : " · noise"}`} />,
-      spark: b.weekly.map((w) => (w.struggled ?? 0) * 100), go: () => { setMetric("struggled"); goto("s-trend"); } },
-    { id: "sessions", label: "Sessions", value: fmtInt(t.sessions), chip: p && (() => { const x = delta(t.sessions, p.sessions, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.sessions), go: () => { setMetric("sessions"); goto("s-trend"); } },
-    effCard,
-    { id: "prompts", label: "Prompts", value: fmtCompact(t.prompts), sub: t.asked ? `${(t.prompts / t.asked).toFixed(1)} per session with prompts` : undefined, chip: p && (() => { const x = delta(t.prompts, p.prompts, pn); return x ? <Delta neutral pct={x.kind === "new" ? "new" : x.pct} /> : pn < MIN_PRIOR_N ? <LowBase n={pn} /> : null; })(), spark: sp(METRICS.prompts), go: () => { setMetric("prompts"); goto("s-trend"); } },
-    { id: "applied", label: "Applied", value: t.asked ? fmtPct(rate) : "0%", sub: t.asked ? (isWide(t.applied, t.asked) ? `n=${fmtInt(t.asked)}, wide CI ${fmtPct(wilson(t.applied, t.asked)[0])}-${fmtPct(wilson(t.applied, t.asked)[1])}` : `${fmtInt(t.applied)} of ${fmtInt(t.asked)} sessions with prompts`) : undefined,
-      chip: p && p.asked > 0 && (() => { const x = dPts(rate, prate, 1); return x && <Delta pct={x.pct} text={x.text} />; })(), spark: sp(METRICS.applied), low: t.asked > 0 && isWide(t.applied, t.asked), go: () => goto("s-funnel") },
-    { id: "exposed", label: "Exposed", value: t.sessions ? fmtPct(exposed.size / t.sessions, 1) : "0%", sub: `${fmtInt(exposed.size)} sessions with open findings`,
-      chip: p && (() => { const x = delta(exposed.size, pExposed, pn); return x && <Delta lowerBetter pct={x.kind === "new" ? "new" : x.pct} />; })(), spark: sparkSeries(v.rows, win, (rs) => rs.filter((r) => open.has(r.id)).length), go: () => goto("s-exposure") },
-  ];
-  return (
-    <ul className="kpis k6" aria-label="Totals for the current selection">
-      {cards.map((c, i) => (
-        <li key={c.id} data-primary={c.primary || undefined} style={{ "--i": i } as React.CSSProperties}>
-          <button type="button" className="kpi" data-kpi={c.id} data-primary={c.primary || undefined} onClick={c.go} aria-label={`${c.label}: ${c.value}. Jump to details`}>
-            <span className="lbl">{c.label}</span>
-            <Count className="val" text={c.value} />
-            <span className="chips">{c.chip}{c.sub ? <span className="sub" data-low={c.low || undefined}>{c.sub}</span> : null}</span>
-            <Spark values={c.spark} cap={c.cap} />
-            {cap && <span className="cap">{cap}</span>}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
+import type { SessionRow, Source } from "../data/types";
+import { KeyNumbers, UsageMix } from "./KeyNumbers";
+import "./story.css";
 
 const DOT: Record<Item["sev"], string> = { bad: "var(--bad)", warn: "var(--warn)", info: "var(--muted)" };
 
-function Attention() {
-  const { d, v, f, ids, apply, goto, setExCat } = useStore();
-  const items = useMemo(() => attention(d, v, f, ids), [d, v, f, ids]);
-  const run = (it: Item) => {
+/** Run an attention item: a drill filters (and opens the list), a scroll jumps to its section. */
+function useRun() {
+  const { apply, goto, setExCat } = useStore();
+  return (it: Item) => {
     const a = it.action;
     if (a.kind === "drill") apply(a.filter, { list: a.list });
     else { if (a.exCat) setExCat(a.exCat); goto(a.id); }
   };
+}
+
+function Attention() {
+  const { d, v, f, ids } = useStore();
+  const items = useMemo(() => attention(d, v, f, ids), [d, v, f, ids]);
+  const run = useRun();
   return (
     <Panel id="s-attention" title="Needs attention" meta="ranked, one click to the cause" src="insights · ranked by sessions" span={4}>
       {items.length === 0 ? <Empty>Nothing needs attention. Checked: {THRESHOLDS}.</Empty> : (
@@ -112,7 +67,7 @@ function WhereWent() {
   const dm = dims.find((x) => x.id === pick) ?? dims[0];
   const text = (x: number) => (dm.byCost ? fmtUSD(x) : `${fmtCompact(x)} tok`);
   const filterOf = (id: string, key: string) => (id === "tools" ? { source: key as Source } : id === "intents" ? { intent: key as never } : { project: key });
-  const fr = (x: number | null) => (x === null ? "–" : x.toFixed(2)), vs = (x: number | null) => (x === null ? "" : `${x >= 0 ? "+" : "−"}${Math.abs(x).toFixed(2)}`);
+  const fr = (x: number | null) => (x === null ? "–" : x.toFixed(2)), vs = (x: number | null) => (x === null ? "" : fmtSigned(x, 2));
   const o = dm.outlier;
   return (
     <Panel id="s-where" src="priced cost share · one denominator" title="Where it went" meta={`top ${dm.rows.length} by ${dm.note}${dm.byCost ? "" : " (nothing priced, so tokens stand in)"}; one click filters`} span={12}
@@ -153,50 +108,178 @@ function Panel({ id, title, meta, src, span, actions, children }: { id?: string;
   );
 }
 
-const pts = (x: number, d = 1) => `${x > 0 ? "+" : x < 0 ? "-" : ""}${Math.abs(x * 100).toFixed(d)} pts`;
+type Scope = { from?: string };
+/** The struggled comparison on the basis, computed once: the Brief and the weekly chart read the same verdict. */
+type Cmp = { now: Rate; prev: Rate | null; vd: Verdict };
 
-/** Briefing: what changed, by how much, how sure, and the driver. A calm variant when nothing is significant or there is nothing to compare. */
-function Brief({ b, nPrior, win }: { b: Briefing; nPrior: number; win: number }) {
-  const s = b.struggled, up = (s.diff ?? 0) > 0, real = s.real && s.diff !== null, tone = real ? (up ? "bad" : "good") : "flat";
-  const head = s.now === null ? "No sessions with a prompt in this window" : s.prev === null ? "No earlier window to compare" : real ? (up ? "More sessions are struggling" : "Fewer sessions are struggling") : "Nothing changed significantly";
-  const why = real ? b.drivers?.headline : null;
+/** CI bar geometry on a `w`-px track (6px padding each side): x of zero, of the interval ends and of the point estimate. The domain always holds 0. */
+export function ciGeom(lo: number, hi: number, d: number, w = 120, pad = 6) {
+  const a = Math.min(0, lo), b = Math.max(0, hi), k = (w - 2 * pad) / (b - a || 1), x = (v: number) => +(pad + (v - a) * k).toFixed(1);
+  return { zero: x(0), x0: x(lo), x1: x(hi), dot: x(d) };
+}
+const CI_W = 120;
+/** The change and its likely range as a bar: a labelled zero tick, the interval, the estimate as a dot. Decorative; the caption beside it carries the numbers. */
+function CiBar({ lo, hi, d }: { lo: number; hi: number; d: number }) {
+  const g = ciGeom(lo, hi, d, CI_W);
+  return (
+    <svg className="ci-bar" width={CI_W} height={28} viewBox={`0 0 ${CI_W} 28`} aria-hidden="true" focusable="false">
+      <line className="ci-axis" x1={0} x2={CI_W} y1={8} y2={8} />
+      <rect className="ci-rng" x={g.x0} y={5} width={Math.max(2, g.x1 - g.x0)} height={6} rx={3} />
+      <line className="ci-zero" x1={g.zero} x2={g.zero} y1={1} y2={15} />
+      <circle className="ci-dot" cx={g.dot} cy={8} r={4} />
+      <text className="ci-0" x={g.zero} y={26} textAnchor="middle">0</text>
+    </svg>
+  );
+}
+/** "1 session", "2 sessions". */
+const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
+
+/** Briefing: the struggled rate, what it is compared against, how sure the change is, and the driver once. Honest copy for every state. */
+function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b: Briefing; bs: Basis; cmp: Cmp; win: number; scope: Scope; all: SessionRow[] }) {
+  const { d, v, f, ids, apply, clear, win: wn } = useStore();
+  const run = useRun();
+  const openIds = useMemo(() => openExposure(d), [d]);
+  // the Key numbers tiles' verdicts on the same basis (lib/mix): an Also moved chip with a tile is grey when its tile is (mixed, within range),
+  // and dropped when its tile shows no change, so the brief never reads as a win the tile below calls mixed
+  const dl = useMemo(() => kpiDeltas(bs, wn, openIds), [bs, wn, openIds]);
+  const tiled = (id: Mover["id"]): id is "applied" | "cpa" | "sessions" => id === "applied" || id === "cpa" || id === "sessions";
+  const greyOf = (m: Mover) => (tiled(m.id) ? dl[m.id]?.grey : undefined);
+  const dd = vd.d;
+  const real = vd.kind === "clear" || vd.kind === "early", up = vd.dir === "up";
+  const tone = real ? (up ? "bad" : "good") : "flat";
   const pct = (x: number) => fmtPct(x, 1);
+  const drv = real ? b.drivers?.headline ?? null : null;
+  const first = useMemo(() => attention(d, v, f, ids)[0], [d, v, f, ids]);
+  const rec = d.recommendations[0], ev = rec ? d.insights.find((i) => i.id === rec.evidence_insight) : undefined, ef = ev?.drill.filter;
+  // a recommendation is Do next only when it is about the driver (same project, and intent when both have one)
+  const recOk = !!rec && (!drv || (!!ef && ef.project === drv.project && (!ef.intent || !drv.intent || ef.intent === drv.intent)));
+  const st = useMemo(() => story(bs.cur, { rec: recOk ? rec.title : undefined, attention: first?.headline }), [bs, recOk, rec, first]);
+  // raw session counts are not comparable across a 4-week vs a 22-week split, so the Sessions mover only runs against an equal prior window
+  const all = useMemo(() => movers(bs.cur, bs.base, 5).filter((m) => (bs.mode !== "split" || m.id !== "sessions") && (!tiled(m.id) || dl[m.id] !== undefined)).slice(0, 2), [bs, dl]);
+  // a grey (mixed / within range) change never leads the headline
+  const lead = vd.kind === "noise" ? all.find((m) => !greyOf(m)) : undefined, mv = all.filter((m) => m !== lead);
+  const toneOf = (g: boolean | null) => (g === null ? "flat" : g ? "good" : "bad");
+  const n = bs.cur.length, p = now.p;
+  const head = p === null ? (n ? `${fmtInt(n)} session${n === 1 ? "" : "s"}, none with a prompt${bs.mode === "split" ? " in the last 4 weeks" : ""}` : bs.mode === "split" ? "No prompts in the last 4 weeks" : "No prompts in this window")
+    : vd.kind === "none" ? (p === 0 ? "No sessions struggled" : `Struggling at ${pct(p)}: ${oneIn(p)} sessions`)
+    : real ? (bs.mode === "split" ? `Struggling ${up ? "rose" : "fell"} in the last 4 weeks` : up ? "More sessions are struggling" : "Fewer sessions are struggling")
+    : lead ? `${lead.label} ${lead.text}; struggling held` : `Struggling held at about ${pct(p)}`;
+  const was = vd.kind !== "none" && prev?.p != null ? prev.p : null;
+  const last = p === null ? unDated.reduce((m, r) => (r.prompts > 0 && r.date > m ? r.date : m), "") : "";
+  const dated = f.from !== undefined || f.to !== undefined;
+  // "1 in 3" vs "1 in 3" reads as no change, so equal phrasings fall back to percentages; CI ends sign off the rounded value (never "-0.0")
+  const fr = was !== null && p !== null && oneIn(p) === oneIn(was) ? pct : oneIn, end = (x: number) => pts(x, 1).replace(" pts", "");
+  const k = (r: number | null, nn: number) => Math.round((r ?? 0) * nn);
+  const drvN = drv ? segCount(bs.cur, drv) : 0;
+  // each story row: its sentence, then one compact "Open N sessions" action (the driver drill is the single primary)
+  const why = drv ? (
+    <><span className="b-say"><b>{drv.key}</b>: {k(drv.r1, drv.n1)} of its {nSess(drv.n1)} struggled, {(drv.r1 ?? 0) < (drv.r0 ?? 0) ? "down" : "up"} from {k(drv.r0, drv.n0)} of {fmtInt(drv.n0)}.</span>{" "}
+      {drvN > 0 && <button type="button" className="btn primary b-act" onClick={() => apply({ ...(drv.project !== undefined ? { project: drv.project } : {}), ...(drv.intent ? { intent: drv.intent as never } : {}), ...scope }, { list: true })}
+        aria-label={`Open ${nSess(drvN)}: ${drv.key}`}>Open {nSess(drvN)}</button>}</>
+  ) : st.why && <span className="b-say">{st.why}</span>;
+  // Do next: a drill (recommendation evidence or attention item) counts what it opens; an exposure jump counts its sessions; any other jump has no count
+  const fa = first?.action;
+  const nextN = st.next?.kind === "rec" ? (ef ? applyFilter(d.sessions, { ...f, ...ef }, openIds).length : null)
+    : fa?.kind === "drill" ? applyFilter(d.sessions, { ...f, ...fa.filter }, openIds).length : first?.sessions ?? null;
+  const nextLbl = nextN === null ? "Show details" : `${fa?.kind === "scroll" && st.next?.kind !== "rec" ? "Review" : "Open"} ${nSess(nextN)}`;
+  const sure = vd.kind === "noise" ? "could be" : "likely";
   return (
     <section className="s12 brief" aria-labelledby="ov-hd" data-tone={tone}>
-      <p className="eyebrow">{real ? (up ? "Early sign" : "Improving") : "Steady"} · {win} days</p>
+      <div className="b-top">
+        <p className="eyebrow"><i className="b-dot" aria-hidden="true" />{vd.eyebrow}</p>
+        <span className="b-basis">{bs.label ? `${bs.label} · ` : ""}{win} days</span>
+        <span className="b-acts"><WrappedButton /><CopySummary /></span>
+      </div>
       <h3 id="ov-hd">{head}</h3>
-      {s.now !== null && (
-        <div className="jump" role="img" aria-label={s.prev === null ? `Struggled rate ${pct(s.now)}` : `Struggled rate ${real ? (up ? "rose" : "fell") : "stayed near"} ${pct(s.prev)} to ${pct(s.now)}`}>
-          {s.prev !== null && <><span className="was">{pct(s.prev)}</span><svg viewBox="0 0 60 24" aria-hidden="true"><path d="M2 12h50M44 4l10 8-10 8" /></svg></>}
-          <span className="now">{pct(s.now)}</span>
+      <div className="lead">
+        {p !== null ? (
+          <>
+            <p className="b-n">
+              <button type="button" className="b-num" onClick={() => apply({ struggled: true, ...scope }, { list: true })}
+                aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}>{pct(p)}</button>
+              {was !== null && <span className="was">{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span>}
+            </p>
+            <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
+            {dd && prev && (
+              <p className="ci" title={`${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before`}>
+                <b className="ci-pt">{pts(dd.diff, 1)}</b> <CiBar lo={dd.lo} hi={dd.hi} d={dd.diff} /> <span className="ci-n">{sure} {end(dd.lo)} to {end(dd.hi)}</span>
+              </p>
+            )}
+            {dd && prev && <p className="b-foot">{fmtInt(now.n)} vs {fmtInt(prev.n)} sessions with a prompt</p>}
+            {vd.kind === "none" && <p className="b-foot">{prev ? `Too few sessions with a prompt to compare yet (${fmtInt(now.n)} vs ${fmtInt(prev.n)})` : "No earlier window to compare yet"}</p>}
+          </>
+        ) : (
+          <>
+            {last && <p className="b-cap">Last prompt {fmtDate(last)}</p>}
+            {dated ? <button type="button" className="btn" onClick={() => apply({ from: undefined, to: undefined })}>Show all time</button>
+              : !isEmpty(f) && <button type="button" className="btn" onClick={() => clear()}>Clear filters</button>}
+          </>
+        )}
+      </div>
+      {(why || st.next || mv.length > 0) && (
+        <div className="b-side">
+          {(why || st.next) && (
+            <dl className="story">
+              {why && <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>}
+              {st.next && (
+                <div><dt>Do next</dt><dd><span className="b-say">{st.next.text}</span>
+                  {/* an action that would open 0 sessions is hidden, not offered */}
+                  {st.next.kind === "rec" ? ev && nextN !== 0 && <button type="button" className="btn b-act" onClick={() => apply(ev.drill.filter, { list: true })} aria-label={`${nextLbl}, the evidence behind: ${st.next.text}`}>{nextLbl}</button>
+                    : first && nextN !== 0 && <button type="button" className="btn b-act" onClick={() => run(first)} aria-label={first.action.kind === "drill" ? `${nextLbl} behind: ${first.headline}` : `${nextLbl}: jump to the details of ${first.headline}`}>{nextLbl}</button>}
+                </dd></div>
+              )}
+            </dl>
+          )}
+          {mv.length > 0 && (
+            <p className="movers"><span className="meta">Also moved</span>
+              {mv.map((m) => {
+                // the arrow carries the sign: "↓43%", never "↓ -43%"
+                const g = greyOf(m), up = !m.text.startsWith("-"), mag = m.text.replace(/^[+-]/, ""), mf = m.filter;
+                const body = <>{m.label} <b data-tone={g ? "flat" : toneOf(m.good)}><span aria-hidden="true">{up ? "↑" : "↓"}</span><span className="sr-only">{up ? "up " : "down "}</span>{mag}</b>{g && <span className="mv-g"> {g}</span>}</>;
+                return mf ? <button key={m.id} type="button" className="tag" onClick={() => apply({ ...mf, ...scope }, { list: true })} aria-label={`${m.label} ${up ? "up" : "down"} ${mag}${g ? `, ${g}` : ""} vs the earlier window. Open these sessions`}>{body}</button>
+                  : <span key={m.id} className="tag">{body}</span>;
+              })}
+            </p>
+          )}
         </div>
       )}
-      {s.diff !== null && s.ci && <span className="ci">{pts(s.diff)} · 95% CI {pts(s.ci[0])} to {pts(s.ci[1])} · n {fmtInt(s.n)} vs {fmtInt(nPrior)}{real ? "" : " · within noise"}</span>}
-      {why && <button type="button" className="link" onClick={() => document.getElementById("s-driver")?.scrollIntoView({ block: "start" })}>{Math.abs(why.total / (b.drivers?.delta || Infinity)) >= 0.5 ? "mostly" : "partly"} {why.key} · Why →</button>}
     </section>
   );
 }
 
-function Drivers({ b }: { b: Briefing }) {
+function Drivers({ b, scope, label, rows: cur }: { b: Briefing; scope: Scope; label?: string; rows: SessionRow[] }) {
   const { apply } = useStore();
   const a = b.drivers;
-  const rows = a ? topDrivers(a) : [], top = Math.max(1e-9, ...rows.map((r) => Math.abs(r.total)));
+  const rows = a ? topDrivers(a) : [], tot = sumTotal(rows), top = Math.max(1e-9, ...rows.map((r) => Math.abs(r.total)), Math.abs(tot));
   const k = (r: number | null, n: number) => fmtInt(Math.round((r ?? 0) * n));
   const h = a?.headline;
   return (
-    <Panel id="s-driver" title={a && rows.length ? `Where the ${pts(a.delta)} came from` : "Where the change came from"} span={12} src={h ? `attribution · n ${h.n1} vs ${h.n0}` : "attribution · project × intent"}>
+    <Panel id="s-driver" title={a && rows.length ? `Where the ${pts(a.delta, 1)} came from` : "Where the change came from"} meta={`${label ? `${label}. ` : ""}Points each row added to the change; right is worse`} span={12} src={h ? `attribution · n ${h.n1} vs ${h.n0}` : "attribution · project × intent"}>
       {!rows.length ? <Empty>Needs an earlier window with prompts in both periods.</Empty> : (
         <>
-          <ul className="drv" aria-label="Signed share of the change, in points">
-            {rows.map((r) => (
-              <li key={r.key} data-tone={r.total > 0 ? "bad" : r.total < 0 ? "good" : "flat"}>
-                <span><b>{r.key === "Other" ? "All other work" : r.key}</b><small>{k(r.r1, r.n1)}/{fmtInt(r.n1)} vs {k(r.r0, r.n0)}/{fmtInt(r.n0)}</small></span>
-                <b className="n">{pts(r.total)}</b>
-                <span className="bar-t" aria-hidden="true"><i style={{ "--w": Math.abs(r.total) / top } as React.CSSProperties} /></span>
-              </li>
-            ))}
+          {/* the zero line sits mid-track only when both signs occur; one-sided, the empty half shrinks to 20% */}
+          <ul className="drv" data-side={!rows.some((r) => r.total < 0) && tot >= 0 ? "pos" : !rows.some((r) => r.total > 0) && tot <= 0 ? "neg" : undefined} aria-label="Signed share of the change, in points">
+            {rows.map((r) => {
+              const body = <>
+                <span><b>{r.key === "Other" ? "All other work" : r.key}</b>{h && r.key === h.key && <em className="drv-why">In the brief</em>}<small>{k(r.r1, r.n1)}/{fmtInt(r.n1)} vs {k(r.r0, r.n0)}/{fmtInt(r.n0)}</small></span>
+                <span className="dv" data-neg={r.total < 0 || undefined} style={{ "--w": Math.abs(r.total) / top } as React.CSSProperties}><i aria-hidden="true" /><b className="n">{pts(r.total, 1)}</b></span>
+              </>;
+              return (
+                <li key={r.key} data-tone={r.total > 0 ? "bad" : r.total < 0 ? "good" : "flat"} data-why={(h && r.key === h.key) || undefined}>
+                  {r.key !== "Other" && (r.project || r.intent) ? (
+                    <button type="button" onClick={() => apply({ ...(r.project ? { project: r.project } : {}), ...(r.intent ? { intent: r.intent as never } : {}), ...scope }, { list: true })}
+                      aria-label={`${r.key}: ${pts(r.total, 1)} of the change. Open these sessions`}>{body}</button>
+                  ) : body}
+                </li>
+              );
+            })}
+            <li className="drv-t" data-tone={tot > 0 ? "bad" : tot < 0 ? "good" : "flat"}>
+              <span><b>Total</b><small>sum of the rows above</small></span>
+              <span className="dv" data-neg={tot < 0 || undefined} style={{ "--w": Math.abs(tot) / top } as React.CSSProperties}><i aria-hidden="true" /><b className="n">{pts(tot, 1)}</b></span>
+            </li>
           </ul>
-          {h && <button type="button" className="btn" onClick={() => apply({ project: h.project, ...(h.intent ? { intent: h.intent as never } : {}) }, { list: true })}>Open {fmtInt(h.n1)} sessions</button>}
+          {h && <button type="button" className="btn b-act" onClick={() => apply({ project: h.project, ...(h.intent ? { intent: h.intent as never } : {}), ...scope }, { list: true })}
+            aria-label={`Open ${nSess(segCount(cur, h))}: ${h.key}`}>Open {nSess(segCount(cur, h))}</button>}
         </>
       )}
     </Panel>
@@ -204,11 +287,21 @@ function Drivers({ b }: { b: Briefing }) {
 }
 
 export function Overview() {
-  const { d, f, v, prior, win, exposed, caps } = useStore();
+  const { d, f, v, prior, win, exposed, caps, cmp } = useStore();
   const [metric, setMetric] = useState<Metric>("struggled");
   const [view, setView] = useState<View>("area");
   const t = d.totals;
-  const b = useMemo(() => briefing(v.rows, prior ? prior.v.rows : null, { all: applyFilter(d.sessions, { ...f, from: undefined, to: undefined }), exposed: exposed.size }), [d, f, v, prior, exposed]);
+  const all = useMemo(() => applyFilter(d.sessions, { ...f, from: undefined, to: undefined }, openExposure(d)), [d, f]);
+  const b = useMemo(() => briefing(v.rows, prior ? prior.v.rows : null, { all, exposed: exposed.size }), [all, v, prior, exposed]);
+  // the Brief and Drivers compare on the basis (prior window, or last 4 weeks vs the rest); the Trend panel keeps the full window
+  const bs = useMemo(() => basis(v.rows, prior, win, cmp), [v.rows, prior, win, cmp]);
+  const bb = useMemo(() => (bs.mode === "split" ? briefing(bs.cur, bs.base, { all, exposed: exposed.size }) : b), [bs, b, all, exposed]);
+  const scope = useMemo<Scope>(() => (bs.cut ? { from: bs.cut } : {}), [bs]);
+  const sc = useMemo<Cmp>(() => { const now = struggledRate(bs.cur), prev = bs.base ? struggledRate(bs.base) : null; return { now, prev, vd: verdict(now, prev) }; }, [bs]);
+  // the chart draws the earlier rate only when the Brief compares (both sides n >= MIN_N); the dashed line spans the earlier days, the shading the compared ones
+  const ref: Ref | null = sc.vd.kind === "none" || sc.prev?.p == null ? null
+    : bs.mode === "split" && bs.cut ? { p: sc.prev.p, was: [win.from, addDays(bs.cut, -1)], now: [bs.cut, win.to], tag: "last 4 weeks" }
+    : prior ? { p: sc.prev.p, was: [prior.win.from, prior.win.to], now: [win.from, win.to], tag: "this window" } : null;
   const m: Metric = metric === "spend" && !caps.hasCost ? "struggled" : metric;
   const priced = v.rows.filter((r) => r.cost_usd !== null);
   const big: Record<Metric, string> = { struggled: b.struggled.now === null ? "–" : fmtPct(b.struggled.now, 1), sessions: fmtInt(b.sessions.now), prompts: fmtCompact(b.prompts.now), spend: priced.length ? `${priced.length < v.rows.length ? "≥ " : ""}${fmtUSD(priced.reduce((a, r) => a + (r.cost_usd ?? 0), 0))}` : "–" };
@@ -216,17 +309,20 @@ export function Overview() {
     <section id="s-overview" className="sec" aria-labelledby="s-overview-h">
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
-        <div className="s12 ov-acts"><WrappedButton /><CopySummary /></div>
-        {prior !== null || b.struggled.now !== null ? <Brief b={b} nPrior={prior ? struggledRate(prior.v.rows).n : 0} win={win.days} /> : null}
-        <div className="s12"><Kpis b={b} setMetric={setMetric} /></div>
+        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} />}
+        <KeyNumbers bs={bs} setMetric={setMetric} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">
-          <span className="meta">All time</span> {fmtInt(t.active_days)} active days · streak {t.longest_streak} longest, {t.current_streak} now · {fmtInt(t.projects)} projects · {fmtInt(t.commits_linked)} commits linked
+          <span className="meta">All time</span><span>{fmtInt(t.active_days)} active days</span><span>streak {t.longest_streak} longest, {t.current_streak} now</span><span>{fmtInt(t.projects)} projects</span><span>{fmtInt(t.commits_linked)} commits linked</span>
         </p>
+        <UsageMix />
         <Panel id="s-trend" title="Per week" meta="last 12 weeks" span={8} src={`sessions · weekly · n ${fmtInt(b.sessions.now)}${b.sessions.prev === null ? "" : ` vs ${fmtInt(b.sessions.prev)}`}`} actions={<TrendToggles metric={m} setMetric={setMetric} view={view} setView={setView} hasCost={caps.hasCost} />}>
-          <div className="wk-big"><b>{big[m]}</b><span>{m === "spend" ? "priced spend in period" : `${m} in period`}</span></div>
-          <WeekChart weekly={b.weekly} metric={m} view={view} />
+          {/* in split mode the struggled headline reads like the Brief: last 4 weeks against the weeks before */}
+          {m === "struggled" && bs.mode === "split" && bb.struggled.now !== null
+            ? <div className="wk-big"><b>{fmtPct(bb.struggled.now, 1)}</b><span>last 4 weeks{ref ? ` · ${fmtPct(ref.p, 1)} before` : ""}</span></div>
+            : <div className="wk-big"><b>{big[m]}</b><span>{m === "spend" ? "priced spend in period" : `${m} in period`}</span></div>}
+          <WeekChart weekly={b.weekly} metric={m} view={view} base={ref} />
         </Panel>
-        <Attention /><Drivers b={b} /><WhereWent />
+        <Attention /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} /><WhereWent />
       </div>
     </section>
   );

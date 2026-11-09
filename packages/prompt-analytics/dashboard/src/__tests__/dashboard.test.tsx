@@ -16,9 +16,10 @@ const mount = () => {
   el = document.createElement("div"); document.body.append(el);
   root = createRoot(el);
   act(() => root!.render(<Dashboard d={d} />));
+  act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click());   // the sample flags nothing on tools, so its section starts quiet
 };
 afterEach(() => { act(() => root?.unmount()); el?.remove(); root = null; location.hash = ""; });
-const kpi = (name: string) => el.querySelector(`.kpi[data-kpi="${name}"] .val`)!.textContent!;
+const kpi = (name: string) => el.querySelector(`.kt[data-kpi="${name}"] .val`)!.textContent!;
 const click = (n: Element | null) => act(() => { (n as HTMLElement).click(); });
 const total = () => fmtInt(d.sessions.length);
 const toolRow = (i = 0) => el.querySelectorAll<HTMLButtonElement>(".sc tbody th button")[i];
@@ -166,6 +167,7 @@ describe("iteration 3: unit economics and nav", () => {
     el = document.createElement("div"); document.body.append(el);
     root = createRoot(el);
     act(() => root!.render(<Dashboard d={data} />));
+    act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click());   // the sample flags nothing on tools, so its section starts quiet
   };
   it("basic tier renders hour-by-weekday without hour_week[].applied (schema 1.0)", () => {
     const raw = JSON.parse(JSON.stringify(sample));
@@ -197,16 +199,34 @@ describe("iteration 3: unit economics and nav", () => {
     const raw = JSON.parse(JSON.stringify(sample));
     raw.sessions = raw.sessions.map((s: Record<string, unknown>) => ({ ...s, cost_usd: null }));
     mountWith(normalize(raw));
-    expect(el.querySelector('.kpi[data-kpi="cpa"]')).toBeNull();
-    const card = el.querySelector('.kpi[data-kpi="tpa"]')!;
+    expect(el.querySelector('.kt[data-kpi="cpa"]')).toBeNull();
+    const card = el.querySelector('.kt[data-kpi="tpa"]')!;
     expect(card.hasAttribute("data-primary")).toBe(true);
     expect(card.textContent).toMatch(/record prices/);
     expect(el.querySelector(".kpis")!.textContent).not.toMatch(/\$0/);
   });
-  it("cost KPI reconciles its denominators", () => {
+  it("cost KPI flags spend outliers; applied counts change work only", () => {
     mount();
-    expect(el.querySelector('.kpi[data-kpi="cpa"] .sub')!.textContent).toMatch(/^per applied · [\d,]+ priced of [\d,]+ applied$/);
-    expect(el.querySelector('.kpi[data-kpi="applied"] .sub')!.textContent).toMatch(/of [\d,]+ sessions with prompts$/);
+    // the sample's two big sessions are 47% of priced spend: listed under the sub (no lead line, no median line), the mean stays the value
+    expect(el.querySelector('.kt[data-kpi="cpa"] .val')!.textContent).toBe("$3.09");
+    // the list is in flow inside the tile (not over a ghost), outside the tile's main button; each outlier is its own button
+    const note = el.querySelector('.kt[data-kpi="cpa"] .kpi-note')!;
+    expect(note.querySelector("ul")!.getAttribute("aria-label")).toBe("2 sessions are 47% of priced spend, costliest first");
+    expect(note.textContent).not.toMatch(/median applied session/);
+    expect(note.closest("button")).toBeNull();
+    expect(el.querySelector(".kpi-ghost")).toBeNull();
+    const outs = note.querySelectorAll<HTMLButtonElement>("button.kpi-out");
+    expect(outs).toHaveLength(2);
+    for (const b of outs) expect(b.getAttribute("aria-label")).toMatch(/^Open session: .+, \d+% of priced spend$/);
+    act(() => outs[0].click());
+    expect(location.hash).toContain("sel=");
+    // split mode (All): the headline, gauge and change are the last 4 weeks; the sub names that side and the whole window's rate.
+    // The loops note rides in the title and for screen readers.
+    const sub = el.querySelector('.kt[data-kpi="applied"] .sub')!;
+    expect(el.querySelector('.kt[data-kpi="applied"] .val')!.textContent).toBe("35%");
+    expect(sub.firstChild!.textContent).toBe("Last 4 weeks: 51 of 146 change sessions\nAll time: 32%");
+    expect(sub.getAttribute("title")).toMatch(/^Last 4 weeks: 51 of 146 change sessions\nAll time: 32% · \d+% of those needed 3\+ loops$/);
+    expect(sub.querySelector(".sr-only")!.textContent).toMatch(/^ · \d+% of those needed 3\+ loops$/);
   });
   it("mobile More names the current section in its label (no aria-current), and closes on Esc", () => {
     // jsdom lays everything out at top 0, which the scroll-spy reads as "scrolled past every section"

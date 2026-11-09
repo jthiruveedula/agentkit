@@ -4,9 +4,10 @@
 /* shared: glass tags and buttons inside these sections */
 .todo .tag, .xs .tag, .best .link { border: 1px solid var(--rim); background: oklch(1 0 0 / 0.55); box-shadow: inset 0 1px 0 #fff; }
 .todo .tag, .xs .tag { height: auto; padding: 1px 8px; border-radius: 999px; }
-.tag.good { color: var(--good); border-color: color-mix(in oklch, var(--good) 35%, transparent); background: color-mix(in oklch, var(--good) 10%, oklch(1 0 0 / 0.6)); }
-.xs .tag[data-cat] { border-color: color-mix(in oklch, var(--c) 45%, transparent); background: color-mix(in oklch, var(--c) 10%, oklch(1 0 0 / 0.6)); color: var(--ink); }
-[data-cat="secret"] { --c: var(--warn-secret); } [data-cat="pii"] { --c: var(--warn-pii); } [data-cat="phi"] { --c: var(--warn-phi); }
+.tag.good { color: var(--good-ink); border-color: color-mix(in oklab, var(--good) 35%, transparent); background: color-mix(in oklab, var(--good) 10%, oklch(1 0 0 / 0.6)); }
+.xs .tag[data-cat] { border-color: color-mix(in oklab, var(--c) 45%, transparent); background: color-mix(in oklab, var(--c) 10%, oklch(1 0 0 / 0.6)); color: var(--ink); }
+/* kind colours are categories, not alarms: secrets take teal so red stays reserved for open or worsening state */
+[data-cat="secret"] { --c: oklch(0.52 0.09 195); } [data-cat="pii"] { --c: var(--warn-pii); } [data-cat="phi"] { --c: var(--warn-phi); }
 
 /* Recommendations: ordered actions */
 .todo { display: grid; gap: var(--s2); counter-reset: n; }
@@ -23,15 +24,6 @@
 .todo .btn.primary { background: linear-gradient(180deg, oklch(0.64 0.2 268), oklch(0.5 0.22 270)); border-color: oklch(0.7 0.15 268 / 0.6); color: #fff; font-weight: 600; }
 
 /* What works */
-.radar { display: block; width: 100%; max-width: 380px; margin: 0 auto; overflow: visible; }
-.radar .rg polygon { fill: none; stroke: var(--line-2); }
-.radar .rtop { fill: none; stroke: var(--prior); stroke-width: 2; stroke-dasharray: 5 4; }
-.radar .ryou { fill: color-mix(in oklch, var(--accent) 22%, transparent); stroke: var(--accent); stroke-width: 2.5; }
-.radar .rl text { font-size: 11px; fill: var(--muted); text-transform: capitalize; }
-.rl-key { justify-content: center; }
-.rl-key li::before { display: none; }
-.rl-key li::after { content: ""; width: 18px; border-top: 3px solid var(--accent); }
-.rl-key .lk-top::after { border-top: 2px dashed var(--prior); }
 .best { width: 100%; }
 .best th { text-align: left; font: 600 12px var(--sans); color: var(--muted); padding: 4px 8px; }
 .best td { padding: 8px; border-top: 1px solid oklch(1 0 0 / 0.7); }
@@ -68,7 +60,7 @@
 .mk .chip { margin: 0 2px; }
 .xbox { max-width: 100%; display: grid; gap: 4px; }
 .xbox p { overflow-wrap: anywhere; padding: var(--s2); background: var(--sunk); border-radius: var(--r2); font: 13px var(--mono); }
-.xbox mark { background: color-mix(in oklch, var(--warn-secret) 25%, transparent); color: inherit; padding: 0 var(--s0); }
+.xbox mark { background: color-mix(in oklab, var(--warn-secret) 25%, transparent); color: inherit; padding: 0 var(--s0); }
 .xnone, .xnote { color: var(--muted); }
 .xa { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
 .xb { font-size: 12.5px; padding: 3px 11px; min-height: 28px; border-radius: 999px; border: 1px solid var(--rim); background: linear-gradient(180deg, oklch(1 0 0 / 0.5), oklch(1 0 0 / 0.16)); box-shadow: inset 0 1px 0 #fff, 0 2px 8px -4px oklch(0.4 0.05 262 / 0.25); }

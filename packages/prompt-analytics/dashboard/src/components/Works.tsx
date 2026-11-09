@@ -4,8 +4,12 @@ import { useStore } from "../state";
 import { fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
 import { intentColor, srcLabel } from "../lib/palette";
 import { ToolLogo } from "./Shell";
-import { BarList, Card, DataTable, Empty, Section, Segmented } from "./ui";
+import { BarList, Card, Cols, DataTable, Empty, Section, Segmented } from "./ui";
+import { noGain, promptBuckets } from "../lib/insights";
+import { MIN_N } from "../lib/thresholds";
 import "./govern.css";
+import "./investigate.css";
+import "./polish.css";
 
 const pts = (x: number) => `${fmtSigned(x * 100)} pts`;
 
@@ -108,27 +112,59 @@ function Topics() {
   );
 }
 
-const R = 80, XY = (i: number, n: number, r: number) => [Math.cos(-Math.PI / 2 + (i * 2 * Math.PI) / n) * r, Math.sin(-Math.PI / 2 + (i * 2 * Math.PI) / n) * r];
-const poly = (v: number[], k = 1) => v.map((x, i) => XY(i, v.length, R * k * Math.min(1, Math.max(0, x))).map((c) => c.toFixed(1)).join(",")).join(" ");
+const at = (x: number) => `${Math.min(1, Math.max(0, x)) * 100}%`;
 
-/** Radar of the quality axes: you (filled) against the top-outcome tercile (dashed). Axis count follows the export. */
+/** You against the top-outcome tercile, one dumbbell per quality axis, biggest gap first. Axis count follows the export. */
 function Quality({ wide }: { wide: boolean }) {
   const { d, caps } = useStore();
   const { axes, you, top, by_source: bs, validation: val } = d.quality;
   const [tool, setTool] = useState("all");
   const mine = tool === "all" ? you : bs.find((b) => b.source === tool)?.values ?? you;
   if (!(you.length === axes.length && you.length > 0)) return null;
-  const n = axes.length, one = Array(n).fill(1);
+  const rows = axes.map((a, i) => ({ a, you: mine[i] ?? 0, top: top[i] ?? 0 })).map((x) => ({ ...x, gap: x.top - x.you })).sort((p, q) => q.gap - p.gap);
   return (
-    <Card title="Quality profile" src="quality.you vs quality.top" meta="you against the top-outcome tercile" span={wide ? 12 : 7}
+    <Card title="Quality profile" src="quality.you vs quality.top" meta="you against the top-outcome tercile, biggest gap first" span={wide ? 12 : 7}
       actions={caps.multiTool && bs.length > 1 ? <Segmented label="Quality by tool" value={tool} onChange={setTool} options={[{ id: "all", text: "All" }, ...bs.map((b) => ({ id: b.source as string, text: srcLabel(b.source) }))]} /> : undefined}>
-      <svg className="radar" viewBox="-150 -105 300 210" role="img" aria-label={`Prompt quality radar. ${axes.map((a, i) => `${a}: you ${fmtPct(mine[i] ?? 0)}, top tercile ${fmtPct(top[i] ?? 0)}`).join("; ")}`}>
-        <g className="rg"><polygon points={poly(one)} /><polygon points={poly(one, 0.5)} /></g>
-        <polygon className="rtop" points={poly(top)} /><polygon className="ryou" points={poly(mine)} />
-        <g className="rl">{axes.map((a, i) => { const [x, y] = XY(i, n, R + 11); return <text key={a} x={x} y={y + 4} textAnchor={Math.abs(x) < 6 ? "middle" : x > 0 ? "start" : "end"}>{a}</text>; })}</g>
-      </svg>
-      <ul className="legend rl-key"><li className="lk-you">You</li><li className="lk-top">Your best</li></ul>
-      <p className="note">{val.spearman !== null ? `Score vs outcome: Spearman ${val.spearman.toFixed(2)}, n=${fmtInt(val.n)}.` : "Score validation unavailable."} Aggregate, ignores filters.</p>
+      <div className="dbs" role="group" aria-label="Prompt quality: you against your top-outcome tercile, per axis">{rows.map((x) => (
+        <div key={x.a} className="db"><span className="gap-l">{x.a}</span>
+          <div className="dbt" role="img" aria-label={`${x.a}: you ${fmtPct(x.you)}, top tercile ${fmtPct(x.top)}, gap ${pts(x.gap)}`}>
+            <i className="seg" style={{ left: at(Math.min(x.you, x.top)), width: `calc(${at(Math.max(x.you, x.top))} - ${at(Math.min(x.you, x.top))})` }} /><i className="p" style={{ left: at(x.top) }} /><i className="c" style={{ left: at(x.you) }} />
+          </div>
+          <b>{pts(x.gap)}</b>
+        </div>
+      ))}</div>
+      <p className="note">Coloured dot = you, grey dot = your top-outcome tercile; the number is the gap to close. {val.spearman !== null ? `Score vs outcome: Spearman ${val.spearman.toFixed(2)}, n=${fmtInt(val.n)}.` : "Score validation unavailable."} Aggregate, ignores filters.</p>
+      <DataTable caption="Prompt quality, you against the top tercile" head={["Axis", "You", "Top tercile", "Gap"]} rows={rows.map((x) => [x.a, fmtPct(x.you), fmtPct(x.top), pts(x.gap)])} />
+    </Card>
+  );
+}
+
+/** Applied rate by prompt count, change sessions only, on a 0-100% scale with a Wilson whisker per column.
+ *  Says "no gain" only when past 10 prompts is not clearly above 6-10. */
+function NoGain() {
+  const { v } = useStore();
+  const bs = useMemo(() => promptBuckets(v.rows), [v.rows]), g = useMemo(() => noGain(v.rows), [v.rows]);
+  const n = bs.reduce((a, b) => a + b.n, 0);
+  if (n === 0) return null;
+  const cmp = g ? `(${fmtPct(g.over.rate ?? 0)} vs ${fmtPct(g.mid.rate ?? 0)})` : "";
+  // whisker x = centre of column i in a flex row with a 3px gap (matches .cols)
+  const cx = (i: number) => `calc(${i + 0.5} * (100% + 3px) / ${bs.length} - 1.5px)`;
+  return (
+    <Card id="s-nogain" src={`sessions.prompts \u00b7 n ${fmtInt(n)}`} title="Applied rate by session length" meta="change sessions (not explain), in view, 95% Wilson CI" span={12}>
+      <p className="lb-call">{!g ? `Fewer than ${MIN_N} sessions on one side of 10 prompts, so there is no comparison yet.`
+        : g.flat ? <><b>Past 10 prompts, sessions applied no more often {cmp}.</b> Consider restarting with a fresh prompt.</>
+        : `Sessions past 10 prompts applied more often ${cmp}.`}</p>
+      <div className="ng-plot">
+        <Cols label="Applied rate by prompts per session" height={96} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--accent)" : "var(--line-2)" }],
+          aria: b.n ? `${b.label} prompts: ${fmtPct(b.rate ?? 0)} applied, 95% CI ${fmtPct(b.lo)} to ${fmtPct(b.hi)}, n=${b.n}${b.n < MIN_N ? ", too few to read alone" : ""}` : `${b.label} prompts: no sessions` }))} />
+        <div className="ng-ci" aria-hidden="true">
+          <span className="ng-top">100%</span>
+          {bs.map((b, i) => b.n > 0 && <i key={b.label} style={{ left: cx(i), bottom: `${b.lo * 100}%`, height: `${(b.hi - b.lo) * 100}%` }} />)}
+        </div>
+      </div>
+      <div className="ng-x" aria-hidden="true">{bs.map((b) => <span key={b.label}><b>{b.label}</b>{b.n ? (b.n < MIN_N ? `n=${b.n}` : fmtPct(b.rate ?? 0)) : "none"}</span>)}</div>
+      <p className="note">Prompts per session, 0 to 100% applied; whiskers are 95% CIs, grey columns have fewer than {MIN_N} sessions. Longer sessions are often harder tasks, so this is association, not cause.</p>
+      <DataTable caption="Applied rate by prompts per session" head={["Prompts", "Sessions", "Applied", "Rate", "95% CI"]} rows={bs.map((b) => [b.label, b.n, b.k, b.n ? fmtPct(b.rate ?? 0) : "-", b.n ? `${fmtPct(b.lo)} to ${fmtPct(b.hi)}` : "-"])} />
     </Card>
   );
 }
@@ -164,7 +200,7 @@ export function Works() {
           ? "The prompt playbook appears once enough sessions exist to test prompt habits against outcomes."
           : <>The prompt playbook and topic map need the ML engine.{up ? <> Run <code>{up.command}</code> to unlock them.</> : null}</>}</p>
       )}
-      {topics && <Topics />}<Quality wide={!topics} /><Best />
+      {topics && <Topics />}<Quality wide={!topics} /><NoGain /><Best />
     </Section>
   );
 }

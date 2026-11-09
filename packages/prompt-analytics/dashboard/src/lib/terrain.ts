@@ -1,7 +1,7 @@
 // Orthographic "terrain" camera for extruded-bar charts (hour-of-week). Pure math, no DOM.
 // Orthographic on purpose: perspective would make near bars look taller, so heights stay comparable at every angle.
 // World: x = column (hour), y = row (weekday, top row first), z = height above the zero floor. pitch 90 deg = straight down (plan view).
-import { clamp } from "./orbit";
+import { clamp } from "./math";
 import { ZOOM_MAX, ZOOM_MIN, zoomAround, wrapYaw, type View } from "./calorbit";
 
 export interface TCam { yaw: number; pitch: number; zoom: number; tx: number; ty: number }

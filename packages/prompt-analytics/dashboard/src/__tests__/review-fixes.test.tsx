@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
@@ -18,9 +19,11 @@ const data = (sessions: S[], range?: object) => normalize({ ...sample, sessions,
 const html = (d: ReturnType<typeof normalize>, C: () => React.ReactElement, initial?: object) => renderToStaticMarkup(<StoreProvider d={d} initial={initial}><C /></StoreProvider>);
 
 describe("review fixes", () => {
-  it("Funnel step rates show n/a when the previous stage is empty", () => {
+  it("Funnel drop-off labels skip a stage whose previous stage is empty (no NaN, no fake 100%)", () => {
     const h = html(data([sess({ reached_stage: 1 }), sess({ reached_stage: 1 })]), Funnel);
-    expect(h).toMatch(/aria-label="Response: n\/a"/);
+    expect(h).toContain("\u2212100% at prompt");
+    expect(h).toMatch(/aria-label="Response: 0 sessions, 0% of all\. Filter/);
+    expect(h).not.toMatch(/NaN|at response/);
   });
 
   it("ModelFit says too few sessions under 15 per tool", () => {
@@ -47,14 +50,23 @@ describe("review fixes", () => {
     }));
     return html(data(rows, { start: "2026-10-01", end: "2026-10-28" }), Overview, { from: "2026-10-15", to: "2026-10-28" });
   };
-  it("Overview chip reads no change when the struggled diff is ~0", () => {
-    expect(win([[4, 4], [4, 4], [4, 4]])).toMatch(/no change versus/);
+  it("Brief says struggling held, with could-be wording, when the struggled diff is ~0", () => {
+    const h = win([[4, 4], [4, 4], [4, 4]]);
+    expect(h).toMatch(/Within noise/);
+    expect(h).toMatch(/Struggling held at about 10\.0%/);
+    expect(htmlText(h)).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
+    expect(htmlText(h)).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
+    expect(h).toMatch(/the evidence behind/);   // no driver, so the top recommendation is Do next
+    expect(h).not.toMatch(/data-kpi="struggled"/);
   });
-  it("Brief says mostly for a dominant driver, partly for a spread one", () => {
-    expect(win([[4, 24], [4, 4], [4, 4]])).toMatch(/mostly p0/);
+  it("Brief names the driver once, with its counts and sessions button", () => {
+    const h = win([[4, 24], [4, 4], [4, 4]]);
+    expect(h).toMatch(/<b>p0 \/ bugfix<\/b>: 24 of its 40 sessions struggled, up from 4 of 40\./);
+    expect(h).toMatch(/>Open 40 sessions</);
+    expect(h).not.toMatch(/mostly|partly/);
     const spread = win([[4, 16], [4, 16], [4, 16]]);
-    expect(spread).toMatch(/partly p\d/);
-    expect(spread).not.toMatch(/mostly p\d/);
+    expect(spread.match(/sessions struggled, up from/g)).toHaveLength(1);
+    expect(spread).not.toMatch(/mostly|partly/);
   });
 
   it("empty project is labelled and survives the URL hash", () => {

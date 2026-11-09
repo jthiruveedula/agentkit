@@ -30,7 +30,7 @@ const COLS: { k: SortKey | null; text: string; cls?: string; id: string }[] = [
 ];
 
 /** Card list for the side panel: "Show more" paging, newest first. */
-export function SessionList({ rows }: { rows: SessionRow[] }) {
+export function SessionList({ rows, current }: { rows: SessionRow[]; current?: string | null }) {
   const { openSession, sel, f } = useStore();
   const [shown, setShown] = useState(PAGE);
   useEffect(() => { setShown(PAGE); }, [f]);
@@ -42,7 +42,7 @@ export function SessionList({ rows }: { rows: SessionRow[] }) {
         <ul className="srows">
           {sorted.slice(0, shown).map((r) => (
             <li key={r.id}>
-              <button type="button" className="srow" aria-current={sel === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
+              <button type="button" className="srow" aria-current={sel === r.id || current === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
                 <span className="l1"><time dateTime={r.date}>{fmtDate(r.date)}</time><span><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</span><span className="tag">{r.intent}</span></span>
                 <span className={`ti ${r.title ? "" : "none"}`}>{r.title || "Untitled session"}</span>
                 <span className="l3"><span>{fmtInt(r.prompts)} prompts</span><span>{r.cost_usd === null ? "not priced" : fmtUSD(r.cost_usd)}</span><span>{r.applied ? "applied" : "not applied"}</span><span>friction {r.friction.toFixed(2)}</span></span>

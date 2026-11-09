@@ -67,6 +67,7 @@ export function Panel() {
   const head = useRef<HTMLHeadingElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const was = useRef(false);
+  const lastOpen = useRef<string | null>(null);
   const hit = useRef<{ el: Element; t: number } | null>(null);
   useEffect(() => {   // remember what was clicked: it is the FLIP origin and the focus-return fallback
     const on = (e: Event) => { const el = e.target instanceof Element ? e.target : null; if (el && !el.closest(".panel")) hit.current = { el, t: performance.now() }; };
@@ -87,7 +88,10 @@ export function Panel() {
       const ae = document.activeElement as HTMLElement | null, c = hit.current?.el.closest<HTMLElement>("button,a,[tabindex]");
       trigger.current = ae && ae !== document.body ? ae : c ?? null;
     }
-    if (on) head.current?.focus();
+    if (panel === "detail" && sel) lastOpen.current = sel;
+    const row = panel === "list" && lastOpen.current ? box.current?.querySelector<HTMLElement>(".srow[aria-current]") : null;   // back from a session: land on its row
+    if (panel === "none") lastOpen.current = null;
+    if (on) (row ?? head.current)?.focus();
     if (!on && was.current) { const t = trigger.current; if (t && document.contains(t)) t.focus(); trigger.current = null; }
     was.current = on;
   }, [panel, sel]);
@@ -102,7 +106,7 @@ export function Panel() {
           <h2 ref={head} tabIndex={-1}>{panel === "detail" ? "Session" : "Sessions"} {panel === "list" && <span className="meta">{fmtInt(v.rows.length)} matching</span>}</h2>
           <button type="button" className="btn" onClick={closePanel}>Close</button>
         </div>
-        <div className="panel-b">{panel === "detail" && sel ? <Detail id={sel} /> : v.legacy ? <p className="empty">This export has no per-session rows.</p> : <SessionList rows={v.rows} />}</div>
+        <div className="panel-b">{panel === "detail" && sel ? <Detail id={sel} /> : v.legacy ? <p className="empty">This export has no per-session rows.</p> : <SessionList rows={v.rows} current={lastOpen.current} />}</div>
       </aside>
     </>
   );

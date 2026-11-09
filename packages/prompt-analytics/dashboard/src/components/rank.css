@@ -1,0 +1,15 @@
+/* Feature 1: signal-ranked sections. A quiet section collapses to one row; a promoted one gets a reason line. */
+.sec.quiet { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--s2); box-sizing: border-box; height: 48px; padding: 0 var(--s3); margin-block: var(--s2); border: 1px solid var(--line); border-radius: var(--r2); background: var(--surface); }
+.sec.quiet h2 { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sec.quiet .meta { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sec.quiet h2 { font: 600 16px/24px var(--sans); }
+.sec.quiet .meta { font-size: 13px; line-height: 20px; color: var(--muted); }
+.sec.quiet .link { margin-left: auto; min-height: 24px; }
+/* The reason line is an eyebrow of the section under it: the 40px (28px at <=699px) section gap from styles.css
+   (.sec + .why-tag) sits above the tag, and the tag hangs 4px over its .sec-h. Gap between sections stays 40/28 either way. */
+.why-tag { margin: 0 0 var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); }
+.why-tag b { color: var(--accent); }
+.side a[data-quiet]:not([aria-current]) { color: var(--muted); }
+/* a jump to a promoted section keeps its reason line in view under the sticky header (mirrors the .sec scroll-margin in styles.css, + the tag) */
+.why-tag + .sec { scroll-margin-top: calc(var(--hh) + 48px); }
+@media (max-width: 699px) { .why-tag + .sec { scroll-margin-top: 100px; } }

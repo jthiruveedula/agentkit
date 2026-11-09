@@ -1,0 +1,57 @@
+/* Bundle 2, charts get a baseline: KPI tiles + sparks, weekly chart reference, diverging drivers, Dumb median rule. */
+
+/* KPI tiles: the card is a div whose main button stretches over it (::after), so the outlier note's buttons sit in flow without nesting.
+   28px values; a two-line label slot lines the values up; every spark bottom-aligned on one baseline */
+.kpi-main { display: grid; gap: 2px; justify-items: start; width: 100%; text-align: left; }
+.kpi-main::after { content: ""; position: absolute; inset: 0; border-radius: var(--r3); }
+html.fx .kpi-main::after { border-radius: 18px; }
+.kpi-main:focus-visible { outline: none; }
+.kpi-main:focus-visible::after { outline: 2px solid var(--accent); outline-offset: 2px; }
+.kpis .kpi-go { color: var(--muted); text-decoration: none; }
+.kpis .kpi-go:hover, .kpis .kpi-go:focus-visible { color: var(--ink); text-decoration: underline; }
+/* cost outlier list: in flow after the sub; text clicks fall through to the tile, its buttons sit above the stretched button */
+.kpi-note { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin-top: var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); pointer-events: none; }
+.kpi-note button { pointer-events: auto; }
+.kpi-note .link { padding: 0; white-space: normal; text-align: left; }
+.kpi-note .kpi-out { display: flex; gap: var(--s1); width: 100%; min-width: 0; min-height: 24px; align-items: center; }
+.kpi-out span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }   /* names wrap, never an ellipsis; the full title is also the accessible name */
+.kpi-out b { flex: none; font-weight: 600; }
+
+/* sparks: thin line, faint IQR band, end dot (non-scaling strokes keep the dot round in the stretched viewBox; overflow shows the dot past the edge) */
+.spark { overflow: visible; }
+.spark .sp-band { fill: var(--accent); opacity: 0.18; }
+.spark .sp-l { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+.spark .sp-d { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+
+/* weekly chart: compared days shaded and labelled, dashed earlier rate (haloed label), low-n weeks hollow and keyed */
+.wk .wk-cmp { fill: var(--ink); opacity: 0.04; }
+.wk .wk-tag { fill: var(--muted); font-weight: 600; }
+.wk .wk-ref line { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.wk .wk-ref text { fill: var(--muted); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.wk .wk-d { fill: var(--accent); }
+.wk .wk-d[data-low], .wk .wk-b[data-low] { fill: var(--surface); stroke: var(--accent); stroke-width: 1.5; }
+.wk .wk-b[data-low] { opacity: 1; }
+.wk-key { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); }
+.wk-key-ref::before { content: ""; display: inline-block; width: 18px; margin-right: 6px; vertical-align: middle; border-top: 1.5px dashed var(--muted); }
+
+/* drivers: bars grow from a zero line, right = worse (--bad), left = better (--good), the points label rides the bar's end.
+   --z is the zero line: mid-track with both signs, 20% (or 80%) when every contribution has one sign. 64px stays free for the label. */
+.drv { --z: 50%; }
+.drv[data-side="pos"] { --z: 20%; } .drv[data-side="neg"] { --z: 80%; }
+ul.drv > li > button { grid-template-columns: minmax(0, 1fr) minmax(160px, 50%); }
+.drv .dv { position: relative; height: 8px; background: var(--line); border-radius: 4px; }
+.drv .dv::before { content: ""; position: absolute; left: var(--z); top: -4px; bottom: -4px; width: 1px; background: var(--line-2); }
+.drv .dv i { position: absolute; top: 0; bottom: 0; left: var(--z); width: calc(var(--w) * max(8px, 100% - var(--z) - 64px)); background: var(--c); border-radius: 0 4px 4px 0; }
+.drv .dv[data-neg] i { left: auto; right: calc(100% - var(--z)); width: calc(var(--w) * max(8px, var(--z) - 64px)); border-radius: 4px 0 0 4px; }
+.drv .dv .n { position: absolute; top: 50%; transform: translateY(-50%); left: calc(var(--z) + var(--w) * max(8px, 100% - var(--z) - 64px) + 6px); font-size: 13px; line-height: 20px; white-space: nowrap; }
+.drv .dv[data-neg] .n { left: auto; right: calc(100% - var(--z) + var(--w) * max(8px, var(--z) - 64px) + 6px); }
+.drv li > span:first-child, .drv li > button > span:first-child { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+.drv .drv-t { border-top-color: var(--line-2); }
+@media (max-width: 599px) { ul.drv > li > button { grid-template-columns: minmax(0, 1fr); } .drv .dv { grid-column: 1 / -1; margin-block: 6px; } }
+
+/* Dumb: median rule through every row, labelled once above */
+.dbt .md { top: -6px; bottom: -6px; width: 0; border-left: 1px dashed var(--ink); opacity: 0.45; }
+.dbm { display: grid; grid-template-columns: minmax(64px, 9.5em) minmax(60px, 1fr) 7em; gap: 12px; margin-bottom: -4px; font-size: 11px; line-height: 14px; color: var(--muted); }
+.dbm > div { position: relative; height: 14px; }
+.dbm > div > span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+@media (max-width: 480px) { .dbm { grid-template-columns: minmax(64px, 7em) minmax(40px, 1fr) 6.5em; gap: 8px; } }

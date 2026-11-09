@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { bh, playbook, pValue } from "../lib/playbook";
 import { golden, router } from "../lib/econ";
-import { layoutOrbit, R_MIN } from "../lib/orbit";
+import { MIN_SHARE, partition } from "../lib/sunburst";
 import { buildTree } from "../lib/mindmap";
 import { monotonePath, niceTicks } from "../lib/trend";
 import type { SessionRow } from "../data/types";
@@ -85,12 +85,12 @@ describe("golden hours", () => {
 });
 
 describe("map + trend geometry", () => {
-  it("node area is proportional within a level (no constant offset)", () => {
+  it("arc length is proportional within a level (no constant offset), and a tiny branch keeps the floor", () => {
     const rows = [...Array.from({ length: 16 }, (_, i) => row({ id: `a${i}`, source: "claude_code" })), ...Array.from({ length: 4 }, (_, i) => row({ id: `b${i}`, source: "cursor" }))];
-    const lay = layoutOrbit(buildTree(rows, "sessions", new Set()));
-    const a = [...lay.values()].find((n) => n.id.endsWith("/claude_code"))!, b = [...lay.values()].find((n) => n.id.endsWith("/cursor"))!;
-    expect((b.r / a.r) ** 2).toBeCloseTo(4 / 16, 5);
-    expect(Math.min(...[...lay.values()].map((n) => n.r))).toBeGreaterThanOrEqual(R_MIN);
+    const parts = partition(buildTree(rows, "sessions", new Set()));
+    const len = (id: string) => parts.get(id)!.x1 - parts.get(id)!.x0;
+    expect(len("root/cursor") / len("root/claude_code")).toBeCloseTo(4 / 16, 9);
+    expect(Math.min(...[...parts.values()].filter((p) => p.parent).map((p) => (p.x1 - p.x0) / (parts.get(p.parent!)!.x1 - parts.get(p.parent!)!.x0)))).toBeGreaterThanOrEqual(MIN_SHARE - 1e-12);
   });
   it("headroom: the axis top clears the max by ~10%; the monotone curve never overshoots", () => {
     expect(niceTicks(60 * 1.1).max).toBeGreaterThan(60);

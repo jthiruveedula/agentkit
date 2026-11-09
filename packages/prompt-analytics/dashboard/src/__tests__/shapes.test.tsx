@@ -16,7 +16,7 @@ type Raw = Record<string, unknown>;
 const raw = sample as unknown as Raw;
 let root: Root | null = null, el: HTMLDivElement;
 afterEach(() => { act(() => root?.unmount()); el?.remove(); root = null; location.hash = ""; try { localStorage.clear(); } catch { /* ignore */ } });
-const mount = (r: Raw) => { el = document.createElement("div"); document.body.append(el); root = createRoot(el); act(() => root!.render(<Dashboard d={normalize(r)} />)); };
+const mount = (r: Raw) => { el = document.createElement("div"); document.body.append(el); root = createRoot(el); act(() => root!.render(<Dashboard d={normalize(r)} />)); act(() => el.querySelector<HTMLButtonElement>("#s-tools.quiet button")?.click()); };
 const caps = (r: Raw) => { const d = normalize(r); return capabilities(d, views(d, {})); };
 const navIds = () => [...el.querySelectorAll<HTMLAnchorElement>("nav.side a")].map((a) => a.getAttribute("href")!.match(/s-[a-z]+/)![0]);
 const has = (sel: string) => el.querySelector(sel) !== null;
@@ -75,12 +75,12 @@ describe("what renders per shape", () => {
     expect(navIds()).toEqual(expect.arrayContaining(FULL));
     expect(has(".sc")).toBe(true);
     expect(el.querySelector("#s-tools h2")?.textContent).toBe("Tools");
-    expect(has('.kpi[data-kpi="cpa"]')).toBe(true);
+    expect(has('.kt[data-kpi="cpa"]')).toBe(true);
   });
   it("Copilot only: no cost KPIs or charts, tokens stand in", () => {
     mount(onlySources(SHAPES["no-prices"](raw), ["copilot"]));
-    expect(has('.kpi[data-kpi="cpa"]')).toBe(false);
-    expect(has('.kpi[data-kpi="tpa"]')).toBe(true);
+    expect(has('.kt[data-kpi="cpa"]')).toBe(false);
+    expect(has('.kt[data-kpi="tpa"]')).toBe(true);
     expect(has("#s-tokens")).toBe(true);
     const txt = (s: string) => el.querySelector(s)?.textContent ?? "";
     for (const s of [".kpis", "#s-time", "#s-tools"]) expect(txt(s), s).not.toMatch(/\$\d/);
@@ -90,7 +90,7 @@ describe("what renders per shape", () => {
   });
   it("no prices anywhere: no $0, tokens per applied change", () => {
     mount(SHAPES["no-prices"](raw));
-    expect(has('.kpi[data-kpi="cpa"]')).toBe(false);
+    expect(has('.kt[data-kpi="cpa"]')).toBe(false);
     expect(el.querySelector(".kpis")!.textContent).not.toMatch(/\$0/);
     expect(has("#s-tokens")).toBe(true);
   });

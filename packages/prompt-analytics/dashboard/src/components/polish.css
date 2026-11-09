@@ -1,0 +1,41 @@
+/* Bundle 3: section polish and insights (Friction rules, Funnel net value, What works gap chart and no-gain columns, Repeats spend). Light only, no animation. */
+
+/* median / p90 rules over the friction histogram: the Dumb median look (muted dashed rule, upright 11px label, no box).
+   Labels are staggered by row (median above, p90 one row lower; the p90 rule starts under the median label), each on the
+   roomier side of its rule; a halo keeps a label legible where the other rule passes behind it. */
+.q-plot { position: relative; padding-top: 36px; }
+.q-rule { position: absolute; top: 4px; bottom: 0; width: 0; border-left: 1px dashed color-mix(in oklab, var(--ink) 45%, transparent); pointer-events: none; font-style: normal; }
+.q-rule span { position: absolute; z-index: 1; top: -4px; left: 4px; font-size: 11px; line-height: 14px; color: var(--muted); white-space: nowrap;
+  text-shadow: 0 0 2px var(--surface), 0 0 2px var(--surface), 0 0 3px var(--surface); }
+.q-rule[data-row] { top: 20px; } .q-rule[data-row] span { top: -4px; }
+.q-rule[data-end] span { left: auto; right: 4px; }
+
+/* What works: you-vs-top gap rows reuse the dumbbell (.db) look; axis names come lowercase from the export */
+.gap-l { text-transform: capitalize; }
+
+/* no-gain columns: 0-100% scale (top labelled), a 95% Wilson whisker per column, one label per column under it */
+.ng-plot { position: relative; padding-top: 16px; }
+.ng-ci { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; border-top: 1px dashed var(--line); pointer-events: none; }
+.ng-top { position: absolute; right: 0; bottom: 100%; font-size: 11px; line-height: 14px; color: var(--muted); }
+.ng-ci i { position: absolute; width: 9px; margin-left: -4.5px; box-sizing: border-box; min-height: 2px; border-block: 1.5px solid var(--ink);
+  background: linear-gradient(var(--ink), var(--ink)) center / 1.5px 100% no-repeat; }
+.ng-x { display: flex; gap: 3px; margin-top: var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ng-x span { flex: 1 1 0; min-width: 0; display: grid; text-align: center; }
+.ng-x b { font-weight: 600; color: var(--ink); }
+
+/* Funnel: net value per intent */
+.nv .n { text-align: right; font-variant-numeric: tabular-nums; }
+.nv .link { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; }
+
+/* Repeats: total spend line */
+.rep-sum { margin-bottom: var(--s3); font-size: 14px; line-height: 20px; overflow-wrap: anywhere; }
+
+/* Funnel: tool switches heatmap. Row labels size to their longest name; column headers wrap (break hints in Funnel.tsx) instead of truncating.
+   Selectors carry one extra class: styles.css loads after component CSS, so equal specificity would lose. */
+.card .mx { grid-template-columns: max-content repeat(var(--cols), minmax(0, 1fr)); }
+.mx .mx-l { overflow: visible; text-overflow: clip; }
+.mx .mx-h { align-self: end; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 14px; padding-bottom: 2px; }
+
+/* Card toggles (Quality profile tool tabs) wrap inside the card at 375 instead of running past its edge */
+.card-acts { max-width: 100%; min-width: 0; }
+.card-acts .seg { flex-wrap: wrap; overflow: visible; }

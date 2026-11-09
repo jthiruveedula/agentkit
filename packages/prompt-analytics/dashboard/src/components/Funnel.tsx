@@ -1,25 +1,33 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { STAGES } from "../lib/filter";
-import { fmtInt } from "../lib/format";
+import { MIN_PRIOR_N } from "../lib/thresholds";
+import { fmtInt, fmtPct, fmtUSD } from "../lib/format";
+import { netValue } from "../lib/insights";
 import { intentColor, SOURCES, srcColor, srcLabel } from "../lib/palette";
 import { useRoving } from "../lib/hooks";
 import { linkProps } from "../lib/motion";
 import { BarList, Card, Cols, DataTable, Empty, Section, Segmented, pct } from "./ui";
-import { Dumb } from "./Time";
 import "./investigate.css";
+import "./polish.css";
 
 type By = "all" | "tool" | "intent";
 
+/** Share lost from stage i-1 to stage i; null when stage i-1 is empty. */
+const lost = (fn: number[], i: number) => (fn[i - 1] ? 1 - (fn[i] ?? 0) / fn[i - 1] : null);
+const dropTxt = (x: number) => `\u2212${Math.round(x * 100)}%`;
+
+/** Bars per stage; the sub line is the drop-off into each stage, with the previous period's drop when there is one (this replaced the Step rates card). */
 function Stages() {
-  const { v, f, drill } = useStore();
+  const { v, f, drill, prior } = useStore();
   const top = v.funnel[0] ?? 0;
   return top === 0 ? <Empty /> : (
     <>
       <BarList cascade label="Sessions reaching each funnel stage" rows={STAGES.map((s, i) => {
-        const n = v.funnel[i] ?? 0, prev = i ? v.funnel[i - 1] ?? 0 : n;
-        return { key: s, label: s, value: n, color: "var(--accent)", active: f.stage === i + 1, text: `${fmtInt(n)} · ${pct(n, top)}`, sub: i ? `${pct(n, prev)} of ${STAGES[i - 1].toLowerCase()}` : undefined,
-          aria: `${s}: ${n} sessions, ${pct(n, top)} of all. Filter to sessions that reached ${s.toLowerCase()}`, onClick: () => drill({ stage: i + 1 }) };
+        const n = v.funnel[i] ?? 0, d = i ? lost(v.funnel, i) : null, pf = prior?.v.funnel, was = d !== null && pf && (pf[0] ?? 0) >= MIN_PRIOR_N ? lost(pf, i) : null;   // same base guard as delta()
+        const sub = d === null ? undefined : `${dropTxt(d)} at ${s.toLowerCase()}${was === null ? "" : `, was ${dropTxt(was)}`}`;
+        return { key: s, label: s, value: n, color: "var(--accent)", active: f.stage === i + 1, text: `${fmtInt(n)} · ${pct(n, top)}`, sub,
+          aria: `${s}: ${n} sessions, ${pct(n, top)} of all${sub ? `, ${sub}` : ""}. Filter to sessions that reached ${s.toLowerCase()}`, onClick: () => drill({ stage: i + 1 }) };
       })} />
       <ul className="drops" aria-label="Where sessions stop">
         {STAGES.slice(0, -1).map((s, i) => {
@@ -56,19 +64,29 @@ function Minis({ by }: { by: By }) {
   );
 }
 
-/** Each stage as a share of the one before, previous period against now. A step moves "clearly" at 2+ pts; fewer reads neutral. */
-function StepRates() {
-  const { v, prior } = useStore();
-  const r = (fn: number[], i: number): number | null => (fn[i - 1] ? ((fn[i] ?? 0) / fn[i - 1]) * 100 : null);
-  if (!v.funnel[0]) return null;
-  const rows = STAGES.slice(1).map((s, k) => { const i = k + 1, b = r(v.funnel, i), a = prior?.v.funnel[0] ? r(prior.v.funnel, i) : null;
-    return { k: s, label: s, name: s, a, b: b ?? 0, fa: a === null ? "" : `${Math.round(a)}%`, fb: b === null ? "n/a" : `${Math.round(b)}%`, bad: a !== null && b !== null && Math.abs(b - a) >= 2 ? b < a : null }; });
+/** Outcome per intent: what a session of each kind costs per applied change. Cheapest first; a row filters to the intent. */
+function NetValue() {
+  const { v, f, drill } = useStore();
+  const rows = useMemo(() => netValue(v.rows), [v.rows]);
+  if (rows.length === 0) return null;
   return (
-    <Card src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0])}${prior ? ` vs ${fmtInt(prior.v.funnel[0])}` : ""}`} title="Step rates" meta={prior ? "before \u2192 now, share of the step before" : "share of the step before"} span={12}>
-      <Dumb rows={rows} max={100} />
+    <Card src={`sessions by intent \u00b7 n ${fmtInt(rows.reduce((a, r) => a + r.n, 0))}`} title="Net value per intent" meta="cost per applied change counts priced sessions only; cheapest first" span={12}>
+      <div className="tbl-wrap"><table className="tbl nv">
+        <thead><tr><th scope="col">Intent</th><th scope="col" className="n">Sessions</th><th scope="col" className="n">Applied</th><th scope="col" className="n">Cost per applied</th><th scope="col" className="n">Median prompts</th></tr></thead>
+        <tbody>{rows.map((r) => (
+          <tr key={r.intent} data-sel={f.intent === r.intent || undefined}>
+            <th scope="row"><button type="button" className="link" aria-pressed={f.intent === r.intent} aria-label={`${r.intent}: ${r.n} sessions, ${fmtPct(r.rate)} applied, ${r.cpa === null ? "no priced applied change" : `${fmtUSD(r.cpa)} per applied change`}. Filter to this intent`}
+              onClick={() => drill({ intent: r.intent })}><span className="sw" style={{ "--c": intentColor(r.intent) } as React.CSSProperties} />{r.intent}</button></th>
+            <td className="n">{fmtInt(r.n)}</td><td className="n">{fmtPct(r.rate)}</td><td className="n">{r.cpa === null ? "\u2014" : fmtUSD(r.cpa)}</td><td className="n">{+r.medPrompts.toFixed(1)}</td>
+          </tr>
+        ))}</tbody>
+      </table></div>
     </Card>
   );
 }
+
+/** Header text with a break hint, so a narrow column wraps the name instead of truncating it ("Antigr…"). */
+const WRAP: Record<string, string> = { opencode: "Open\u200bCode", antigravity: "Anti\u00adgravity" };
 
 function Switches() {
   const { d, drill, f } = useStore();
@@ -81,7 +99,7 @@ function Switches() {
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
           <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
-            <span className="mx-h" />{srcs.map((s) => <span key={s} className="mx-h" title={`to ${srcLabel(s)}`}>{srcLabel(s)}</span>)}
+            <span className="mx-h" />{srcs.map((s) => <span key={s} className="mx-h" title={`to ${srcLabel(s)}`}>{WRAP[s] ?? srcLabel(s)}</span>)}
             {srcs.map((a, r) => (
               <div key={a} style={{ display: "contents" }}>
                 <span className="mx-l" title={`from ${srcLabel(a)}`}>{srcLabel(a)}</span>
@@ -116,7 +134,7 @@ export function Funnel() {
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />
       </Card>
       {switches && <Switches />}
-      <StepRates />
+      <NetValue />
     </Section>
   );
 }
