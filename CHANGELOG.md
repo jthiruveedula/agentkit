@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/jthiruveedula/agentkit/compare/v0.22.0...v0.23.0) (2026-11-09)
+
+
+### Features
+
+* **prompt-analytics:** storytelling dashboard with key numbers, usage mix and sunburst ([#107](https://github.com/jthiruveedula/agentkit/issues/107)) ([7ebc70d](https://github.com/jthiruveedula/agentkit/commit/7ebc70d8825ddbb7caf37e2a3ad08efe88381265))
+
 ## [0.22.0](https://github.com/jthiruveedula/agentkit/compare/v0.21.0...v0.22.0) (2026-11-02)
 
 
