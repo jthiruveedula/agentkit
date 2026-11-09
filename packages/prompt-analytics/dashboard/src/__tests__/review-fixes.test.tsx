@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
@@ -53,8 +54,8 @@ describe("review fixes", () => {
     const h = win([[4, 4], [4, 4], [4, 4]]);
     expect(h).toMatch(/Within noise/);
     expect(h).toMatch(/Struggling held at about 10\.0%/);
-    expect(h.replace(/<[^>]+>/g, "")).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
-    expect(h.replace(/<[^>]+>/g, "")).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
+    expect(htmlText(h)).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
+    expect(htmlText(h)).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
     expect(h).toMatch(/the evidence behind/);   // no driver, so the top recommendation is Do next
     expect(h).not.toMatch(/data-kpi="struggled"/);
   });

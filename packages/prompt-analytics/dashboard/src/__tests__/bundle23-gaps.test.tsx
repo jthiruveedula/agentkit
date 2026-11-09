@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
@@ -17,7 +18,7 @@ import type { SessionRow } from "../data/types";
 const win = (d: ReturnType<typeof normalize>) => ({ from: d.range.start, to: d.range.end, days: 30 });
 type S = Record<string, unknown>;
 const base = sample as unknown as { sessions: S[] };
-const text = (h: string) => h.replace(/<[^>]+>/g, "");
+const text = (h: string) => htmlText(h);
 const render = (el: React.ReactNode, sessions: S[], extra: S = {}, initial: object = {}) =>
   renderToStaticMarkup(<StoreProvider d={normalize({ ...sample, sessions, ...extra } as never)} initial={initial}>{el}</StoreProvider>);
 let n = 0;
