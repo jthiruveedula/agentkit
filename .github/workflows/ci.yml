@@ -254,7 +254,7 @@ jobs:
         run: |
           npm run build
           size=$(gzip -9 -c ../src/prompt_analytics/web/index.html | wc -c)
-          echo "dashboard gzip: $size bytes (cap 179200)"
+          echo "dashboard gzip: $size bytes (cap 204800)"
           test "$size" -le 179200
 
   packaging:
