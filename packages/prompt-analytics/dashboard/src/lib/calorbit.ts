@@ -1,7 +1,7 @@
 // Orbit camera for the 3D activity calendar (CSS 3D, no WebGL). Pure math, no DOM.
 // The floor is the calendar's XY plane; yaw spins it (rotateZ), pitch tilts it away from top-down (rotateX: 0 = plan view,
 // 90 = edge-on), zoom scales it on top of a per-angle fit, and tx/ty shift it on screen so a zoom stays anchored under the pointer.
-import { clamp } from "./orbit";
+import { clamp } from "./math";
 
 export interface View { yaw: number; pitch: number; zoom: number; tx: number; ty: number }
 

@@ -3,7 +3,8 @@ import type { SessionRow } from "../data/types";
 import { costPerApplied, MIN_PRIOR_N, tokensPerApplied } from "./compare";
 import type { Filter } from "./filter";
 import { fmtPct } from "./format";
-import { diffRate, isReal, rateOf } from "./metrics";
+import { diffRate, isReal } from "./metrics";
+import { appliedRate } from "./baseline";
 
 export interface Mover { id: "applied" | "cpa" | "tpa" | "prompts" | "sessions"; label: string; text: string; good: boolean | null; strength: number; filter?: Filter }
 
@@ -19,7 +20,7 @@ export function movers(cur: SessionRow[], prior: SessionRow[] | null, k = 2): Mo
     if (pct !== null && Math.abs(pct) >= min) out.push({ id, label, text: `${sgn(pct)}${fmtPct(Math.abs(pct))}`, good: lowerBetter ? pct < 0 : null, strength: Math.abs(pct) / min });
   };
   const ac = asked(cur), ap = asked(prior);
-  const a = rateOf(ac.filter((r) => r.applied).length, ac.length), b = rateOf(ap.filter((r) => r.applied).length, ap.length), d = diffRate(a, b);
+  const a = appliedRate(cur), b = appliedRate(prior), d = diffRate(a, b);   // change work only, matching the KPI tile
   if (d && isReal(a, b)) out.push({ id: "applied", label: "Applied", text: `${sgn(d.diff)}${Math.abs(d.diff * 100).toFixed(1)} pts`, good: d.diff > 0, strength: Math.abs(d.diff) / ((d.hi - d.lo) / 3.92), filter: { applied: true } });
   const c0 = costPerApplied(prior), c1 = costPerApplied(cur);
   if (c1.value !== null && c0.value !== null && c1.pricedApplied >= MIN_PRIOR_N && c0.pricedApplied >= MIN_PRIOR_N) pctMover("cpa", "Cost per applied change", rel(c1.value, c0.value), 0.15, true);

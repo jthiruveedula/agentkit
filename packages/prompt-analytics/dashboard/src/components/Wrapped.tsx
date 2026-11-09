@@ -4,42 +4,44 @@ import { useStore } from "../state";
 import { autoShow, markSeen, wrapped } from "../lib/wrapped";
 
 export const WRAPPED_EVENT = "pa:wrapped";
+/** Delay before the live region is filled: long enough for assistive tech to register the empty region first. */
+export const SAY_MS = 600;
 export const openWrapped = () => window.dispatchEvent(new Event(WRAPPED_EVENT));
 
-/** Visible entry point (Overview header). Not offered when the week is too thin to say anything. */
+/** Visible entry point (Overview brief). Not offered when the week is too thin to say anything.
+ *  At most once per ISO week it is marked new in place (a dot, announced once): no floating toast over the page. */
 export function WrappedButton() {
   const { d } = useStore();
   const ok = useMemo(() => wrapped(d) !== null, [d]);
-  return ok ? <button type="button" className="btn" onClick={openWrapped}>Weekly Wrapped</button> : null;
-}
-
-/** Mounted once. Never opens by itself: at most once per ISO week a dismissible chip offers it (auto-dismisses after 6 s). The button and palette open the modal. */
-export function WrappedHost() {
-  const { d } = useStore();
-  const [open, setOpen] = useState(false), [chip, setChip] = useState(false);
+  const [due, setDue] = useState(false), [say, setSay] = useState(false);
   useEffect(() => {
     const now = new Date();
-    if (autoShow(d, now)) { markSeen(now); setChip(true); }
+    if (autoShow(d, now)) { markSeen(now); setDue(true); }
   }, [d]);
+  // the dot shows at once; the live region gets its text a beat later. React flushes this effect's setState before the first paint,
+  // so text set straight from `due` is already there when the region appears, and screen readers do not announce it.
+  useEffect(() => { if (!due) return; const t = setTimeout(() => setSay(true), SAY_MS); return () => clearTimeout(t); }, [due]);
+  if (!ok) return null;
+  return (
+    <>
+      <button type="button" className="btn" data-due={due || undefined} onClick={() => { setDue(false); openWrapped(); }}>Weekly Wrapped</button>
+      <span className="sr-only" role="status">{due && say ? "Your weekly Wrapped is ready" : ""}</span>
+    </>
+  );
+}
+
+/** Mounted once. Never opens by itself; the brief's button and the palette open the modal. */
+export function WrappedHost() {
+  const { d } = useStore();
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    if (!chip) return;
-    const t = setTimeout(() => setChip(false), 6000);
-    return () => clearTimeout(t);
-  }, [chip]);
-  useEffect(() => {
-    const on = () => { markSeen(new Date()); setChip(false); setOpen(true); };
+    const on = () => { markSeen(new Date()); setOpen(true); };
     window.addEventListener(WRAPPED_EVENT, on);
     return () => window.removeEventListener(WRAPPED_EVENT, on);
   }, []);
   const w = useMemo(() => (open ? wrapped(d) : null), [d, open]);
   return (
     <>
-      {chip && !open && (
-        <div className="wrap-chip" role="status">
-          <button type="button" onClick={openWrapped}>Your weekly Wrapped is ready</button>
-          <button type="button" aria-label="Dismiss weekly Wrapped reminder" onClick={() => setChip(false)}>&times;</button>
-        </div>
-      )}
       {open && w && <Dialog w={w} close={() => setOpen(false)} />}
     </>
   );

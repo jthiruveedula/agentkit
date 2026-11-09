@@ -9,6 +9,7 @@ import { unpricedNote, type Caps } from "./capabilities";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtRange, fmtUSD, fmtValue } from "./format";
 import { srcLabel } from "./palette";
 import { pctChange, pts } from "./stats";
+import { appliedRate } from "./baseline";
 import { PRICING_SHARE_TOL } from "./thresholds";
 
 export interface SummaryView { f: Filter; v: Views; win: Win; caps: Caps; prior: Prior | null; cmp: Cmp; /** the Brief's split label, when it compares last 4 weeks vs the rest */ basis?: string }
@@ -96,9 +97,12 @@ export function summarize(d: DashboardData, view: SummaryView): string {
     L.push(`- Cost: ${fmtUSD(t.cost)} ${dl}${note}`.trim());
   }
   else if (caps.allUnpriced) L.push(`- ${unpricedNote(caps) || "No prices recorded."}`);
+  const ar = appliedRate(v.rows), pr = prior ? appliedRate(prior.v.rows) : null;   // change work only, matching the KPI tile
+  if (ar.p !== null) {
+    const [lo, hi] = wilson(ar.k, ar.n), dp = pr?.p != null && pr.n >= 30 && ar.n >= 30 ? pts(ar.p - pr.p) : null;
+    L.push(`- Applied: ${fmtPct(ar.p)} of ${fmtInt(ar.n)} change sessions, explain excluded (95% CI ${fmtPct(lo)} to ${fmtPct(hi)})${dp ? `, ${dp === "±0 pts" ? "flat" : dp} vs prior` : ""}`);
+  }
   if (t.asked) {
-    const [lo, hi] = wilson(t.applied, t.asked), pr = p && p.asked ? p.applied / p.asked : 0;
-    L.push(`- Applied: ${fmtPct(t.applied / t.asked)} of ${fmtInt(t.asked)} sessions with a prompt (n=${fmtInt(t.asked)}, 95% CI ${fmtPct(lo)} to ${fmtPct(hi)})${p && p.asked >= 30 && t.asked >= 30 ? `, ${pts(t.applied / t.asked - pr) === "±0 pts" ? "flat" : pts(t.applied / t.asked - pr)} vs prior` : ""}`);
     L.push(`- Friction: ${t.friction.toFixed(2)} mean, 0 to 1 (n=${fmtInt(t.asked)})`);
   }
   L.push(`- Active days: ${fmtInt(t.activeDays)}; projects: ${fmtInt(t.projects)}`, "");

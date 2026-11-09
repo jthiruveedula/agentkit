@@ -1,15 +1,16 @@
 // Inline-SVG charts. No chart library: marks are plain elements, every mark is keyboard-reachable (roving tabindex)
 // and activates through the same callback a click does. Each chart is paired with an sr-only DataTable by its caller.
 import type React from "react";
-import { useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
+import { useId, useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
 import { press, useMorph, useRoving, useSize } from "../lib/hooks";
 import { linkProps } from "../lib/motion";
 import { fmtDate } from "../lib/format";
 import { SOURCES, srcColor, srcLabel } from "../lib/palette";
 import type { Week } from "../lib/filter";
 import { Empty } from "./ui";
+import { iqr } from "../lib/baseline";
+import "./baseline.css";
 
-/** 24 mini bars in a card. Decorative: the value and delta beside it carry the meaning. */
 /** Sparkline ceiling. `cap` clips at 2x the 75th percentile of non-zero values, so one spike day cannot flatten the rest. */
 export function sparkTop(values: number[], cap = false): number {
   const top = Math.max(...values, 0);
@@ -19,12 +20,91 @@ export function sparkTop(values: number[], cap = false): number {
   return Math.min(top, 2 * nz[Math.floor((nz.length - 1) * 0.75)]);
 }
 
-export function Spark({ values, w = 120, h = 24, cap = false }: { values: number[]; w?: number; h?: number; cap?: boolean }) {
-  const top = sparkTop(values, cap), bw = w / Math.max(values.length, 1);
+/** Line path for a sparkline: a null breaks the line (a gap, never 0); a lone point between gaps is a zero-length dot (round cap). */
+export function sparkPath(values: (number | null)[], x: (i: number) => number, y: (v: number) => number): string {
+  let d = "", run = 0;
+  values.forEach((v, i) => {
+    if (v === null) { if (run === 1) d += "h0"; run = 0; return; }
+    d += `${run ? "L" : "M"}${+x(i).toFixed(2)},${+y(v).toFixed(2)}`; run++;
+  });
+  return run === 1 ? `${d}h0` : d;
+}
+
+/** Thin line in a card with a faint "normal" band (IQR of the non-null values) and a dot on the last point. Decorative: the value and delta beside it carry the meaning. */
+export function Spark({ values, w = 120, h = 24, cap = false }: { values: (number | null)[]; w?: number; h?: number; cap?: boolean }) {
+  const real = values.filter((v): v is number => v !== null), top = sparkTop(real, cap), n = values.length, band = iqr(values);
+  const x = (i: number) => (n > 1 ? (i * w) / (n - 1) : w / 2), y = (v: number) => h - 2 - (top > 0 ? (Math.min(v, top) / top) * (h - 4) : 0);
+  let last = n - 1;
+  while (last >= 0 && values[last] === null) last--;
   return (
     <svg className="spark" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {values.map((v, i) => { const bh = top > 0 && v > 0 ? Math.max(1.5, (Math.min(v, top) / top) * (h - 1)) : 0; return <rect key={i} style={{ "--i": i } as React.CSSProperties} x={i * bw + 0.5} y={h - bh} width={Math.max(1, bw - 1)} height={bh} />; })}
+      {band && <rect className="sp-band" x={0} width={w} y={y(band[1])} height={Math.max(1, y(band[0]) - y(band[1]))} />}
+      <path className="sp-l" d={sparkPath(values, x, y)} vectorEffect="non-scaling-stroke" />
+      {last >= 0 && <path className="sp-d" d={`M${+x(last).toFixed(2)},${+y(values[last] as number).toFixed(2)}h0`} vectorEffect="non-scaling-stroke" />}
     </svg>
+  );
+}
+
+/** Weekly columns for a KPI tile: bars from index `from` on are the compared window (accent), earlier bars grey. A line marks each
+ *  window's weekly average: `now` over the compared bars, `was` (dashed) over the earlier ones, or across the whole width when the
+ *  earlier window is not drawn (a prior period). Decorative: the caption beside it carries the numbers. */
+export function WeekCols({ values, from, now, was, h = 34 }: { values: number[]; from: number; now?: number | null; was?: number | null; h?: number }) {
+  const n = values.length, w = Math.max(1, n * 4), top = Math.max(...values, now ?? 0, was ?? 0, 1), y = (v: number) => +(h - (v / top) * (h - 2)).toFixed(2);
+  const split = from > 0 && from < n;
+  return (
+    <svg className="wc" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      {values.map((v, i) => <rect key={i} className={i >= from ? "wc-b wc-now" : "wc-b"} x={i * 4 + 0.5} width={3} y={y(v)} height={h - y(v)} />)}
+      <line className="wc-ax" x1={0} x2={w} y1={h - 0.5} y2={h - 0.5} vectorEffect="non-scaling-stroke" />
+      {was != null && <line className="wc-was" x1={0} x2={split ? from * 4 : w} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
+      {now != null && <line className="wc-avg" x1={split ? from * 4 : 0} x2={w} y1={y(now)} y2={y(now)} vectorEffect="non-scaling-stroke" />}
+    </svg>
+  );
+}
+
+/** Semicircle gauge for a 0..1 rate: a thin 0-100 track, the fill to `p` (haloed so it reads apart from the band), a wider band for
+ *  its interval [lo, hi], a dashed tick at the earlier value, 0 and 100 at the ends. Decorative. */
+export function gaugeArc(a: number, b: number, r = 40, cx = 48, cy = 48): string {
+  const at = (f: number) => `${+(cx - r * Math.cos(Math.PI * f)).toFixed(2)},${+(cy - r * Math.sin(Math.PI * f)).toFixed(2)}`;
+  return `M${at(a)}A${r},${r} 0 0 1 ${at(b)}`;
+}
+export function Gauge({ p, lo, hi, was }: { p: number; lo?: number; hi?: number; was?: number | null }) {
+  const c = (x: number) => Math.min(1, Math.max(0, x)), tick = (f: number, r: number) => [48 - r * Math.cos(Math.PI * c(f)), 48 - r * Math.sin(Math.PI * c(f))].map((v) => +v.toFixed(2));
+  const [x1, y1] = was != null ? tick(was, 31) : [0, 0], [x2, y2] = was != null ? tick(was, 49) : [0, 0];
+  return (
+    <svg className="gauge" viewBox="0 0 96 66" aria-hidden="true" focusable="false">
+      <path className="g-track" d={gaugeArc(0, 1)} />
+      {lo != null && hi != null && <path className="g-ci" d={gaugeArc(c(lo), c(hi))} />}
+      <path className="g-halo" d={gaugeArc(0, Math.max(0.002, c(p)))} />
+      <path className="g-fill" d={gaugeArc(0, Math.max(0.002, c(p)))} />
+      <text className="g-end" x={8} y={65} textAnchor="middle">0</text><text className="g-end" x={88} y={65} textAnchor="middle">100</text>
+      {was != null && <line className="g-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
+    </svg>
+  );
+}
+
+export interface DonutSeg { key: string; value: number; color: string; hatch?: boolean; on?: boolean; title: string; onPick?: () => void }
+/** Donut of shares, starting at 12 o'clock, clockwise. Slices are mouse targets only (`onPick`); the caller's legend carries the
+ *  keyboard route and the numbers, so the SVG is hidden from assistive tech. `children` sit in the hole. */
+export function Donut({ segs, children }: { segs: DonutSeg[]; children?: React.ReactNode }) {
+  const pid = `dn-h${useId().replace(/:/g, "")}`, total = segs.reduce((a, s) => a + Math.max(0, s.value), 0);
+  let acc = 0;
+  return (
+    <div className="dn">
+      <svg viewBox="0 0 42 42" aria-hidden="true" focusable="false">
+        <defs><pattern id={pid} width="2" height="2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect className="dn-hb" width="2" height="2" /><rect className="dn-hl" width="0.8" height="2" /></pattern></defs>
+        {total === 0 && <circle className="dn-track" cx={21} cy={21} r={15.915} />}
+        {/* no track under the slices: each slice ends 0.4 units (1.6px at 168px) short, so the card surface shows between neighbours */}
+        {total > 0 && segs.map((s) => {
+          const len = (Math.max(0, s.value) / total) * 100, gap = len < 100 ? Math.min(0.4, len / 3) : 0, off = 25 - acc;
+          acc += len;
+          return len > 0 ? (
+            <circle key={s.key} className="dn-s" data-pick={s.onPick ? "" : undefined} data-on={s.on || undefined} cx={21} cy={21} r={15.915} stroke={s.hatch ? `url(#${pid})` : s.color}
+              strokeDasharray={`${+(len - gap).toFixed(3)} ${+(100 - len + gap).toFixed(3)}`} strokeDashoffset={+off.toFixed(3)} onClick={s.onPick}><title>{s.title}</title></circle>
+          ) : null;
+        })}
+      </svg>
+      {children && <div className="dn-hole">{children}</div>}
+    </div>
   );
 }
 

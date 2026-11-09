@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { barRects, easeOut, linkMark, linkReducer, staggerDelay, linkDispatch, linkGet, linkProps } from "../lib/motion";
-import { shares, layoutOrbit } from "../lib/orbit";
+import { partition, spans, TAU, arcOf, winOf } from "../lib/sunburst";
 import { tiltOf } from "../components/Fx";
 import type { MapNode } from "../lib/mindmap";
 
@@ -47,17 +47,18 @@ describe("card tilt", () => {
 });
 
 describe("sunburst fan layout", () => {
-  it("shares are proportional to size, floored, and sum to 1", () => {
-    const s = shares([90, 9, 1]);
-    expect(s.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9); expect(s[0]).toBeGreaterThan(s[1]); expect(Math.min(...s)).toBeGreaterThan(0.04);
+  it("spans are proportional to value, floored, and sum to 1", () => {
+    const s = spans([90, 9, 1]);
+    expect(s.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9); expect(s[0]).toBeGreaterThan(s[1]); expect(Math.min(...s)).toBeGreaterThanOrEqual(0.025 - 1e-12);
   });
-  const node = (id: string, kind: MapNode["kind"], sessions: number, children: MapNode[] = []): MapNode => ({ id, kind, label: id, value: sessions, sessions, friction: 0, applied: 0, filter: {}, children });
-  it("children sit on their depth ring, bigger subtrees get wider wedges", () => {
+  const node = (id: string, kind: MapNode["kind"], sessions: number, children: MapNode[] = []): MapNode => ({ id, kind, label: id, value: sessions, sessions, friction: 0, applied: 0, struggled: 0, rated: 0, priced: 0, filter: {}, children });
+  it("children nest inside their parent's slice on the next ring, bigger subtrees get wider slices", () => {
     const root = node("root", "root", 12, [node("root/a", "tool", 10, [node("root/a/x", "intent", 7), node("root/a/y", "intent", 3)]), node("root/b", "tool", 2)]);
-    const l = layoutOrbit(root), ang = (id: string) => Math.atan2(l.get(id)!.p.y / 0.82, l.get(id)!.p.x);
-    expect(l.get("root")!.p).toEqual({ x: 0, y: 0, z: 0 });
-    expect(l.get("root/a/x")!.parent).toBe("root/a");
-    expect(Math.hypot(l.get("root/a")!.p.x, l.get("root/a")!.p.y / 0.82)).toBeGreaterThan(200);
-    expect(Number.isFinite(ang("root/b"))).toBe(true);
+    const l = partition(root), a = l.get("root/a")!, x = l.get("root/a/x")!, y = l.get("root/a/y")!;
+    expect([l.get("root")!.x0, l.get("root")!.x1]).toEqual([0, 1]);
+    expect(x.parent).toBe("root/a"); expect(x.depth).toBe(2);
+    expect(x.x0).toBe(a.x0); expect(y.x1).toBe(a.x1); expect(x.x1 - x.x0).toBeGreaterThan(y.x1 - y.x0);
+    const arc = arcOf(a, winOf(l.get("root")!), 100);
+    expect(arc.a1 - arc.a0).toBeCloseTo((10 / 12) * TAU, 9);
   });
 });

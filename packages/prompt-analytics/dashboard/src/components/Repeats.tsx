@@ -2,9 +2,11 @@ import { useId, useMemo, useState } from "react";
 import { useStore } from "../state";
 import { fmtCompact, fmtInt, fmtUSD } from "../lib/format";
 import { cleanSlug, draftCommand, repeatCost, shownRepeats, uniqueSlugs } from "../lib/repeats";
+import { repeatSpend } from "../lib/insights";
 import { findSecrets, secretReason } from "../lib/secrets";
 import { toast } from "../lib/toast";
 import { Card, Segmented } from "./ui";
+import "./polish.css";
 
 const SHOW = 3;
 type Rep = ReturnType<typeof shownRepeats>[number];
@@ -53,14 +55,15 @@ function Row({ r, slug, cost }: { r: Rep; slug: string; cost: ReturnType<typeof 
 export function Repeats() {
   const { d } = useStore();
   const [sort, setSort] = useState<"count" | "cost">("count"), [all, setAll] = useState(false);
-  const rows = useMemo(() => {
+  const data = useMemo(() => {
     const byId = new Map(d.sessions.map((s) => [s.id, s]));
     const base = shownRepeats(d.repeats, new Set(byId.keys()), new Map(d.sessions.map((s) => [s.id, s.date])));
     const slugs = uniqueSlugs(base.map((r) => r.exemplar));   // slugs follow the default order, so a name never changes when the sort does
     const xs = base.map((r, i) => ({ r, slug: slugs[i], cost: repeatCost(r.sessions, byId) }));
     const priced = xs.some((x) => x.cost.cost !== null), val = (x: (typeof xs)[number]) => (priced ? x.cost.cost ?? 0 : x.cost.tokens);
-    return sort === "cost" ? [...xs].sort((a, b) => val(b) - val(a) || b.r.count - a.r.count) : xs;
+    return { xs: sort === "cost" ? [...xs].sort((a, b) => val(b) - val(a) || b.r.count - a.r.count) : xs, spend: repeatSpend(base, byId) };
   }, [d, sort]);
+  const { xs: rows, spend } = data;
   if (d.repeats === undefined || d.sessions.length === 0) return null;
   const shown = all ? rows : rows.slice(0, SHOW);
   return (
@@ -68,6 +71,10 @@ export function Repeats() {
       actions={<><span className="chip">Whole export</span>{rows.length > 1 && <Segmented quiet label="Sort repeated prompts" value={sort} onChange={setSort} options={[{ id: "count", text: "Most typed" }, { id: "cost", text: "Most spend" }]} />}</>}>
       {rows.length === 0 ? <p className="note">No prompt came up three or more times across sessions. Nothing to turn into a command yet.</p> : (
         <>
+          <p className="rep-sum">{spend.cost !== null
+            ? <><b>Repeated prompts cost {fmtUSD(spend.cost)}</b> across {fmtInt(spend.sessions)} session{spend.sessions === 1 ? "" : "s"}{spend.priced < spend.sessions ? ` (${fmtInt(spend.priced)} priced)` : ""}.</>
+            : <><b>Repeated prompts used ~{fmtCompact(spend.tokens)} tokens</b> across {fmtInt(spend.sessions)} session{spend.sessions === 1 ? "" : "s"}.</>}
+            {spend.top && rows.length > 1 ? <> Costliest: <q>{spend.top.r.exemplar}</q>, {spend.cost !== null ? fmtUSD(spend.top.cost ?? 0) : `~${fmtCompact(spend.top.tokens)} tokens`}.</> : null}</p>
           <ul className="reps">{shown.map((x) => <Row key={x.r.cluster + x.r.exemplar} {...x} />)}</ul>
           {rows.length > SHOW && <button type="button" className="link rep-more" aria-expanded={all} onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show ${rows.length - SHOW} more`}</button>}
           <p className="note">Drafts are checked for secrets before they can be copied or downloaded. Cost is the whole of those sessions, not only the repeated prompt.</p>

@@ -13,7 +13,7 @@ export function basis(rows: SessionRow[], prior: Prior | null, win: Win, cmp: Cm
   if (prior) return { mode: "prior", cur: rows, base: prior.v.rows, label: `vs ${fmtDate(prior.win.from)} – ${fmtDate(prior.win.to)}` };
   if (cmp !== "off" && win.days >= 56) {
     const cut = addDays(win.to, -27);
-    return { mode: "split", cur: rows.filter((r) => r.date >= cut), base: rows.filter((r) => r.date < cut), label: `Last 4 weeks vs the ${Math.round((win.days - 28) / 7)} before`, cut };
+    return { mode: "split", cur: rows.filter((r) => r.date >= cut), base: rows.filter((r) => r.date < cut), label: `Last 4 weeks vs the ${Math.round((win.days - 28) / 7)} weeks before`, cut };
   }
   return { mode: "none", cur: rows, base: null, label: "" };
 }

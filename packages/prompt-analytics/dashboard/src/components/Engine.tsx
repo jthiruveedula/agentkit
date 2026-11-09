@@ -22,6 +22,9 @@ export function pillText(e: DashboardData["engine"]): string {
   return `Semantic · local embeddings · ${e.accel}`;
 }
 
+/** Short header meta text; the full pillText (with the library version) is its tooltip. */
+export const engineShort = (e: DashboardData["engine"]) => (e.mode === "basic" ? "heuristics only" : e.mode === "ml" ? "analyzed with ML" : "semantic analysis");
+
 function Copy({ text }: { text: string }) {
   const [ok, setOk] = useState(false);
   return (
@@ -31,7 +34,7 @@ function Copy({ text }: { text: string }) {
   );
 }
 
-/** Engine pill + tier switch. `onData` receives re-analyzed data from POST /api/analyze. */
+/** Engine meta text + tier switch. `onData` receives re-analyzed data from POST /api/analyze. */
 export function EnginePill({ d, onData }: { d: DashboardData; onData: (d: DashboardData) => void }) {
   const e = d.engine;
   const api = getApi();
@@ -45,11 +48,12 @@ export function EnginePill({ d, onData }: { d: DashboardData; onData: (d: Dashbo
 
   useEffect(() => {
     if (!open) return;
-    const key = (ev: KeyboardEvent) => { if (ev.key === "Escape") { setOpen(false); btn.current?.focus(); } };
+    // Esc only closes the popover: stopImmediatePropagation also stops the other window capture listeners (the Filters panel), preventDefault marks it handled
+    const key = (ev: KeyboardEvent) => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopImmediatePropagation(); setOpen(false); btn.current?.focus(); } };
     const away = (ev: PointerEvent) => { if (!box.current?.contains(ev.target as Node)) setOpen(false); };
-    document.addEventListener("keydown", key);
+    window.addEventListener("keydown", key, true);
     document.addEventListener("pointerdown", away);
-    return () => { document.removeEventListener("keydown", key); document.removeEventListener("pointerdown", away); };
+    return () => { window.removeEventListener("keydown", key, true); document.removeEventListener("pointerdown", away); };
   }, [open]);
 
   const pick = async (m: Pick) => {
@@ -63,8 +67,8 @@ export function EnginePill({ d, onData }: { d: DashboardData; onData: (d: Dashbo
 
   return (
     <div className="engine" ref={box}>
-      <button ref={btn} type="button" className="pill" aria-expanded={open} aria-controls="eng-pop" onClick={() => setOpen((o) => !o)}>
-        <span className="pill-dot" data-mode={e.mode} aria-hidden="true" />{pillText(e)}
+      <button ref={btn} type="button" className="eng-t" title={pillText(e)} aria-label={`${engineShort(e)}: change analysis tier`} aria-expanded={open} aria-controls="eng-pop" onClick={() => setOpen((o) => !o)}>
+        {engineShort(e)}
       </button>
       {open && (
         <div id="eng-pop" className="pop" role="group" aria-label="Analysis engine">

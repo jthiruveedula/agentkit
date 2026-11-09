@@ -1,17 +1,36 @@
 import { useEffect, useRef, useState } from "react";
 import { useStore } from "../state";
-import { addDays } from "../lib/filter";
+import { addDays, type Filter } from "../lib/filter";
+import { clampDay, isoDay } from "../lib/hash";
 import { fmtDate, fmtInt, fmtRange } from "../lib/format";
 import { INTENTS, SOURCES, srcLabel } from "../lib/palette";
 import type { Cmp } from "../lib/compare";
 import type { DashboardData } from "../data/types";
 import { EnginePill } from "./Engine";
-import { Pulse } from "./Pulse";
 import { Segmented } from "./ui";
 import { openPalette } from "./Palette";
 import { ACCENTS, GLASS, applySettings, loadSettings, saveSettings, type Settings } from "../lib/settings";
 
 type Period = "30" | "90" | "all" | "custom";
+/** Filters the badge counts: the panel's own selects, plus the model (set from the Model mix legend, shown as a chip). */
+const scopedOf = (f: Filter) => (["source", "project", "intent", "model"] as const).filter((k) => f[k] !== undefined).length;
+
+/** A date input that commits only a whole, valid day, on blur or Enter, clamped to [min, max]. A native date input passes
+ *  half-typed years through ("0002-09-01"); committing those per keystroke built a centuries-wide window and froze the tab. */
+function DateField({ label, value, min, max, disabled, inputRef, onCommit }: { label: string; value: string; min: string; max: string; disabled: boolean; inputRef?: React.Ref<HTMLInputElement>; onCommit: (v: string) => void }) {
+  const [draft, setDraft] = useState(value), [seen, setSeen] = useState(value);
+  if (seen !== value) { setSeen(value); setDraft(value); }   // the filter changed elsewhere (a crumb, Back): show it
+  const commit = () => {
+    const v = isoDay(draft), c = v && clampDay(v, { start: min, end: max });
+    if (c && c !== value) onCommit(c);
+    setDraft(c || value);   // invalid or empty: back to the committed day
+  };
+  return (
+    <label className="field"><span>{label}</span>
+      <input ref={inputRef} type="date" value={draft} min={min} max={max} disabled={disabled} onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } }} /></label>
+  );
+}
 
 export const NAV: { group: string; items: { id: string; text: string; go?: string }[] }[] = [
   { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-attention", text: "Needs attention" }] },
@@ -80,31 +99,71 @@ const Glyph = () => (
 );
 
 export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onData: (d: DashboardData) => void; onMenu: () => void; menuOpen: boolean }) {
-  const { f, set, v, win, cmp, setCmp, crumbs, clearAfter, clear, openList, caps, capsAll, section } = useStore();
-  const ref = useRef<HTMLElement>(null);
-  const [custom, setCustom] = useState(false);
+  const { f, set, v, win, cmp, setCmp, crumbs, clear, openList, caps, capsAll, section, panel, back } = useStore();
+  const ref = useRef<HTMLElement>(null), fbtn = useRef<HTMLButtonElement>(null), crumbsRef = useRef<HTMLElement>(null);
   const [fopen, setFopen] = useState(false);
-  useEffect(() => {   // --hh drives sticky offsets and scroll-margin
-    const el = ref.current; if (!el) return;
-    const put = () => { const h = Math.ceil(el.getBoundingClientRect().height); document.documentElement.style.setProperty("--hh", `${h}px`); };
+  const fromRef = useRef<HTMLInputElement>(null), wantFrom = useRef(false);
+  /** Index of the chip to focus after a removal re-renders (the next chip slides into it); no chip there = the Filters button. */
+  const refocus = useRef<number | null>(null);
+  useEffect(() => {   // --hh = the part that stays stuck (sticky offsets, scroll-margin): the whole header on desktop, only the toolbar bar on phones
+    const el = ref.current, bar = el?.querySelector<HTMLElement>(".top-bar"); if (!el || !bar) return;
+    const put = () => document.documentElement.style.setProperty("--hh", `${Math.ceil((getComputedStyle(el).display === "contents" ? bar : el).getBoundingClientRect().height)}px`);
     put();
     if (typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(put); ro.observe(el);
+    const ro = new ResizeObserver(put); ro.observe(el); ro.observe(bar);
     return () => ro.disconnect();
   }, []);
-  useEffect(() => { if (!fopen) return; const on = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setFopen(false); } }; window.addEventListener("keydown", on, true); return () => window.removeEventListener("keydown", on, true); }, [fopen]);
-  const end = d.range.end;
-  const period: Period = custom ? "custom" : f.from === undefined && f.to === undefined ? "all"
-    : (f.to === undefined || f.to === end) && f.from === addDays(end, -29) ? "30" : (f.to === undefined || f.to === end) && f.from === addDays(end, -89) ? "90" : "custom";
+  useEffect(() => {   // Esc closes the open Filters panel and hands focus back to its button; a popover or dialog above it takes the Esc first
+    if (!fopen) return;
+    const on = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector("#eng-pop, #prefs, .palette, .wrap")) return;
+      e.stopPropagation(); setFopen(false); fbtn.current?.focus();
+    };
+    window.addEventListener("keydown", on, true); return () => window.removeEventListener("keydown", on, true);
+  }, [fopen]);
+  useEffect(() => {
+    if (wantFrom.current) { wantFrom.current = false; fromRef.current?.focus(); }   // Custom: focus From once the panel shows it
+    const j = refocus.current;
+    if (j !== null) { refocus.current = null; (crumbsRef.current?.querySelectorAll<HTMLElement>(".fchip")[j] ?? fbtn.current)?.focus(); }
+  });
+  const end = d.range.end, start = d.range.start;
+  // a preset writes `from` only; Custom always writes both ends, so the URL itself records custom mode and a reload keeps it (even a range equal to 30d)
+  const period: Period = f.from === undefined && f.to === undefined ? "all"
+    : f.to === undefined && f.from === addDays(end, -29) ? "30" : f.to === undefined && f.from === addDays(end, -89) ? "90" : "custom";
   const pickPeriod = (p: Period) => {
-    setCustom(p === "custom");
+    // Custom opens Filters on the From date, prefilled with the range in view
+    if (p === "custom") { set({ from: win.from, to: win.to }); setFopen(true); wantFrom.current = true; return; }
     if (p === "all") set({ from: undefined, to: undefined });
-    else if (p !== "custom") set({ from: addDays(end, -(+p - 1)), to: undefined });
+    else set({ from: addDays(end, -(+p - 1)), to: undefined });
   };
   const projects = [...new Set(d.sessions.map((s) => s.project).filter(Boolean))].sort();
   const srcs = SOURCES.filter((s) => d.sessions.some((r) => r.source === s));
   const off = d.sessions.length === 0;
-  const scoped = (["source", "project", "intent"] as const).filter((k) => f[k] !== undefined).length;
+  const scoped = scopedOf(f);
+  // a preset period (30d / 90d / All) already shows in the toolbar, so its date crumb would only repeat it; a custom range keeps its crumb
+  const preset = period !== "custom";
+  const shown = crumbs.filter((c) => !(preset && c.keys.includes("from")));
+  const clearAll = () => { const { from, to } = f; refocus.current = 0; clear(); if (preset && (from !== undefined || to !== undefined)) set({ from, to }); };
+  /** Remove a chip; `at` = the chip index to focus afterwards (the next chip, else the Filters button). */
+  const drop = (c: (typeof shown)[number], at?: number) => { if (at !== undefined) refocus.current = at; clear(c.keys); };
+  // page Esc: step the panel back one level (Session detail -> the Sessions list it came from -> closed), else remove the last visible crumb. A preset period has no crumb, so Esc never resets it; nothing visible, nothing happens.
+  // The listener subscribes once and reads the latest render through a ref.
+  const onEsc = useRef<(e: KeyboardEvent) => void>(() => {});
+  useEffect(() => {
+    onEsc.current = (e) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const t = e.target as Element | null;
+      if (t?.closest?.("select, input, .pop, .palette, .wrap, .menu") || document.querySelector(".mk.on")) return;
+      if (panel !== "none") back();
+      else if (shown.length) drop(shown[shown.length - 1], crumbsRef.current?.contains(document.activeElement) ? shown.length - 1 : undefined);
+    };
+  });
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => onEsc.current(e);
+    window.addEventListener("keydown", on);
+    return () => window.removeEventListener("keydown", on);
+  }, []);
+  const note = off && !caps.empty;
   return (
     <div className="top-slot">
       <header className="top" ref={ref} data-fopen={fopen || undefined}>
@@ -115,23 +174,30 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
             </button>
             <div className="brand-t">
               <h1>{titleOf(section, capsAll.multiTool)}</h1>
-              <div className="sub-row">
-                {!caps.empty && <p className="sub">{fmtRange(win.from, win.to)}<span aria-hidden="true"> · </span><span className="asof">data as of {fmtDate(d.generated_at)}</span></p>}
+              {/* one meta line: window, the sessions link, the engine; items part on hairlines, not dots */}
+              <div className="top-meta">
+                {!caps.empty && <span className="sub asof" title={`Data as of ${fmtDate(d.generated_at)}`}>{fmtRange(win.from, win.to)}</span>}
+                <button type="button" className="link count" disabled={off} onClick={openList} aria-label={`${fmtInt(v.rows.length)} sessions in view${v.rows.length !== d.sessions.length ? ` of ${fmtInt(d.sessions.length)}` : ""}. Open the list`}>
+                  {fmtInt(v.rows.length)}{v.rows.length !== d.sessions.length ? ` of ${fmtInt(d.sessions.length)}` : ""} sessions
+                </button>
                 {!caps.empty && <EnginePill d={d} onData={onData} />}
               </div>
             </div>
           </div>
-          {!caps.empty && <Pulse />}
           <span className="grow" />
-          <button type="button" className="link count" disabled={off} onClick={openList} aria-label={`${fmtInt(v.rows.length)} sessions in view${v.rows.length !== d.sessions.length ? ` of ${fmtInt(d.sessions.length)}` : ""}. Open the list`}>
-            {fmtInt(v.rows.length)}{v.rows.length !== d.sessions.length ? ` of ${fmtInt(d.sessions.length)}` : ""} sessions
-          </button>
-          <div className="top-tools">
-          <Segmented label="Period" value={period} onChange={pickPeriod} options={[{ id: "30", text: "30d" }, { id: "90", text: "90d" }, { id: "all", text: "All" }, { id: "custom", text: "Custom" }]} />
-          <button type="button" className="btn fbtn" aria-expanded={fopen} aria-controls="hdr-filters" onClick={() => setFopen(!fopen)}>Filters{scoped > 0 && <b className="badge">{scoped}</b>}</button>
-          <Prefs />
-          <button type="button" className="btn kbd" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K" onClick={openPalette}>{/Mac|iP/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</button>
-          </div>
+          {/* phones: this bar is the only sticky part (title, Filters panel and chips scroll with the page); desktop: display: contents */}
+          <div className="top-bar"><div className="top-tools">
+            <Segmented label="Period" value={period} onChange={pickPeriod} options={[{ id: "30", text: "30d" }, { id: "90", text: "90d" }, { id: "all", text: "All" }, { id: "custom", text: "Custom" }]} />
+            <button ref={fbtn} type="button" className="btn fbtn" aria-label={scoped > 0 ? `Filters, ${scoped} active` : undefined} aria-expanded={fopen} aria-controls="hdr-filters" onClick={() => setFopen(!fopen)}>
+              <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>
+              <span className="fbtn-t">Filters</span>{scoped > 0 && <b className="badge">{scoped}</b>}
+            </button>
+            <Prefs />
+            <button type="button" className="btn kbd" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K" onClick={openPalette}>
+              <svg className="kbd-ic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              <span className="kbd-k">{/Mac|iP/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</span>
+            </button>
+          </div></div>
         </div>
         <form className="filters" id="hdr-filters" aria-label="Filters" onSubmit={(e) => e.preventDefault()}>
           <label className="field"><span>Tool</span>
@@ -142,25 +208,27 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
             <select value={f.intent ?? ""} disabled={off} onChange={(e) => set({ intent: (e.target.value || undefined) as never })}><option value="">All intents</option>{INTENTS.map((i) => <option key={i} value={i}>{i}</option>)}</select></label>
           <label className="field"><span>Compare</span>
             <select value={cmp} disabled={off} onChange={(e) => setCmp(e.target.value as Cmp)}><option value="prev">Previous period</option><option value="yoy">Year ago</option><option value="off">Off</option></select></label>
-          {period === "custom" && (
+          {/* the date fields; under 360px the period control drops Custom, so a Custom dates button stands in here (CSS shows it only there) */}
+          {period === "custom" ? (
             <>
-              <label className="field"><span>From</span><input type="date" value={f.from ?? ""} min={d.range.start} max={f.to ?? end} disabled={off} onChange={(e) => set({ from: e.target.value || undefined })} /></label>
-              <label className="field"><span>To</span><input type="date" value={f.to ?? ""} min={f.from ?? d.range.start} max={end} disabled={off} onChange={(e) => set({ to: e.target.value || undefined })} /></label>
+              <DateField label="From" inputRef={fromRef} value={f.from ?? ""} min={start} max={f.to ?? end} disabled={off} onCommit={(from) => set({ from, to: f.to ?? end })} />
+              <DateField label="To" value={f.to ?? ""} min={f.from ?? start} max={end} disabled={off} onCommit={(to) => set({ to })} />
             </>
-          )}
+          ) : <button type="button" className="btn f-custom" disabled={off} onClick={() => pickPeriod("custom")}>Custom dates</button>}
         </form>
-        <div className="top-r3">
-          <nav className="crumbs" aria-label="Active filters">
-            {crumbs.map((c, i) => (
-              <button key={c.id} type="button" className="crumb fchip" aria-label={`Remove filter: ${c.label}`} onClick={() => (c.keys === "sel" ? clearAfter(i - 1) : clear(c.keys))}>
-                <span className="fchip-t">{c.label}</span><span aria-hidden="true" className="x">&times;</span>
-              </button>
-            ))}
-            {crumbs.length > 1 && <button type="button" className="link" onClick={() => clear()}>Clear all</button>}
-          </nav>
-          <span className="grow" />
-          {off && !caps.empty && <span className="note">This export has no per-session rows, so filters are off. Re-run prompt-analytics export.</span>}
-        </div>
+        {(shown.length > 0 || note) && (
+          <div className="top-r3">
+            {shown.length > 0 && <nav ref={crumbsRef} className="crumbs" aria-label="Active filters">
+              {shown.map((c, j) => (
+                <button key={c.id} type="button" className="crumb fchip" aria-label={`Remove filter: ${c.label}`} onClick={() => drop(c, j)}>
+                  <span className="fchip-t">{c.label}</span><span aria-hidden="true" className="x">&times;</span>
+                </button>
+              ))}
+              {shown.length > 1 && <button type="button" className="link" onClick={clearAll}>Clear all</button>}
+            </nav>}
+            {note && <span className="note">This export has no per-session rows, so filters are off. Re-run prompt-analytics export.</span>}
+          </div>
+        )}
       </header>
     </div>
   );
@@ -208,7 +276,7 @@ export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string>
   const groups = navFor(secs, capsAll.multiTool);
   const bar = BAR.filter(([id]) => secs.has(id));
   const rest = groups.flatMap((g) => g.items).filter((i) => !BAR_IDS.includes(i.id));
-  const scoped = (["source", "project", "intent"] as const).filter((k) => f[k] !== undefined).length;
+  const scoped = scopedOf(f);
   const here = underMore(section);
   const [more, setMore] = useState(false);
   const box = useRef<HTMLDivElement>(null), btn = useRef<HTMLButtonElement>(null);

@@ -121,16 +121,16 @@ export interface Bucket { from: string; to: string; i: number }
 export function buckets(win: Win, step: 1 | 7): Bucket[] {
   return Array.from({ length: Math.ceil(win.days / step) }, (_, i) => ({ i, from: addDays(win.from, i * step), to: addDays(win.from, Math.min(win.days, (i + 1) * step) - 1) }));
 }
-export function bucketSeries(rows: SessionRow[], win: Win, step: 1 | 7, val: (rs: SessionRow[]) => number): number[] {
+/** `empty` fills buckets with no rows: 0 for counts, null for rates (a gap, not a fake 0). */
+export function bucketSeries<T = number>(rows: SessionRow[], win: Win, step: 1 | 7, val: (rs: SessionRow[]) => T, empty: T = 0 as T): T[] {
   const n = Math.ceil(win.days / step), groups: SessionRow[][] = Array.from({ length: n }, () => []);
   for (const r of rows) { const i = Math.floor(dayDiff(win.from, r.date) / step); if (i >= 0 && i < n) groups[i].push(r); }
-  return groups.map((g) => (g.length ? val(g) : 0));
+  return groups.map((g) => (g.length ? val(g) : empty));
 }
 export const METRICS = {
   sessions: (rs: SessionRow[]) => rs.length,
   prompts: (rs: SessionRow[]) => rs.reduce((a, r) => a + r.prompts, 0),
   cost: (rs: SessionRow[]) => rs.reduce((a, r) => a + (r.cost_usd ?? 0), 0),
-  applied: (rs: SessionRow[]) => { const a = rs.filter((r) => r.prompts > 0); return a.length ? a.filter((r) => r.applied).length / a.length : 0; },
   friction: (rs: SessionRow[]) => { const a = rs.filter((r) => r.prompts > 0); return a.length ? a.reduce((s, r) => s + r.friction, 0) / a.length : 0; },
 };
 /** Last 24 buckets for a KPI sparkline: daily for windows up to 31 days, weekly beyond. */

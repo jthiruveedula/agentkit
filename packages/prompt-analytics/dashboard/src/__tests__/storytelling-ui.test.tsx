@@ -53,8 +53,8 @@ describe("storytelling UI", () => {
 
   it("the brief number replaces the Struggled tile, drills in place and opens the list", () => {
     mount();
-    expect(el.querySelector('button.kpi[data-kpi="struggled"]')).toBeNull();
-    expect(el.querySelectorAll(".kpis.k5 > li")).toHaveLength(5);
+    expect(el.querySelector('.kt[data-kpi="struggled"]')).toBeNull();
+    expect(el.querySelectorAll(".kpis.k6 > li")).toHaveLength(6);
     click(el.querySelector(".brief button.b-num"));
     expect(params().get("sg")).toBe("1");
     expect(params().get("pn")).toBe("list");
@@ -65,8 +65,8 @@ describe("storytelling UI", () => {
     mount();
     const go = el.querySelectorAll("button.kpi-go");
     expect(go.length).toBeGreaterThan(0);
-    for (const g of go) expect(g.closest("button.kpi")).toBeNull();
-    const ctl = el.querySelectorAll<HTMLButtonElement>("button.kpi, button.kpi-go, .drv li > button, p.movers button, dl.story button, section.quiet button, .brief button");
+    for (const g of go) expect(g.closest(".kt")).toBeNull();
+    const ctl = el.querySelectorAll<HTMLButtonElement>("button.kpi-main, .kpi-note button, button.kpi-go, .drv li > button, p.movers button, dl.story button, section.quiet button, .brief button");
     for (const b of ctl) {
       expect(b.getAttribute("type")).toBe("button");
       expect((b.getAttribute("aria-label") || b.textContent || "").trim()).not.toBe("");
@@ -88,7 +88,7 @@ describe("storytelling UI", () => {
     const dl = el.querySelector("dl.story")!;
     expect(dl.textContent).toContain("Why");
     expect(dl.textContent).toContain("Do next");
-    expect([...dl.querySelectorAll("button")].some((b) => b.textContent === "Open")).toBe(true);   // the rec is not about the driver, so Do next is the top attention item
+    expect([...dl.querySelectorAll("button")].some((b) => /^Review \d+ sessions?$/.test(b.textContent!))).toBe(true);   // the rec is not about the driver, so Do next is the top attention item (an exposure jump)
     click(dl.querySelector(".btn.primary"));
     expect(params().get("prj")).toBe("billing-api");
     expect(params().get("pn")).toBe("list");
@@ -98,16 +98,17 @@ describe("storytelling UI", () => {
     mount("#/s-overview");
     const br = el.querySelector(".brief")!, txt = (s: string) => br.querySelector(s)!.textContent;
     expect(txt(".eyebrow")).toBe("Clear rise");
-    expect(txt(".b-basis")).toBe("Last 4 weeks vs the 22 before · 182 days");
+    expect(txt(".b-basis")).toBe("Last 4 weeks vs the 22 weeks before · 182 days");
     expect(txt("h3")).toBe("Struggling rose in the last 4 weeks");
     expect(txt(".b-num")).toBe("11.0%");
-    expect(txt(".was")).toBe("was 2.6%");
+    expect(txt(".was")).toBe("↑ from 2.6%");
     expect(txt(".b-cap")).toBe("of sessions struggled: 1 in 9, up from 1 in 39");
-    expect(txt(".ci")).toBe("+8.4 pts · likely +4.2 to +14.2 · n 164 vs 623");
+    expect(txt(".ci")).toBe("+8.4 pts 0 likely +4.2 to +14.2");   // "0" labels the bar's zero tick
+    expect(txt(".b-foot")).toBe("164 vs 623 sessions with a prompt");
     expect(txt("dl.story dd")).toMatch(/^billing-api \/ bugfix: 12 of its 15 sessions struggled, up from 4 of 37\. Open 15 sessions$/);
-    expect(el.querySelectorAll(".kpis.k5 > li")).toHaveLength(5);
+    expect(el.querySelectorAll(".kpis.k6 > li")).toHaveLength(6);
     expect(el.querySelector("#s-driver")!.textContent).not.toMatch(/Needs an earlier window/);
-    expect(el.querySelector("#s-driver .meta")!.textContent).toBe("Last 4 weeks vs the 22 before");
+    expect(el.querySelector("#s-driver .meta")!.textContent).toBe("Last 4 weeks vs the 22 weeks before. Points each row added to the change; right is worse");
     click(br.querySelector(".btn.primary"));
     expect([params().get("prj"), params().get("int"), params().get("from"), params().get("pn")]).toEqual(["billing-api", "bugfix", "2026-09-28", "list"]);
   });

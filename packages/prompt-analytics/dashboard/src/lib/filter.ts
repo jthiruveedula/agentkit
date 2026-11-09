@@ -15,6 +15,7 @@ export interface Filter {
   q?: string;                          // session-title search: every word must appear (case-insensitive)
   struggled?: boolean;                 // see struggled()
   exposed?: boolean;                   // has an open exposure finding (needs the openExposure set)
+  model?: string;                      // dominant model id; "" = unknown (no model recorded)
 }
 export type FilterKey = keyof Filter;
 export const STAGES = ["Intent", "Prompt", "Response", "Iterate", "Applied", "Outcome"] as const;
@@ -47,7 +48,8 @@ export function match(r: SessionRow, f: Filter, ex?: Set<string>): boolean {
     && (f.frictionMax === undefined || f.frictionMax >= 1 || r.friction < f.frictionMax)
     && (f.q === undefined || titleHas(r.title, f.q))
     && (f.struggled === undefined || struggled(r) === f.struggled)
-    && (f.exposed === undefined || (ex?.has(r.id) ?? false) === f.exposed);
+    && (f.exposed === undefined || (ex?.has(r.id) ?? false) === f.exposed)
+    && (f.model === undefined || (r.model || "") === f.model);
 }
 /** Every whitespace-separated word of `q` appears in the title (case-insensitive). An empty query matches all. */
 export const titleHas = (title: string, q: string) => { const t = (title ?? "").toLowerCase(); return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w)); };
@@ -73,6 +75,7 @@ export function chips(f: Filter, clusterLabel?: (id: number) => string): { keys:
   if (f.q) out.push({ keys: ["q"], label: `Title: ${f.q}` });
   if (f.struggled !== undefined) out.push({ keys: ["struggled"], label: f.struggled ? "Struggled" : "Didn't struggle" });
   if (f.exposed !== undefined) out.push({ keys: ["exposed"], label: f.exposed ? "Open findings" : "No open findings" });
+  if (f.model !== undefined) out.push({ keys: ["model"], label: `Model: ${f.model || "Unknown"}` });
   return out;
 }
 

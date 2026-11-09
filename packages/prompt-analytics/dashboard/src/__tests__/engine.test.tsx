@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
 import { Works } from "../components/Works";
 import { StoreProvider } from "../state";
-import { EnginePill, pillText } from "../components/Engine";
+import { EnginePill, engineShort, pillText } from "../components/Engine";
 
 const clusters = [
   { id: 0, label: "Fix tests", size: 400, intent: "debug", success: 0.7, cx: 0.2, cy: 0.2 },
@@ -20,6 +20,7 @@ describe("engine tiers", () => {
   it("normalize defaults engine to basic", () => { expect(normalize({ schema: "1.0" }).engine.mode).toBe("basic"); });
   it("pill text per tier", () => {
     expect(pillText(basic.engine)).toMatch(/Heuristics/);
+    expect(engineShort(ml.engine)).toBe("analyzed with ML");
     expect(pillText(ml.engine)).toMatch(/ML .* scikit-learn 1\.9\.1/);
     expect(pillText({ ...ml.engine, mode: "deep", accel: "mps" })).toMatch(/Semantic .* mps/);
   });
@@ -32,7 +33,7 @@ describe("engine tiers", () => {
     const el = document.createElement("div"); document.body.append(el);
     const r = createRoot(el);
     act(() => r.render(<EnginePill d={d} onData={() => {}} />));
-    act(() => { el.querySelector<HTMLButtonElement>(".pill")!.click(); });
+    act(() => { el.querySelector<HTMLButtonElement>(".eng-t")!.click(); });
     return [...el.querySelectorAll<HTMLButtonElement>(".seg button")].map((b) => [b.textContent, b.disabled] as const);
   };
   it("switch is disabled without a token (file://)", () => {

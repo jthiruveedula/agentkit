@@ -1,0 +1,68 @@
+/* Mind map sunburst (Sunburst.tsx). Light only, tokens only. Fills are set inline from the tool hue (srcColor) so they follow the palette;
+   everything here is strokes, type and state. Motion is opacity only, under html.fx, and off for prefers-reduced-motion. */
+.sb { position: absolute; inset: 0; background: radial-gradient(closest-side, var(--surface), transparent); }
+.sb svg { display: block; overflow: visible; }
+
+.sb-arc { stroke: var(--surface); stroke-width: 1.5px; cursor: pointer; outline: none; }
+.sb-arc:hover { filter: brightness(0.95); }
+.sb-arc[data-dim] { fill-opacity: 0.4; }
+.sb-arc[data-kind="more"] { stroke: var(--line-2); stroke-dasharray: 3 3; }
+.sb-arc:focus-visible { stroke: var(--accent); stroke-width: 3px; }
+/* the arc's own stroke and the selection ring mark focus; the global box outline would draw a rectangle over the arcs */
+.sb-arc:focus-visible, .sb-hub:focus-visible { outline: none; }
+.sb-deco, .sb-labels, .sb-over { pointer-events: none; }
+
+.sb text { font: 12px var(--sans); fill: var(--ink); }
+.sb .sb-n { font-weight: 600; }
+.sb .sb-m { fill: var(--muted); }
+.sb .sb-v { font-size: 22px; font-weight: 650; }
+.sb .sb-n-sm { font-size: 10.5px; }   /* a name that only fits whole at the smaller size (lib/sunburst nameFit) */
+
+.sb-sel { fill: none; stroke: var(--ink); stroke-width: 2px; }
+.sb:has(.sb-arc:focus-visible) .sb-sel { stroke: var(--accent); stroke-width: 3px; }
+.sb-hot { fill: none; stroke: var(--warn); stroke-width: 2px; stroke-dasharray: 5 3; }
+
+.sb-hub { cursor: pointer; outline: none; }
+.sb-disc { fill: var(--surface); stroke: var(--line-2); stroke-width: 1px; }
+.sb-disc[data-sel] { stroke: var(--ink); stroke-width: 2px; }
+.sb-hub:focus-visible .sb-disc { stroke: var(--accent); stroke-width: 3px; }
+.sb-ring { fill: none; stroke-width: 3px; }
+.sb-edge[data-faded] { opacity: 0.55; }   /* struggle edge on 15-29 sessions: capped at half strength and faded */
+.sb-hatch { stroke: var(--muted); stroke-opacity: 0.45; stroke-width: 1.5px; }   /* unpriced on the cost metric */
+
+.sb-call { cursor: pointer; }
+.sb-call polyline { fill: none; stroke: var(--warn-ink); stroke-width: 1.25px; }
+.sb-call circle { fill: var(--warn-ink); }
+.sb-call .sb-badge { fill: var(--surface); stroke: var(--warn); stroke-width: 1.5px; stroke-dasharray: 3 2; }
+.sb .sb-rank { font-weight: 600; fill: var(--warn-ink); }
+.sb-call:hover .sb-n { text-decoration: underline; }
+.sb-call .sb-hit { fill: transparent; }
+
+/* new arcs and labels fade in (expand, zoom, metric switch); a label switching between curved and straight keeps its group, so it does not replay */
+.fx .sb-arc, .fx .sb-labels > g { animation: sb-in 280ms ease-out backwards; }
+@keyframes sb-in { from { opacity: 0; } }
+/* beside an open side panel the chart slides into the uncovered part of the card (Sunburst placeChart): a transform, so nothing reflows */
+.fx .sb-shift { transition: transform 240ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .fx .sb-arc, .fx .sb-labels > g { animation: none; } .fx .sb-shift { transition: none; } }
+
+/* legend: arc share, tool tone, struggle edge (the hotspot key is shared from styles.css) */
+.mm-key .k-arc::before { border-radius: 50%; background: conic-gradient(var(--src-claude_code) 0 30%, var(--sunk) 0); border: 1px solid var(--line-2); }
+.mm-key .k-tone::before { width: 22px; background: linear-gradient(90deg, var(--src-claude_code), var(--surface)); border: 1px solid var(--line); }
+.mm-key .k-heat::before { width: 26px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--surface), var(--bad)); border: 1px solid var(--line); }
+.mm-keys { margin-top: var(--s1); }
+
+/* narrow list: struggle dot (same min-n rule as the edge), hotspot chip labels never break mid-word */
+.mm-heat { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--bad); vertical-align: middle; }
+.mm-heat[data-faded] { opacity: 0.55; }
+.mm-hl { white-space: nowrap; }
+
+/* phones and touch: every control in the card is a 40px target, list rows 44px */
+@media (max-width: 699px), (pointer: coarse) {
+  #s-map .seg button, #s-map .mm-acts .btn, #s-map .mm-path .crumb, #s-map .mm-hots .chip, #s-map .mm-go { min-height: 40px; }
+  #s-map .mm-path .crumb { min-width: 40px; }
+  #s-map .mm-row { min-height: 44px; }
+}
+
+/* the source chip ("sessions graph · n 837") shows while the card has focus, and the map holds focus while you work it: on the top
+   border it sat under the sticky header, so here it straddles the bottom border instead */
+#s-map .card[data-src]::after { top: auto; bottom: -9px; }

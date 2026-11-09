@@ -18,9 +18,11 @@ const data = (sessions: S[], range?: object) => normalize({ ...sample, sessions,
 const html = (d: ReturnType<typeof normalize>, C: () => React.ReactElement, initial?: object) => renderToStaticMarkup(<StoreProvider d={d} initial={initial}><C /></StoreProvider>);
 
 describe("review fixes", () => {
-  it("Funnel step rates show n/a when the previous stage is empty", () => {
+  it("Funnel drop-off labels skip a stage whose previous stage is empty (no NaN, no fake 100%)", () => {
     const h = html(data([sess({ reached_stage: 1 }), sess({ reached_stage: 1 })]), Funnel);
-    expect(h).toMatch(/aria-label="Response: n\/a"/);
+    expect(h).toContain("\u2212100% at prompt");
+    expect(h).toMatch(/aria-label="Response: 0 sessions, 0% of all\. Filter/);
+    expect(h).not.toMatch(/NaN|at response/);
   });
 
   it("ModelFit says too few sessions under 15 per tool", () => {
@@ -52,8 +54,8 @@ describe("review fixes", () => {
     expect(h).toMatch(/Within noise/);
     expect(h).toMatch(/Struggling held at about 10\.0%/);
     expect(h.replace(/<[^>]+>/g, "")).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
-    expect(h).toMatch(/±0 pts · could be -?\d+\.\d to \+\d+\.\d · n 120 vs 120/);
-    expect(h).toMatch(/>Show evidence</);   // no driver, so the top recommendation is Do next
+    expect(h.replace(/<[^>]+>/g, "")).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
+    expect(h).toMatch(/the evidence behind/);   // no driver, so the top recommendation is Do next
     expect(h).not.toMatch(/data-kpi="struggled"/);
   });
   it("Brief names the driver once, with its counts and sessions button", () => {

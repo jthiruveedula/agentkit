@@ -1,0 +1,203 @@
+/* Hallmark · component scope · posture: restrained · surface: absolute, the app ships pure white cards (styles.css --surface) */
+/* Overview key numbers (one card, six instrument tiles) and the usage mix row (model donut, tool butterfly, tier stacks).
+   Light theme only. No animation: hover and pressed states switch instantly. */
+:root {
+  /* model slots reuse the series ramp; Other is the neutral series, Unknown is hatched */
+  --mx1: var(--s1c); --mx2: var(--s2c); --mx3: var(--s3c); --mx4: var(--s4c); --mx5: var(--s6c); --mx-o: var(--s5c); --mx-u: var(--sunk);
+  /* tiers are ordinal: one sequential blue ramp, light to dark, every step at 3:1+ on white (text on 0 is ink, on 1 and 2 white).
+     Every oklch() here is checked by scripts/contrast.mjs. */
+  --tier0: oklch(0.64 0.09 262); --tier1: oklch(0.47 0.15 262); --tier2: oklch(0.3 0.11 262);
+  --kx-ci: oklch(0.66 0.1 262); --kx-trk: oklch(0.6 0.01 260); --kx-rest: oklch(0.63 0.11 262);
+  /* the concentration bar: three outlier greys and the blue remainder, each step 1.6:1+ from the next (contrast.mjs) */
+  --kx-o1: var(--ink); --kx-o2: oklch(0.38 0.02 260); --kx-o3: oklch(0.51 0.02 260);
+}
+
+/* ---------- Key numbers card ---------- */
+#s-overview .card.kcard { padding: 0; container: kc / inline-size; }
+.fx .card.kcard:hover { translate: none; }   /* six tiles do not lift as one slab (no per-tile motion either) */
+.kc-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s1) var(--s4); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); }
+.kc-h h3 { font: 600 16px/22px var(--sans); }
+.kc-p { font-weight: 400; color: var(--muted); }
+.kc-key { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); }
+.kc-key b { font-weight: 600; color: var(--ink); }
+/* dashed ink = the earlier window, as drawn in the sessions columns and the gauge tick */
+.k-tick { display: inline-block; width: 14px; height: 0; margin-right: var(--s1); vertical-align: middle; border-top: 1.5px dashed var(--ink); }
+.k-grey { display: inline-block; width: 10px; height: 10px; margin-right: var(--s1); vertical-align: -1px; border-radius: 2px; background: var(--muted); }
+
+/* tiles share hairlines (each draws its left and top edge; the list clips the outer ones) */
+/* the only place the tile grid is set: 6 across, 3x2 under 1000px of card, 2x3 under 520px */
+.kcard ul.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; overflow: hidden; border-radius: 0 0 var(--r3) var(--r3); }
+.kcard ul.kpis.k5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@container kc (max-width: 1000px) { .kcard ul.kpis.k5, .kcard ul.kpis.k6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@container kc (max-width: 520px) {
+  .kcard ul.kpis.k5, .kcard ul.kpis.k6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kcard ul.kpis.k5 > li:last-child { grid-column: span 2; }
+}
+.kcard ul.kpis > li { position: relative; container-type: inline-size; box-shadow: -1px 0 0 var(--line), 0 -1px 0 var(--line); }
+
+.kt { position: relative; display: flex; flex-direction: column; gap: var(--s1); height: 100%; min-width: 0; padding: var(--s3) var(--s4) var(--s4); overflow-wrap: anywhere; }
+.kt .kpi-main { gap: 2px; }
+.kt .kpi-main::after { border-radius: 0; }
+html.fx .kt .kpi-main::after { border-radius: 0; }
+.kt .kpi-main:hover::after { background: color-mix(in oklab, var(--accent) 4%, transparent); }
+.kt .kpi-main:focus-visible::after { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* the label keeps a two-line slot and clears the Details link pinned top right (~48px from the tile edge, 16px of it is tile padding) */
+.kt .lbl { display: block; min-height: 36px; padding-right: 36px; font: 500 13px/18px var(--sans); color: var(--muted); }
+.kt .kv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s2); }
+.kt .val { font: 650 28px/32px var(--sans); letter-spacing: -0.015em; white-space: nowrap; }
+.kt .kv small { font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; }
+.kt .sub { margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); white-space: pre-line; }   /* one fact per line */
+.kt .sub[data-low] { color: var(--warn-ink); }
+.kt-vis { margin-top: auto; padding-top: var(--s2); }
+.kcard .kpi-go { top: var(--s2); right: var(--s2); }
+/* narrow tiles (two up on a phone, list panel open): Details gets its own row above the label instead of covering it.
+   190px: above it the label has 123px beside Details, enough for "Tokens per applied" on one line, so labels stay at two */
+@container (max-width: 190px) {
+  .kcard ul.kpis > li > .kt { padding-top: calc(var(--s3) + 22px); }
+  .kcard ul.kpis > li > .kt .lbl { padding-right: 0; }
+}
+
+/* delta: arrow and size; volume in ink, quality in good or bad, grey with its reason when mixed or within range */
+.kd { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: var(--s2); margin: 0; font: 600 12px/16px var(--sans); color: var(--ink); }
+.kd > span:first-child { white-space: nowrap; }
+.kd[data-tone="good"] { color: var(--good-ink); } .kd[data-tone="bad"] { color: var(--bad); } .kd[data-tone="grey"] { color: var(--muted); }
+.kd-a { margin-right: 1px; }
+.kd-u { font-weight: 400; color: var(--muted); }
+.kd-g { padding-left: var(--s2); border-left: 1px solid var(--line-2); font-weight: 500; color: var(--muted); }
+
+/* sessions: weekly columns, compared weeks in accent, the two windows' weekly averages as lines */
+.wc { display: block; width: 100%; height: 34px; overflow: visible; }
+.wc-b { fill: var(--kx-trk); } .wc-now { fill: var(--accent); }
+.wc-ax { stroke: var(--line-2); stroke-width: 1; }
+.wc-was { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 2 2; }
+.wc-avg { stroke: var(--accent); stroke-width: 1.5; }
+
+/* meters: priced coverage (unpriced hatched) and spend concentration */
+.meter { display: flex; gap: 1px; height: 10px; border-radius: 3px; overflow: hidden; }
+.meter > span { display: block; flex: 1 1 0; min-width: 2px; height: 100%; }
+.m-on { background: var(--accent); }
+.m-off { background: var(--hatch) var(--sunk); }
+.m-rest { background: var(--kx-rest); }
+.km-l { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--s2); margin-top: var(--s1); font-size: 11px; line-height: 14px; color: var(--muted); }
+.km-l b { font-weight: 600; color: var(--ink); }
+.kt .kpi-note { margin-top: 0; }
+.kpi-note .kpi-out i { flex: none; width: 8px; height: 8px; border-radius: 2px; }
+.kpi-note ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+
+/* tier bar: Small, Mid, Top in a blue ramp, Unknown hatched */
+.tb { display: flex; gap: 1px; height: 10px; border-radius: 3px; overflow: hidden; }
+.tb > span { flex: 1 1 0; min-width: 2px; display: flex; align-items: center; padding-left: 4px; font: 600 11px/14px var(--sans); white-space: nowrap; overflow: hidden; container: tbs / inline-size; }
+.tb b { font-weight: inherit; }
+@container tbs (max-width: 30px) { .tb b { display: none; } }   /* "12%" needs ~28px: no clipped labels, the table carries the value */
+.tb-0 { background: var(--tier0); color: var(--ink); }
+.tb-1 { background: var(--tier1); color: var(--accent-ink); }
+.tb-2 { background: var(--tier2); color: var(--accent-ink); }
+.tb-3 { background: var(--hatch) var(--sunk); color: var(--ink); }
+.tkey { display: flex; flex-wrap: wrap; gap: 2px var(--s3); margin: var(--s1) 0 0; font-size: 11px; line-height: 14px; color: var(--muted); }
+.tkey b { font-weight: 600; color: var(--ink); }
+.tkey i { display: inline-block; width: 8px; height: 8px; margin-right: var(--s1); border-radius: 2px; }
+
+/* applied rate: semicircle gauge, the interval as a wide pale band, a tick at the earlier rate */
+.kg { display: flex; flex-wrap: wrap; align-items: end; gap: var(--s1) var(--s3); }
+.gauge { flex: none; width: 96px; height: 66px; overflow: visible; }
+.gauge path { fill: none; stroke-width: 8; }
+.gauge .g-track { stroke: var(--kx-trk); stroke-width: 2; }
+.gauge .g-ci { stroke: var(--kx-ci); stroke-width: 14; }
+.gauge .g-halo { stroke: var(--surface); stroke-width: 11; }
+.g-fill { stroke: var(--accent); }
+.g-was { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 2; }
+.g-end { fill: var(--muted); font-size: 10px; }
+.kg-l { display: grid; margin: 0; font-size: 11px; line-height: 16px; color: var(--muted); }
+.kg-l b { font-weight: 600; color: var(--ink); }
+
+/* exposed: one bar per kind (a session can hold several, so never stacked); red is kept for open, worsening alerts */
+.kx { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--s1) var(--s2); align-items: center; margin: 0; padding: 0; list-style: none; font-size: 11px; line-height: 14px; color: var(--muted); }
+.kx > li { display: contents; }
+.kx b { font-weight: 600; color: var(--ink); text-align: right; }
+.kx-t { height: 6px; border-radius: 2px; background: var(--sunk); }
+.kx-t i { display: block; width: calc(var(--w) * 100%); min-width: 2px; height: 100%; border-radius: 2px; background: var(--muted); }
+.kx [data-k="pii"] i { background: var(--warn-pii); } .kx [data-k="secret"] i { background: var(--s6c); } .kx [data-k="phi"] i { background: var(--warn-phi); }
+
+/* ---------- Usage mix cards ---------- */
+.mixc { container: mixc / inline-size; display: flex; flex-direction: column; }
+#s-overview .mixc { align-self: stretch; }   /* one height per row (beats styles.css .grid > .card); the notes pin to the bottom */
+.mixc .lede { margin: 0 0 var(--s3); font-size: 13px; line-height: 18px; color: var(--muted); text-wrap: pretty; }
+.mixc .lede b { font-weight: 600; color: var(--ink); }
+.mixc .note { margin-top: auto; padding-top: var(--s3); }
+.mixc .note:empty { display: none; }
+
+/* model donut + legend */
+.dn-row { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: var(--s4); align-items: center; }
+.dn { position: relative; width: 168px; aspect-ratio: 1; }
+.dn svg { display: block; width: 100%; height: 100%; }
+.dn circle { fill: none; stroke-width: 5; }
+.dn-track { stroke: var(--line); }
+.dn-s[data-pick] { cursor: pointer; }
+.dn-s[data-pick]:hover, .dn-s[data-on] { stroke-width: 6.5; }
+.dn-hb { fill: var(--sunk); } .dn-hl { fill: var(--line-2); }
+/* the hole is ~107px across at the middle but ~88px at the caption rows: 40px side padding keeps every line off the ring */
+.dn-hole { position: absolute; inset: 0; display: grid; place-content: center; padding: 0 40px; text-align: center; pointer-events: none; }
+.dn-big { font: 650 28px/30px var(--sans); }
+.dn-who { margin: 4px 0 1px; font: 600 11px/14px var(--sans); }
+.mn { white-space: nowrap; }   /* a model id's word part ("sonnet-4-5"): lines break only between parts */
+.dn-of { font-size: 11px; line-height: 14px; color: var(--muted); }
+.mlg { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 16px; }
+.mlg th { width: 55%; max-width: 0; padding: 0; text-align: left; font-weight: 500; }
+.mlg td { padding: var(--s1) 0 var(--s1) var(--s2); text-align: right; white-space: nowrap; }
+.mlg tr + tr > * { border-top: 1px solid var(--line); }
+.mlg .mlg-tier { text-align: left; font-size: 11px; color: var(--muted); }
+.mlg .mlg-p { width: 3.2em; color: var(--muted); }
+.mlg-b, .mlg-t { display: flex; align-items: center; gap: var(--s2); width: 100%; min-height: 28px; padding: 2px var(--s1); margin-left: calc(-1 * var(--s1)); text-align: left; font: inherit; color: inherit; }
+.mlg-b { background: transparent; border-radius: var(--r1); }
+.mlg-b:hover { background: var(--sunk); }
+.mlg-b:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* the ring spans the whole legend row (name, tier, value, share), not just the name cell; without :has the button keeps its own */
+.mlg tr:has(.mlg-b:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
+.mlg tr:has(.mlg-b:focus-visible) .mlg-b { outline: none; }
+.mlg-b[aria-pressed="true"] { font-weight: 650; color: var(--accent); }
+.mlg-sw { flex: none; width: 9px; height: 9px; border-radius: 2px; }
+.mlg-sw[data-hatch] { background: var(--hatch) var(--sunk); box-shadow: inset 0 0 0 1px var(--line-2); }
+@container mixc (max-width: 400px) {
+  .dn-row { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .mlg { justify-self: stretch; }
+}
+
+/* tool butterfly: tokens grow left from the spine, spend grows right; each side on its own scale.
+   Two-sided above 320px of card: at 321 each side is (321 - 88 - 16) / 2 = 108px = a 44px bar + 6px + "$293.10" (~50px).
+   The 1440 tool card is 324px (two-sided); a 375 phone gives 317px (stacked). */
+.fly { display: grid; gap: 2px; }
+.fly-h, .fly-r { display: grid; grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr); grid-template-areas: "l n r"; align-items: center; column-gap: var(--s2); }
+.fly-h { padding-bottom: 2px; border-bottom: 1px solid var(--line); font-size: 11px; line-height: 14px; color: var(--muted); }
+.fly-h > :first-child { text-align: right; } .fly-h > :nth-child(2) { text-align: center; }
+.fly-r { width: 100%; min-height: 40px; padding: var(--s1) 0; background: transparent; border-radius: var(--r1); font: inherit; color: inherit; text-align: left; }
+.fly-r:hover { background: var(--sunk); }
+.fly-r:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fly-r[aria-pressed="true"] .fly-n { color: var(--accent); }
+.fly-n { grid-area: n; font: 600 12px/15px var(--sans); text-align: center; overflow-wrap: anywhere; }
+.fly-n small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); white-space: nowrap; }
+.fly-t { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; line-height: 16px; }
+.fly-t[data-side="l"] { grid-area: l; flex-direction: row-reverse; }
+.fly-t[data-side="r"] { grid-area: r; }
+.fly-t i { flex: none; width: max(2px, calc(var(--w) * (100% - 64px))); height: 14px; border-radius: 2px; background: var(--c); }
+.fly-t b { font-weight: 600; white-space: nowrap; }
+.fly-t em { font-style: normal; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.fly-t .fly-np { padding: 0 6px; border-radius: 2px; background: var(--hatch) var(--sunk); color: var(--ink); }
+.fly-k { display: none; }
+@container mixc (max-width: 320px) {
+  .fly-h { display: none; }
+  .fly-r { grid-template-columns: minmax(0, 1fr); grid-template-areas: "n" "l" "r"; row-gap: 2px; padding: var(--s2) var(--s1); }
+  .fly-n { text-align: left; }
+  .fly-n small { display: inline; margin-left: var(--s2); }
+  .fly-t[data-side="l"] { flex-direction: row; }
+  .fly-k { display: inline-block; flex: none; width: 44px; font-size: 11px; color: var(--muted); }
+  .fly-t i { width: max(2px, calc(var(--w) * (100% - 44px - 72px))); }
+}
+
+/* tier stacks */
+.tm { display: grid; gap: var(--s2); }
+.tm-r { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s2); align-items: center; font-size: 12px; line-height: 16px; }
+.tm .tb { height: 22px; }
+.mixc .tkey { margin-top: var(--s2); }
+/* stretched to the row's height, the bars and their key sit centred between the lede and the member note, not above a gap */
+.tm-w { margin-block: auto; }
+#s-mix-tiers .note { margin-top: 0; }

@@ -53,8 +53,10 @@ describe("brief states", () => {
     const h = html(rows("p0", 10, 2, 10, 5));
     expect(h).toMatch(/Too few to compare/);
     expect(h).not.toMatch(/No baseline/);
-    expect(h).toMatch(/Too few sessions with a prompt to compare yet \(n 10 vs 10\)/);
-    expect(h).not.toMatch(/likely|could be/);
+    expect(h).toMatch(/Too few sessions with a prompt to compare yet \(10 vs 10\)/);
+    // the brief draws no interval under 30 a side (the Applied rate tile's own "likely X to Y" is not the brief's)
+    const brief = new DOMParser().parseFromString(h, "text/html").querySelector("section.brief")!.textContent!;
+    expect(brief).not.toMatch(/likely|could be/);
   });
   it("noise headline is led by a mover", () => {
     // same struggled rate (10%), 3x the sessions now: a Sessions mover leads, and is not repeated in Also moved
@@ -72,7 +74,8 @@ describe("Do next matching", () => {
   it("shows the recommendation when its project matches the driver", () => {
     const h = html(driver(), ins({ project: "p0" }));
     expect(h).toMatch(/RECTITLE/);
-    expect(h).toMatch(/>Show evidence</);
+    expect(h).toMatch(/evidence behind: RECTITLE">Open 40 sessions</);   // the evidence drill (project p0) is counted like the Why row's action
+    expect(h).toMatch(/the evidence behind: RECTITLE/);
   });
   it("shows the recommendation when project matches and only one side has an intent", () => {
     expect(html(driver(), ins({ project: "p0", intent: "bugfix" }))).toMatch(/RECTITLE/);
@@ -82,7 +85,7 @@ describe("Do next matching", () => {
     for (const f of [{ project: "other" }, { project: "p0", intent: "refactor" }, {}, { intent: "bugfix" }]) {
       const h = html(driver(), ins(f));
       expect(h).not.toMatch(/RECTITLE/);
-      expect(h).not.toMatch(/>Show evidence</);
+      expect(h).not.toMatch(/the evidence behind/);
       expect(h).toMatch(/<dt>Do next<\/dt>/);
     }
   });

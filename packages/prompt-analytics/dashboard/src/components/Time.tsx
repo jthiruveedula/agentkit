@@ -19,15 +19,21 @@ import type { SessionRow } from "../data/types";
 export const toolName = (k: string) => <><ToolLogo source={k} size={18} />{srcLabel(k)}</>;
 
 export interface DumbRow { k: string; label: ReactNode; a: number | null; b: number; fa: string; fb: string; bad?: boolean | null; name: string }
-/** Dumbbell: grey dot = before, coloured dot = now. `a` null = no prior period, now only. bad: true red, false green, null neutral. */
-export function Dumb({ rows, max }: { rows: DumbRow[]; max: number }) {
+/** Median of the `now` values: Dumb's median rule. The `all` row is the total, not a member, so it is left out. */
+export const dumbMedian = (rows: DumbRow[]) => median(rows.filter((r) => r.k !== "all").map((r) => r.b));
+/** Dumbbell: grey dot = before, coloured dot = now. `a` null = no prior period, now only. bad: true red, false green, null neutral.
+ *  `median` draws a thin rule at the median of the now values; `sort` orders rows by now, largest first, with the `all` row pinned first. */
+export function Dumb({ rows, max, median: med = false, sort = false }: { rows: DumbRow[]; max: number; median?: boolean; sort?: boolean }) {
+  const pm = med && rows.some((r) => r.k !== "all") ? (dumbMedian(rows) / max) * 100 : null;
   return (
-    <div className="dbs">{rows.map((r) => {
+    <div className="dbs">{pm !== null && <div className="dbm" aria-hidden="true"><span /><div><span style={{ left: `${pm}%` }}>median</span></div><span /></div>}
+      {(sort ? [...rows].sort((x, y) => +(y.k === "all") - +(x.k === "all") || y.b - x.b) : rows).map((r) => {
       const tn = r.bad == null ? "" : r.bad ? "bad" : "good", pa = ((r.a ?? r.b) / max) * 100, pb = (r.b / max) * 100;
       return (
         <div key={r.k} className="db"><span>{r.label}</span>
           <div className="dbt" role="img" aria-label={r.a === null ? `${r.name}: ${r.fb}` : `${r.name}: ${r.fa} before, ${r.fb} now`}>
             {r.a !== null && <><i className={`seg ${tn}`} style={{ left: `${Math.min(pa, pb)}%`, width: `${Math.abs(pb - pa)}%` }} /><i className="p" style={{ left: `${pa}%` }} /></>}
+            {pm !== null && <i className="md" style={{ left: `${pm}%` }} />}
             <i className={`c ${tn}`} style={{ left: `${pb}%` }} />
           </div>
           <b>{r.a === null ? r.fb : `${r.fa} \u2192 ${r.fb}`}</b>
@@ -50,7 +56,7 @@ function TimeToResolve() {
   return (
     <Card src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={12}>
       {rows.length === 0 ? <Empty>No resolved session with a time in view.</Empty> : (
-        <Dumb max={max} rows={rows.map((x) => ({ k: x.k, label: x.label, name: x.name, a: x.was?.m ?? null, b: x.now!.m, fa: x.was ? x.was.m.toFixed(1) : "", fb: x.now!.m.toFixed(1),
+        <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: x.label, name: x.name, a: x.was?.m ?? null, b: x.now!.m, fa: x.was ? x.was.m.toFixed(1) : "", fb: x.now!.m.toFixed(1),
           bad: x.was && Math.abs(x.now!.m - x.was.m) > x.was.m * 0.05 ? x.now!.m > x.was.m : null }))} />
       )}
     </Card>

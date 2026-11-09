@@ -22,7 +22,11 @@ export function fmtUSD(n: number): string {
 /** fraction -> percent string. 0.256 -> "26%" */
 export const fmtPct = (f: number, digits = 0) => `${(Number.isFinite(f) ? f * 100 : 0).toFixed(digits)}%`;
 
-export const fmtSigned = (n: number, digits = 0) => `${n > 0 ? "+" : n < 0 ? "-" : ""}${Math.abs(n).toFixed(digits)}`;
+/** Signed number; the sign is read off the ROUNDED value, so -0.001 prints "0.00", never "-0.00". */
+export function fmtSigned(n: number, digits = 0): string {
+  const a = Math.abs(n).toFixed(digits);
+  return `${+a === 0 ? "" : n > 0 ? "+" : "-"}${a}`;
+}
 
 export function fmtDate(iso: string): string {
   const d = new Date(`${iso.slice(0, 10)}T00:00:00Z`);

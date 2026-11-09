@@ -29,7 +29,7 @@ describe("basis", () => {
     expect(b.cut).toBe("2026-09-30");
     expect(b.cur.map((r) => r.date)).toEqual(["2026-09-30", "2026-10-27"]);
     expect(b.base!.map((r) => r.date)).toEqual(["2026-09-29"]);
-    expect(b.label).toBe("Last 4 weeks vs the 4 before");
+    expect(b.label).toBe("Last 4 weeks vs the 4 weeks before");
   });
   it("has no basis under 56 days", () => {
     const b = basis([row("2026-10-01")], null, win("2026-09-01", "2026-10-25", 55), "prev");

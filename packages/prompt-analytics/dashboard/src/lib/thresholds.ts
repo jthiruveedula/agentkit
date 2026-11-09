@@ -3,6 +3,8 @@
 
 /** Sessions below which a rate is shown faded and flagged "low" (scorecard, router, intent tables). */
 export const MIN_N = 30;
+/** Per-week chart: a week with fewer sessions with a prompt draws a hollow dot ("too few to read alone"). */
+export const WEEK_MIN_N = 25;
 /** Router cell (tool x kind of change) needs this many sessions before it gets a rate. */
 export const ROUTER_MIN_N = 15;
 /** Loop breaker: a rephrase bucket with fewer sessions draws no rate. */
