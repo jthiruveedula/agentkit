@@ -2,21 +2,21 @@
   "$schema": "./skills.lock.schema.json",
   "note": "Pinned external skill sources -- fetched on demand into external/<name>/ by scripts/sync-external.sh, never vendored into this repo's git history. GPL-licensed entries are reference-only: read for guidance, never copied verbatim into a skill body.",
   "sources": [
-    { "name": "diagram-design",   "repo": "cathrynlavery/diagram-design",                   "sha": "0cf73c3fcc56667ad91a9a04c439ac6ccfabc9d1", "license": "MIT",       "for": "diagrams" },
-    { "name": "ui-ux-pro-max",    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",            "sha": "713eef51b04efc98d6fa565323b495f7c9c89fd4", "license": "MIT",       "for": "ui/ux" },
+    { "name": "diagram-design",   "repo": "cathrynlavery/diagram-design",                   "sha": "6a7f19fcc132b39b126bea90167679b46b14bcc4", "license": "MIT",       "for": "diagrams" },
+    { "name": "ui-ux-pro-max",    "repo": "nextlevelbuilder/ui-ux-pro-max-skill",            "sha": "4f2dbb67e64969a9a30ab00742f2d55d66ddec2b", "license": "MIT",       "for": "ui/ux" },
     { "name": "codegraph",        "repo": "colbymchenry/codegraph",                          "sha": "f72c9d2efb14454ff4f9fd7b8460abd82f19a287", "license": "MIT",       "for": "codebase reads" },
-    { "name": "boost",            "repo": "jfrog/boost",                                     "sha": "0d89d89d3a393482acac9fd74e1cb2a593ca038a", "license": "NOASSERTION", "for": "token/CLI ops" },
-    { "name": "gcp-skills",       "repo": "google/skills",                                   "sha": "dc266e019a32621845b6b2bb81084b3c9657774c", "license": "Apache-2.0", "for": "gcp" },
-    { "name": "databricks-agent-skills", "repo": "databricks/databricks-agent-skills",       "sha": "0ff187b19ed71744d9159c8eb0776a339d305d63", "license": "NOASSERTION", "for": "databricks" },
+    { "name": "boost",            "repo": "jfrog/boost",                                     "sha": "42aa593cefef11ea81efc199101137a4412b7144", "license": "NOASSERTION", "for": "token/CLI ops" },
+    { "name": "gcp-skills",       "repo": "google/skills",                                   "sha": "a34bbf6ded899d2d3cdf58c88b2d1bd388e6b199", "license": "Apache-2.0", "for": "gcp" },
+    { "name": "databricks-agent-skills", "repo": "databricks/databricks-agent-skills",       "sha": "b079942c0fcad01ec7afc2c37d816c8f1345323a", "license": "NOASSERTION", "for": "databricks" },
     { "name": "aws-sample-skills", "repo": "aws-samples/sample-agent-skills",                "sha": "dd0bdc07ec0485e9594e4deb497c108724a80400", "license": "MIT-0",     "for": "aws" },
     { "name": "aws-skills",       "repo": "zxkane/aws-skills",                               "sha": "68530c6f296ccd2f5e99c79782f3e0fbf962c51a", "license": "MIT",       "for": "aws" },
-    { "name": "azure-skills",     "repo": "microsoft/azure-skills",                          "sha": "fbda857c484a85c7ce644f56809b7f204471fb69", "license": "MIT",       "for": "azure" },
-    { "name": "agent-skills-ms",  "repo": "MicrosoftDocs/Agent-Skills",                      "sha": "6ecdaf59cde880d0ef3d1715357b6c0b0c6696d8", "license": "CC-BY-4.0", "for": "azure" },
-    { "name": "anthropic-skills", "repo": "anthropics/skills",                               "sha": "ca45fc496a3436251f191354091d557da31c15b5", "license": "NOASSERTION", "for": "system design/scalability" },
+    { "name": "azure-skills",     "repo": "microsoft/azure-skills",                          "sha": "299b16bf063bdf37c783e08bcae27ca57fface38", "license": "MIT",       "for": "azure" },
+    { "name": "agent-skills-ms",  "repo": "MicrosoftDocs/Agent-Skills",                      "sha": "9b16b5c7c7716949c83fc4bbdc448e0ada7f93a3", "license": "CC-BY-4.0", "for": "azure" },
+    { "name": "anthropic-skills", "repo": "anthropics/skills",                               "sha": "2c5958ecac7cee2b583967a2c4981d0f4a75c579", "license": "NOASSERTION", "for": "system design/scalability" },
     { "name": "systems-design-resources", "repo": "ashishps1/awesome-system-design-resources", "sha": "58bf0b48badf1e6d62d1e3d024e9578ff809c95f", "license": "GPL-3.0", "for": "system design/scalability (substituted for ryanthedev/systems-design, which 404s)" },
-    { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "459d2421bdfe2f8111d291fff161926815939288", "license": "MIT",       "for": "gap discovery" },
+    { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "6d483e29da745a010d88974ef6d0e50d15755e9a", "license": "MIT",       "for": "gap discovery" },
     { "name": "security-audit",   "repo": "cloudflare/security-audit-skill",                 "sha": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8", "license": "MIT",       "for": "security review/audit" },
     { "name": "claude-seo",       "repo": "AgriciDaniel/claude-seo",                         "sha": "6be93f45064ffbadced572b5d5c95f55fd263af0", "license": "MIT",       "for": "seo for frontends/sites" },
-    { "name": "hallmark",         "repo": "nutlope/hallmark",                                "sha": "4f6a46c6dc325d40ab268c93e25c7b96676ebccd", "license": "MIT",       "for": "anti-AI-slop frontend design" }
+    { "name": "hallmark",         "repo": "nutlope/hallmark",                                "sha": "407fa689f4a276f2fd389208d271d0fef08f5058", "license": "MIT",       "for": "anti-AI-slop frontend design" }
   ]
 }
