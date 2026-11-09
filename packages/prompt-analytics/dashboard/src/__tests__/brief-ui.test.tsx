@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { normalize } from "../data/load";
@@ -37,7 +38,7 @@ describe("brief states", () => {
   });
   it("equal 1-in-N phrasing falls back to percentages", () => {
     const h = html(rows("p0", 100, 35, 100, 39));
-    expect(h.replace(/<[^>]+>/g, "")).toMatch(/of sessions struggled: 39\.0%, about the same as 35\.0%/);
+    expect(htmlText(h)).toMatch(/of sessions struggled: 39\.0%, about the same as 35\.0%/);
   });
   it("CI ends never print -0.0", () => {
     const h = html(rows("p0", 30, 17, 60, 46));   // lo is about -0.03 pts

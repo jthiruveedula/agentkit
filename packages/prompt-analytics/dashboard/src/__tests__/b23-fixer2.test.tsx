@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 // Bundle 2+3 review round 1, Fixer 2: insights denominators, no-gain chart scale and whiskers, funnel prior guard, switch headers.
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -11,7 +12,7 @@ import type { SessionRow } from "../data/types";
 
 type S = Record<string, unknown>;
 const base = sample as unknown as { sessions: S[] };
-const text = (h: string) => h.replace(/<[^>]+>/g, "");
+const text = (h: string) => htmlText(h);
 const render = (el: React.ReactNode, sessions: S[], extra: S = {}, initial: object = {}) =>
   renderToStaticMarkup(<StoreProvider d={normalize({ ...sample, sessions, ...extra } as never)} initial={initial}>{el}</StoreProvider>);
 let n = 0;

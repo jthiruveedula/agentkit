@@ -1,3 +1,4 @@
+import { htmlText } from "./text";
 // Bundle 2+3 review round 2: Applied delta guard, week-aligned sparks, verdict-gated baseline, prior-mode baseline, Drivers side, outlier share.
 import { describe, expect, it } from "vitest";
 import { act } from "react";
@@ -20,7 +21,7 @@ const DATED = { from: "2026-10-15", to: "2026-10-28" };   // prior window: Oct 1
 const data = (sessions: S[], range = { start: "2026-10-01", end: "2026-10-28" }) => normalize({ ...sample, sessions, range } as never);
 const html = (sessions: S[], initial: object = DATED, range?: { start: string; end: string }) =>
   renderToStaticMarkup(<StoreProvider d={data(sessions, range)} initial={initial}><Overview /></StoreProvider>);
-const text = (h: string) => h.replace(/<[^>]+>/g, "");
+const text = (h: string) => htmlText(h);
 const tile = (h: string, id: string) => h.split(`data-kpi="${id}"`)[1].split('data-kpi="')[0];
 
 describe("Applied delta needs MIN_N change sessions on both sides", () => {
