@@ -41,7 +41,7 @@ def test_uninstall_skips_paths_outside_install_roots(tmp_path):
     state.mkdir(parents=True)
     ours = home / ".claude" / "agents" / "x.md"
     ours.parent.mkdir(parents=True)
-    ours.symlink_to(tmp_path / "missing-target")  # a link is always safe to remove
+    ours.symlink_to(INSTALL.parent / "dist" / "missing-target")  # link into the kit
     victim = tmp_path / "victim"
     victim.mkdir()
     (victim / "keep.txt").write_text("keep")
@@ -74,6 +74,68 @@ def test_reinstall_backs_up_user_file_that_replaced_link(tmp_path):
     assert [b.read_text() for b in baks] == ["MINE"]
     assert "backing up" in r.stderr
     assert mine.is_symlink()
+
+
+@posix_only
+def test_user_symlink_is_kept_on_uninstall_and_backed_up_on_install(tmp_path):
+    home = tmp_path / "home"
+    _run(home, "--tools=cursor")
+    link = _cursor_rules(home)[-1]
+    theirs = tmp_path / "theirs.mdc"
+    theirs.write_text("THEIRS")
+    link.unlink()
+    link.symlink_to(theirs)
+    r = _run(home, "uninstall")
+    assert "modified since install" in r.stderr
+    assert link.resolve() == theirs.resolve()
+    r = _run(home, "--tools=cursor")
+    baks = list(link.parent.glob(link.name + ".bak.*"))
+    assert [b.read_text() for b in baks] == ["THEIRS"]
+    assert "backing up" in r.stderr
+
+
+@posix_only
+def test_upgrade_prune_keeps_edited_copy_removed_upstream(tmp_path):
+    import shutil
+
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@t"]
+    git += ["-c", "commit.gpgsign=false"]
+    origin = tmp_path / "origin"
+    shutil.copytree(INSTALL.parent / "dist" / "cursor", origin / "dist" / "cursor")
+    shutil.copy(INSTALL.parent / "AGENTS.md", origin / "AGENTS.md")
+    shutil.copy(INSTALL, origin / "install.sh")
+    subprocess.run(["git", "init", "-q", str(origin)], check=True)
+    subprocess.run(git + ["-C", str(origin), "add", "-A"], check=True)
+    subprocess.run(git + ["-C", str(origin), "commit", "-qm", "v1"], check=True)
+    kit = tmp_path / "kit"
+    subprocess.run(["git", "clone", "-q", str(origin), str(kit)], check=True)
+    home = tmp_path / "home"
+    env = os.environ.copy()
+    env.update(_env(home), AGENTKIT_HOME=str(kit))
+
+    def run(*args):
+        r = subprocess.run(
+            ["sh", str(kit / "install.sh"), *args],
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+        assert r.returncode == 0, r.stderr
+        return r
+
+    run("--copy", "--tools=cursor")
+    names = sorted(p.name for p in (kit / "dist" / "cursor" / "rules").glob("*.mdc"))
+    edited, untouched = names[0], names[1]
+    rules = home / ".cursor" / "rules"
+    (rules / edited).write_text("my edit\n")
+    for n in (edited, untouched):
+        (origin / "dist" / "cursor" / "rules" / n).unlink()
+    subprocess.run(git + ["-C", str(origin), "commit", "-qam", "v2"], check=True)
+
+    r = run("upgrade", "--tools=cursor", "--copy")
+    assert (rules / edited).read_text() == "my edit\n"
+    assert not (rules / untouched).exists()
+    assert "modified since install" in r.stderr
 
 
 @posix_only

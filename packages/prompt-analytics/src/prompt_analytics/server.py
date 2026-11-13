@@ -210,7 +210,9 @@ def make_server(
     srv = ThreadingHTTPServer((HOST, port), partial(_Handler, directory=str(d)))
     srv.daemon_threads = True
     srv.cfg, srv.adapters = cfg, adapters  # type: ignore[attr-defined]
-    srv.token = secrets.token_urlsafe(32)  # per run, memory only  # type: ignore[attr-defined]
+    srv.token = secrets.token_urlsafe(
+        32
+    )  # per run, memory only  # type: ignore[attr-defined]
     return srv
 
 

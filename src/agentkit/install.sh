@@ -133,13 +133,15 @@ record_hash() {
 
 [ "$DRY_RUN" = 1 ] || { mkdir -p "$MANIFEST_DIR"; touch "$MANIFEST" "$HASHES"; }
 
-# is_ours DEST -- true when DEST is safe to delete: a symlink (removing it
-# destroys no user data) or a copy unchanged since install (its hash matches
-# the one recorded then). Copies with no recorded hash (installed before
+# is_ours DEST -- true when DEST is safe to delete: a symlink into
+# $AGENTKIT_HOME (a link pointing elsewhere is the user's) or a copy
+# unchanged since install (its hash matches the one recorded then). Copies with no recorded hash (installed before
 # hashes.tsv existed, or no sha256 tool) fall back to diffing the current
 # dist source. Anything else is user content: back it up or leave it.
 is_ours() {
-  [ -L "$1" ] && return 0
+  if [ -L "$1" ]; then
+    case "$(readlink "$1")" in "$AGENTKIT_HOME"/*) return 0 ;; *) return 1 ;; esac
+  fi
   _want=$(recorded_hash "$1")
   if [ -n "$_want" ]; then
     [ "$(tree_sha256 "$1")" = "$_want" ]
@@ -292,7 +294,8 @@ dist_source_for_copy() {
 #   * copy installs (--copy): the manifest only records the destination, so
 #     the dist source is re-derived with dist_source_for_copy, which mirrors
 #     the dest layouts in the install_* functions above. An entry is pruned
-#     only when the mapping is recognized AND the dist source is gone;
+#     only when the mapping is recognized AND the dist source is gone AND
+#     the copy is unmodified (is_ours) -- a user-edited copy is left alone;
 #     anything unrecognized is kept -- better a stale copy than deleting a
 #     file we can't trace back to dist/.
 prune_stale() {
@@ -315,6 +318,10 @@ prune_stale() {
     elif [ -e "$path" ]; then
       src=$(dist_source_for_copy "$path")
       if [ -n "$src" ] && [ ! -e "$src" ]; then
+        if ! is_ours "$path"; then
+          warn "$path was removed upstream but modified since install -- leaving it (no longer managed)"
+          continue
+        fi
         [ "$DRY_RUN" = 1 ] || rm -rf "$path"
         log "  pruned (removed upstream): $path"
         continue
