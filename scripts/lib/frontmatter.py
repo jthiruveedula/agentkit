@@ -6,6 +6,7 @@ needs -- `key: scalar` and `key: [a, b]`, no nesting, no anchors, no
 multi-line scalars.
 """
 
+import json
 import re
 from pathlib import Path
 
@@ -21,8 +22,13 @@ def _scalar(raw):
     raw = raw.strip()
     if not raw:
         return ""
-    if raw[0] in "'\"" and raw[-1] == raw[0] and len(raw) > 1:
-        return raw[1:-1]
+    if raw[0] == "'" and raw[-1] == "'" and len(raw) > 1:
+        return raw[1:-1].replace("''", "'")
+    if raw[0] == '"' and raw[-1] == '"' and len(raw) > 1:
+        try:
+            return json.loads(raw)
+        except ValueError:
+            return raw[1:-1]
     if raw.startswith("[") and raw.endswith("]"):
         inner = raw[1:-1].strip()
         return [_scalar(p) for p in inner.split(",")] if inner else []
@@ -78,7 +84,13 @@ def dump(meta, order=None):
         else:
             s = str(v)
             # quote only when the scalar would otherwise reparse as something else
-            if s and (s[0] in "[{#'\"" or s.strip() != s):
+            if s and (
+                s[0] in "[{#'\"-?:,&*!|>%@`"
+                or s.strip() != s
+                or ": " in s
+                or " #" in s
+                or s.endswith(":")
+            ):
                 s = "'%s'" % s.replace("'", "''")
         out.append("%s: %s" % (k, s))
     out.append(DELIM)
@@ -96,6 +108,8 @@ def demo():
     }, meta
     assert body == "hello\n", repr(body)
     assert "allowed-tools: [Read, Bash]" in dump(meta)
+    tricky = {"name": "x", "description": "it's: fine # here. Use when x"}
+    assert parse(dump(tricky) + "\nhi\n") == (tricky, "hi\n"), dump(tricky)
     for bad in ("no frontmatter", "---\nname: x\n", "---\nnot a pair\n---\n"):
         try:
             parse(bad)

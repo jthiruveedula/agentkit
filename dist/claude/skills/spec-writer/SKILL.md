@@ -1,6 +1,6 @@
 ---
 name: spec-writer
-description: Turns a rough feature idea or bug report into a short spec: problem, scope, non-goals, acceptance criteria, tasks. Use when asked for a spec, design doc, or "write this up before we build it".
+description: 'Turns a rough feature idea or bug report into a short spec: problem, scope, non-goals, acceptance criteria, tasks. Use when asked for a spec, design doc, or "write this up before we build it".'
 version: 0.1.0
 ---
 

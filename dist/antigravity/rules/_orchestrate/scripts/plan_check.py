@@ -25,6 +25,7 @@ ROSTER = {
     "ml-engineer",
     "frontend-engineer",
 }
+TIERS = ("haiku", "sonnet", "opus")
 
 
 def check(plan, owners=ROSTER, max_parallel=5):
@@ -48,6 +49,10 @@ def check(plan, owners=ROSTER, max_parallel=5):
         for field in ("objective", "output"):
             if not str(t.get(field, "")).strip():
                 errors.append("%s: empty %s" % (tid, field))
+        if "tier" in t and t["tier"] not in TIERS:
+            errors.append(
+                "%s: unknown tier %r (allowed: %s)" % (tid, t["tier"], ", ".join(TIERS))
+            )
         for d in t.get("deps", []):
             if d not in ids:
                 errors.append("%s: unknown dep %r" % (tid, d))
@@ -89,8 +94,9 @@ def main(argv=None):
     if a.json:
         print(json.dumps({"waves": waves}))
     else:
+        tier = {t["id"]: " (%s)" % t["tier"] for t in plan["tasks"] if "tier" in t}
         for i, w in enumerate(waves, 1):
-            print("wave %d: %s" % (i, ", ".join(w)))
+            print("wave %d: %s" % (i, ", ".join(x + tier.get(x, "") for x in w)))
     return 0
 
 

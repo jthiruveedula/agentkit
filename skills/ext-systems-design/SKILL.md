@@ -19,6 +19,8 @@ diagrams into a skill body or code (GPL-3.0 doesn't mix with this MIT repo).
 
 ## Procedure
 
+`./scripts/` and `external/` are relative to the agentkit checkout, not the user's project: `cd` there first (the installed skill is a symlink into it); the script needs `jq`. No checkout: say so, do not guess upstream content.
+
 1. Sync: `./scripts/sync-external.sh anthropic-skills systems-design-resources`
 2. `anthropic-skills`: `ls external/anthropic-skills/skills/`, follow the matching `SKILL.md`.
 3. `systems-design-resources`: read the relevant README section, then answer in your own words.

@@ -17,6 +17,7 @@ validate:
 test: validate
 	python3 scripts/build.py --check
 	python3 skills/prompt-enhancer/scripts/classify.py --selftest
+	python3 site/scripts/check_site.py
 	python3 -m pytest tests/ skills/ -q
 
 smoke:
@@ -28,6 +29,6 @@ clean:
 	rm -rf dist/__pycache__ scripts/__pycache__ scripts/lib/__pycache__ tests/__pycache__
 
 lint:
-	ruff check .
-	ruff format --check .
+	uvx ruff@0.16.8 check .
+	uvx ruff@0.16.8 format --check .
 	if command -v shellcheck >/dev/null 2>&1; then shellcheck install.sh tests/smoke_install.sh scripts/*.sh; else echo "shellcheck not installed -- skipping shell lint"; fi
