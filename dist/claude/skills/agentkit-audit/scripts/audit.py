@@ -58,7 +58,9 @@ GOOD_CTX = re.compile(
     r"\b(offset|limit|range|grep|rg|summar\w*|targeted|head|tail|checkpoint|diff)\b",
     re.I,
 )
-BAD_CTX = re.compile(r"read (the )?(entire|whole|all)\b|whole[- ]file|read every", re.I)
+BAD_CTX = re.compile(
+    r"read (the )?(entire|whole|all)\b|whole[- ]file reads?|read every", re.I
+)
 # Feedback loop in the body: a check step that says to fix and repeat/re-run.
 LOOP = re.compile(
     r"\b(validat|verif|lint|check|test|re-?run)\w*[^\n]{0,120}?\b(repeat|until|re-?run|again)\b",

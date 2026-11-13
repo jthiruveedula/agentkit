@@ -1,6 +1,6 @@
 ---
 name: researcher
-description: Read-only investigation: locates code, gathers facts, compares options; cites file:line or URL. Use when you need facts before any edit.
+description: 'Read-only investigation: locates code, gathers facts, compares options; cites file:line or URL. Use when you need facts before any edit.'
 tools: Read, Grep, Glob, WebFetch
 model: sonnet
 skills: [smart-navigator]

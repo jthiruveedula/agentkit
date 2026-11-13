@@ -1,6 +1,6 @@
 ---
 name: memory
-description: Durable local SQLite memory: store and search episodes, facts and corrections. Use when the user says "remember this", when you need a past decision, preference or fix, or before debugging (check corrections first).
+description: 'Durable local SQLite memory: store and search episodes, facts and corrections. Use when the user says "remember this", when you need a past decision, preference or fix, or before debugging (check corrections first).'
 allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/memory.py *), Bash(python3 scripts/memory.py *), Read
 version: 0.1.0
 ---

@@ -12,7 +12,7 @@
      "output": "model path + test command", "deps": ["adr"]},
     {"id": "model", "owner": "ml-engineer",
      "objective": "Train baseline + GBM, time-split, log to MLflow",
-     "output": "metrics table + run ids", "deps": ["features"]},
+     "output": "metrics table + run ids", "deps": ["features"], "tier": "opus"},
     {"id": "dq", "owner": "data-quality-engineer",
      "objective": "Freshness/PII checks on feature table",
      "output": "tests added + PII columns", "deps": ["features"]},
@@ -29,3 +29,6 @@ Rules enforced by `scripts/plan_check.py`:
 - each wave (tasks whose deps are all satisfied) has at most `--max-parallel`
   tasks (default 5 — past that, coordination cost outweighs parallelism).
 - `objective` and `output` must be non-empty.
+- optional `tier` must be `haiku`, `sonnet` or `opus`; absent means the owner
+  agent's frontmatter model. Omit by default; `haiku` for mechanical
+  lookups/renames/formatting, `opus` for cross-file design or subtle debugging.

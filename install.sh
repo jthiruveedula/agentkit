@@ -33,6 +33,9 @@ DIST="$AGENTKIT_HOME/dist"
 MANIFEST_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/agentkit"
 MANIFEST="$MANIFEST_DIR/manifest.tsv"
 TOOLS_FILE="$MANIFEST_DIR/tools"
+# HASHES: "<sha256>\t<dest>" per --copy install, recorded at install time so
+# is_ours can tell an untouched copy from a user edit after dist/ moves on.
+HASHES="$MANIFEST_DIR/hashes.tsv"
 
 TOOLS=""
 TOOLS_GIVEN=0
@@ -53,7 +56,7 @@ for arg in "$@"; do
     uninstall) ACTION=uninstall ;;
     version) ACTION=version ;;
     -h|--help)
-      sed -n '2,25p' "$0"; exit 0 ;;
+      awk 'NR > 1 && !/^#/ { exit } NR > 1' "$0"; exit 0 ;;
     *) echo "unknown argument: $arg" >&2; exit 2 ;;
   esac
 done
@@ -82,15 +85,69 @@ fetch_url() {
 # file_sha256 FILE -- print FILE's SHA-256 hex digest, or nothing when
 # neither sha256sum nor shasum is available.
 file_sha256() {
+  sha256_stdin < "$1"
+}
+
+sha256_stdin() {
   if command -v sha256sum >/dev/null 2>&1; then
-    sha256sum < "$1" | awk '{print $1}'
+    sha256sum | awk '{print $1}'
   elif command -v shasum >/dev/null 2>&1; then
-    shasum -a 256 < "$1" | awk '{print $1}'
+    shasum -a 256 | awk '{print $1}'
   fi
 }
 
-mkdir -p "$MANIFEST_DIR"
-touch "$MANIFEST"
+# tree_sha256 PATH -- digest of a file, or of a dir's sorted entry names plus
+# regular-file contents (so added, removed or edited files all change it).
+# Prints nothing when no sha256 tool is available.
+tree_sha256() {
+  command -v sha256sum >/dev/null 2>&1 || command -v shasum >/dev/null 2>&1 || return 0
+  if [ -d "$1" ]; then
+    (cd "$1" && find . | LC_ALL=C sort | while IFS= read -r _f; do
+      if [ -f "$_f" ] && [ ! -L "$_f" ]; then
+        printf '%s %s\n' "$(file_sha256 "$_f")" "$_f"
+      else
+        printf '%s\n' "$_f"
+      fi
+    done) | sha256_stdin
+  else
+    file_sha256 "$1"
+  fi
+}
+
+# recorded_hash DEST -- the install-time hash of DEST, or nothing.
+recorded_hash() {
+  [ -f "$HASHES" ] || return 0
+  awk -F '\t' -v p="$1" '$2 == p { h = $1 } END { if (h != "") print h }' "$HASHES"
+}
+
+# record_hash DEST -- replace DEST's hash entry; a symlink install (or no
+# sha256 tool) just drops the entry.
+record_hash() {
+  _h=""
+  [ -L "$1" ] || _h=$(tree_sha256 "$1")
+  _tmp="$HASHES.tmp.$$"
+  awk -F '\t' -v p="$1" '$2 != p' "$HASHES" > "$_tmp" 2>/dev/null || : > "$_tmp"
+  [ -z "$_h" ] || printf '%s\t%s\n' "$_h" "$1" >> "$_tmp"
+  mv "$_tmp" "$HASHES"
+}
+
+[ "$DRY_RUN" = 1 ] || { mkdir -p "$MANIFEST_DIR"; touch "$MANIFEST" "$HASHES"; }
+
+# is_ours DEST -- true when DEST is safe to delete: a symlink (removing it
+# destroys no user data) or a copy unchanged since install (its hash matches
+# the one recorded then). Copies with no recorded hash (installed before
+# hashes.tsv existed, or no sha256 tool) fall back to diffing the current
+# dist source. Anything else is user content: back it up or leave it.
+is_ours() {
+  [ -L "$1" ] && return 0
+  _want=$(recorded_hash "$1")
+  if [ -n "$_want" ]; then
+    [ "$(tree_sha256 "$1")" = "$_want" ]
+    return
+  fi
+  _src=$(dist_source_for_copy "$1")
+  [ -n "$_src" ] && [ -e "$_src" ] && diff -rq "$1" "$_src" >/dev/null 2>&1
+}
 
 # link_one SRC DEST -- installs one file/dir, backing up a pre-existing
 # non-agentkit target instead of overwriting it.
@@ -103,12 +160,12 @@ link_one() {
   fi
 
   if [ -e "$dest" ] || [ -L "$dest" ]; then
-    if grep -qxF "$dest" "$MANIFEST" 2>/dev/null; then
-      : # a previous agentkit target we're about to replace with a fresher link
+    if grep -qxF "$dest" "$MANIFEST" 2>/dev/null && is_ours "$dest"; then
+      : # an unmodified agentkit target we're about to replace
     else
       ts=$(date +%Y%m%d%H%M%S)
       bak="$dest.bak.$ts"
-      warn "$dest exists and is not managed by agentkit -- backing up to $bak"
+      warn "$dest exists and is not managed by agentkit (or was modified) -- backing up to $bak"
       [ "$DRY_RUN" = 1 ] || mv "$dest" "$bak"
     fi
   fi
@@ -123,13 +180,14 @@ link_one() {
     cp -R "$src" "$dest"
   fi
   grep -qxF "$dest" "$MANIFEST" || printf '%s\n' "$dest" >> "$MANIFEST"
+  record_hash "$dest"
   log "  installed: $dest"
 }
 
 install_claude() {
   log "claude:"
   base="${CLAUDE_HOME:-$HOME/.claude}"
-  mkdir -p "$base"
+  [ "$DRY_RUN" = 1 ] || mkdir -p "$base"
   for d in "$DIST"/claude/skills/*; do
     [ -d "$d" ] || continue
     link_one "$d" "$base/skills/$(basename "$d")"
@@ -163,7 +221,7 @@ install_copilot() {
     Linux)  base="$HOME/.config/Code/User" ;;
     *)      base="$HOME/.config/Code/User" ;;
   esac
-  mkdir -p "$base"
+  [ "$DRY_RUN" = 1 ] || mkdir -p "$base"
   link_one "$AGENTKIT_HOME/AGENTS.md" "$base/copilot-instructions.md"
   for f in "$DIST"/copilot/instructions/*.instructions.md; do
     [ -f "$f" ] || continue
@@ -174,7 +232,7 @@ install_copilot() {
 install_cursor() {
   log "cursor:"
   base="${CURSOR_HOME:-$HOME/.cursor}"
-  mkdir -p "$base"
+  [ "$DRY_RUN" = 1 ] || mkdir -p "$base"
   for f in "$DIST"/cursor/rules/*.mdc; do
     [ -f "$f" ] || continue
     link_one "$f" "$base/rules/$(basename "$f")"
@@ -185,7 +243,7 @@ install_cursor() {
 install_antigravity() {
   log "antigravity:"
   base="${ANTIGRAVITY_HOME:-$HOME/.antigravity}"
-  mkdir -p "$base"
+  [ "$DRY_RUN" = 1 ] || mkdir -p "$base"
   for f in "$DIST"/antigravity/rules/*.md; do
     [ -f "$f" ] || continue
     link_one "$f" "$base/rules/$(basename "$f")"
@@ -323,6 +381,10 @@ do_uninstall() {
       warn "skipping manifest entry outside the agentkit install locations: $path"
       continue
     fi
+    if ! is_ours "$path"; then
+      warn "$path was modified since install -- leaving it in place"
+      continue
+    fi
     [ "$DRY_RUN" = 1 ] && { log "  would remove: $path"; continue; }
     rm -rf "$path"
     # Backups are named "$path.bak.YYYYMMDDHHMMSS", so the newest is the
@@ -338,7 +400,7 @@ do_uninstall() {
       log "  removed: $path"
     fi
   done < "$MANIFEST"
-  [ "$DRY_RUN" = 1 ] || : > "$MANIFEST"
+  [ "$DRY_RUN" = 1 ] || { : > "$MANIFEST"; : > "$HASHES"; }
   log "uninstall complete"
 }
 

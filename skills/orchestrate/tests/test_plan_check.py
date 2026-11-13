@@ -57,3 +57,20 @@ def test_rejects_missing_dep_and_empty_fields():
     )
     assert any("unknown dep" in e for e in errors)
     assert any("empty objective" in e for e in errors)
+
+
+def test_optional_tier_validated_and_printed(tmp_path, capsys):
+    import json
+
+    from plan_check import main
+
+    plan = tmp_path / "plan.json"
+    plan.write_text(json.dumps({"tasks": [dict(_t("a"), tier="opus"), _t("b")]}))
+    assert main([str(plan)]) == 0
+    assert "wave 1: a (opus), b" in capsys.readouterr().out
+    plan.write_text(json.dumps({"tasks": [dict(_t("a"), tier="gpt")]}))
+    assert main([str(plan)]) == 1
+    assert (
+        "a: unknown tier 'gpt' (allowed: haiku, sonnet, opus)"
+        in capsys.readouterr().err
+    )

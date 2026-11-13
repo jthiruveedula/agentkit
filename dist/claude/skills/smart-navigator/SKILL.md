@@ -1,6 +1,6 @@
 ---
 name: smart-navigator
-description: Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.
+description: 'Structure-first repo recon: map manifests and a 2-level tree, then trace entry points instead of reading file by file. Use when in an unfamiliar codebase, finding where something lives or what calls it, or before scoping a change.'
 allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/map.py *), Bash(python3 scripts/map.py *), Read
 version: 0.1.0
 ---

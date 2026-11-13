@@ -27,4 +27,6 @@ file paths, not transcripts.
 is capped at 2 rounds per task, then report the open risk.
 
 **Blocked workers:** on a worker's `blocked: needs <agent>` return, dispatch
-that agent, then re-dispatch the worker with its output.
+that agent, then re-dispatch the worker with its output. A task is
+re-dispatched after `blocked` at most once; a second block on the same task
+is reported as an open risk, not dispatched again.
