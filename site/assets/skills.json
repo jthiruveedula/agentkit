@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 42,
+  "count": 43,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -157,6 +157,12 @@
       "description": "Cuts input-token burn: search before read, line ranges, diff-first, batched calls, no re-reads, terse output. Use when a session burns context, reads feel wasteful, or a task spans many files/logs/shell output.",
       "version": "0.1.0",
       "kind": "native"
+    },
+    {
+      "name": "ext-archify",
+      "description": "Route architecture, sequence, dataflow, ERD and lifecycle diagrams of a real codebase or system to the pinned tt-a1i/archify. Use when asked to diagram a codebase or repo architecture, draw how a service works, or make a sequence, dataflow or ERD diagram of our system.",
+      "version": "0.1.0",
+      "kind": "router"
     },
     {
       "name": "ext-aws",
