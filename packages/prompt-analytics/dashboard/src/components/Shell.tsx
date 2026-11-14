@@ -33,9 +33,9 @@ function DateField({ label, value, min, max, disabled, inputRef, onCommit }: { l
 }
 
 export const NAV: { group: string; items: { id: string; text: string; go?: string }[] }[] = [
-  { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-attention", text: "Needs attention" }] },
+  { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-next", text: "Do next" }] },
   { group: "Investigate", items: [{ id: "s-tools", text: "Tools" }, { id: "s-time", text: "Time" }, { id: "s-funnel", text: "Funnel" }, { id: "s-friction", text: "Friction" }] },
-  { group: "Optimise", items: [{ id: "s-works", text: "What works" }, { id: "s-models", text: "Model fit" }, { id: "s-recs", text: "Recommendations" }] },
+  { group: "Optimise", items: [{ id: "s-works", text: "What works" }, { id: "s-models", text: "Model fit" }] },
   { group: "Govern", items: [{ id: "s-exposure", text: "Exposure" }, { id: "s-sessions", text: "Sessions" }] },
   { group: "Explore", items: [{ id: "s-map", text: "Mind map" }] },
 ];
@@ -56,14 +56,13 @@ export const titleOf = (id: string, multiTool = true) => (id === "s-tools" && !m
 /** 24px stroke icons per section (paths from the signed-off preview) and one hue per nav group. */
 const ICON: Record<string, string> = {
   "s-overview": "M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z",
-  "s-attention": "M12 3l9 16H3zM12 10v4M12 17h.01",
+  "s-next": "M12 3l9 16H3zM12 10v4M12 17h.01",
   "s-tools": "M14 6a4 4 0 0 0-5 5l-6 6 3 3 6-6a4 4 0 0 0 5-5l-3 2-2-2z",
   "s-time": "M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
   "s-funnel": "M3 4h18l-7 8v6l-4 2v-8z",
   "s-friction": "M3 12l4-6 4 12 4-12 3 6h3",
   "s-works": "M5 12l4 4 10-10",
   "s-models": "M4 20V10M10 20V4M16 20v-7M22 20H2",
-  "s-recs": "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z",
   "s-exposure": "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
   "s-sessions": "M4 6h16M4 12h16M4 18h16",
   "s-map": "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM5 5h.01M19 5h.01M5 19h.01M19 19h.01M6 6l4 4M18 6l-4 4M6 18l4-4M18 18l-4-4",

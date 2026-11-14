@@ -1364,12 +1364,12 @@
  ],
  "engine": {
   "methods": {
-   "footprint": "descriptive counts",
+   "footprint": "plain counts",
    "friction": "regex cues + tf-idf rephrase",
    "funnel": "cumulative stage counts",
    "recommend": "templated from ranked insights",
    "time": "rolling robust z (median/MAD)",
-   "works": "tf-idf + KMeans galaxy; Cliffs delta, bootstrap CI, BH-FDR"
+   "works": "tf-idf + KMeans galaxy; best vs worst sessions, repeat-checked"
   },
   "mode": "ml",
   "requested": "ml"
@@ -5368,7 +5368,7 @@
    ]
   }
  },
- "generated_at": "2026-11-02T02:37:55Z",
+ "generated_at": "2026-11-14T21:41:33Z",
  "hour_week": [
   {
    "applied": 1,
@@ -6582,14 +6582,14 @@
    "action": "Start refactor tasks in Cursor; it resolves faster than Claude Code in your history.",
    "evidence_insight": "time.ttr.refactor",
    "id": "rec.5",
-   "impact": "3.8x gap (descriptive, not causal)",
+   "impact": "3.8x gap in your own history",
    "title": "Try Cursor first for refactor"
   },
   {
    "action": "Start refactor tasks in Cursor; it lands code more often than Claude Code in your history.",
    "evidence_insight": "funnel.applied.refactor",
    "id": "rec.6",
-   "impact": "1.4x gap (descriptive, not causal)",
+   "impact": "1.4x gap in your own history",
    "title": "Try Cursor first for refactor"
   }
  ],
@@ -6861,6 +6861,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "feature in mobile-app",
    "tokens": 10682,
    "ttr_min": 32.5
@@ -6883,6 +6884,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "explain in webapp",
    "tokens": 3226,
    "ttr_min": 34.93
@@ -6904,6 +6906,7 @@
    "prompts": 1,
    "reached_stage": 3,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "devops in mobile-app",
    "tokens": 7229,
    "ttr_min": null
@@ -6965,6 +6968,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.279,
    "title": "docs in infra",
    "tokens": 16575,
    "ttr_min": 20.0
@@ -6986,6 +6990,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.482,
    "title": "refactor in infra",
    "tokens": 17141,
    "ttr_min": 8.25
@@ -7008,6 +7013,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.33,
    "title": "feature in api-server",
    "tokens": 10317,
    "ttr_min": null
@@ -7050,6 +7056,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in api-server",
    "tokens": 2541,
    "ttr_min": 34.62
@@ -7073,6 +7080,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "data in webapp",
    "tokens": 14304,
    "ttr_min": 14.27
@@ -7096,6 +7104,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "refactor in webapp",
    "tokens": 10317,
    "ttr_min": 29.3
@@ -7118,6 +7127,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "feature in docs-site",
    "tokens": 10041,
    "ttr_min": 11.5
@@ -7139,6 +7149,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.512,
    "title": "bugfix in api-server",
    "tokens": 14792,
    "ttr_min": null
@@ -7162,6 +7173,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.482,
    "title": "devops in docs-site",
    "tokens": 12685,
    "ttr_min": 16.97
@@ -7184,6 +7196,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.465,
    "title": "bugfix in webapp",
    "tokens": 33715,
    "ttr_min": null
@@ -7207,6 +7220,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in api-server",
    "tokens": 5945,
    "ttr_min": 17.45
@@ -7230,6 +7244,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 7678,
    "ttr_min": 9.65
@@ -7252,6 +7267,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "feature in webapp",
    "tokens": 8860,
    "ttr_min": 12.73
@@ -7273,6 +7289,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "devops in docs-site",
    "tokens": 3290,
    "ttr_min": null
@@ -7314,6 +7331,7 @@
    "prompts": 5,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.427,
    "title": "bugfix in webapp",
    "tokens": 23588,
    "ttr_min": 9.7
@@ -7336,6 +7354,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.451,
    "title": "bugfix in infra",
    "tokens": 23587,
    "ttr_min": 17.73
@@ -7358,6 +7377,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.345,
    "title": "devops in api-server",
    "tokens": 26942,
    "ttr_min": 11.85
@@ -7379,6 +7399,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "devops in webapp",
    "tokens": 10865,
    "ttr_min": null
@@ -7402,6 +7423,7 @@
    "prompts": 7,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.377,
    "title": "explain in docs-site",
    "tokens": 43738,
    "ttr_min": null
@@ -7425,6 +7447,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "refactor in ml-pipeline",
    "tokens": 15626,
    "ttr_min": 6.5
@@ -7447,6 +7470,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "feature in ml-pipeline",
    "tokens": 32963,
    "ttr_min": 22.63
@@ -7470,6 +7494,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "test in infra",
    "tokens": 18970,
    "ttr_min": 18.73
@@ -7492,6 +7517,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in api-server",
    "tokens": 4464,
    "ttr_min": null
@@ -7514,6 +7540,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.515,
    "title": "bugfix in api-server",
    "tokens": 21104,
    "ttr_min": null
@@ -7537,6 +7564,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.13,
    "title": "feature in mobile-app",
    "tokens": 6659,
    "ttr_min": 39.77
@@ -7559,6 +7587,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "data in ml-pipeline",
    "tokens": 16326,
    "ttr_min": 16.02
@@ -7582,6 +7611,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.231,
    "title": "feature in infra",
    "tokens": 19916,
    "ttr_min": 15.58
@@ -7605,6 +7635,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.39,
    "title": "feature in ml-pipeline",
    "tokens": 23688,
    "ttr_min": 18.7
@@ -7628,6 +7659,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "docs in infra",
    "tokens": 27360,
    "ttr_min": null
@@ -7651,6 +7683,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in docs-site",
    "tokens": 12624,
    "ttr_min": 12.17
@@ -7674,6 +7707,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.345,
    "title": "refactor in infra",
    "tokens": 32104,
    "ttr_min": 36.17
@@ -7696,6 +7730,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.451,
    "title": "devops in api-server",
    "tokens": 21605,
    "ttr_min": null
@@ -7718,6 +7753,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "explain in infra",
    "tokens": 16784,
    "ttr_min": 19.23
@@ -7740,6 +7776,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.456,
    "title": "bugfix in mobile-app",
    "tokens": 17868,
    "ttr_min": 7.87
@@ -7763,6 +7800,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "bugfix in ml-pipeline",
    "tokens": 16241,
    "ttr_min": 22.42
@@ -7786,6 +7824,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 5141,
    "ttr_min": 9.38
@@ -7809,6 +7848,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in ml-pipeline",
    "tokens": 7209,
    "ttr_min": 38.2
@@ -7830,6 +7870,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.482,
    "title": "explain in ml-pipeline",
    "tokens": 12821,
    "ttr_min": 23.58
@@ -7853,6 +7894,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "data in mobile-app",
    "tokens": 5302,
    "ttr_min": null
@@ -7876,6 +7918,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in ml-pipeline",
    "tokens": 7668,
    "ttr_min": 15.78
@@ -7899,6 +7942,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "test in infra",
    "tokens": 13826,
    "ttr_min": 20.48
@@ -7921,6 +7965,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.279,
    "title": "bugfix in api-server",
    "tokens": 11099,
    "ttr_min": 12.92
@@ -7943,6 +7988,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in ml-pipeline",
    "tokens": 10455,
    "ttr_min": 31.07
@@ -7966,6 +8012,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "bugfix in docs-site",
    "tokens": 15606,
    "ttr_min": null
@@ -7988,6 +8035,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "devops in api-server",
    "tokens": 13477,
    "ttr_min": null
@@ -8010,6 +8058,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.567,
    "title": "bugfix in docs-site",
    "tokens": 11996,
    "ttr_min": null
@@ -8032,6 +8081,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.23,
    "title": "explain in webapp",
    "tokens": 9513,
    "ttr_min": 25.13
@@ -8054,6 +8104,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "bugfix in docs-site",
    "tokens": 15350,
    "ttr_min": 24.7
@@ -8076,6 +8127,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.39,
    "title": "refactor in mobile-app",
    "tokens": 30565,
    "ttr_min": 9.27
@@ -8098,6 +8150,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.331,
    "title": "bugfix in webapp",
    "tokens": 15515,
    "ttr_min": 30.35
@@ -8120,6 +8173,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.512,
    "title": "bugfix in ml-pipeline",
    "tokens": 24738,
    "ttr_min": 9.88
@@ -8143,6 +8197,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "refactor in docs-site",
    "tokens": 18424,
    "ttr_min": 8.85
@@ -8166,6 +8221,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.275,
    "title": "feature in api-server",
    "tokens": 14955,
    "ttr_min": 37.2
@@ -8189,6 +8245,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in webapp",
    "tokens": 10811,
    "ttr_min": 51.75
@@ -8211,6 +8268,7 @@
    "prompts": 5,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.354,
    "title": "refactor in docs-site",
    "tokens": 29023,
    "ttr_min": 12.73
@@ -8232,6 +8290,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.708,
    "title": "bugfix in mobile-app",
    "tokens": 19616,
    "ttr_min": null
@@ -8254,6 +8313,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.302,
    "title": "explain in mobile-app",
    "tokens": 13514,
    "ttr_min": null
@@ -8276,6 +8336,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.543,
    "title": "bugfix in docs-site",
    "tokens": 26493,
    "ttr_min": 15.78
@@ -8298,6 +8359,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.334,
    "title": "feature in docs-site",
    "tokens": 21857,
    "ttr_min": null
@@ -8321,6 +8383,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "data in api-server",
    "tokens": 8015,
    "ttr_min": 19.82
@@ -8343,6 +8406,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "explain in webapp",
    "tokens": 5499,
    "ttr_min": null
@@ -8365,6 +8429,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "explain in ml-pipeline",
    "tokens": 13233,
    "ttr_min": 32.48
@@ -8387,6 +8452,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.331,
    "title": "bugfix in infra",
    "tokens": 21482,
    "ttr_min": 15.97
@@ -8410,6 +8476,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.451,
    "title": "bugfix in webapp",
    "tokens": 18109,
    "ttr_min": null
@@ -8452,6 +8519,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.451,
    "title": "devops in docs-site",
    "tokens": 16246,
    "ttr_min": null
@@ -8474,6 +8542,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "docs in api-server",
    "tokens": 5338,
    "ttr_min": null
@@ -8496,6 +8565,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "feature in infra",
    "tokens": 3384,
    "ttr_min": 15.35
@@ -8519,6 +8589,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in api-server",
    "tokens": 15804,
    "ttr_min": 21.13
@@ -8540,6 +8611,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "devops in mobile-app",
    "tokens": 8092,
    "ttr_min": 21.45
@@ -8561,6 +8633,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "devops in webapp",
    "tokens": 4446,
    "ttr_min": 16.13
@@ -8583,6 +8656,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 7273,
    "ttr_min": 20.75
@@ -8644,6 +8718,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in webapp",
    "tokens": 5672,
    "ttr_min": 10.78
@@ -8667,6 +8742,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "refactor in docs-site",
    "tokens": 14440,
    "ttr_min": 36.38
@@ -8688,6 +8764,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.482,
    "title": "refactor in webapp",
    "tokens": 17589,
    "ttr_min": null
@@ -8711,6 +8788,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.189,
    "title": "test in ml-pipeline",
    "tokens": 25531,
    "ttr_min": 32.05
@@ -8733,6 +8811,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.158,
    "title": "bugfix in ml-pipeline",
    "tokens": 9284,
    "ttr_min": 33.73
@@ -8755,6 +8834,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "data in mobile-app",
    "tokens": 24332,
    "ttr_min": null
@@ -8778,6 +8858,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "feature in api-server",
    "tokens": 12453,
    "ttr_min": 22.7
@@ -8800,6 +8881,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.365,
    "title": "feature in infra",
    "tokens": 34371,
    "ttr_min": null
@@ -8822,6 +8904,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "feature in api-server",
    "tokens": 28149,
    "ttr_min": 21.28
@@ -8845,6 +8928,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in docs-site",
    "tokens": 5570,
    "ttr_min": 21.93
@@ -8867,6 +8951,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.567,
    "title": "bugfix in mobile-app",
    "tokens": 27210,
    "ttr_min": null
@@ -8889,6 +8974,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.512,
    "title": "refactor in api-server",
    "tokens": 21215,
    "ttr_min": 39.37
@@ -8911,6 +8997,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in docs-site",
    "tokens": 20794,
    "ttr_min": 15.23
@@ -8951,6 +9038,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.512,
    "title": "refactor in mobile-app",
    "tokens": 16905,
    "ttr_min": 8.0
@@ -8973,6 +9061,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.334,
    "title": "feature in mobile-app",
    "tokens": 17185,
    "ttr_min": 18.75
@@ -8995,6 +9084,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "explain in mobile-app",
    "tokens": 19815,
    "ttr_min": null
@@ -9018,6 +9108,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.482,
    "title": "feature in api-server",
    "tokens": 20403,
    "ttr_min": null
@@ -9040,6 +9131,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.456,
    "title": "devops in mobile-app",
    "tokens": 33637,
    "ttr_min": 11.55
@@ -9062,6 +9154,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.451,
    "title": "data in api-server",
    "tokens": 23176,
    "ttr_min": null
@@ -9085,6 +9178,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.279,
    "title": "test in ml-pipeline",
    "tokens": 20089,
    "ttr_min": null
@@ -9108,6 +9202,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in api-server",
    "tokens": 3866,
    "ttr_min": 27.93
@@ -9130,6 +9225,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in mobile-app",
    "tokens": 3133,
    "ttr_min": 12.07
@@ -9151,6 +9247,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.39,
    "title": "devops in api-server",
    "tokens": 21127,
    "ttr_min": 27.58
@@ -9173,6 +9270,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.39,
    "title": "bugfix in docs-site",
    "tokens": 18930,
    "ttr_min": 18.87
@@ -9195,6 +9293,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "explain in ml-pipeline",
    "tokens": 10540,
    "ttr_min": 12.02
@@ -9218,6 +9317,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.332,
    "title": "test in infra",
    "tokens": 17037,
    "ttr_min": 26.62
@@ -9241,6 +9341,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in webapp",
    "tokens": 7444,
    "ttr_min": 16.22
@@ -9263,6 +9364,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.345,
    "title": "data in mobile-app",
    "tokens": 19416,
    "ttr_min": 13.0
@@ -9284,6 +9386,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.391,
    "title": "refactor in mobile-app",
    "tokens": 17033,
    "ttr_min": 8.23
@@ -9306,6 +9409,7 @@
    "prompts": 6,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.36,
    "title": "feature in webapp",
    "tokens": 39882,
    "ttr_min": 17.05
@@ -9327,6 +9431,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.618,
    "title": "bugfix in docs-site",
    "tokens": 17658,
    "ttr_min": null
@@ -9388,6 +9493,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.482,
    "title": "feature in webapp",
    "tokens": 24398,
    "ttr_min": null
@@ -9410,6 +9516,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "refactor in infra",
    "tokens": 9434,
    "ttr_min": 8.32
@@ -9432,6 +9539,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.189,
    "title": "refactor in docs-site",
    "tokens": 21664,
    "ttr_min": 37.85
@@ -9454,6 +9562,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "feature in infra",
    "tokens": 11491,
    "ttr_min": null
@@ -9476,6 +9585,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "refactor in ml-pipeline",
    "tokens": 10058,
    "ttr_min": null
@@ -9517,6 +9627,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in mobile-app",
    "tokens": 3820,
    "ttr_min": null
@@ -9538,6 +9649,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.642,
    "title": "bugfix in webapp",
    "tokens": 11554,
    "ttr_min": null
@@ -9560,6 +9672,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "explain in ml-pipeline",
    "tokens": 14369,
    "ttr_min": 8.38
@@ -9583,6 +9696,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "devops in infra",
    "tokens": 20943,
    "ttr_min": null
@@ -9606,6 +9720,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in infra",
    "tokens": 12522,
    "ttr_min": 19.53
@@ -9629,6 +9744,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in ml-pipeline",
    "tokens": 10603,
    "ttr_min": 33.77
@@ -9651,6 +9767,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "explain in infra",
    "tokens": 8378,
    "ttr_min": 12.93
@@ -9673,6 +9790,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "feature in docs-site",
    "tokens": 15410,
    "ttr_min": null
@@ -9695,6 +9813,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "explain in docs-site",
    "tokens": 13302,
    "ttr_min": null
@@ -9717,6 +9836,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.331,
    "title": "docs in docs-site",
    "tokens": 23221,
    "ttr_min": null
@@ -9740,6 +9860,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "refactor in docs-site",
    "tokens": 5678,
    "ttr_min": 31.63
@@ -9762,6 +9883,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in ml-pipeline",
    "tokens": 7213,
    "ttr_min": 29.07
@@ -9783,6 +9905,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.437,
    "title": "feature in mobile-app",
    "tokens": 21752,
    "ttr_min": null
@@ -9805,6 +9928,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "explain in ml-pipeline",
    "tokens": 16000,
    "ttr_min": 18.0
@@ -9828,6 +9952,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "explain in webapp",
    "tokens": 16682,
    "ttr_min": null
@@ -9850,6 +9975,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "refactor in ml-pipeline",
    "tokens": 16929,
    "ttr_min": 37.17
@@ -9873,6 +9999,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "refactor in infra",
    "tokens": 9059,
    "ttr_min": 39.1
@@ -9896,6 +10023,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.456,
    "title": "test in docs-site",
    "tokens": 16766,
    "ttr_min": 5.75
@@ -9919,6 +10047,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.173,
    "title": "feature in docs-site",
    "tokens": 13916,
    "ttr_min": 22.13
@@ -9979,6 +10108,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.543,
    "title": "bugfix in ml-pipeline",
    "tokens": 28824,
    "ttr_min": 16.87
@@ -10001,6 +10131,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "feature in ml-pipeline",
    "tokens": 8619,
    "ttr_min": 31.7
@@ -10023,6 +10154,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "feature in mobile-app",
    "tokens": 14018,
    "ttr_min": 16.58
@@ -10046,6 +10178,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.345,
    "title": "refactor in webapp",
    "tokens": 19185,
    "ttr_min": 12.93
@@ -10069,6 +10202,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "refactor in webapp",
    "tokens": 9700,
    "ttr_min": null
@@ -10092,6 +10226,7 @@
    "prompts": 6,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.57,
    "title": "test in api-server",
    "tokens": 37382,
    "ttr_min": null
@@ -10115,6 +10250,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.302,
    "title": "bugfix in infra",
    "tokens": 32763,
    "ttr_min": 31.88
@@ -10137,6 +10273,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.345,
    "title": "feature in docs-site",
    "tokens": 30387,
    "ttr_min": null
@@ -10160,6 +10297,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.39,
    "title": "bugfix in ml-pipeline",
    "tokens": 18005,
    "ttr_min": 15.8
@@ -10182,6 +10320,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 10085,
    "ttr_min": null
@@ -10204,6 +10343,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "bugfix in mobile-app",
    "tokens": 19954,
    "ttr_min": 22.83
@@ -10227,6 +10367,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.281,
    "title": "feature in ml-pipeline",
    "tokens": 12676,
    "ttr_min": 14.0
@@ -10250,6 +10391,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.391,
    "title": "docs in api-server",
    "tokens": 17737,
    "ttr_min": 10.78
@@ -10273,6 +10415,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.526,
    "title": "test in webapp",
    "tokens": 27533,
    "ttr_min": null
@@ -10295,6 +10438,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in webapp",
    "tokens": 13726,
    "ttr_min": 13.7
@@ -10318,6 +10462,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in ml-pipeline",
    "tokens": 3704,
    "ttr_min": 16.68
@@ -10340,6 +10485,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.482,
    "title": "refactor in mobile-app",
    "tokens": 13584,
    "ttr_min": 18.0
@@ -10363,6 +10509,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "test in mobile-app",
    "tokens": 8414,
    "ttr_min": 14.05
@@ -10385,6 +10532,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "refactor in infra",
    "tokens": 20744,
    "ttr_min": 9.82
@@ -10407,6 +10555,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in ml-pipeline",
    "tokens": 5311,
    "ttr_min": null
@@ -10430,6 +10579,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "explain in webapp",
    "tokens": 17742,
    "ttr_min": null
@@ -10453,6 +10603,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "devops in api-server",
    "tokens": 6413,
    "ttr_min": 35.18
@@ -10493,6 +10644,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "devops in docs-site",
    "tokens": 10128,
    "ttr_min": 24.53
@@ -10516,6 +10668,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in webapp",
    "tokens": 7248,
    "ttr_min": 19.17
@@ -10538,6 +10691,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "explain in mobile-app",
    "tokens": 12547,
    "ttr_min": 29.73
@@ -10561,6 +10715,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 3249,
    "ttr_min": 15.7
@@ -10584,6 +10739,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in api-server",
    "tokens": 386613,
    "ttr_min": 9.58
@@ -10607,6 +10763,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.279,
    "title": "feature in api-server",
    "tokens": 270421,
    "ttr_min": 47.15
@@ -10630,6 +10787,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "feature in api-server",
    "tokens": 281676,
    "ttr_min": 15.65
@@ -10653,6 +10811,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "claude_code",
+   "struggle_p": 0.078,
    "title": "feature in api-server",
    "tokens": 67941,
    "ttr_min": 21.75
@@ -10676,6 +10835,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "feature in api-server",
    "tokens": 232078,
    "ttr_min": 18.45
@@ -10699,6 +10859,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "feature in api-server",
    "tokens": 469378,
    "ttr_min": 15.48
@@ -10739,6 +10900,7 @@
    "prompts": 6,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.518,
    "title": "refactor in ml-pipeline",
    "tokens": 40098,
    "ttr_min": 14.7
@@ -10761,6 +10923,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.452,
    "title": "docs in infra",
    "tokens": 17907,
    "ttr_min": null
@@ -10783,6 +10946,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.543,
    "title": "feature in ml-pipeline",
    "tokens": 28491,
    "ttr_min": 20.25
@@ -10806,6 +10970,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.427,
    "title": "bugfix in mobile-app",
    "tokens": 33737,
    "ttr_min": null
@@ -10828,6 +10993,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.39,
    "title": "bugfix in api-server",
    "tokens": 22309,
    "ttr_min": 19.3
@@ -10850,6 +11016,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.23,
    "title": "explain in api-server",
    "tokens": 18488,
    "ttr_min": 23.15
@@ -10873,6 +11040,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "data in api-server",
    "tokens": 9234,
    "ttr_min": null
@@ -10896,6 +11064,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "explain in webapp",
    "tokens": 20771,
    "ttr_min": null
@@ -10917,6 +11086,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in infra",
    "tokens": 0,
    "ttr_min": null
@@ -10939,6 +11109,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.279,
    "title": "bugfix in api-server",
    "tokens": 24719,
    "ttr_min": null
@@ -10962,6 +11133,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.334,
    "title": "bugfix in ml-pipeline",
    "tokens": 17820,
    "ttr_min": 17.58
@@ -10985,6 +11157,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 12388,
    "ttr_min": 13.02
@@ -11007,6 +11180,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.512,
    "title": "bugfix in docs-site",
    "tokens": 17108,
    "ttr_min": 10.77
@@ -11029,6 +11203,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.275,
    "title": "devops in infra",
    "tokens": 13274,
    "ttr_min": 15.72
@@ -11051,6 +11226,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.46,
    "title": "bugfix in ml-pipeline",
    "tokens": 16216,
    "ttr_min": null
@@ -11074,6 +11250,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in api-server",
    "tokens": 9277,
    "ttr_min": null
@@ -11097,6 +11274,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in ml-pipeline",
    "tokens": 9539,
    "ttr_min": 12.05
@@ -11120,6 +11298,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.331,
    "title": "data in api-server",
    "tokens": 15936,
    "ttr_min": 7.88
@@ -11142,6 +11321,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "explain in webapp",
    "tokens": 9024,
    "ttr_min": 12.2
@@ -11165,6 +11345,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.656,
    "title": "bugfix in api-server",
    "tokens": 26394,
    "ttr_min": 15.47
@@ -11187,6 +11368,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in api-server",
    "tokens": 4631,
    "ttr_min": 36.1
@@ -11210,6 +11392,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.451,
    "title": "feature in api-server",
    "tokens": 17501,
    "ttr_min": null
@@ -11269,6 +11452,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "explain in ml-pipeline",
    "tokens": 4106,
    "ttr_min": null
@@ -11292,6 +11476,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "feature in docs-site",
    "tokens": 15047,
    "ttr_min": 17.2
@@ -11314,6 +11499,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.364,
    "title": "feature in docs-site",
    "tokens": 31139,
    "ttr_min": null
@@ -11337,6 +11523,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 5878,
    "ttr_min": 19.93
@@ -11359,6 +11546,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.39,
    "title": "explain in docs-site",
    "tokens": 16269,
    "ttr_min": 18.7
@@ -11382,6 +11570,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in webapp",
    "tokens": 5593,
    "ttr_min": 31.47
@@ -11403,6 +11592,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in ml-pipeline",
    "tokens": 12162,
    "ttr_min": null
@@ -11425,6 +11615,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 11952,
    "ttr_min": 29.67
@@ -11446,6 +11637,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.501,
    "title": "devops in webapp",
    "tokens": 33992,
    "ttr_min": 29.93
@@ -11468,6 +11660,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "explain in docs-site",
    "tokens": 10768,
    "ttr_min": 17.83
@@ -11490,6 +11683,7 @@
    "prompts": 6,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.543,
    "title": "feature in mobile-app",
    "tokens": 38349,
    "ttr_min": null
@@ -11513,6 +11707,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.5,
    "title": "bugfix in api-server",
    "tokens": 36729,
    "ttr_min": null
@@ -11554,6 +11749,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.331,
    "title": "bugfix in webapp",
    "tokens": 21797,
    "ttr_min": null
@@ -11577,6 +11773,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.482,
    "title": "feature in infra",
    "tokens": 12276,
    "ttr_min": 9.18
@@ -11599,6 +11796,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "explain in webapp",
    "tokens": 7243,
    "ttr_min": 17.55
@@ -11622,6 +11820,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.263,
    "title": "refactor in mobile-app",
    "tokens": 26715,
    "ttr_min": 14.93
@@ -11645,6 +11844,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.345,
    "title": "feature in ml-pipeline",
    "tokens": 34268,
    "ttr_min": 12.17
@@ -11667,6 +11867,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.437,
    "title": "feature in mobile-app",
    "tokens": 26193,
    "ttr_min": 18.1
@@ -11690,6 +11891,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "explain in docs-site",
    "tokens": 15871,
    "ttr_min": null
@@ -11713,6 +11915,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "docs in webapp",
    "tokens": 9919,
    "ttr_min": 11.02
@@ -11773,6 +11976,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in mobile-app",
    "tokens": 7282,
    "ttr_min": 7.47
@@ -11795,6 +11999,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "bugfix in mobile-app",
    "tokens": 26063,
    "ttr_min": 35.95
@@ -11818,6 +12023,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "docs in mobile-app",
    "tokens": 6705,
    "ttr_min": 25.62
@@ -11860,6 +12066,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "feature in api-server",
    "tokens": 22286,
    "ttr_min": 33.67
@@ -11882,6 +12089,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in webapp",
    "tokens": 10472,
    "ttr_min": 38.65
@@ -11905,6 +12113,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "bugfix in webapp",
    "tokens": 19955,
    "ttr_min": 17.57
@@ -11928,6 +12137,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "bugfix in docs-site",
    "tokens": 23564,
    "ttr_min": null
@@ -11950,6 +12160,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.229,
    "title": "feature in ml-pipeline",
    "tokens": 22159,
    "ttr_min": null
@@ -11973,6 +12184,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 9351,
    "ttr_min": 21.6
@@ -11996,6 +12208,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.318,
    "title": "feature in ml-pipeline",
    "tokens": 26492,
    "ttr_min": null
@@ -12019,6 +12232,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in infra",
    "tokens": 8130,
    "ttr_min": 39.6
@@ -12042,6 +12256,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in ml-pipeline",
    "tokens": 4609,
    "ttr_min": 32.43
@@ -12064,6 +12279,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "devops in api-server",
    "tokens": 19637,
    "ttr_min": 33.15
@@ -12104,6 +12320,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "test in mobile-app",
    "tokens": 0,
    "ttr_min": null
@@ -12126,6 +12343,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "bugfix in api-server",
    "tokens": 12737,
    "ttr_min": 23.1
@@ -12149,6 +12367,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.451,
    "title": "bugfix in mobile-app",
    "tokens": 23941,
    "ttr_min": null
@@ -12190,6 +12409,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.621,
    "title": "bugfix in mobile-app",
    "tokens": 32356,
    "ttr_min": 36.08
@@ -12213,6 +12433,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "explain in webapp",
    "tokens": 24202,
    "ttr_min": 19.18
@@ -12255,6 +12476,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "feature in api-server",
    "tokens": 15753,
    "ttr_min": null
@@ -12278,6 +12500,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "feature in infra",
    "tokens": 13328,
    "ttr_min": 18.03
@@ -12301,6 +12524,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "refactor in infra",
    "tokens": 9395,
    "ttr_min": 37.08
@@ -12323,6 +12547,7 @@
    "prompts": 5,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.419,
    "title": "feature in api-server",
    "tokens": 30730,
    "ttr_min": 22.65
@@ -12346,6 +12571,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "data in api-server",
    "tokens": 10088,
    "ttr_min": 16.88
@@ -12368,6 +12594,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.173,
    "title": "explain in infra",
    "tokens": 6927,
    "ttr_min": 26.55
@@ -12391,6 +12618,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in ml-pipeline",
    "tokens": 7999,
    "ttr_min": 38.68
@@ -12413,6 +12641,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "devops in infra",
    "tokens": 24845,
    "ttr_min": 19.42
@@ -12435,6 +12664,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.279,
    "title": "bugfix in api-server",
    "tokens": 8695,
    "ttr_min": 11.95
@@ -12458,6 +12688,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "feature in ml-pipeline",
    "tokens": 19618,
    "ttr_min": null
@@ -12481,6 +12712,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.345,
    "title": "feature in docs-site",
    "tokens": 31368,
    "ttr_min": null
@@ -12503,6 +12735,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "refactor in ml-pipeline",
    "tokens": 31155,
    "ttr_min": null
@@ -12526,6 +12759,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "feature in webapp",
    "tokens": 24409,
    "ttr_min": 14.98
@@ -12568,6 +12802,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "devops in ml-pipeline",
    "tokens": 25911,
    "ttr_min": null
@@ -12591,6 +12826,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "test in mobile-app",
    "tokens": 26899,
    "ttr_min": 32.23
@@ -12614,6 +12850,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.551,
    "title": "devops in api-server",
    "tokens": 31406,
    "ttr_min": null
@@ -12635,6 +12872,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "cursor",
+   "struggle_p": 0.567,
    "title": "bugfix in api-server",
    "tokens": 0,
    "ttr_min": null
@@ -12677,6 +12915,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "devops in docs-site",
    "tokens": 9261,
    "ttr_min": 15.67
@@ -12700,6 +12939,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 4033,
    "ttr_min": 14.65
@@ -12721,6 +12961,7 @@
    "prompts": 1,
    "reached_stage": 3,
    "source": "copilot",
+   "struggle_p": 0.567,
    "title": "bugfix in infra",
    "tokens": 5198,
    "ttr_min": null
@@ -12744,6 +12985,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "docs in api-server",
    "tokens": 11302,
    "ttr_min": 18.08
@@ -12765,6 +13007,7 @@
    "prompts": 1,
    "reached_stage": 3,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in infra",
    "tokens": 7451,
    "ttr_min": null
@@ -12787,6 +13030,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.452,
    "title": "refactor in api-server",
    "tokens": 22591,
    "ttr_min": 10.68
@@ -12808,6 +13052,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.687,
    "title": "bugfix in api-server",
    "tokens": 21970,
    "ttr_min": 7.85
@@ -12830,6 +13075,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.456,
    "title": "feature in api-server",
    "tokens": 19932,
    "ttr_min": null
@@ -12852,6 +13098,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.279,
    "title": "feature in ml-pipeline",
    "tokens": 16617,
    "ttr_min": null
@@ -12874,6 +13121,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "feature in webapp",
    "tokens": 4821,
    "ttr_min": 27.2
@@ -12895,6 +13143,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.482,
    "title": "explain in infra",
    "tokens": 13670,
    "ttr_min": null
@@ -12917,6 +13166,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.231,
    "title": "explain in docs-site",
    "tokens": 19816,
    "ttr_min": 12.82
@@ -12938,6 +13188,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in api-server",
    "tokens": 0,
    "ttr_min": null
@@ -12961,6 +13212,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "explain in docs-site",
    "tokens": 28955,
    "ttr_min": null
@@ -12983,6 +13235,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "feature in infra",
    "tokens": 22644,
    "ttr_min": null
@@ -13006,6 +13259,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "bugfix in api-server",
    "tokens": 15541,
    "ttr_min": null
@@ -13028,6 +13282,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.13,
    "title": "bugfix in mobile-app",
    "tokens": 16772,
    "ttr_min": 25.93
@@ -13050,6 +13305,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.303,
    "title": "feature in webapp",
    "tokens": 15276,
    "ttr_min": 33.52
@@ -13072,6 +13328,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.451,
    "title": "feature in infra",
    "tokens": 19025,
    "ttr_min": null
@@ -13094,6 +13351,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.482,
    "title": "explain in ml-pipeline",
    "tokens": 13479,
    "ttr_min": 17.83
@@ -13117,6 +13375,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in ml-pipeline",
    "tokens": 8678,
    "ttr_min": 33.5
@@ -13140,6 +13399,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "test in ml-pipeline",
    "tokens": 7003,
    "ttr_min": 16.45
@@ -13163,6 +13423,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "docs in docs-site",
    "tokens": 10198,
    "ttr_min": 17.17
@@ -13185,6 +13446,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "refactor in docs-site",
    "tokens": 12589,
    "ttr_min": null
@@ -13207,6 +13469,7 @@
    "prompts": 1,
    "reached_stage": 2,
    "source": "copilot",
+   "struggle_p": 0.078,
    "title": "explain in api-server",
    "tokens": 5153,
    "ttr_min": 14.38
@@ -13249,6 +13512,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "bugfix in infra",
    "tokens": 18184,
    "ttr_min": 13.2
@@ -13271,6 +13535,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 9942,
    "ttr_min": 19.72
@@ -13294,6 +13559,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 3129,
    "ttr_min": 29.27
@@ -13316,6 +13582,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.515,
    "title": "feature in ml-pipeline",
    "tokens": 18823,
    "ttr_min": null
@@ -13339,6 +13606,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.334,
    "title": "bugfix in ml-pipeline",
    "tokens": 21715,
    "ttr_min": 29.45
@@ -13361,6 +13629,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.279,
    "title": "feature in ml-pipeline",
    "tokens": 11305,
    "ttr_min": 17.1
@@ -13384,6 +13653,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "devops in docs-site",
    "tokens": 33455,
    "ttr_min": null
@@ -13406,6 +13676,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.437,
    "title": "docs in infra",
    "tokens": 24902,
    "ttr_min": 46.8
@@ -13429,6 +13700,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.275,
    "title": "bugfix in docs-site",
    "tokens": 25589,
    "ttr_min": 38.12
@@ -13450,6 +13722,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.737,
    "title": "bugfix in mobile-app",
    "tokens": 28790,
    "ttr_min": null
@@ -13473,6 +13746,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in webapp",
    "tokens": 15409,
    "ttr_min": 16.65
@@ -13496,6 +13770,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "devops in ml-pipeline",
    "tokens": 4651,
    "ttr_min": 22.73
@@ -13518,6 +13793,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "devops in infra",
    "tokens": 14885,
    "ttr_min": null
@@ -13541,6 +13817,7 @@
    "prompts": 5,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.427,
    "title": "test in ml-pipeline",
    "tokens": 34533,
    "ttr_min": null
@@ -13563,6 +13840,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 9190,
    "ttr_min": null
@@ -13604,6 +13882,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.275,
    "title": "devops in webapp",
    "tokens": 19136,
    "ttr_min": null
@@ -13627,6 +13906,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.331,
    "title": "test in infra",
    "tokens": 14314,
    "ttr_min": 18.48
@@ -13649,6 +13929,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.437,
    "title": "bugfix in ml-pipeline",
    "tokens": 28188,
    "ttr_min": null
@@ -13672,6 +13953,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.33,
    "title": "feature in mobile-app",
    "tokens": 21459,
    "ttr_min": 38.72
@@ -13695,6 +13977,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.456,
    "title": "bugfix in api-server",
    "tokens": 23210,
    "ttr_min": 18.02
@@ -13717,6 +14000,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 8347,
    "ttr_min": 7.8
@@ -13740,6 +14024,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "feature in infra",
    "tokens": 12320,
    "ttr_min": 17.37
@@ -13763,6 +14048,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.13,
    "title": "refactor in docs-site",
    "tokens": 18787,
    "ttr_min": 38.53
@@ -13786,6 +14072,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in api-server",
    "tokens": 10291,
    "ttr_min": null
@@ -13807,6 +14094,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "data in mobile-app",
    "tokens": 13842,
    "ttr_min": 20.08
@@ -13830,6 +14118,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in ml-pipeline",
    "tokens": 11884,
    "ttr_min": 8.97
@@ -13852,6 +14141,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.41,
    "title": "refactor in webapp",
    "tokens": 30025,
    "ttr_min": null
@@ -13875,6 +14165,7 @@
    "prompts": 5,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.287,
    "title": "test in infra",
    "tokens": 37489,
    "ttr_min": 15.98
@@ -13898,6 +14189,7 @@
    "prompts": 8,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.677,
    "title": "bugfix in webapp",
    "tokens": 54276,
    "ttr_min": null
@@ -13920,6 +14212,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.23,
    "title": "explain in api-server",
    "tokens": 10670,
    "ttr_min": 15.55
@@ -13943,6 +14236,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.41,
    "title": "bugfix in webapp",
    "tokens": 21735,
    "ttr_min": 20.2
@@ -13965,6 +14259,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.482,
    "title": "bugfix in ml-pipeline",
    "tokens": 15476,
    "ttr_min": 32.62
@@ -13988,6 +14283,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.33,
    "title": "refactor in docs-site",
    "tokens": 20602,
    "ttr_min": 24.85
@@ -14010,6 +14306,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "refactor in api-server",
    "tokens": 15181,
    "ttr_min": 28.67
@@ -14033,6 +14330,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in ml-pipeline",
    "tokens": 5098,
    "ttr_min": 9.62
@@ -14056,6 +14354,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "docs in api-server",
    "tokens": 5992,
    "ttr_min": 24.05
@@ -14078,6 +14377,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "cursor",
+   "struggle_p": 0.391,
    "title": "bugfix in webapp",
    "tokens": 11917,
    "ttr_min": null
@@ -14101,6 +14401,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "bugfix in ml-pipeline",
    "tokens": 4355,
    "ttr_min": 11.27
@@ -14123,6 +14424,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.279,
    "title": "bugfix in infra",
    "tokens": 17486,
    "ttr_min": 53.02
@@ -14146,6 +14448,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "refactor in mobile-app",
    "tokens": 5360,
    "ttr_min": 18.62
@@ -14168,6 +14471,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in ml-pipeline",
    "tokens": 17456,
    "ttr_min": 15.78
@@ -14209,6 +14513,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.302,
    "title": "feature in api-server",
    "tokens": 18959,
    "ttr_min": 12.88
@@ -14232,6 +14537,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.501,
    "title": "bugfix in ml-pipeline",
    "tokens": 24954,
    "ttr_min": null
@@ -14253,6 +14559,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in webapp",
    "tokens": 5912,
    "ttr_min": null
@@ -14275,6 +14582,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.452,
    "title": "bugfix in mobile-app",
    "tokens": 14787,
    "ttr_min": null
@@ -14297,6 +14605,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.456,
    "title": "feature in api-server",
    "tokens": 16675,
    "ttr_min": null
@@ -14320,6 +14629,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "feature in api-server",
    "tokens": 14099,
    "ttr_min": 7.67
@@ -14342,6 +14652,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.482,
    "title": "refactor in webapp",
    "tokens": 13325,
    "ttr_min": 48.22
@@ -14363,6 +14674,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.621,
    "title": "docs in api-server",
    "tokens": 30318,
    "ttr_min": 22.2
@@ -14385,6 +14697,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in mobile-app",
    "tokens": 9722,
    "ttr_min": 11.13
@@ -14408,6 +14721,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in mobile-app",
    "tokens": 7269,
    "ttr_min": 48.65
@@ -14430,6 +14744,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.279,
    "title": "bugfix in docs-site",
    "tokens": 13104,
    "ttr_min": 9.67
@@ -14452,6 +14767,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "feature in docs-site",
    "tokens": 17516,
    "ttr_min": 21.7
@@ -14475,6 +14791,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "bugfix in infra",
    "tokens": 14082,
    "ttr_min": 13.6
@@ -14497,6 +14814,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.482,
    "title": "refactor in webapp",
    "tokens": 12330,
    "ttr_min": 29.97
@@ -14518,6 +14836,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "feature in infra",
    "tokens": 11714,
    "ttr_min": null
@@ -14541,6 +14860,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.302,
    "title": "explain in docs-site",
    "tokens": 13464,
    "ttr_min": 11.9
@@ -14563,6 +14883,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.229,
    "title": "refactor in docs-site",
    "tokens": 19609,
    "ttr_min": 5.6
@@ -14586,6 +14907,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in webapp",
    "tokens": 6547,
    "ttr_min": 14.08
@@ -14609,6 +14931,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "test in webapp",
    "tokens": 8335,
    "ttr_min": 27.33
@@ -14631,6 +14954,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.456,
    "title": "data in mobile-app",
    "tokens": 13298,
    "ttr_min": 22.8
@@ -14654,6 +14978,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in webapp",
    "tokens": 10495,
    "ttr_min": 9.13
@@ -14677,6 +15002,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in ml-pipeline",
    "tokens": 9922,
    "ttr_min": null
@@ -14699,6 +15025,7 @@
    "prompts": 6,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.46,
    "title": "devops in webapp",
    "tokens": 42344,
    "ttr_min": null
@@ -14722,6 +15049,7 @@
    "prompts": 6,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.452,
    "title": "bugfix in webapp",
    "tokens": 44363,
    "ttr_min": null
@@ -14744,6 +15072,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "feature in mobile-app",
    "tokens": 8563,
    "ttr_min": null
@@ -14766,6 +15095,7 @@
    "prompts": 3,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.331,
    "title": "bugfix in docs-site",
    "tokens": 18147,
    "ttr_min": null
@@ -14788,6 +15118,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "docs in ml-pipeline",
    "tokens": 19648,
    "ttr_min": 21.12
@@ -14830,6 +15161,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 3003,
    "ttr_min": 10.42
@@ -14853,6 +15185,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.229,
    "title": "data in api-server",
    "tokens": 18355,
    "ttr_min": 22.43
@@ -14894,6 +15227,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.279,
    "title": "explain in ml-pipeline",
    "tokens": 19863,
    "ttr_min": 32.65
@@ -14917,6 +15251,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "docs in infra",
    "tokens": 7382,
    "ttr_min": null
@@ -14939,6 +15274,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in docs-site",
    "tokens": 4109,
    "ttr_min": 14.92
@@ -14961,6 +15297,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "bugfix in api-server",
    "tokens": 15889,
    "ttr_min": 26.37
@@ -14984,6 +15321,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 13272,
    "ttr_min": 33.3
@@ -15006,6 +15344,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.391,
    "title": "explain in webapp",
    "tokens": 13988,
    "ttr_min": null
@@ -15029,6 +15368,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.275,
    "title": "test in ml-pipeline",
    "tokens": 21753,
    "ttr_min": 34.45
@@ -15052,6 +15392,7 @@
    "prompts": 1,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "devops in infra",
    "tokens": 7428,
    "ttr_min": 26.07
@@ -15075,6 +15416,7 @@
    "prompts": 6,
    "reached_stage": 4,
    "source": "opencode",
+   "struggle_p": 0.544,
    "title": "bugfix in mobile-app",
    "tokens": 39708,
    "ttr_min": null
@@ -15097,6 +15439,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 10164,
    "ttr_min": 43.18
@@ -15138,6 +15481,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "feature in infra",
    "tokens": 17592,
    "ttr_min": 19.88
@@ -15160,6 +15504,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "feature in infra",
    "tokens": 12295,
    "ttr_min": 11.68
@@ -15182,6 +15527,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "claude_code",
+   "struggle_p": 0.39,
    "title": "feature in mobile-app",
    "tokens": 13953,
    "ttr_min": 24.22
@@ -15205,6 +15551,7 @@
    "prompts": 4,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.411,
    "title": "bugfix in webapp",
    "tokens": 17725,
    "ttr_min": 31.22
@@ -15227,6 +15574,7 @@
    "prompts": 3,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.451,
    "title": "refactor in docs-site",
    "tokens": 17549,
    "ttr_min": 12.02
@@ -15249,6 +15597,7 @@
    "prompts": 1,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "feature in ml-pipeline",
    "tokens": 8369,
    "ttr_min": 18.2
@@ -15272,6 +15621,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "copilot",
+   "struggle_p": 0.302,
    "title": "test in webapp",
    "tokens": 13763,
    "ttr_min": null
@@ -15295,6 +15645,7 @@
    "prompts": 4,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.302,
    "title": "docs in infra",
    "tokens": 21348,
    "ttr_min": null
@@ -15317,6 +15668,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "claude_code",
+   "struggle_p": 0.303,
    "title": "explain in mobile-app",
    "tokens": 14858,
    "ttr_min": 16.03
@@ -15357,6 +15709,7 @@
    "prompts": 1,
    "reached_stage": 3,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "refactor in docs-site",
    "tokens": 7092,
    "ttr_min": null
@@ -15379,6 +15732,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "opencode",
+   "struggle_p": 0.227,
    "title": "feature in api-server",
    "tokens": 9450,
    "ttr_min": 31.7
@@ -15401,6 +15755,7 @@
    "prompts": 4,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.263,
    "title": "refactor in infra",
    "tokens": 30875,
    "ttr_min": 9.85
@@ -15423,6 +15778,7 @@
    "prompts": 2,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.391,
    "title": "docs in ml-pipeline",
    "tokens": 14524,
    "ttr_min": 20.07
@@ -15444,6 +15800,7 @@
    "prompts": 1,
    "reached_stage": 3,
    "source": "cursor",
+   "struggle_p": 0.567,
    "title": "bugfix in ml-pipeline",
    "tokens": 4817,
    "ttr_min": null
@@ -15467,6 +15824,7 @@
    "prompts": 6,
    "reached_stage": 5,
    "source": "copilot",
+   "struggle_p": 0.39,
    "title": "data in mobile-app",
    "tokens": 43116,
    "ttr_min": 26.12
@@ -15489,6 +15847,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "bugfix in webapp",
    "tokens": 18015,
    "ttr_min": 15.72
@@ -15511,6 +15870,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "copilot",
+   "struggle_p": 0.227,
    "title": "bugfix in api-server",
    "tokens": 17212,
    "ttr_min": 31.47
@@ -15534,6 +15894,7 @@
    "prompts": 1,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.227,
    "title": "bugfix in webapp",
    "tokens": 9381,
    "ttr_min": null
@@ -15556,6 +15917,7 @@
    "prompts": 2,
    "reached_stage": 6,
    "source": "cursor",
+   "struggle_p": 0.302,
    "title": "refactor in api-server",
    "tokens": 13806,
    "ttr_min": 9.58
@@ -15579,6 +15941,7 @@
    "prompts": 3,
    "reached_stage": 5,
    "source": "cursor",
+   "struggle_p": 0.451,
    "title": "feature in api-server",
    "tokens": 24890,
    "ttr_min": 20.35
@@ -15601,6 +15964,7 @@
    "prompts": 2,
    "reached_stage": 4,
    "source": "claude_code",
+   "struggle_p": 0.482,
    "title": "bugfix in webapp",
    "tokens": 6101,
    "ttr_min": null

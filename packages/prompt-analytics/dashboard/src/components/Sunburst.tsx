@@ -12,8 +12,10 @@ import { fxOn, onReveal, reducedNow } from "../lib/hooks";
 
 interface Props {
   w: number; h: number; parts: ReadonlyMap<string, Part>; shown: ReadonlySet<string>; cur: string; open: ReadonlySet<string>;
-  /** hotspot callouts by branch id: `note` when it fits beside the chart, else `short` */
-  hot: ReadonlyMap<string, { rank: number; label: string; note: string; short: string }>;
+  /** hotspot callouts by branch id (leader + numbered badge; the names live in the inspector's list) */
+  hot: ReadonlyMap<string, { rank: number }>;
+  /** the pointer's arc, lifted to the inspector */ onHover: (id: string | null) => void;
+  /** a branch to highlight (a hotspot row under the pointer): its arc, or the nearest drawn ancestor, gets data-hi */ hi: string | null;
   nameOf: (n: MapNode) => string; ariaOf: (n: MapNode) => string;
   /** the node's value on the metric, as shown ("unpriced" for a cost nobody priced) */ fmt: (n: MapNode) => string;
   /** small hub lines under the value, each [full, short] (the short one when the full one does not fit the disc's chord) */ info: (n: MapNode) => [string, string][];
@@ -40,10 +42,11 @@ const frameOf = (a: Anim): Frame => ({ win: lerpWin(a.from.win, a.to.win, a.e), 
 export function Sunburst(p: Props) {
   const svg = useRef<SVGSVGElement>(null);
   const W = p.w || 720, H = p.h || 520;   // jsdom and the first frame have no size yet
-  const { R, dx, moved } = placeChart(W, H, p.cover), cx = W / 2, cy = H / 2;
+  const { R, dx, moved } = placeChart(W, H, p.cover, 30), cx = W / 2, cy = H / 2;
   const focus = focusOf(p.parts, p.cur) ?? p.parts.values().next().value!;
   const target = winOf(focus, ringsFor(p.parts, p.shown, focus));
-  const [hover, setHover] = useState<string | null>(null);
+  const [hover, setHov] = useState<string | null>(null);
+  const setHover = (v: string | null) => { setHov(v); p.onHover(v); };
   const uid = useId().replace(/[^\w-]/g, ""), avg = p.parts.values().next().value?.node.struggled ?? 0;
 
   // ---- tween: zoom window, ring count and metric morph share one eased clock. It starts from the frame on screen (so an interrupted tween
@@ -125,28 +128,29 @@ export function Sunburst(p: Props) {
   });
 
   // hotspot callouts: each points at its arc, or the nearest drawn ancestor when its branch is folded or hidden behind "+N more"
-  const room = Math.max(4, Math.floor((W / 2 - R - 62) / CW));   // 14+ characters on a W-limited chart (side 160+): "auth-service", "5/45 sessions"
-  const calls = [...p.hot].flatMap(([id, x0]) => {
+  /** The arc drawn for a branch id, or its nearest drawn ancestor when the branch is folded or hidden behind "+N more". */
+  const near = (id: string) => {
     const seg = id.split("/");
     let q: Part | undefined;
     for (let i = seg.length; i > 0 && !q; i--) q = p.parts.get(seg.slice(0, i).join("/"));
     while (q && !byId.has(q.id)) q = q.parent ? p.parts.get(q.parent) : undefined;
-    const d = q && byId.get(q.id);
+    return q && byId.get(q.id);
+  };
+  const hiD = p.hi ? near(p.hi) : undefined;
+  const calls = [...p.hot].flatMap(([id, x]) => {
+    const d = near(id);
     if (!d) return [];
-    const m = (d.a.a0 + d.a.a1) / 2, right = Math.sin(m) >= 0, re = R + 10, lx = right ? cx + R + 30 : cx - R - 30;
-    const note = fitNum(x0.note.length <= room ? x0.note : x0.short, room), x = { ...x0, note };   // money shortens, never "$143.90/$158.1…"
-    const wide = 28 + Math.min(room, Math.max(x.label.length, note.length)) * CW;   // badge + text: the click target, not just the 18px badge
-    const l = right ? lx - 4 : lx + 4 - wide;
-    if (moved && (l + dx < 0 || l + wide + dx > W - (p.cover ?? 0))) return [];   // re-centred beside a panel: no callout under it or off the card
-    return [{ id, x, right, lx, wide, ax: cx + d.a.r1 * Math.sin(m), ay: cy - d.a.r1 * Math.cos(m), ex: cx + re * Math.sin(m), ey: cy - re * Math.cos(m), exact: d.p.id === id }];
+    const m = (d.a.a0 + d.a.a1) / 2, right = Math.sin(m) >= 0, re = R + 10, lx = right ? cx + R + 20 : cx - R - 20;
+    if (moved && (lx - 14 + dx < 0 || lx + 14 + dx > W - (p.cover ?? 0))) return [];   // re-centred beside a panel: no callout under it or off the card
+    return [{ id, x, right, lx, ax: cx + d.a.r1 * Math.sin(m), ay: cy - d.a.r1 * Math.cos(m), ex: cx + re * Math.sin(m), ey: cy - re * Math.cos(m), exact: d.p.id === id }];
   });
   for (const right of [true, false]) {
-    const g = calls.filter((c) => c.right === right).sort((a, b) => a.ey - b.ey), ys = stack(g.map((c) => c.ey), 38, 18, H - 30);
+    const g = calls.filter((c) => c.right === right).sort((a, b) => a.ey - b.ey), ys = stack(g.map((c) => c.ey), 28, 18, H - 30);
     g.forEach((c, i) => { c.ey = ys[i]; });
   }
 
   return (
-    <div className="sb">
+    <div className="sb" data-hi={hiD ? "" : undefined}>
       <svg ref={svg} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="tree" aria-label={p.label} aria-describedby={p.describedBy}
         onKeyDown={(e) => { ptr.current = false; p.onKey(e); }} onPointerDown={() => { ptr.current = true; }}
         onFocus={() => { had.current = true; }} onBlur={(e) => { had.current = !!svg.current?.contains(e.relatedTarget as Node | null); if (!had.current) ptr.current = false; }}
@@ -176,10 +180,11 @@ export function Sunburst(p: Props) {
             {hubText.map((l, i) => <text key={i} x={cx} y={l.y.toFixed(1)} textAnchor="middle" dominantBaseline="central" className={l.cls}>{l.t}</text>)}
           </g>
         </g>
+        <circle cx={cx} cy={cy} r={R} className="sb-rim" aria-hidden="true" />
         <g className="sb-arcs">
           {drawn.map(({ p: q, a }) => (
             <path key={q.id} d={arcPath(cx, cy, a.r0, a.r1, a.a0, a.a1)} fillRule="evenodd" className="sb-arc" data-id={q.id} data-kind={q.node.kind}
-              data-dim={!p.related(q.id) || undefined} style={{ fill: fillOf(q.node) }} role="treeitem" tabIndex={tab(q.id)} aria-label={p.ariaOf(q.node)} {...tree(q)}
+              data-dim={!p.related(q.id) || undefined} data-hi={hiD?.p.id === q.id || undefined} style={{ fill: fillOf(q.node) }} role="treeitem" tabIndex={tab(q.id)} aria-label={p.ariaOf(q.node)} {...tree(q)}
               onFocus={() => { setHover(null); if (!ptr.current && q.id !== p.cur) p.onSel(q.id); }}
               onClick={(e) => { if (e.detail < 2) { pick.current = { id: q.id, t: e.timeStamp }; setHover(null); p.onPick(q.node); } }} />
           ))}
@@ -216,21 +221,18 @@ export function Sunburst(p: Props) {
         </g>
         <g className="sb-over" aria-hidden="true">
           {[...p.hot.keys()].map((id) => { const d = byId.get(id); return d && <path key={id} className="sb-hot" d={arcPath(cx, cy, d.a.r0 + 1, d.a.r1 - 1, d.a.a0, d.a.a1)} />; })}
+          {hiD && <path className="sb-hi" d={arcPath(cx, cy, hiD.a.r0, hiD.a.r1, hiD.a.a0, hiD.a.a1)} />}
           {curD && <path className="sb-sel" d={arcPath(cx, cy, curD.a.r0, curD.a.r1, curD.a.a0, curD.a.a1)} />}
         </g>
         <g className="sb-calls" aria-hidden="true">
           {calls.map((c) => {
-            const { lx, wide, x: { note } } = c, dir = c.right ? 1 : -1;
+            const { lx } = c, dir = c.right ? 1 : -1;
             return <g key={c.id} className="sb-call" onClick={() => p.onHot(c.id)}>
-              <rect className="sb-hit" x={c.right ? lx - 4 : lx + 4 - wide} y={c.ey - 18} width={wide} height={36} />
+              <rect className="sb-hit" x={lx + dir * 9 - 12} y={c.ey - 12} width={24} height={24} />
               <polyline points={`${c.ax.toFixed(1)},${c.ay.toFixed(1)} ${c.ex.toFixed(1)},${c.ey.toFixed(1)} ${(lx - dir * 4).toFixed(1)},${c.ey.toFixed(1)}`} strokeDasharray={c.exact ? undefined : "3 3"} />
               <circle cx={c.ax} cy={c.ay} r={3} />
               <circle cx={lx + dir * 9} cy={c.ey} r={9} className="sb-badge" />
               <text x={lx + dir * 9} y={c.ey} textAnchor="middle" dominantBaseline="central" className="sb-rank">{c.x.rank}</text>
-              <text x={lx + dir * 24} y={c.ey} textAnchor={c.right ? "start" : "end"}>
-                <tspan x={lx + dir * 24} dy="-0.15em" className="sb-n">{clip(c.x.label, room)}</tspan>
-                <tspan x={lx + dir * 24} dy="1.3em" className="sb-m">{note}</tspan>
-              </text>
             </g>;
           })}
         </g>

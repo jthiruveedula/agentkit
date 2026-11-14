@@ -28,8 +28,8 @@ const clean = (f: Filter): Filter => Object.fromEntries(Object.entries(f).filter
 export const patchFilter = (f: Filter, p: Filter): Filter => clean({ ...f, ...p });
 export const same = (a: Filter, b: Filter) => JSON.stringify(clean(a)) === JSON.stringify(clean(b));
 
-/** Struggled (decision #1): a session with a prompt where loops >= 3 or friction >= 0.5. Sessions without a prompt are not in the base. */
-export const struggled = (r: SessionRow): boolean => r.prompts > 0 && (r.loops >= 3 || r.friction >= 0.5);
+/** Struggled (decision #1): a session with a prompt where struggle_p >= 0.5 when scored, else loops >= 3 or friction >= 0.5. Sessions without a prompt are not in the base. */
+export const struggled = (r: SessionRow): boolean => r.prompts > 0 && (r.struggle_p !== undefined ? r.struggle_p >= 0.5 : r.loops >= 3 || r.friction >= 0.5);
 /** Ids of sessions with an open exposure finding. */
 export const openExposure = (d: DashboardData): Set<string> => new Set(d.exposure.items.filter((i) => i.status === "open" && i.session).map((i) => i.session as string));
 

@@ -5,12 +5,12 @@ import { addDays, weekStart } from "../lib/filter";
 import { bucketSeries, buckets, cumulative, median, METRICS, monthProjection } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { golden, GOLD_MIN_N } from "../lib/econ";
-import { SOURCES, srcColor, srcLabel } from "../lib/palette";
+import { srcLabel } from "../lib/palette";
 import { useRoving } from "../lib/hooks";
 import { billboard, clampPitch, fitScale, DEFAULT_VIEW, describeView, edgeFade, inertia, nearestYaw, viewTransform, wrapYaw, zoomAround } from "../lib/calorbit";
 import type { TCell } from "./Terrain";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
-import { LineChart, River } from "./charts";
+import { LineChart } from "./charts";
 import { tokensPerApplied } from "../lib/compare";
 import { unpricedNote } from "../lib/capabilities";
 import { ToolLogo } from "./Shell";
@@ -53,8 +53,10 @@ function TimeToResolve() {
       .map((x) => ({ ...x, now: ttrMed(v.rows.filter(x.sel)), was: prior ? ttrMed(prior.v.rows.filter(x.sel)) : null })).filter((x) => x.now);
   }, [v, prior, caps.multiTool]);
   const max = Math.max(...rows.flatMap((x) => [x.now!.m, x.was?.m ?? 0]), 1) * 1.15;
+  const fast = rows.filter((x) => x.k !== "all").reduce<(typeof rows)[number] | null>((a, b) => (!a || b.now!.m < a.now!.m ? b : a), null) ?? rows[0];
+  const so = fast ? <>{fast.k === "all" ? "Resolved sessions take" : `${fast.name} resolves fastest:`} <b className={fast.was && fast.now!.m > fast.was.m * 1.05 ? "bad" : undefined}>{fast.now!.m.toFixed(1)}</b> min typical{fast.was ? `, was ${fast.was.m.toFixed(1)}` : ""}.</> : "Nothing flagged in this window.";
   return (
-    <Card src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={12}>
+    <Card so={so} thin={!fast} src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={5}>
       {rows.length === 0 ? <Empty>No resolved session with a time in view.</Empty> : (
         <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: x.label, name: x.name, a: x.was?.m ?? null, b: x.now!.m, fa: x.was ? x.was.m.toFixed(1) : "", fb: x.now!.m.toFixed(1),
           bad: x.was && Math.abs(x.now!.m - x.was.m) > x.was.m * 0.05 ? x.now!.m > x.was.m : null }))} />
@@ -221,9 +223,10 @@ function CalGrid() {
   const reset = useCalOrbit(stage, wrap, live, three);
   const [act, setAct] = useState(false);
   useEffect(() => { const st = stage.current; if (!st) return; const on = (e: Event) => setAct((e as CustomEvent<boolean>).detail); st.addEventListener("cal-active", on); return () => { st.removeEventListener("cal-active", on); setAct(false); }; }, [three]);
+  const busy = v.calendar.length ? v.calendar.reduce((a, b) => (b.sessions > a.sessions ? b : a)) : null;
   const months = days.filter((x) => x.i % 7 === 0 && x.date.slice(8, 10) <= "07");
   return (
-    <Card src="calendar \u00b7 sessions per day" title="Activity calendar" meta="click a day, shift-click to extend" span={8}
+    <Card so={busy && busy.sessions > 0 ? <>Busiest day was {fmtDate(busy.date)}: <b>{fmtInt(busy.sessions)}</b> sessions.</> : "Nothing flagged in this window."} thin={!busy || busy.sessions <= 0} src="calendar \u00b7 sessions per day" title="Activity calendar" meta="click a day, shift-click to extend" span={8}
       actions={<><Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, ...(caps.hasCost ? [{ id: "cost" as const, text: "Cost" }] : [])]} />
         <button type="button" className="btn tog3" aria-pressed={three} onClick={() => setThree(!three)} title="Raise each day into a column, height by value">3D</button></>}>
       {v.calendar.length === 0 ? <Empty /> : (
@@ -260,7 +263,7 @@ function CalGrid() {
 
 function Calendar() {
   const { d } = useStore();
-  return d.range.end ? <CalGrid /> : <Card src="calendar" title="Activity calendar" span={8}><Empty /></Card>;
+  return d.range.end ? <CalGrid /> : <Card so="Nothing flagged in this window." thin src="calendar" title="Activity calendar" span={8}><Empty /></Card>;
 }
 
 function HourWeek() {
@@ -283,8 +286,9 @@ function HourWeek() {
       <Terrain cells={cells} max={max} maxText={maxText} rows={DOW} cols={24} colLabel={hours} summary={summary} />
     </Suspense>
   );
+  const so = best.prompts > 0 ? <>Most prompts land {DOW[best.dow]} {best.hour}:00: <b>{fmtInt(best.prompts)}</b>.</> : "Nothing flagged in this window.";
   return (
-    <Card src="hour_week \u00b7 all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
+    <Card so={so} thin={best.prompts <= 0} src="hour_week \u00b7 all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
       actions={<>{gold && <Segmented quiet label="Heatmap shows" value={mode} onChange={setMode} options={[{ id: "prompts", text: "Prompts" }, { id: "success", text: "Success" }]} />}
         <span className="tog3d"><Segmented quiet label="Heatmap view" value={view} onChange={setView} options={[{ id: "2d", text: "2D" }, { id: "3d", text: "3D" }]} /></span></>}>
       {d.hour_week.length === 0 ? <Empty /> : succ ? (
@@ -325,33 +329,19 @@ function HourWeek() {
   );
 }
 
-function Spend() {
-  const { v, f, drill, caps } = useStore();
-  const unpriced = SOURCES.filter((s) => v.sources.some((t) => t.key === s && t.cost === null));
-  const weeks = v.weeks;
-  return (
-    <Card src="cost_river \u00b7 priced only" title={caps.multiTool ? "Cost by tool, weekly" : "Cost, weekly"} meta={caps.multiTool ? "priced tools only" : `your ${caps.names} sessions`} span={7}>
-      <River weeks={weeks} sel={f.source} label="Weekly cost by tool. Click a band to filter a tool, a column to filter a week" fmt={fmtUSD} height={200}
-        onBand={(s) => drill({ source: s as never })} onWeek={(i) => drill({ from: weeks[i].week, to: addDays(weeks[i].week, 6) })} activeWeek={(i) => f.from === weeks[i].week} />
-      {caps.multiTool && <ul className="legend">
-        {SOURCES.filter((s) => weeks.some((w) => (w.bySource[s] ?? 0) > 0)).map((s) => <li key={s} style={{ "--c": srcColor(s) } as React.CSSProperties}>{srcLabel(s)}</li>)}
-        {unpriced.length > 0 && <li className="hatch">{unpriced.map(srcLabel).join(", ")}: not priced</li>}
-      </ul>}
-      <DataTable caption="Weekly cost by tool" head={["Week", ...SOURCES.map(srcLabel)]} rows={weeks.map((w) => [w.week, ...SOURCES.map((s) => +(w.bySource[s] ?? 0).toFixed(2))])} />
-    </Card>
-  );
-}
-
 function Cumulative() {
-  const { v, prior, win, apply } = useStore();
+  const { v, prior, win, apply, caps } = useStore();
   const bks = useMemo(() => buckets(win, 1), [win]);
   const cur = useMemo(() => cumulative(bucketSeries(v.rows, win, 1, METRICS.cost)), [v.rows, win]);
   const prv = useMemo(() => (prior ? cumulative(bucketSeries(prior.v.rows, prior.win, 1, METRICS.cost)) : null), [prior]);
   const proj = useMemo(() => monthProjection(v.rows, win.to), [v.rows, win.to]);
   const labels = bks.map((b) => fmtDate(b.from));
   const priced = cur.length > 0 && cur[cur.length - 1] > 0;
+  const nowC = cur[cur.length - 1] ?? 0, prevAt = prv ? prv[cur.length - 1] ?? prv[prv.length - 1] : null;
+  const dPct = prevAt ? Math.round(((nowC - prevAt) / prevAt) * 100) : null;
+  const so = !priced ? "Nothing flagged in this window." : <><b>{fmtUSD(nowC)}</b> so far{dPct === null ? "." : dPct === 0 ? ", level with last period at this point." : <>, <span className={dPct > 0 ? "bad" : undefined}>{Math.abs(dPct)}% {dPct > 0 ? "above" : "below"}</span> last period at this point.</>}</>;
   return (
-    <Card src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={5}>
+    <Card so={so} thin={!priced} src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={caps.hasTtrRows ? 7 : 12}>
       {!priced ? <Empty>No priced sessions in this period.</Empty> : (
         <>
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
@@ -371,8 +361,11 @@ function TokenEfficiency() {
   const bks = useMemo(() => buckets(win, 7), [win]);
   const cur = useMemo(() => bucketSeries(v.rows, win, 7, (rs) => tokensPerApplied(rs) ?? 0), [v.rows, win]);
   const labels = bks.map((b) => fmtDate(b.from));
+  const wk = cur.filter((x) => x > 0), tNow = wk[wk.length - 1], tFirst = wk[0];
+  const tPct = wk.length > 1 ? Math.round(((tNow - tFirst) / tFirst) * 100) : null;
+  const so = !wk.length ? "Nothing flagged in this window." : <>Each applied change costs <b>{fmtCompact(tNow)}</b> tokens{tPct === null ? "." : <>, <span className={tPct > 0 ? "bad" : undefined}>{Math.abs(tPct)}% {tPct >= 0 ? "more" : "less"}</span> than the first week.</>}</>;
   return (
-    <Card src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={12}>
+    <Card so={so} thin={!wk.length} src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={caps.hasTtrRows ? 7 : 12}>
       {cur.every((x) => x === 0) ? <Empty>No session applied a change in this period.</Empty> : (
         <>
           <LineChart label="Tokens per applied change by week. Click a week to filter it" labels={labels} fmt={fmtCompact} height={180}
@@ -389,7 +382,7 @@ export function Time() {
   const { caps } = useStore();
   return (
     <Section id="s-time" title="Time" q={caps.hasCost ? "When and how much?" : "When does the work happen?"}>
-      <Calendar /><HourWeek />{caps.hasCost ? <><Spend /><Cumulative /></> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
+      <Calendar /><HourWeek />{caps.hasCost ? <Cumulative /> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
     </Section>
   );
 }

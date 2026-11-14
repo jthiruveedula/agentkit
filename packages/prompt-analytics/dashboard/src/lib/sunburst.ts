@@ -196,8 +196,8 @@ export const MIN_VIS = 340;
 /** Where the chart sits on a W x H card when a side panel covers its right `cover` px: the chart's radius and its x shift. Uncovered (or too
  *  little left, MIN_VIS): radius as always (callouts beside it) and no shift. Else centred in the uncovered part, the radius kept unless that
  *  part is narrower than the disc; callouts that would land under the panel are the caller's to hide. */
-export function placeChart(W: number, H: number, cover = 0): { R: number; dx: number; moved: boolean } {
-  const side = W >= 760 ? 170 : 160, R = Math.max(90, Math.min(H / 2 - 18, W / 2 - side - 12)), vis = W - cover;
+export function placeChart(W: number, H: number, cover = 0, side = W >= 760 ? 170 : 160): { R: number; dx: number; moved: boolean } {
+  const R = Math.max(90, Math.min(H / 2 - 18, W / 2 - side - 12)), vis = W - cover;
   if (cover <= 0 || vis < MIN_VIS) return { R, dx: 0, moved: false };
   return { R: Math.min(R, vis / 2 - 12), dx: vis / 2 - W / 2, moved: true };
 }

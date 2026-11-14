@@ -9,6 +9,8 @@
    (.sec + .why-tag) sits above the tag, and the tag hangs 4px over its .sec-h. Gap between sections stays 40/28 either way. */
 .why-tag { margin: 0 0 var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); }
 .why-tag b { color: var(--accent); }
+.why-tag .link { color: var(--muted); text-decoration: none; white-space: normal; text-align: left; padding: 0; }
+.why-tag .link:hover { text-decoration: underline; }
 .side a[data-quiet]:not([aria-current]) { color: var(--muted); }
 /* a jump to a promoted section keeps its reason line in view under the sticky header (mirrors the .sec scroll-margin in styles.css, + the tag) */
 .why-tag + .sec { scroll-margin-top: calc(var(--hh) + 48px); }

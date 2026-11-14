@@ -24,12 +24,11 @@ const raf = () => act(async () => { await new Promise((r) => requestAnimationFra
 const params = () => new URLSearchParams(location.hash.split("?")[1] ?? "");
 
 describe("storytelling UI", () => {
-  it("orders sections by signal and collapses quiet ones", () => {
+  it("keeps the narrative order and collapses quiet sections", () => {
     mount();
     const order = ids();
-    expect(order[0]).toBe("s-overview");
+    expect(order).toEqual(["s-overview", "s-time", "s-models", "s-friction", "s-works", "s-exposure", "s-funnel", "s-tools", "s-sessions", "s-map"].filter((id) => order.includes(id)));
     expect(order.slice(-2)).toEqual(["s-sessions", "s-map"]);
-    expect(order.indexOf("s-exposure")).toBeLessThan(order.indexOf("s-tools"));
     const quiet = el.querySelectorAll("section.sec.quiet");
     expect(quiet.length).toBeGreaterThan(0);
     for (const q of quiet) expect(q.querySelector("button")!.getAttribute("aria-expanded")).toBe("false");
@@ -88,7 +87,8 @@ describe("storytelling UI", () => {
     const dl = el.querySelector("dl.story")!;
     expect(dl.textContent).toContain("Why");
     expect(dl.textContent).toContain("Do next");
-    expect([...dl.querySelectorAll("button")].some((b) => /^Review \d+ sessions?$/.test(b.textContent!))).toBe(true);   // the rec is not about the driver, so Do next is the top attention item (an exposure jump)
+    expect(dl.querySelector(":scope > div:last-child .b-say")!.textContent).toBe(el.querySelector("#s-next li")!.querySelector("h4")!.textContent);   // Do next is row 1 of the list
+    expect([...dl.querySelectorAll("button")].some((b) => b.textContent === "See Exposure")).toBe(true);   // an open secret leads, and it has no filter, so the button jumps to its evidence
     click(dl.querySelector(".btn.primary"));
     expect(params().get("prj")).toBe("billing-api");
     expect(params().get("pn")).toBe("list");

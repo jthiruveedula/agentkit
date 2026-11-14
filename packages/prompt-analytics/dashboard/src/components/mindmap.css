@@ -1,6 +1,6 @@
 /* Mind map sunburst (Sunburst.tsx). Light only, tokens only. Fills are set inline from the tool hue (srcColor) so they follow the palette;
    everything here is strokes, type and state. Motion is opacity only, under html.fx, and off for prefers-reduced-motion. */
-.sb { position: absolute; inset: 0; background: radial-gradient(closest-side, var(--surface), transparent); }
+.sb { position: absolute; inset: 0; }
 .sb svg { display: block; overflow: visible; }
 
 .sb-arc { stroke: var(--surface); stroke-width: 1.5px; cursor: pointer; outline: none; }
@@ -20,6 +20,10 @@
 
 .sb-sel { fill: none; stroke: var(--ink); stroke-width: 2px; }
 .sb:has(.sb-arc:focus-visible) .sb-sel { stroke: var(--accent); stroke-width: 3px; }
+.sb-rim { fill: none; stroke: var(--muted); stroke-width: 1px; }   /* the palest ring must not melt into the glass: --muted reaches 3:1 there (contrast.mjs) */
+.sb-hi { fill: none; stroke: var(--warn-ink); stroke-width: 3px; }
+.sb[data-hi] .sb-arc:not([data-hi]) { fill-opacity: 0.45; }
+.fx .sb-arc { transition: fill-opacity 120ms; }
 .sb-hot { fill: none; stroke: var(--warn); stroke-width: 2px; stroke-dasharray: 5 3; }
 
 .sb-hub { cursor: pointer; outline: none; }
@@ -35,7 +39,6 @@
 .sb-call circle { fill: var(--warn-ink); }
 .sb-call .sb-badge { fill: var(--surface); stroke: var(--warn); stroke-width: 1.5px; stroke-dasharray: 3 2; }
 .sb .sb-rank { font-weight: 600; fill: var(--warn-ink); }
-.sb-call:hover .sb-n { text-decoration: underline; }
 .sb-call .sb-hit { fill: transparent; }
 
 /* new arcs and labels fade in (expand, zoom, metric switch); a label switching between curved and straight keeps its group, so it does not replay */
@@ -43,12 +46,14 @@
 @keyframes sb-in { from { opacity: 0; } }
 /* beside an open side panel the chart slides into the uncovered part of the card (Sunburst placeChart): a transform, so nothing reflows */
 .fx .sb-shift { transition: transform 240ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .fx .sb-arc, .fx .sb-labels > g { animation: none; } .fx .sb-shift { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .fx .sb-arc, .fx .sb-labels > g { animation: none; transition: none; } .fx .sb-shift { transition: none; } }
 
 /* legend: arc share, tool tone, struggle edge (the hotspot key is shared from styles.css) */
 .mm-key .k-arc::before { border-radius: 50%; background: conic-gradient(var(--src-claude_code) 0 30%, var(--sunk) 0); border: 1px solid var(--line-2); }
 .mm-key .k-tone::before { width: 22px; background: linear-gradient(90deg, var(--src-claude_code), var(--surface)); border: 1px solid var(--line); }
 .mm-key .k-heat::before { width: 26px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--surface), var(--bad)); border: 1px solid var(--line); }
+.mm-key .hatch::before { width: 10px; }
+.mm-keys-d summary { cursor: pointer; width: fit-content; font-size: 12px; color: var(--muted); border-radius: var(--r1); }
 .mm-keys { margin-top: var(--s1); }
 
 /* narrow list: struggle dot (same min-n rule as the edge), hotspot chip labels never break mid-word */
@@ -56,9 +61,57 @@
 .mm-heat[data-faded] { opacity: 0.55; }
 .mm-hl { white-space: nowrap; }
 
+/* two panes: chart | inspector. Breakpoints are the card's content width (data-mode from MindMap.tsx): wide >= 880, medium >= 560, narrow below */
+.mm-wrap { display: grid; gap: var(--s3); }
+.mm-plot { position: relative; min-width: 0; }
+.mm-ov { position: absolute; z-index: 1; inset: 8px 8px auto; display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s2); pointer-events: none; }
+.mm-ov > * { pointer-events: auto; }
+.mm-ov .mm-path { max-width: 60%; padding: 2px var(--s2); border-radius: 999px; background: oklch(1 0 0 / 0.72); }
+.mm-ov .btn { padding: 2px var(--s2); font-size: 12px; background: oklch(1 0 0 / 0.72); }
+.mm-reset { margin-left: var(--s1); color: var(--accent); text-decoration: underline; }
+.mm-wrap[data-mode="wide"] { grid-template-columns: minmax(0, 1fr) clamp(300px, 31%, 360px); height: clamp(440px, 62vh, 600px); }
+.mm-wrap[data-mode="wide"] .mm { height: 100%; }
+.mm-side { display: grid; gap: var(--s2); min-width: 0; min-height: 0; padding: var(--s3); border: 1px solid var(--line); border-radius: var(--r2); background: var(--surface); overflow: hidden; }
+.mm-wrap[data-mode="wide"] .mm-side { grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
+.mm-wrap[data-mode="mid"] .mm-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.mm-wrap[data-mode="mid"] .mm-foot { grid-column: 1 / -1; }
+html.glass .mm-side { background: oklch(1 0 0 / 0.5); border-color: var(--rim); }   /* nested block on glass, like .kpi / .mini (flat, no blur) */
+.mm-detail, .mm-hots { min-width: 0; }
+.mm-detail { display: grid; gap: var(--s1); align-content: start; }
+.mm-detail p { margin: 0; }
+.mm-eye { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.mm-eye .sw { width: 10px; height: 10px; border-radius: 50%; }
+.mm-prev { margin-left: auto; padding: 0 6px; border-radius: 999px; border: 1px solid var(--line-2); letter-spacing: 0; text-transform: none; font-weight: 500; }
+.mm-nm { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mm-big b { font-size: 22px; font-weight: 650; }
+.mm-str { display: grid; gap: 4px; }
+.mm-track { position: relative; display: block; height: 6px; border-radius: 3px; background: var(--sunk); }
+.mm-track i { position: absolute; inset: 0 auto 0 0; width: calc(var(--f) * 100%); border-radius: 3px; background: var(--muted); }
+.mm-track[data-bad] i { background: var(--bad); }
+.mm-track u { position: absolute; top: -2px; bottom: -2px; left: calc(var(--a) * 100%); width: 2px; background: var(--ink); }
+.mm-kids { display: grid; gap: 2px; margin-top: var(--s1); font-size: 12px; }
+.mm-kid { display: grid; grid-template-columns: minmax(0, 1fr) auto 48px; align-items: center; gap: var(--s2); min-height: 28px; padding: 0 var(--s1); border-radius: var(--r1); text-align: left; background: none; }
+.mm-kid:hover { background: var(--sunk); }
+.mm-detail .mm-acts { margin-top: var(--s1); }
+.mm-wrap[data-mode="wide"] .mm-hots, .mm-wrap[data-mode="mid"] .mm-hots { display: flex; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: var(--s1); margin: 0; overflow-y: auto; min-height: 0; }
+.mm-side .mm-hots .chip { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "b l m" ". n n"; align-items: center; gap: 0 var(--s2); }
+.mm-side .mm-hot { grid-area: b; margin: 0; }
+.mm-side .mm-hl { grid-area: l; overflow: hidden; text-overflow: ellipsis; }
+.mm-side .mm-hots .chip .meta { grid-area: m; }
+.mm-note { grid-area: n; font-size: 12px; color: var(--muted); }
+.mm-foot { display: grid; gap: var(--s1); padding-top: var(--s2); border-top: 1px solid var(--line); }
+.mm-foot .legend { margin-top: 0; }
+
+/* narrow: chips become one scrollable row, no inspector */
+.mm-wrap[data-mode="narrow"] { display: block; }
+.mm-wrap[data-mode="narrow"] .mm-hots { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x proximity; }
+.mm-wrap[data-mode="narrow"] .mm-hots .chip { flex: none; scroll-snap-align: start; }
+.mm-wrap[data-mode="narrow"] .mm-hots .muted, .mm-wrap[data-mode="narrow"] .mm-note { display: none; }
+.mm-wrap[data-mode="narrow"] .mm-hot { margin-right: 6px; }
+
 /* phones and touch: every control in the card is a 40px target, list rows 44px */
 @media (max-width: 699px), (pointer: coarse) {
-  #s-map .seg button, #s-map .mm-acts .btn, #s-map .mm-path .crumb, #s-map .mm-hots .chip, #s-map .mm-go { min-height: 40px; }
+  #s-map .seg button, #s-map .mm-acts .btn, #s-map .mm-path .crumb, #s-map .mm-hots .chip, #s-map .mm-go, #s-map .mm-kid, #s-map .mm-keys-d summary { min-height: 40px; }
   #s-map .mm-path .crumb { min-width: 40px; }
   #s-map .mm-row { min-height: 44px; }
 }

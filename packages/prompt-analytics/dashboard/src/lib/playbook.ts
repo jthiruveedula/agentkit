@@ -18,6 +18,8 @@ export interface Play {
   dir: "more" | "less"; line: string;
   /** The sign runs against common prompting advice: show "correlation, not cause". */
   counter: boolean;
+  /** The recent-weeks re-check failed: sorted after the rest, treat as a hunch. */
+  hunch: boolean;
   /** Do-more only: an already-redacted prompt from this topic that has the feature (<= 160 chars), or null. */
   snippet: string | null;
 }
@@ -38,6 +40,10 @@ const LINE: Record<string, [string, string, string, string]> = {
   "very short prompt": ["keep it short", "add a line of context", "Keep prompts this short for these tasks.", "Add a sentence of context to short prompts."],
   "no context given": ["skip the background", "give one line of context", "Skip background the tool does not need.", "Give one line of context before the ask."],
 };
+/** Verb phrase for a habit ("name the files"), for sentences like "Sessions that name the files ...". */
+// The analyzer's four quality axes (whatworks.py FEATURES) next to the eight tagged features above.
+const AXIS: Record<string, string> = { specificity: "name files, symbols or the error", context: "paste the log or the code", constraints: "state constraints", length: "keep prompts 40-300 characters" };
+export const habitLabel = (feature: string) => { const f = feature.toLowerCase(); return LINE[f]?.[0] ?? AXIS[f] ?? `use ${feature}`; };
 /** Does a (redacted) prompt show the feature? Unknown features never match, so no example is offered. */
 const HAS: Record<string, (t: string) => boolean> = {
   "explicit constraints": (t) => /\b(must|only|without|don't|do not|never|keep|limit|max|at most|version)\b/i.test(t),
@@ -88,11 +94,11 @@ export function playbook(rows: Row[], clusters: Cluster[], tested = rows.length,
     const ex = pool.find((t) => t && hasFeature(t, f));
     return {
       key: `${r.cluster}:${r.feature}`, feature: r.feature, cluster: r.cluster, scope, title: scope ? `${scope}: ${short}` : short[0].toUpperCase() + short.slice(1),
-      pts: r.effect * 100, lo: r.ci[0] * 100, hi: r.ci[1] * 100, n: r.n, p: ps[i], pass: ok[i], dir,
+      pts: r.effect * 100, lo: r.ci[0] * 100, hi: r.ci[1] * 100, n: r.n, p: ps[i], pass: ok[i], dir, hunch: r.holdout?.held === false,
       line: L ? L[dir === "more" ? 2 : 3] : dir === "more" ? `Use ${r.feature} more often.` : `Use ${r.feature} less often.`,
       counter: exp !== undefined && Math.sign(r.effect) !== exp, snippet: ex ? ex.slice(0, 160) : null,
     };
-  }).sort((a, b) => Math.abs(b.pts) - Math.abs(a.pts) || b.n - a.n);
+  }).sort((a, b) => +a.hunch - +b.hunch || Math.abs(b.pts) - Math.abs(a.pts) || b.n - a.n);
   const cards = all.filter((p) => p.pass && (p.lo > 0 || p.hi < 0));
   return { more: cards.filter((p) => p.dir === "more").slice(0, k), less: cards.filter((p) => p.dir === "less").slice(0, k), all, tested: Math.max(tested, rows.length), pass: ok.filter(Boolean).length };
 }

@@ -14,7 +14,7 @@ import sample from "../data/sample.dev.json";
 type S = Record<string, unknown>;
 const base = sample as unknown as { sessions: S[]; range: object };
 let n = 0;
-const sess = (o: S): S => ({ ...base.sessions[0], id: `x${n++}`, title: `T${n}`, prompts: 3, cost_usd: 1, reached_stage: 6, applied: true, loops: 0, friction: 0.1, source: "cursor", date: "2026-10-20", project: "p", intent: "bugfix", model: "gpt-5", ...o });
+const sess = (o: S): S => ({ ...base.sessions[0], struggle_p: undefined, id: `x${n++}`, title: `T${n}`, prompts: 3, cost_usd: 1, reached_stage: 6, applied: true, loops: 0, friction: 0.1, source: "cursor", date: "2026-10-20", project: "p", intent: "bugfix", model: "gpt-5", ...o });
 const data = (sessions: S[], range?: object) => normalize({ ...sample, sessions, ...(range ? { range } : {}) } as never);
 const html = (d: ReturnType<typeof normalize>, C: () => React.ReactElement, initial?: object) => renderToStaticMarkup(<StoreProvider d={d} initial={initial}><C /></StoreProvider>);
 
@@ -56,7 +56,7 @@ describe("review fixes", () => {
     expect(h).toMatch(/Struggling held at about 10\.0%/);
     expect(htmlText(h)).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
     expect(htmlText(h)).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
-    expect(h).toMatch(/the evidence behind/);   // no driver, so the top recommendation is Do next
+    expect(h).toMatch(/<dt>Do next<\/dt>/);   // row 1 of the Do-next list
     expect(h).not.toMatch(/data-kpi="struggled"/);
   });
   it("Brief names the driver once, with its counts and sessions button", () => {

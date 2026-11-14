@@ -32,6 +32,8 @@ export interface SessionRow {
   ttr_min?: number | null;
   /** (1.3+) Dominant model id. null = unknown. Absent in older exports. */
   model?: string | null;
+  /** (1.4+) Calibrated chance 0..1 that a session like this ended with nothing applied. Absent = too little data. */
+  struggle_p?: number;
 }
 
 /** (1.2+) A prompt typed again in other sessions. `exemplar` is redacted, <= 160 chars; `sessions` are ids only, newest first. */
@@ -82,7 +84,11 @@ export interface DashboardData {
     by_source: { source: Source; values: number[] }[];
     validation: { spearman: number | null; n: number };
   };
-  what_works: { cluster: number; feature: string; effect: number; ci: [number, number]; n: number; direction: "helps" | "hurts" }[];
+  what_works: { cluster: number; feature: string; effect: number; ci: [number, number]; n: number; direction: "helps" | "hurts";
+    /** Matched uplift in percentage points vs similar sessions without the habit. Absent in older exports. */
+    uplift?: { pts: number; n_with: number; n_without: number; strata: number };
+    /** Recent-weeks re-check. null = too little recent data. Absent in older exports. */
+    holdout?: { held: boolean; weeks: number } | null }[];
   what_works_tested: number;                        // effect tests run (0 = none ran); what_works holds only those that passed the gates
 
   // Per-session rows for drilldowns and client-side cross-filtering. Non-subagent sessions only, newest first,

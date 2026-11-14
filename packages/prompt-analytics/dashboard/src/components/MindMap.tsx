@@ -9,6 +9,7 @@ import { buildTree, hotspots, ROOT_ID, type Hotspot, visible, type MapMetric, ty
 import { BASIS_NOTE, projectKey } from "../lib/share";
 import { EDGE_OVER, edgeOf, focusOf, partition, struggleNote } from "../lib/sunburst";
 import { MIN_N, ROUTER_MIN_N } from "../lib/thresholds";
+import { struggled } from "../lib/metrics";
 import { fmtCompact, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { intentColor, srcColor, srcLabel } from "../lib/palette";
 import { useSize } from "../lib/hooks";
@@ -17,7 +18,7 @@ import "./govern.css";
 import "./mindmap.css";
 import { Sunburst } from "./Sunburst";
 
-const NARROW = 560;
+const NARROW = 560, WIDE = 880;   // breakpoints on the card's content width
 const FMT: Record<MapMetric, (n: number) => string> = { sessions: fmtInt, prompts: fmtCompact, cost: fmtUSD };
 const nameOf = (n: MapNode) => (n.kind === "tool" ? srcLabel(n.label) : n.label);
 /** A share, with "<1%" for a sliver that would round to 0%. */
@@ -38,9 +39,9 @@ export function MindMap() {
   const [pickMetric, setMetric] = useState<MapMetric>("sessions");
   const hasCost = useMemo(() => v.rows.some((r) => (r.cost_usd ?? 0) > 0), [v.rows]);
   const metric: MapMetric = pickMetric === "cost" && !hasCost ? "sessions" : pickMetric;   // nothing priced: no Cost option, the map reads sessions
-  const body = useRef<HTMLDivElement>(null);
-  const { w, h } = useSize(body);
-  const narrow = w > 0 && w < NARROW;
+  const body = useRef<HTMLDivElement>(null), wrap = useRef<HTMLDivElement>(null);
+  const { w, h } = useSize(body), { w: W } = useSize(wrap);
+  const narrow = W > 0 && W < NARROW, mode = narrow ? "narrow" : W >= WIDE ? "wide" : "mid";
   // px of the map under the open side panel (fixed, over the page from 700px up; a bottom sheet below that covers it all, which the
   // sunburst ignores). offsetLeft is the layout box, so the panel's open animation (a transform) never skews it. Re-read when the card or window resizes.
   const [cover, setCover] = useState(0);
@@ -69,6 +70,7 @@ export function MindMap() {
   const setOpen = (fn: (s: ReadonlySet<string>) => Set<string>) => setOpened((s) => fn(s ?? open));
   const [cur, setCur] = useState(ROOT_ID);
   const [inTree, setInTree] = useState(false);
+  const [hov, setHov] = useState<string | null>(null), [hotHov, setHotHov] = useState<string | null>(null);   // inspector previews: the pointer's arc, a hotspot row under pointer or focus
 
   const rows = useMemo(() => visible(root, open), [root, open]);
   const parts = useMemo(() => partition(root), [root]);
@@ -141,31 +143,89 @@ export function MindMap() {
   const announce = inTree ? "" : `${nameOf(sel.node)}, ${sel.node.kind}, ${amount(sel.node)}, friction ${sel.node.friction.toFixed(2)}. ${sel.node.children.length ? (open.has(curId) ? "Expanded" : "Collapsed") : "No children"}. Level ${sel.depth + 1}.`;
   const avg = root.struggled;
 
-  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
+  const hit = v.rows.filter(struggled), byProj = new Map<string, number>();
+  for (const r of hit) byProj.set(r.project, (byProj.get(r.project) ?? 0) + 1);
+  const hotP = [...byProj].sort((a, b) => b[1] - a[1])[0];
+  const so = hotP ? <>{hotP[0]} is the hotspot: <b>{Math.round((hotP[1] / hit.length) * 100)}%</b> of struggled sessions.</> : <>Nothing flagged in this window.</>;
+  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card so="Nothing flagged in this window." thin title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
+
+  // ---- pieces shared by the bar (narrow) and the plot overlay / inspector (wide, medium)
+  const crumbs = (
+    <nav className="mm-path" aria-label="Expanded path">
+      {path.map((n, i) => <span key={n.id} className="crumb-w">{i > 0 && <span aria-hidden="true">/</span>}<button type="button" className="crumb" aria-current={i === path.length - 1 || undefined} onClick={() => { setCur(n.id); focusId(n.id); }}>{nameOf(n)}</button></span>)}
+      {(curId !== ROOT_ID || opened) && <button type="button" className="crumb mm-reset" onClick={() => { setOpened(null); setCur(ROOT_ID); }}>Reset</button>}
+    </nav>
+  );
+  const zoomOut = !narrow && focus?.parent && <button type="button" className="btn" onClick={() => { setCur(focus.id); focusId(focus.id); }}>Zoom out to {nameOf(byId.get(focus.parent)?.node ?? root)}</button>;
+  const sn = sel.node, why = !canApply(sn) && <span className="meta" id={whyId}>{sn.kind === "root" ? "Select a branch to filter" : sn.kind === "more" ? "Open the group first" : "No filter for this node"}</span>;
+  /** Actions always act on the selection, never on a hover preview. */
+  const actions = (
+    <span className="mm-acts">
+      {sn.kind === "session" && sn.session ? <button type="button" className="btn" onClick={() => applyNode(sn)}>Open session</button> : <button type="button" className="btn" disabled={!canApply(sn)} aria-describedby={canApply(sn) ? undefined : whyId} onClick={() => applyNode(sn)}>Apply filter</button>}
+      {!narrow && canApply(sn) && <button type="button" className="btn" onClick={() => { apply(sn.filter); goto("s-sessions"); }}>Open {fmtInt(sn.sessions)} sessions</button>}
+      {sn.children.length > 0 && <button type="button" className="btn" aria-expanded={open.has(curId)} onClick={() => toggle(curId)}>{open.has(curId) ? "Collapse" : "Expand"}</button>}
+      {why}
+    </span>
+  );
+  const hotsEl = hots.length > 0 && <div className="mm-hots"><span className="muted">Hotspots by cost × friction ({BASIS_NOTE[metric]}):</span>{hots.map((x) => <button key={x.id} type="button" className="chip" onClick={() => {
+    showHot(x.id);
+    if (x.project) { apply({ project: x.project }); requestAnimationFrame(() => goto("s-sessions")); }   // scroll once the filtered page has laid out
+  }}
+    onMouseEnter={() => setHotHov(x.id)} onMouseLeave={() => setHotHov(null)} onFocus={() => setHotHov(x.id)} onBlur={() => setHotHov(null)}
+    aria-label={`Hotspot ${x.rank}: ${x.label}, ${chipText(x)}, friction ${x.friction.toFixed(2)}. Filter to this project and show its sessions`}><b className="mm-hot" aria-hidden="true">{x.rank}</b><span className="mm-hl">{x.label}</span> <span className="meta">{chipShort(x)}</span><span className="mm-note">{hot.get(x.id)?.note}</span></button>)}</div>;
+
+  // inspector: the pointer's arc, else a hovered or focused hotspot row, else the selection
+  const N = (hov && byId.get(hov)?.node) || (hotHov && byId.get(hotHov)?.node) || sn;
+  const kids = N.kind === "more" ? [] : N.children.filter((c) => c.kind !== "more").sort((a, b) => b.value - a.value).slice(0, 5);
+  const idle = N.id === ROOT_ID, few = N.rated < ROUTER_MIN_N, bad = N.kind !== "more" && !(metric === "cost" && !N.priced) && edgeOf(N, avg);
+  const sc = Math.min(1, Math.max(N.struggled, avg, 0.1) * 1.25);
+  const detail = (
+    <section className="mm-detail" aria-label="Node details">
+      <p className="mm-eye"><i className="sw" style={{ background: colorOf(N, toolOf(N)) }} />{N.kind}{N.id !== sn.id && <span className="mm-prev">previewing</span>}</p>
+      <p className="mm-nm" title={nameOf(N)}>{nameOf(N)}</p>
+      <p className="mm-big"><b>{val(N)}</b> <span className="meta">{share(N)}</span></p>
+      {N.kind !== "more" && <div className="mm-str">
+        <p className="meta">{few ? struggleNote(N) : <><b>{fmtPct(N.struggled)}</b> struggled vs {fmtPct(avg)} average</>}</p>
+        {!few && <span className="mm-track" data-bad={bad ? "" : undefined} style={{ "--f": N.struggled / sc, "--a": avg / sc } as CSSProperties}><i /><u /></span>}
+      </div>}
+      {!idle && N.kind !== "more" && <p className="meta mm-stats">friction <b>{N.friction.toFixed(2)}</b> · applied <b>{fmtPct(N.applied)}</b></p>}
+      {kids.length > 0 && <div className="mm-kids"><span className="muted">Top {kids[0].kind}s</span>{kids.map((c) => (
+        <button key={c.id} type="button" className="mm-kid" onClick={() => { setCur(c.id); if (c.kind === "session" && c.session) openSession(c.session); else toggle(N.id, true); }}>
+          <span className="mm-name">{nameOf(c)}</span><span className="mm-val">{val(c)}</span>
+          <span className="mm-share" aria-hidden="true" style={{ "--w": Math.max(0.02, c.value / (N.value || 1)), "--c": colorOf(c, toolOf(c)) } as CSSProperties}><i /></span>
+        </button>))}</div>}
+      {sn.kind !== "root" && actions}
+    </section>
+  );
+  const foot = (
+    <div className="mm-foot">
+      <ul className="legend mm-key">
+        <li className="k-arc" title={`Arc length = share of ${metric}`}>Arc = share of {metric}</li>
+        <li className="k-tone" title="Colour = tool, lighter each ring out: intent, project, session">Tool, lighter outward</li>
+        {avg > 0 && <li className="k-heat" title={`Red outer edge = struggled ${EDGE_OVER} times the ${fmtPct(avg, 0)} average or more, darkest at 3 times it (${ROUTER_MIN_N}+ sessions with a prompt; faded under ${MIN_N})`}>Struggle ≥ {EDGE_OVER}x avg</li>}
+        {hots.length > 0 && <li className="hotkey" title="Dashed outline and number = hotspot">Hotspot</li>}
+        {metric === "cost" && <li className="hatch" title="Hatched = no priced sessions">Unpriced</li>}
+      </ul>
+      <details className="mm-keys-d"><summary>Keys</summary>
+        <p className="meta mm-keys" id={keysId}>Keys: up and down move around a ring, right opens or steps out, left closes or steps in, Enter applies the filter (on the centre it zooms out), Space opens or closes, Home returns to the centre, End goes to the last node. Click the centre to zoom out.</p>
+      </details>
+    </div>
+  );
 
   return (
     <Section id="s-map" title="Mind map" q="How does your AI work branch?">
-      <Card title="How your work connects" src={`sessions graph · n ${fmtInt(v.rows.length)}`} meta={narrow ? "tool, intent, project, session" : "tool, intent, project, session. Click to open and zoom, double-click to filter"} span={12}
+      <Card so={so} thin={!hotP} title="How your work connects" src={`sessions graph · n ${fmtInt(v.rows.length)}`} meta={narrow ? "tool, intent, project, session" : "tool, intent, project, session. Click to open and zoom, double-click to filter"} span={12}
         actions={<Segmented label="Size nodes by" value={metric} onChange={setMetric} options={[{ id: "sessions" as const, text: "Sessions" }, { id: "prompts" as const, text: "Prompts" }, ...(hasCost ? [{ id: "cost" as const, text: "Cost" }] : [])]} />}>
-        <div className="mm-bar">
-          <nav className="mm-path" aria-label="Expanded path">
-            {path.map((n, i) => <span key={n.id} className="crumb-w">{i > 0 && <span aria-hidden="true">/</span>}<button type="button" className="crumb" aria-current={i === path.length - 1 || undefined} onClick={() => { setCur(n.id); focusId(n.id); }}>{nameOf(n)}</button></span>)}
-          </nav>
-          <span className="grow" />
-          <span className="mm-acts">
-            {!narrow && focus?.parent && <button type="button" className="btn" onClick={() => { setCur(focus.id); focusId(focus.id); }}>Zoom out to {nameOf(byId.get(focus.parent)?.node ?? root)}</button>}
-            {sel.node.children.length > 0 && <button type="button" className="btn" aria-expanded={open.has(curId)} onClick={() => toggle(curId)}>{open.has(curId) ? "Collapse" : "Expand"}</button>}
-            {sel.node.kind === "session" && sel.node.session ? <button type="button" className="btn" onClick={() => applyNode(sel.node)}>Open session</button> : <><button type="button" className="btn" disabled={!canApply(sel.node)} aria-describedby={canApply(sel.node) ? undefined : whyId} onClick={() => applyNode(sel.node)}>Apply filter</button>{!canApply(sel.node) && <span className="meta" id={whyId}>{sel.node.kind === "root" ? "Select a branch to filter" : sel.node.kind === "more" ? "Open the group first" : "No filter for this node"}</span>}</>}
-          </span>
-        </div>
-        {hots.length > 0 && <p className="mm-hots"><span className="muted">Hotspots by cost × friction ({BASIS_NOTE[metric]}):</span>{hots.map((x) => <button key={x.id} type="button" className="chip" onClick={() => {
-          showHot(x.id);
-          if (x.project) { apply({ project: x.project }); requestAnimationFrame(() => goto("s-sessions")); }   // scroll once the filtered page has laid out
-        }}
-          aria-label={`Hotspot ${x.rank}: ${x.label}, ${chipText(x)}, friction ${x.friction.toFixed(2)}. Filter to this project and show its sessions`}><span className="mm-hl">{x.rank}. {x.label}</span> <span className="meta">{chipShort(x)}</span></button>)}</p>}
-        <div className="mm" ref={body} onFocus={() => setInTree(true)} onBlur={(e) => setInTree(!!body.current?.contains(e.relatedTarget as Node | null))}>
-          {narrow ? (
-            <ul className="mm-list" aria-label="Mind map as an indented list">
+        <div className="mm-wrap" ref={wrap} data-mode={mode}>
+          {narrow && <>
+            <div className="mm-bar">{crumbs}<span className="grow" />{actions}</div>
+            {hotsEl}
+          </>}
+          <div className="mm-plot">
+            {!narrow && <div className="mm-ov">{crumbs}{zoomOut}</div>}
+            <div className="mm" ref={body} style={mode === "mid" && W ? { height: Math.min(W - 24, 440) } : undefined} onFocus={() => setInTree(true)} onBlur={(e) => setInTree(!!body.current?.contains(e.relatedTarget as Node | null))}>
+              {narrow ? (
+                <ul className="mm-list" aria-label="Mind map as an indented list">
               {rows.map(({ node: n, depth }, i) => {
                 const kids = n.children.length > 0, on = open.has(n.id), c = colorOf(n, toolOf(n)), ed = n.kind === "more" || (metric === "cost" && !n.priced) ? null : edgeOf(n, avg);
                 return (
@@ -182,23 +242,17 @@ export function MindMap() {
                   </li>
                 );
               })}
-            </ul>
-          ) : (
-            <Sunburst w={w} h={h} parts={parts} shown={shown} cur={curId} open={open} hot={hot} label={`Mind map sunburst: ${fmtInt(v.rows.length)} sessions by tool, intent and project, arcs sized by ${metric}`} describedBy={keysId}
+                </ul>
+              ) : (
+            <Sunburst w={w} h={h} parts={parts} shown={shown} cur={curId} open={open} hot={hot} hi={hotHov} onHover={setHov} label={`Mind map sunburst: ${fmtInt(v.rows.length)} sessions by tool, intent and project, arcs sized by ${metric}`} describedBy={keysId}
               nameOf={nameOf} ariaOf={aria} fmt={val} info={info} metric={metric} related={related} cover={cover}
               onPick={(n) => { if (n.id !== curId && open.has(n.id)) setCur(n.id); else activate(n); }}   // the first click on an open node selects it, the next one closes it
               onApply={(n) => { setCur(n.id); applyNode(n); }} onKey={key} onUp={() => focus && setCur(focus.id)} onSel={setCur} onHot={showHot} />
-          )}
+              )}
+            </div>
+          </div>
+          {!narrow && <div className="mm-side">{detail}{hotsEl || <span />}{foot}</div>}
         </div>
-        {!narrow && <>
-          <ul className="legend mm-key">
-            <li className="k-arc">Arc length = share of {metric}{metric === "cost" ? "; hatched = unpriced" : ""}</li>
-            <li className="k-tone">Colour = tool, lighter each ring out: intent, project, session</li>
-            {avg > 0 && <li className="k-heat">Red outer edge = struggled {EDGE_OVER} times the {fmtPct(avg, 0)} average or more, darkest at 3 times it ({ROUTER_MIN_N}+ sessions with a prompt; faded under {MIN_N})</li>}
-            {hots.length > 0 && <li className="hotkey">Dashed outline and number = hotspot</li>}
-          </ul>
-          <p className="meta mm-keys" id={keysId}>Keys: up and down move around a ring, right opens or steps out, left closes or steps in, Enter applies the filter (on the centre it zooms out), Space opens or closes, Home returns to the centre, End goes to the last node. Click the centre to zoom out.</p>
-        </>}
         <p className="sr-only" aria-live="polite">{announce}</p>
         <DataTable caption="Mind map nodes" head={["Node", "Level", "Sessions", "Friction", "Struggled", "Applied"]} rows={rows.map(({ node: n }) => [n.id.replace(`${ROOT_ID}/`, "").replace(ROOT_ID, "Your AI work"), n.kind, n.sessions, n.friction.toFixed(2), fmtPct(n.struggled), fmtPct(n.applied)])} />
       </Card>
