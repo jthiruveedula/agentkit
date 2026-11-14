@@ -18,6 +18,8 @@
     { "name": "security-audit",   "repo": "cloudflare/security-audit-skill",                 "sha": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8", "license": "MIT",       "for": "security review/audit" },
     { "name": "claude-seo",       "repo": "AgriciDaniel/claude-seo",                         "sha": "6be93f45064ffbadced572b5d5c95f55fd263af0", "license": "MIT",       "for": "seo for frontends/sites" },
     { "name": "hallmark",         "repo": "nutlope/hallmark",                                "sha": "4f6a46c6dc325d40ab268c93e25c7b96676ebccd", "license": "MIT",       "for": "anti-AI-slop frontend design" },
+    { "name": "frontend-slides",  "repo": "zarazhangrui/frontend-slides",                    "sha": "9906a34d640d2111f724544cbc50f7f130569ae1", "license": "MIT",       "for": "html slide decks / presentations" },
+    { "name": "archify",          "repo": "tt-a1i/archify",                                  "sha": "e37848822238e3a61b12739185cdadd49843a620", "license": "Apache-2.0", "for": "architecture diagrams from codebases" },
     { "name": "humanizer",        "repo": "blader/humanizer",                                "sha": "b48c832f0f809c1b5658edbb838c2521b72f2413", "license": "MIT",       "for": "anti-AI writing patterns (prose rewrite reference)" }
   ]
 }
