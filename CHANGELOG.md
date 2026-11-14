@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.1](https://github.com/jthiruveedula/agentkit/compare/v0.25.0...v0.25.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **site:** regenerate og image with current counts and add build-og script ([#124](https://github.com/jthiruveedula/agentkit/issues/124)) ([9b43fe7](https://github.com/jthiruveedula/agentkit/commit/9b43fe75e8e0572b6fcf40f605c9d501d821a465))
+
 ## [0.25.0](https://github.com/jthiruveedula/agentkit/compare/v0.24.0...v0.25.0) (2026-11-14)
 
 
