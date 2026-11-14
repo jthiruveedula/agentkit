@@ -66,9 +66,6 @@
 @media (min-width: 600px) { #s-overview .drv li, #s-overview .drv li > button { grid-template-columns: minmax(0, 18rem) minmax(160px, 1fr); } }
 #s-overview .drv li:not(:has(> button)), #s-overview .drv li > button { padding-left: var(--s3); }
 
-/* Per week and Needs attention share a row: one height */
-#s-overview #s-trend, #s-overview #s-attention { align-self: stretch; }
-
 /* Where it went: numbers in the UI face (tabular), the table spans the card */
 #s-overview .wh { max-width: none; }
 #s-overview .wh-v, #s-overview .wh-f, #s-overview .wh-p { font: 13px/20px var(--sans); font-variant-numeric: tabular-nums; }

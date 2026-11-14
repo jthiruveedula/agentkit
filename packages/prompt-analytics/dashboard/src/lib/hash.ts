@@ -6,9 +6,9 @@ import type { Cmp } from "./compare";
 /** Sessions table view state, all optional so a bare hash means: page 1, 10 rows, comfortable, default sort.
  *  pg = page (1-based), pgs = rows per page (0 = All), dens = "c" for compact, so = sort token ("cost-d"). */
 export interface Nav { f: Filter; sel?: string; list: boolean; cmp: Cmp; pg?: number; pgs?: number; dens?: "c"; so?: string }
-export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-models", "s-exposure", "s-recs", "s-sessions", "s-map"];
+export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-models", "s-exposure", "s-sessions", "s-map"];
 /** Card anchors inside a section: linkable and scroll targets, but the nav / scroll-spy highlight their section. */
-export const ANCHORS: Record<string, string> = { "s-trend": "s-overview", "s-attention": "s-overview", "s-playbook": "s-works", "s-loopbreak": "s-friction" };
+export const ANCHORS: Record<string, string> = { "s-trend": "s-overview", "s-next": "s-overview", "s-playbook": "s-works", "s-loopbreak": "s-friction" };
 /** Scroll-spy lock: goto() pins the active nav item to the clicked section until the smooth scroll ends (scrollend, or ~900 ms). */
 export const spyLock = { id: "", until: 0 };
 export function lockSpy(id: string, ms = 900) {
@@ -18,6 +18,8 @@ export function lockSpy(id: string, ms = 900) {
 }
 export const spyLocked = () => (Date.now() < spyLock.until ? spyLock.id : null);
 export const sectionOf = (id: string) => ANCHORS[id] ?? id;
+/** Retired section ids: old links land on the one Do-next card. */
+const LEGACY: Record<string, string> = { "s-attention": "s-next", "s-recs": "s-next" };
 const known = (id: string) => SECTIONS.includes(id) || id in ANCHORS;
 
 export function toHash(n: Nav, sec = "s-overview"): string {
@@ -62,11 +64,11 @@ export function fromHash(h: string, range?: Span): { nav: Nav; sec: string } {
   if (f.from !== undefined && f.to !== undefined && f.to < f.from) delete f.to;   // an inverted range keeps its start
   if (fr) { f.frictionMin = +fr[1]; f.frictionMax = +fr[2]; }
   const cmp = p.get("cmp");
-  const sec = str("sec") ?? path;
+  const sec = str("sec") ?? path, legacy = (x: string) => LEGACY[x] ?? x;
   const view: Partial<Nav> = {}, pg = num("pg"), ps = p.get("pgs"), so = str("so");
   if (pg !== undefined && pg > 1) view.pg = Math.floor(pg);
   if (ps === "all") view.pgs = 0; else if (ps && [25, 50, 100].includes(+ps)) view.pgs = +ps;
   if (p.get("dn") === "c") view.dens = "c";
   if (so && /^(date|prompts|tokens|loops|cost|friction)-[ad]$/.test(so)) view.so = so;
-  return { nav: { f, sel: str("sel"), list: p.get("pn") === "list", cmp: cmp === "yoy" || cmp === "off" ? cmp : "prev", ...view }, sec: known(sec) ? sec : known(`s-${sec}`) ? `s-${sec}` : "s-overview" };
+  return { nav: { f, sel: str("sel"), list: p.get("pn") === "list", cmp: cmp === "yoy" || cmp === "off" ? cmp : "prev", ...view }, sec: known(legacy(sec)) ? legacy(sec) : known(legacy(`s-${sec}`)) ? legacy(`s-${sec}`) : "s-overview" };
 }

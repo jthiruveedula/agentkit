@@ -9,19 +9,33 @@
 /* kind colours are categories, not alarms: secrets take teal so red stays reserved for open or worsening state */
 [data-cat="secret"] { --c: oklch(0.52 0.09 195); } [data-cat="pii"] { --c: var(--warn-pii); } [data-cat="phi"] { --c: var(--warn-phi); }
 
-/* Recommendations: ordered actions */
-.todo { display: grid; gap: var(--s2); counter-reset: n; }
-.todo li { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: 10px var(--s3); border-radius: var(--r2); border: 1px solid var(--rim);
+/* Do next: ordered actions. Desktop one grid line per row: number, action (+ detail), impact chip, evidence link + filter button; "Why this" on a line below */
+.todo { display: grid; gap: var(--s2); list-style: none; padding: 0; }
+.todo li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: var(--s2) var(--s3); align-items: center; padding: 10px var(--s3); border-radius: var(--r2); border: 1px solid var(--rim);
   background: oklch(1 0 0 / 0.5); box-shadow: inset 0 1px 0 #fff; }
-.todo .ic { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; color: #fff;
-  background: linear-gradient(135deg, oklch(0.66 0.09 var(--hue)), oklch(0.54 0.11 calc(var(--hue) + 25))); box-shadow: inset 0 1px 0 #fff8, 0 6px 14px -8px oklch(0.5 0.2 var(--hue)); }
-.todo .ic svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.todo h4 { font: 600 14px/20px var(--sans); }
-.todo p { overflow-wrap: anywhere; }
-.todo .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.todo .meta { margin-top: 2px; }
-.todo .btn { justify-self: end; }
+.todo .num { width: 24px; font: 600 14px/20px var(--sans); font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; }
+.todo .act { min-width: 0; }
+.todo h4 { font: 600 14px/20px var(--sans); color: var(--ink); overflow-wrap: anywhere; }
+.todo .act p { font-size: 13px; line-height: 18px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.todo .tag { font-weight: 600; font-variant-numeric: tabular-nums; white-space: normal; }
+.todo .tag.bad { color: var(--bad); border-color: color-mix(in oklab, var(--bad) 40%, transparent); background: color-mix(in oklab, var(--bad) 8%, oklch(1 0 0 / 0.6)); }
+.todo .tag.warn { color: var(--warn-ink); border-color: color-mix(in oklab, var(--warn) 45%, transparent); background: color-mix(in oklab, var(--warn) 10%, oklch(1 0 0 / 0.6)); }
+.todo .tag.info { color: var(--ink); }
+.todo .go { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--s2) var(--s3); }
+.todo .go .link { white-space: nowrap; }
+.todo details { grid-column: 2 / -1; font-size: 13px; line-height: 18px; color: var(--muted); }
+.todo summary { cursor: pointer; width: fit-content; border-radius: var(--r1); }
+.todo details p { margin-top: 4px; overflow-wrap: anywhere; }
 .todo .btn.primary { background: linear-gradient(180deg, oklch(0.64 0.2 268), oklch(0.5 0.22 270)); border-color: oklch(0.7 0.15 268 / 0.6); color: #fff; font-weight: 600; }
+.more { margin-top: var(--s2); }
+@media (max-width: 640px) {   /* number + action, then the chip, then the link and button; 44px tap height, no sideways scroll */
+  .todo li { grid-template-columns: auto minmax(0, 1fr); }
+  .todo .act p { white-space: normal; }
+  .todo .tag, .todo .go { grid-column: 2; justify-self: start; }
+  .todo .go { justify-content: flex-start; }
+  .todo .go :is(.link, .btn), .todo summary, .more { min-height: 44px; display: inline-flex; align-items: center; }
+  .todo .go .link { padding: 0 var(--s2); }
+}
 
 /* What works */
 .best { width: 100%; }

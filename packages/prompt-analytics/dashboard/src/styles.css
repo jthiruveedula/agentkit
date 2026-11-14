@@ -238,11 +238,6 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 .rq { display: grid; gap: var(--s3); }
 .rq-pages { display: flex; gap: var(--s3); align-items: center; flex-wrap: wrap; }
 
-/* needs attention, recommendations */
-.attn { display: grid; gap: 2px; }
-.attn button { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: center; gap: var(--s2); width: 100%; padding: 6px var(--s2); border-radius: var(--r1); }
-.attn button:hover { background: var(--sunk); }
-.sev { width: 8px; height: 8px; border-radius: 50%; }
 
 /* tables */
 .tbl-wrap { overflow-x: auto; max-width: 100%; }
@@ -782,10 +777,10 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .grid > .card { display: flex; flex-direction: column; }
 .grid > .card > .card-h + .so { margin-top: 0; }   /* flex items keep both margins: hold the 12px block rhythm */
 .grid > .card > :is(.btn, .seg, .chip, .link) { align-self: flex-start; }
-.grid > .card > :is(.bars, .attn, .dbs, .mx, .mf-recs, .chart) { flex: 1 1 auto; }
-.grid > .card > :is(.bars, .attn, .dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
-.grid > .card > :is(.bars, .attn) { grid-auto-rows: minmax(min-content, 42px); }
-.grid > .card > :is(.bars, .attn) > li { display: grid; }   /* the row button fills its stretched track */
+.grid > .card > :is(.bars, .dbs, .mx, .mf-recs, .chart) { flex: 1 1 auto; }
+.grid > .card > :is(.bars, .dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
+.grid > .card > :is(.bars) { grid-auto-rows: minmax(min-content, 42px); }
+.grid > .card > :is(.bars) > li { display: grid; }   /* the row button fills its stretched track */
 .grid > .card > .dbs { grid-auto-rows: minmax(min-content, 30px); }
 .grid > .card > .mx:not(.rt) { grid-auto-rows: minmax(min-content, 40px); }   /* switch matrix: rows grow to 40px */
 .grid > .card > .mx:not(.rt) .cell { height: auto; min-height: 26px; align-self: stretch; display: grid; place-content: center; }

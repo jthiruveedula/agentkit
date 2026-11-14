@@ -72,22 +72,20 @@ describe("Do next matching", () => {
   const ins = (filter: S) => ({ insights: [{ ...base.insights[0], id: "iX", drill: { chapter: "friction", filter } }],
     recommendations: [{ ...base.recommendations[0], id: "rX", title: "RECTITLE", evidence_insight: "iX" }] });
   const driver = () => rows("p0", 40, 4, 40, 24);   // driver = p0 / bugfix
-  it("shows the recommendation when its project matches the driver", () => {
+  const brief = (h: string) => new DOMParser().parseFromString(h, "text/html").querySelector("section.brief")!.textContent!;
+  it("a recommendation about the driver is Do next, with the same button as its row", () => {
     const h = html(driver(), ins({ project: "p0" }));
-    expect(h).toMatch(/RECTITLE/);
-    expect(h).toMatch(/evidence behind: RECTITLE">Open 40 sessions</);   // the evidence drill (project p0) is counted like the Why row's action
-    expect(h).toMatch(/the evidence behind: RECTITLE/);
+    expect(brief(h)).toMatch(/RECTITLE/);
+    expect(h.match(/aria-label="Open 40 sessions behind: RECTITLE">Open 40 sessions</g)).toHaveLength(2);   // the Brief and row 1
   });
-  it("shows the recommendation when project matches and only one side has an intent", () => {
-    expect(html(driver(), ins({ project: "p0", intent: "bugfix" }))).toMatch(/RECTITLE/);
-    expect(html(driver(), ins({ project: "p0" }))).toMatch(/RECTITLE/);
+  it("matches when project matches and only one side has an intent", () => {
+    expect(brief(html(driver(), ins({ project: "p0", intent: "bugfix" })))).toMatch(/RECTITLE/);
+    expect(brief(html(driver(), ins({ project: "p0" })))).toMatch(/RECTITLE/);
   });
-  it("falls back to the top attention item on a different project, a different intent, or no project", () => {
+  it("the Brief reads row 1 of the list, so a recommendation about another project never leads past the driver's", () => {
     for (const f of [{ project: "other" }, { project: "p0", intent: "refactor" }, {}, { intent: "bugfix" }]) {
-      const h = html(driver(), ins(f));
-      expect(h).not.toMatch(/RECTITLE/);
-      expect(h).not.toMatch(/the evidence behind/);
-      expect(h).toMatch(/<dt>Do next<\/dt>/);
+      const h = html(driver(), ins(f)), doc = new DOMParser().parseFromString(h, "text/html");
+      expect(doc.querySelector("section.brief dl.story > div:last-child .b-say")?.textContent).toBe(doc.querySelector("#s-next li h4")?.textContent);
     }
   });
   it("Open N sessions counts what the drill-down returns, prompt-less sessions included", () => {
@@ -95,7 +93,7 @@ describe("Do next matching", () => {
     expect(h).toMatch(/of its 40 sessions struggled/);
     expect(h.match(/aria-label="Open 43 sessions: p0 \/ bugfix">Open 43 sessions</g)).toHaveLength(2);   // Brief and Drivers panel
   });
-  it("with no driver the recommendation always shows", () => {
+  it("with no driver the recommendation is listed", () => {
     expect(html(rows("p0", 40, 4, 40, 4), ins({ project: "other" }))).toMatch(/RECTITLE/);
   });
 });
