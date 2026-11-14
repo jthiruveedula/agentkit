@@ -19,9 +19,10 @@ export function Section({ id, title, q, actions, children }: { id: string; title
 }
 
 /** Titled block on the grid. `meta` is the one-line method/scope caption ("all sessions" marks aggregates that ignore filters). */
-export function Card({ title, meta, span = 6, actions, children, id, src, so, thin }: { title: string; so?: ReactNode; thin?: boolean; meta?: ReactNode; span?: Span; actions?: ReactNode; children: ReactNode; id?: string; src?: string }) {
+/** `half`: one of a pair that stays side by side (6 + 6) at a <=1000px container, where every other card goes full width. */
+export function Card({ title, meta, span = 6, half, actions, children, id, src, so, thin }: { title: string; so?: ReactNode; thin?: boolean; meta?: ReactNode; span?: Span; half?: boolean; actions?: ReactNode; children: ReactNode; id?: string; src?: string }) {
   return (
-    <div className={`card s${span}`} id={id} role="group" aria-label={title} data-src={src}>
+    <div className={`card s${span}${half ? " half" : ""}`} id={id} role="group" aria-label={title} data-src={src}>
       <header className="card-h">
         <h3>{title}</h3>
         {meta ? <span className="meta">{meta}</span> : null}

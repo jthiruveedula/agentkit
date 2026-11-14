@@ -56,7 +56,7 @@ function TimeToResolve() {
   const fast = rows.filter((x) => x.k !== "all").reduce<(typeof rows)[number] | null>((a, b) => (!a || b.now!.m < a.now!.m ? b : a), null) ?? rows[0];
   const so = fast ? <>{fast.k === "all" ? "Resolved sessions take" : `${fast.name} resolves fastest:`} <b className={fast.was && fast.now!.m > fast.was.m * 1.05 ? "bad" : undefined}>{fast.now!.m.toFixed(1)}</b> min typical{fast.was ? `, was ${fast.was.m.toFixed(1)}` : ""}.</> : "Nothing flagged in this window.";
   return (
-    <Card so={so} thin={!fast} src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={12}>
+    <Card so={so} thin={!fast} src={`sessions.ttr_min \u00b7 n ${rows[0]?.now?.n ?? 0}${rows[0]?.was ? ` vs ${rows[0].was.n}` : ""}`} title="Time to resolve" meta="median minutes, resolved sessions only" span={5}>
       {rows.length === 0 ? <Empty>No resolved session with a time in view.</Empty> : (
         <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: x.label, name: x.name, a: x.was?.m ?? null, b: x.now!.m, fa: x.was ? x.was.m.toFixed(1) : "", fb: x.now!.m.toFixed(1),
           bad: x.was && Math.abs(x.now!.m - x.was.m) > x.was.m * 0.05 ? x.now!.m > x.was.m : null }))} />
@@ -330,7 +330,7 @@ function HourWeek() {
 }
 
 function Cumulative() {
-  const { v, prior, win, apply } = useStore();
+  const { v, prior, win, apply, caps } = useStore();
   const bks = useMemo(() => buckets(win, 1), [win]);
   const cur = useMemo(() => cumulative(bucketSeries(v.rows, win, 1, METRICS.cost)), [v.rows, win]);
   const prv = useMemo(() => (prior ? cumulative(bucketSeries(prior.v.rows, prior.win, 1, METRICS.cost)) : null), [prior]);
@@ -341,7 +341,7 @@ function Cumulative() {
   const dPct = prevAt ? Math.round(((nowC - prevAt) / prevAt) * 100) : null;
   const so = !priced ? "Nothing flagged in this window." : <><b>{fmtUSD(nowC)}</b> so far{dPct === null ? "." : dPct === 0 ? ", level with last period at this point." : <>, <span className={dPct > 0 ? "bad" : undefined}>{Math.abs(dPct)}% {dPct > 0 ? "above" : "below"}</span> last period at this point.</>}</>;
   return (
-    <Card so={so} thin={!priced} src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={12}>
+    <Card so={so} thin={!priced} src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={caps.hasTtrRows ? 7 : 12}>
       {!priced ? <Empty>No priced sessions in this period.</Empty> : (
         <>
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
@@ -365,7 +365,7 @@ function TokenEfficiency() {
   const tPct = wk.length > 1 ? Math.round(((tNow - tFirst) / tFirst) * 100) : null;
   const so = !wk.length ? "Nothing flagged in this window." : <>Each applied change costs <b>{fmtCompact(tNow)}</b> tokens{tPct === null ? "." : <>, <span className={tPct > 0 ? "bad" : undefined}>{Math.abs(tPct)}% {tPct >= 0 ? "more" : "less"}</span> than the first week.</>}</>;
   return (
-    <Card so={so} thin={!wk.length} src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={12}>
+    <Card so={so} thin={!wk.length} src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={caps.hasTtrRows ? 7 : 12}>
       {cur.every((x) => x === 0) ? <Empty>No session applied a change in this period.</Empty> : (
         <>
           <LineChart label="Tokens per applied change by week. Click a week to filter it" labels={labels} fmt={fmtCompact} height={180}

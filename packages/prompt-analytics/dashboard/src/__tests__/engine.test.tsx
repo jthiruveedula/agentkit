@@ -24,10 +24,9 @@ describe("engine tiers", () => {
     expect(pillText(ml.engine)).toMatch(/ML .* scikit-learn 1\.9\.1/);
     expect(pillText({ ...ml.engine, mode: "deep", accel: "mps" })).toMatch(/Semantic .* mps/);
   });
-  it("basic renders keyword topics, not the galaxy", () => {
+  it("What works shows no topic list (cut: a generic list with no action)", () => {
     const html = renderToStaticMarkup(<StoreProvider d={basic}><Works /></StoreProvider>);
-    expect(html).toMatch(/Topics, grouped by keywords/);
-    expect(html).not.toMatch(/Topic galaxy/);
+    expect(html).not.toMatch(/Topics|Topic galaxy|biggest topic/);
   });
   const mount = (d: typeof ml) => {
     const el = document.createElement("div"); document.body.append(el);

@@ -82,6 +82,17 @@ export function initFx() { setFx(!reducedNow()); }
 /** Switch `html.fx` on or off (only ever on in a real browser). Called at start-up and whenever the reduced-motion preference changes. */
 export function setFx(on: boolean) { if (typeof document !== "undefined") document.documentElement.classList.toggle("fx", on && realBrowser()); }
 
+/** `html.glass` (translucent cards): a real browser where the OS asks for none of these. Separate from motion: reduced motion keeps glass.
+ *  A JS flag, not a CSS query, because Safari and Firefox do not know prefers-reduced-transparency. Follows each preference live. */
+const SOLID = ["(prefers-reduced-transparency: reduce)", "(prefers-contrast: more)", "(forced-colors: active)"];
+export function initGlass() {
+  if (typeof document === "undefined" || !realBrowser()) return;
+  const qs = SOLID.map((q) => matchMedia(q));
+  const set = () => document.documentElement.classList.toggle("glass", !qs.some((q) => q.matches));
+  qs.forEach((q) => q.addEventListener?.("change", set));
+  set();
+}
+
 const reveal = (sec: Element) => {
   if (sec.hasAttribute("data-in")) return;
   sec.setAttribute("data-in", "");

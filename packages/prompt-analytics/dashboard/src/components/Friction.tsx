@@ -23,7 +23,7 @@ function Signals() {
   const rs = d.friction.rates.filter((r) => caps.sources.includes(r.source)), n = rs.reduce((a, r) => a + r.n, 0);
   const top = n === 0 ? null : SIGNALS.map((sg) => ({ sg, x: rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n })).reduce((a, b) => (b.x > a.x ? b : a));
   return (
-    <Card so={top ? <>{top.sg.text} is your top struggle signal: <b>{fmtPct(top.x)}</b> of prompts.</> : <>Nothing flagged in this window.</>} thin={!top} src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={7}>
+    <Card so={top ? <>{top.sg.text} is your top struggle signal: <b>{fmtPct(top.x)}</b> of prompts.</> : <>Nothing flagged in this window.</>} thin={!top} src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={5} half>
       {n === 0 ? <Empty /> : (
         <BarList label="Friction signals" rows={SIGNALS.map((sg) => { const x = rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n;
           return { key: sg.id, label: sg.text, value: x, color: sg.id === "rephrase" ? "var(--accent)" : "var(--prior)", text: fmtPct(x, 1), aria: `${sg.text}: ${fmtPct(x, 1)} of ${fmtInt(n)} prompts` }; })} />
@@ -42,7 +42,7 @@ function ByIntent() {
   const worst = rows.length ? rows.reduce((a, b) => (b.b > a.b ? b : a)) : null;
   const so = worst ? <>{worst.k} retries most: <b className={worst.a !== null && worst.b - worst.a >= 0.15 ? "bad" : undefined}>{worst.b.toFixed(1)}</b> per session{worst.a !== null ? `, was ${worst.a.toFixed(1)}` : ""}.</> : <>Nothing flagged in this window.</>;
   return (
-    <Card so={so} thin={!worst} src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={5}>
+    <Card so={so} thin={!worst} src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={7} half>
       {rows.length === 0 ? <Empty /> : (
         <>
           <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: x.k, name: x.k, a: x.a, b: x.b, fa: x.a === null ? "" : x.a.toFixed(1), fb: x.b.toFixed(1), bad: x.a !== null && Math.abs(x.b - x.a) >= 0.15 ? x.b > x.a : null }))} />
