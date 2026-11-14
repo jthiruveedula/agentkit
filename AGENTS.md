@@ -12,6 +12,7 @@ Per-tool shims translate frontmatter only; the procedure is one file.
 | Skill | Version | Trigger |
 |---|---|---|
 | `agentkit-audit` | 0.1.0 | Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard. |
+| `chart-design` | 0.1.0 | Pick the chart form that answers the question, then make it honest, accessible and good-looking in any medium (SVG, D3, Vega, Recharts, matplotlib, plotly, dashboards). Use when creating, reviewing or restyling a chart, graph, plot, KPI tile or dashboard, or choosing chart colours. |
 | `context-budget` | 0.1.0 | Pause long Claude Code sessions at a token budget: write a checkpoint, ask for /compact or /clear, auto-reinject on resume. Use when the user wants session token monitoring, a context budget, or pause/resume on long runs. |
 | `context-compressor` | 0.1.0 | Write short summarization checkpoints (goal, decisions+reasons, state, open threads, memory keys) to survive context pressure. Use when a session is long, before compaction or risky multi-step runs, at task boundaries, or before handoff. |
 | `daily-standup` | 0.1.0 | Summarize commits, closed issues/PRs and open threads since the last standup into 3 lines (did/doing/blocked). Use when the user asks for a standup update, status report, or "what did I do yesterday". |

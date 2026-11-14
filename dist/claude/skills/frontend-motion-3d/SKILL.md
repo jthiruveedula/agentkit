@@ -21,6 +21,7 @@ Choose the lightest tool, set the budget, then build.
    - immersive scroll-through 3D world → `scroll-world`; 3D data viz → `3dviz-pro-max`
    - rendered video / motion graphics from HTML → `hyperframes`
    - visual direction, layout, type, color → `ext-hallmark` first (every UI change passes its Floor + sloplint)
+   - charts, graphs, KPI tiles, dashboards → `chart-design` (form, honest axes, palette check)
    - any public page or site → `ext-seo` baseline (meta, canonical, OG, JSON-LD, sitemap, robots)
    - how a live reference site builds an effect → `ext-rea`
      (`inspect_web_page`, `analyze_web_bundle`), then reimplement it. Never copy its code or assets.
