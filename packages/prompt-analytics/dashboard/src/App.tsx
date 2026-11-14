@@ -18,7 +18,7 @@ import { Friction } from "./components/Friction";
 import { Works } from "./components/Works";
 import { ModelFit } from "./components/ModelFit";
 import { Exposure } from "./components/Exposure";
-import { Recommend } from "./components/Recommend";
+import { NextCtx, useNext } from "./components/Recommend";
 import { Sessions } from "./components/Sessions";
 import { Panel } from "./components/Detail";
 import { Palette } from "./components/Palette";
@@ -32,7 +32,7 @@ import "./components/rank.css";
 
 const COMP: Record<string, () => JSX.Element | null> = {
   "s-overview": Overview, "s-tools": Tools, "s-time": Time, "s-funnel": Funnel, "s-friction": Friction, "s-works": Works,
-  "s-models": ModelFit, "s-exposure": Exposure, "s-recs": Recommend, "s-sessions": Sessions, "s-map": MindMap,
+  "s-models": ModelFit, "s-exposure": Exposure, "s-sessions": Sessions, "s-map": MindMap,
 };
 
 type State = { kind: "loading" } | { kind: "empty" } | { kind: "error"; msg: string } | { kind: "ready"; d: DashboardData };
@@ -48,7 +48,7 @@ function initial(): State {
 }
 
 function Body({ onData }: { onData: (d: DashboardData) => void }) {
-  const { d, f, panel, section, setSection, secs, caps, capsAll } = useStore();
+  const { d, f, panel, section, setSection, goto, secs, caps, capsAll } = useStore();
   useReveal();
   const [col, setCol] = useState(railCollapsed);
   const [menu, setMenu] = useState(false);
@@ -69,7 +69,8 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
 
   // Rank on the date window only, so drilling never reshuffles the page.
   const wv = useMemo(() => views(d, { from: f.from, to: f.to }), [d, f.from, f.to]);
-  const ranked = useMemo(() => rankSections(secs, attention(d, wv, { from: f.from, to: f.to }, null), d, wv.rows), [secs, d, wv, f.from, f.to]);
+  const next = useNext();   // computed once here and shared with the Do-next card and the Brief through NextCtx
+  const ranked = useMemo(() => rankSections(secs, attention(d, wv, { from: f.from, to: f.to }, null), d, wv.rows, next), [secs, d, wv, f.from, f.to, next]);
   const [open, setOpen] = useState(() => new Set([sectionOf(fromHash(typeof location === "undefined" ? "" : location.hash).sec)]));   // a shared link to a quiet section opens it
   const expand = (id: string) => {
     setOpen((s) => new Set(s).add(id));
@@ -78,7 +79,7 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
   useEffect(() => {   // rail, palette or a KPI "Details" jump to a quiet section opens it (goto locks the spy; plain scrolling does not)
     if (ranked.quiet.has(section) && !open.has(section) && spyLocked() === section) expand(section);
   }, [section]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const promoted = ranked.order.filter((id) => ranked.score[id] > 0);
+  const goNext = () => { goto("s-next"); requestAnimationFrame(() => { const h = document.querySelector<HTMLElement>("#s-next h3"); if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); } }); };
   const shownKey = ranked.order.join();
   useEffect(() => {   // the nav highlights the last section whose top passed 30% of the viewport (or the last one at the page end): always exactly one
     let raf = 0;
@@ -113,11 +114,13 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
               {caps.empty ? <EmptyState /> : <>
                 <OtherTools />
                 {caps.tooSmall && <p className="hint unlock" role="status">{unlockText(caps, secs.has("s-time"))}</p>}
+                <NextCtx.Provider value={next}>
                 {ranked.order.map((id) => {
-                  const C = COMP[id], at = promoted.indexOf(id);
+                  const C = COMP[id], w = ranked.why[id];
                   if (ranked.quiet.has(id) && !open.has(id)) return <Quiet key={id} id={id} title={titleOf(id, capsAll.multiTool)} expand={() => expand(id)} />;
-                  return at < 0 ? <C key={id} /> : <Fragment key={id}><p className="why-tag"><b>#{at + 1}</b> {ranked.why[id]}</p><C /></Fragment>;
+                  return !w ? <C key={id} /> : <Fragment key={id}><p className="why-tag"><button type="button" className="link" onClick={() => goNext()} aria-label={`Do next row ${w.n}: ${w.text}. Back to the list`}><b>#{w.n}</b> {w.text}</button></p><C /></Fragment>;
                 })}
+                </NextCtx.Provider>
               </>}
             </main>
           </div>

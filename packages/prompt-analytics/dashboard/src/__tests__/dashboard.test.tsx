@@ -27,7 +27,7 @@ const toolRow = (i = 0) => el.querySelectorAll<HTMLButtonElement>(".sc tbody th 
 describe("one-page drilldown", () => {
   it("renders every section on one page with no tabs or story", () => {
     mount();
-    for (const id of ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure", "s-recs", "s-sessions"]) expect(el.querySelector(`#${id}`)).not.toBeNull();
+    for (const id of ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-exposure", "s-next", "s-sessions"]) expect(el.querySelector(`#${id}`)).not.toBeNull();
     expect(el.querySelector('[role="tab"]')).toBeNull();
     expect(el.querySelector(".panel")).toBeNull();
     expect(kpi("sessions")).toBe(total());
@@ -94,7 +94,8 @@ describe("one-page drilldown", () => {
   it("Show evidence applies the insight filter and opens the list", () => {
     mount();
     const rec = d.recommendations.find((r) => { const i = d.insights.find((x) => x.id === r.evidence_insight); return i && Object.keys(i.drill.filter).length > 0; })!;
-    click(el.querySelector(`[data-rec="${rec.id}"] button`));
+    const more = el.querySelector("#s-next .more"); if (more) click(more);   // the recommendation may sit past the first three rows
+    click(el.querySelector(`[data-next="${rec.id}"] .btn`));
     expect(el.querySelector(".panel")).not.toBeNull();
     expect(el.querySelectorAll(".crumbs .crumb").length).toBeGreaterThan(0);
   });

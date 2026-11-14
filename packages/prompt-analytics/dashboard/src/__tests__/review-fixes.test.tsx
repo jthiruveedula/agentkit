@@ -56,7 +56,7 @@ describe("review fixes", () => {
     expect(h).toMatch(/Struggling held at about 10\.0%/);
     expect(htmlText(h)).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
     expect(htmlText(h)).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
-    expect(h).toMatch(/the evidence behind/);   // no driver, so the top recommendation is Do next
+    expect(h).toMatch(/<dt>Do next<\/dt>/);   // row 1 of the Do-next list
     expect(h).not.toMatch(/data-kpi="struggled"/);
   });
   it("Brief names the driver once, with its counts and sessions button", () => {

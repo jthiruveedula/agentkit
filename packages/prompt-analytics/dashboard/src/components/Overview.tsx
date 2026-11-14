@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { useStore } from "../state";
-import { attention, THRESHOLDS, type Item } from "../lib/attention";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
 import { Empty, Segmented } from "./ui";
+import { Recommend, useNext, useRowOps } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
@@ -21,41 +21,6 @@ import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
 import "./story.css";
-
-const DOT: Record<Item["sev"], string> = { bad: "var(--bad)", warn: "var(--warn)", info: "var(--muted)" };
-
-/** Run an attention item: a drill filters (and opens the list), a scroll jumps to its section. */
-function useRun() {
-  const { apply, goto, setExCat } = useStore();
-  return (it: Item) => {
-    const a = it.action;
-    if (a.kind === "drill") apply(a.filter, { list: a.list });
-    else { if (a.exCat) setExCat(a.exCat); goto(a.id); }
-  };
-}
-
-function Attention() {
-  const { d, v, f, ids } = useStore();
-  const items = useMemo(() => attention(d, v, f, ids), [d, v, f, ids]);
-  const run = useRun();
-  return (
-    <Panel id="s-attention" title="Needs attention" meta="ranked, one click to the cause" src="insights · ranked by sessions" span={4}>
-      {items.length === 0 ? <Empty>Nothing needs attention. Checked: {THRESHOLDS}.</Empty> : (
-        <ol className="attn">
-          {items.map((it) => (
-            <li key={it.id}>
-              <button type="button" onClick={() => run(it)} aria-label={`${it.headline}. ${it.action.kind === "drill" ? "Filter and open sessions" : "Jump to details"}`}>
-                <i className="sev" style={{ background: DOT[it.sev] }} aria-hidden="true" />
-                <span className="hl">{it.headline}</span>
-                <b className="num">{it.num}</b>
-              </button>
-            </li>
-          ))}
-        </ol>
-      )}
-    </Panel>
-  );
-}
 
 /** Top 5 projects, tools or intents by share of priced cost (tokens when unpriced). One denominator for every row (lib/share.ts), a fixed 0-100% track,
  *  an "Other" row so the list adds to 100%, and per-row mean friction (vs the median of the group) and cost per session. A row filters the page to it. */
@@ -91,7 +56,7 @@ function WhereWent() {
           </div>
         )}
       </div>
-      {o && <p className="wh-out"><b>{o.label}</b> is the friction outlier ({fr(o.friction)}, {vs(o.vsMedian)} vs the median {fr(dm.median)}). <button type="button" className="link" onClick={() => goto("s-friction")}>See Friction</button> · <button type="button" className="link" onClick={() => goto("s-recs")}>See Recommendations</button></p>}
+      {o && <p className="wh-out"><b>{o.label}</b> is the friction outlier ({fr(o.friction)}, {vs(o.vsMedian)} vs the median {fr(dm.median)}). <button type="button" className="link" onClick={() => goto("s-friction")}>See Friction</button> · <button type="button" className="link" onClick={() => goto("s-next")}>See Do next</button></p>}
       <p className="note">Shares are of {dm.byCost ? "priced cost" : "all tokens"} in this view ({text(dm.total)}).{dm.unpriced ? ` ${fmtInt(dm.unpriced.n)} of ${fmtInt(dm.unpriced.of)} sessions are unpriced: excluded from cost, not counted as $0.` : ""}{dm.id === "projects" && dm.rows.some((r) => !r.filterable) ? " Sessions with no project cannot be filtered to." : ""}</p>
     </Panel>
   );
@@ -137,7 +102,7 @@ const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
 /** Briefing: the struggled rate, what it is compared against, how sure the change is, and the driver once. Honest copy for every state. */
 function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b: Briefing; bs: Basis; cmp: Cmp; win: number; scope: Scope; all: SessionRow[] }) {
   const { d, v, f, ids, apply, clear, win: wn } = useStore();
-  const run = useRun();
+  const rows = useNext(), ops = useRowOps();
   const openIds = useMemo(() => openExposure(d), [d]);
   // the Key numbers tiles' verdicts on the same basis (lib/mix): an Also moved chip with a tile is grey when its tile is (mixed, within range),
   // and dropped when its tile shows no change, so the brief never reads as a win the tile below calls mixed
@@ -149,11 +114,8 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
   const tone = real ? (up ? "bad" : "good") : "flat";
   const pct = (x: number) => fmtPct(x, 1);
   const drv = real ? b.drivers?.headline ?? null : null;
-  const first = useMemo(() => attention(d, v, f, ids)[0], [d, v, f, ids]);
-  const rec = d.recommendations[0], ev = rec ? d.insights.find((i) => i.id === rec.evidence_insight) : undefined, ef = ev?.drill.filter;
-  // a recommendation is Do next only when it is about the driver (same project, and intent when both have one)
-  const recOk = !!rec && (!drv || (!!ef && ef.project === drv.project && (!ef.intent || !drv.intent || ef.intent === drv.intent)));
-  const st = useMemo(() => story(bs.cur, { rec: recOk ? rec.title : undefined, attention: first?.headline }), [bs, recOk, rec, first]);
+  const top = rows[0], topN = top ? ops.count(top) : 0, topSec = top ? ops.sec(top) : null;
+  const st = useMemo(() => story(bs.cur), [bs]);
   // raw session counts are not comparable across a 4-week vs a 22-week split, so the Sessions mover only runs against an equal prior window
   const all = useMemo(() => movers(bs.cur, bs.base, 5).filter((m) => (bs.mode !== "split" || m.id !== "sessions") && (!tiled(m.id) || dl[m.id] !== undefined)).slice(0, 2), [bs, dl]);
   // a grey (mixed / within range) change never leads the headline
@@ -177,11 +139,6 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
       {drvN > 0 && <button type="button" className="btn primary b-act" onClick={() => apply({ ...(drv.project !== undefined ? { project: drv.project } : {}), ...(drv.intent ? { intent: drv.intent as never } : {}), ...scope }, { list: true })}
         aria-label={`Open ${nSess(drvN)}: ${drv.key}`}>Open {nSess(drvN)}</button>}</>
   ) : st.why && <span className="b-say">{st.why}</span>;
-  // Do next: a drill (recommendation evidence or attention item) counts what it opens; an exposure jump counts its sessions; any other jump has no count
-  const fa = first?.action;
-  const nextN = st.next?.kind === "rec" ? (ef ? applyFilter(d.sessions, { ...f, ...ef }, openIds).length : null)
-    : fa?.kind === "drill" ? applyFilter(d.sessions, { ...f, ...fa.filter }, openIds).length : first?.sessions ?? null;
-  const nextLbl = nextN === null ? "Show details" : `${fa?.kind === "scroll" && st.next?.kind !== "rec" ? "Review" : "Open"} ${nSess(nextN)}`;
   const sure = vd.kind === "noise" ? "could be" : "likely";
   return (
     <section className="s12 brief" aria-labelledby="ov-hd" data-tone={tone}>
@@ -216,16 +173,16 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
           </>
         )}
       </div>
-      {(why || st.next || mv.length > 0) && (
+      {(why || top || mv.length > 0) && (
         <div className="b-side">
-          {(why || st.next) && (
+          {(why || top) && (
             <dl className="story">
               {why && <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>}
-              {st.next && (
-                <div><dt>Do next</dt><dd><span className="b-say">{st.next.text}</span>
-                  {/* an action that would open 0 sessions is hidden, not offered */}
-                  {st.next.kind === "rec" ? ev && nextN !== 0 && <button type="button" className="btn b-act" onClick={() => apply(ev.drill.filter, { list: true })} aria-label={`${nextLbl}, the evidence behind: ${st.next.text}`}>{nextLbl}</button>
-                    : first && nextN !== 0 && <button type="button" className="btn b-act" onClick={() => run(first)} aria-label={first.action.kind === "drill" ? `${nextLbl} behind: ${first.headline}` : `${nextLbl}: jump to the details of ${first.headline}`}>{nextLbl}</button>}
+              {top && (
+                <div><dt>Do next</dt><dd><span className="b-say">{top.action}</span>
+                  {/* the same button as row 1 of Do next; an action that would open 0 sessions is hidden, not offered */}
+                  {top.filter && topN > 0 ? <button type="button" className="btn b-act" onClick={() => ops.open(top)} aria-label={`Open ${nSess(topN)} behind: ${top.action}`}>Open {nSess(topN)}</button>
+                    : topSec && <button type="button" className="btn b-act" onClick={() => ops.see(top)} aria-label={`See ${topSec.title}: evidence for ${top.action}`}>See {topSec.title}</button>}
                 </dd></div>
               )}
             </dl>
@@ -310,19 +267,20 @@ export function Overview() {
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
         {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} />}
+        <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <KeyNumbers bs={bs} setMetric={setMetric} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">
           <span className="meta">All time</span><span>{fmtInt(t.active_days)} active days</span><span>streak {t.longest_streak} longest, {t.current_streak} now</span><span>{fmtInt(t.projects)} projects</span><span>{fmtInt(t.commits_linked)} commits linked</span>
         </p>
         <UsageMix />
-        <Panel id="s-trend" title="Per week" meta="last 12 weeks" span={8} src={`sessions · weekly · n ${fmtInt(b.sessions.now)}${b.sessions.prev === null ? "" : ` vs ${fmtInt(b.sessions.prev)}`}`} actions={<TrendToggles metric={m} setMetric={setMetric} view={view} setView={setView} hasCost={caps.hasCost} />}>
+        <Panel id="s-trend" title="Per week" meta="last 12 weeks" span={12} src={`sessions · weekly · n ${fmtInt(b.sessions.now)}${b.sessions.prev === null ? "" : ` vs ${fmtInt(b.sessions.prev)}`}`} actions={<TrendToggles metric={m} setMetric={setMetric} view={view} setView={setView} hasCost={caps.hasCost} />}>
           {/* in split mode the struggled headline reads like the Brief: last 4 weeks against the weeks before */}
           {m === "struggled" && bs.mode === "split" && bb.struggled.now !== null
             ? <div className="wk-big"><b>{fmtPct(bb.struggled.now, 1)}</b><span>last 4 weeks{ref ? ` · ${fmtPct(ref.p, 1)} before` : ""}</span></div>
             : <div className="wk-big"><b>{big[m]}</b><span>{m === "spend" ? "priced spend in period" : `${m} in period`}</span></div>}
           <WeekChart weekly={b.weekly} metric={m} view={view} base={ref} />
         </Panel>
-        <Attention /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} /><WhereWent />
+        <WhereWent />
       </div>
     </section>
   );
