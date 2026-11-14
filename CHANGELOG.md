@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.2](https://github.com/jthiruveedula/agentkit/compare/v0.25.1...v0.25.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* **prompt-analytics:** exercise umap in CI and pin golden to PCA ([#128](https://github.com/jthiruveedula/agentkit/issues/128)) ([2aa2f50](https://github.com/jthiruveedula/agentkit/commit/2aa2f5033f4bd0940225df181e449d82abe233a6))
+
 ## [0.25.1](https://github.com/jthiruveedula/agentkit/compare/v0.25.0...v0.25.1) (2026-11-14)
 
 
