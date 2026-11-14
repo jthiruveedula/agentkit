@@ -449,8 +449,9 @@ The social card `site/assets/og.png` is rendered from the hero by `bash site/scr
 
 Every PR runs 3 OS × 4 Python versions, lint (ruff, shellcheck, PowerShell syntax, link check),
 secret scanning, CodeQL, `npm audit`, and packed-artifact tests (npm tarball + Python wheel).
-release-please builds the changelog and version bump from conventional commits; merging the
-release PR tags `vX.Y.Z` and `publish.yml` ships `@jthiruveedula/agentkit` to GitHub Packages.
+release-please builds the changelog and version bump from conventional commits. The release
+workflow runs CI on the release PR and merges it when green, which tags `vX.Y.Z`; `publish.yml`
+then ships `@jthiruveedula/agentkit` to GitHub Packages. No manual release step.
 See [`CHANGELOG.md`](CHANGELOG.md) and [releases](https://github.com/jthiruveedula/agentkit/releases).
 A nightly run catches external drift.
 
