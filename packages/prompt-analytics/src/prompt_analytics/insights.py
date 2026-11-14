@@ -1,4 +1,4 @@
-"""Insight engine: templated comparisons -> ranked, evidence-linked, descriptive (never causal) claims.
+"""Insight engine: templated comparisons -> ranked, evidence-linked claims that describe your history (never causes).
 
 Candidates are ranked by |effect| * ln(n) within their chapter (exposure findings outrank everything in
 friction by severity: phi > secret > pii). Every chapter gets a headline (rank 1); thin data falls back to a
@@ -610,14 +610,14 @@ def _works(ww: list[dict], labels: dict[int, str], val: dict) -> list[dict]:
                 f"works.effect.{r['cluster']}.{r['feature']}",
                 "works",
                 f"Your {FEATURE_PHRASE[r['feature']][0].lower() + FEATURE_PHRASE[r['feature']][1:]} {verb} in '{topic}' topics",
-                f"{r['feature']} effect ({'applied-rate difference' if rate else 'Cliffs delta'})",
+                f"{r['feature']} effect",
                 r["effect"],
                 "",
                 None,
                 r["n"],
-                "applied-rate difference, Newcombe-Wilson CI"
+                "how often changes landed, high vs low"
                 if rate
-                else "cliffs delta, bootstrap CI, BH-FDR q=0.1",
+                else "best vs worst sessions, repeat-checked",
                 abs(r["effect"]) * math.log(r["n"]),
                 "effect",
                 {"cluster": r["cluster"]},
@@ -1126,7 +1126,7 @@ def _recommend(items: list[dict], sec: dict) -> list[dict]:
                 c,
                 f"Try {NAMES[m['best']]} first for {m['intent']}",
                 f"Start {m['intent']} tasks in {NAMES[m['best']]}; it {what} than {NAMES[m['worst']]} in your history.",
-                f"{m['ratio']:.1f}x gap (descriptive, not causal)",
+                f"{m['ratio']:.1f}x gap in your own history",
             )
         elif k == "anomaly" and m["metric"] == "cost":
             add(
@@ -1142,7 +1142,7 @@ def _recommend(items: list[dict], sec: dict) -> list[dict]:
                 c,
                 f"Lean on {m['feature']} in '{m['topic']}' prompts",
                 FEATURE_ACTION[m["feature"]],
-                f"Effect {c['value']:+.2f} (descriptive)",
+                "Seen in your own history; a pattern, not proof",
             )
     return sorted(recs, key=lambda r: (-r["rank"], r["evidence_insight"]))[:8]
 

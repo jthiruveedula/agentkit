@@ -336,7 +336,7 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
     sm = mx.fetch(
         con,
         """SELECT session_id, source, intent, n_user, n_turns, corrections, frustrations, loops, interrupts, abandoned,
-                          friction, has_applied, has_outcome, ttr_s, reached_stage FROM session_metrics ORDER BY session_id""",
+                          friction, has_applied, has_outcome, ttr_s, reached_stage, struggle_p FROM session_metrics ORDER BY session_id""",
         {
             "session_id": pl.Utf8,
             "source": pl.Utf8,
@@ -353,6 +353,7 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
             "has_outcome": pl.Boolean,
             "ttr_s": pl.Float64,
             "reached_stage": pl.Int64,
+            "struggle_p": pl.Float64,
         },
     )
     sec, _ = core_sections(b, sess, prompts, sm)
@@ -372,9 +373,16 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
             "ci": [r[3], r[4]],
             "n": r[5],
             "direction": r[6],
+            **(
+                {"uplift": {"pts": r[7], "n_with": r[8], "n_without": r[9], "strata": r[10]}}
+                if r[7] is not None
+                else {}
+            ),
+            "holdout": None if r[11] is None else {"held": bool(r[11]), "weeks": r[12]},
         }
         for r in con.execute(
-            "SELECT cluster, feature, effect, ci_lo, ci_hi, n, direction FROM what_works ORDER BY abs(effect) DESC, cluster, feature"
+            "SELECT cluster, feature, effect, ci_lo, ci_hi, n, direction, uplift_pts, uplift_n_with, uplift_n_without, "
+            "uplift_strata, hold_held, hold_weeks FROM what_works ORDER BY abs(effect) DESC, cluster, feature"
         ).fetchall()
     ]
     ins = [
@@ -555,6 +563,7 @@ def _sessions(
                 "friction": float(x.get("friction") or 0.0),
                 "cluster": int(cl.get(r["session_id"], -1)),
                 "features": feats.get(r["session_id"], []),
+                **({"struggle_p": x["struggle_p"]} if x.get("struggle_p") is not None else {}),
                 "ttr_min": None
                 if x.get("ttr_s") is None
                 else round(float(x["ttr_s"]) / 60.0, 2),

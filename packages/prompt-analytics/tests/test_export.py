@@ -172,7 +172,7 @@ def test_sessions_rows(built):
         "model",
     }
     assert all(
-        set(r) == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS
+        set(r) - {"struggle_p"} == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS
         for r in rows
     )
     assert sum(r["prompts"] for r in rows) <= d["totals"]["prompts"] + 1 and all(
@@ -183,3 +183,15 @@ def test_sessions_rows(built):
     for r in rows:
         if by[r["source"]] == 0:
             assert r["cost_usd"] is None
+
+
+def test_what_works_uplift_holdout_contract():
+    cfg, con, _ = synth.build_analyzed(mode="basic")
+    ww = export.build(con, cfg)["what_works"]
+    assert ww and any("uplift" in w for w in ww)
+    for w in ww:
+        assert "holdout" in w
+        if "uplift" in w:
+            assert set(w["uplift"]) == {"pts", "n_with", "n_without", "strata"}
+        h = w["holdout"]
+        assert h is None or (set(h) == {"held", "weeks"} and h["weeks"] == 3)

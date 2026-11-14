@@ -48,14 +48,15 @@ CREATE OR REPLACE TABLE prompt_features (turn_id VARCHAR, intent VARCHAR, intent
   is_rephrase BOOLEAN, cluster_id INTEGER, x DOUBLE, y DOUBLE);
 CREATE OR REPLACE TABLE session_metrics (session_id VARCHAR, ttr_s DOUBLE, friction DOUBLE, abandoned BOOLEAN, loops INTEGER,
   reached_stage INTEGER, source VARCHAR, intent VARCHAR, n_user INTEGER, n_turns INTEGER, corrections INTEGER, frustrations INTEGER,
-  interrupts INTEGER, has_applied BOOLEAN, has_outcome BOOLEAN, first_quality DOUBLE, outcome_score DOUBLE);
+  interrupts INTEGER, has_applied BOOLEAN, has_outcome BOOLEAN, first_quality DOUBLE, outcome_score DOUBLE, struggle_p DOUBLE);
 CREATE OR REPLACE TABLE clusters (cluster_id INTEGER, label VARCHAR, size INTEGER, exemplar VARCHAR, intent VARCHAR, success DOUBLE);
 CREATE OR REPLACE TABLE daily (date DATE, source VARCHAR, sessions INTEGER, prompts INTEGER, tokens BIGINT, cost DOUBLE, anomaly_z DOUBLE);
 CREATE TABLE IF NOT EXISTS embeddings_cache (text_hmac VARCHAR, backend VARCHAR, vec FLOAT[], PRIMARY KEY (text_hmac, backend));
 CREATE OR REPLACE TABLE insights (rank INTEGER, id VARCHAR, chapter VARCHAR, claim VARCHAR, metric VARCHAR, value DOUBLE, delta DOUBLE,
   evidence VARCHAR, drill VARCHAR, unit VARCHAR);
 CREATE OR REPLACE TABLE recommendations (rank INTEGER, id VARCHAR, title VARCHAR, action VARCHAR, impact VARCHAR, evidence_insight VARCHAR);
-CREATE OR REPLACE TABLE what_works (cluster INTEGER, feature VARCHAR, effect DOUBLE, ci_lo DOUBLE, ci_hi DOUBLE, n INTEGER, direction VARCHAR);
+CREATE OR REPLACE TABLE what_works (cluster INTEGER, feature VARCHAR, effect DOUBLE, ci_lo DOUBLE, ci_hi DOUBLE, n INTEGER, direction VARCHAR,
+  uplift_pts DOUBLE, uplift_n_with INTEGER, uplift_n_without INTEGER, uplift_strata INTEGER, hold_held BOOLEAN, hold_weeks INTEGER);
 CREATE OR REPLACE TABLE quality_summary (scope VARCHAR, specificity DOUBLE, context DOUBLE, constraints DOUBLE, length DOUBLE);
 CREATE OR REPLACE TABLE analysis_meta (key VARCHAR, value VARCHAR);
 """
@@ -97,19 +98,19 @@ def _mean_cols(df: pl.DataFrame) -> tuple[float, float, float, float]:
 METHODS = {
     "basic": {
         "friction": "regex cues + token-overlap rephrase",
-        "works": "intent groups; applied-rate difference, Newcombe-Wilson CI",
+        "works": "intent groups; how often changes landed, high vs low",
     },
     "ml": {
         "friction": "regex cues + tf-idf rephrase",
-        "works": "tf-idf + KMeans galaxy; Cliffs delta, bootstrap CI, BH-FDR",
+        "works": "tf-idf + KMeans galaxy; best vs worst sessions, repeat-checked",
     },
     "deep": {
         "friction": "regex cues + embedding rephrase + near-duplicates",
-        "works": "semantic galaxy; Cliffs delta, bootstrap CI, BH-FDR",
+        "works": "semantic galaxy; best vs worst sessions, repeat-checked",
     },
 }
 COMMON = {
-    "footprint": "descriptive counts",
+    "footprint": "plain counts",
     "time": "rolling robust z (median/MAD)",
     "funnel": "cumulative stage counts",
     "recommend": "templated from ranked insights",
@@ -466,6 +467,31 @@ def run(
                 pfs, min_cluster=mc, min_group=max(10, mc // 3), stats=ww_stats
             )
 
+    if ww:
+        qc = [whatworks.COLS[f] for f in whatworks.FEATURES]
+        whatworks.annotate(
+            ww,
+            pfs.filter((pl.col("cluster_id") >= 0) & pl.col("q_specificity").is_not_null())
+            .group_by("session_id", "cluster_id")
+            .agg([pl.col(c).max() for c in qc]),
+            sm.select("session_id", "intent", "source", "has_applied").join(
+                sess_h.select("session_id", "date"), on="session_id", how="left"
+            ),
+        )
+
+    # ---- calibrated struggle score (needs sklearn: not in the basic tier)
+    struggle: dict[str, float] = {}
+    if tier != "basic":
+        sw = sm.filter(pl.col("n_user") > 0).join(
+            sess_h.select("session_id", "project_id"), on="session_id", how="left"
+        )
+        struggle = friction.struggle_prob(
+            sw, sw.select(pl.coalesce("project_id", "session_id"))["project_id"].to_numpy()
+        )
+    sm = sm.with_columns(
+        pl.col("session_id").replace_strict(struggle, default=None, return_dtype=pl.Float64).alias("struggle_p")
+    )
+
     # ---- daily + anomaly z (per source, cost)
     daily = mx.daily_frame(sess, mx.prompt_frame(b, sess))
     z_parts = []
@@ -535,6 +561,7 @@ def run(
             "has_outcome",
             "first_quality",
             "outcome_score",
+            "struggle_p",
         ).with_columns(pl.col("loops").cast(pl.Int32)),
         tmp,
     )
@@ -586,6 +613,12 @@ def run(
                     "ci_hi": r["ci"][1],
                     "n": r["n"],
                     "direction": r["direction"],
+                    "uplift_pts": (r.get("uplift") or {}).get("pts"),
+                    "uplift_n_with": (r.get("uplift") or {}).get("n_with"),
+                    "uplift_n_without": (r.get("uplift") or {}).get("n_without"),
+                    "uplift_strata": (r.get("uplift") or {}).get("strata"),
+                    "hold_held": (r.get("holdout") or {}).get("held"),
+                    "hold_weeks": (r.get("holdout") or {}).get("weeks"),
                 }
                 for r in ww
             ]
