@@ -45,8 +45,11 @@ def _cmp(a, b, path="$"):
 @pytest.mark.skipif(
     sys.platform != "darwin", reason="golden snapshot is macOS/Accelerate output"
 )
-def test_golden():
-    cfg, con, _ = synth.build_analyzed(backend="tfidf")
+def test_golden(monkeypatch):
+    # Snapshot assumes project2d's PCA fallback; block umap (viz extra) and bypass the
+    # memoised build so the result is the same with or without it installed.
+    monkeypatch.setitem(sys.modules, "umap", None)
+    cfg, con, _ = synth.build_analyzed.__wrapped__(backend="tfidf")
     got = json.loads(export.serialize(export.build(con, cfg)))
     got["engine"] = {
         k: got["engine"][k] for k in ("mode", "requested", "methods")

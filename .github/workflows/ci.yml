@@ -236,6 +236,9 @@ jobs:
         run: |
           python -m pip install --quiet -e ".[dev]"
           python -m pytest -q
+          # viz extra (umap) is optional; exercise project2d's UMAP path and the golden pin too
+          python -m pip install --quiet -e ".[dev,viz]"
+          python -m pytest -q tests/test_ml.py tests/test_golden.py
 
       - name: Install dashboard dependencies
         working-directory: packages/prompt-analytics/dashboard
