@@ -6,7 +6,7 @@ import sample from "../data/sample.dev.json";
 
 const d = normalize(sample);
 const base = d.sessions[0];
-const row = (id: string, o: object) => ({ ...base, id, prompts: 2, loops: 0, friction: 0, ...o });
+const row = (id: string, o: object) => ({ ...base, struggle_p: undefined, id, prompts: 2, loops: 0, friction: 0, ...o });
 const rows = [row("a", { loops: 3 }), row("b", { friction: 0.5 }), row("c", {}), row("d", { prompts: 0, loops: 9 })];
 
 describe("struggled / exposed filters", () => {
