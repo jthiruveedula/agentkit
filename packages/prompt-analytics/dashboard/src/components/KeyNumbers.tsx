@@ -224,9 +224,9 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
   );
 }
 
-function MixCard({ id, title, span, actions, children }: { id: string; title: string; span: 3 | 4 | 5; actions?: ReactNode; children: ReactNode }) {
+function MixCard({ id, title, span, half, actions, children }: { id: string; title: string; span: 3 | 4 | 5; half?: boolean; actions?: ReactNode; children: ReactNode }) {
   return (
-    <div className={`card s${span} mixc`} id={id} role="group" aria-labelledby={`${id}-h`}>
+    <div className={`card s${span}${half ? " half" : ""} mixc`} id={id} role="group" aria-labelledby={`${id}-h`}>
       <header className="card-h"><h3 id={`${id}-h`}>{title}</h3>{actions ? <span className="card-acts">{actions}</span> : null}</header>
       {children}
     </div>
@@ -303,7 +303,7 @@ function ToolMix() {
   const mt = Math.max(1, ...rows.map((r) => r.tokens)), mc = Math.max(1e-9, ...rows.map((r) => r.cost ?? 0));
   const tt = total(rows.map((r) => r.tokens)), ct = total(rows.map((r) => r.cost ?? 0)), top = rows[0];
   return (
-    <MixCard id="s-mix-tools" title="Tokens and spend by tool" span={4}>
+    <MixCard id="s-mix-tools" title="Tokens and spend by tool" span={4} half>
       {/* no ranking claim without data: tokens and spend shares only when some tool recorded them */}
       <p className="lede">{tt > 0 ? <><b>{srcLabel(top.source)}</b> is {fmtPct(top.tokens / tt)} of tokens{ct > 0 && top.cost !== null ? ` and ${fmtPct(top.cost / ct)} of priced spend` : ""}.</>
         : ct > 0 && top.cost !== null ? <><b>{srcLabel(top.source)}</b> is {fmtPct(top.cost / ct)} of priced spend; no tool recorded tokens.</>
@@ -340,7 +340,7 @@ function TierMix() {
   const bars: [string, number[]][] = ([["Sessions", tm.sessions], ["Tokens", tm.tokens], ["Spend", tm.spend]] as [string, number[] | null][]).flatMap(([k, a]) => (a && total(a) > 0 ? [[k, a] as [string, number[]]] : []));
   const sp = tm.spend && total(tm.spend) > 0 ? tm.spend : null;
   return (
-    <MixCard id="s-mix-tiers" title="Model tier mix" span={3}>
+    <MixCard id="s-mix-tiers" title="Model tier mix" span={3} half>
       <p className="lede">Top-tier models run <b>{fmtPct(tm.sessions[2] / ns)}</b> of sessions{sp ? <> and <b>{fmtPct(sp[2] / total(sp))}</b> of priced spend</> : null}.</p>
       <div className="tm-w">
         <div className="tm" aria-hidden="true">

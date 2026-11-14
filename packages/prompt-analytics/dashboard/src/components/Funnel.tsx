@@ -98,7 +98,7 @@ function Switches() {
   const moves = d.tool_switch.filter((t) => t.from !== t.to && srcs.includes(t.from) && srcs.includes(t.to));
   const topMove = moves.reduce<(typeof moves)[number] | null>((a, b) => (!a || b.count > a.count ? b : a), null);
   return (
-    <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
+    <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={5}>
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
           <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
@@ -134,7 +134,7 @@ export function Funnel() {
   const so = top > 0 && big.lost > 0 ? <>Biggest drop is {big.s.toLowerCase()} to {big.to.toLowerCase()}: <b>{Math.round((big.lost / top) * 100)}%</b> of sessions stop there.</> : "Nothing flagged in this window.";
   return (
     <Section id="s-funnel" title="Funnel" q="Where do sessions stop?">
-      <Card so={so} thin={!(top > 0 && big.lost > 0)} src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0] ?? 0)}`} title="Session to resolved" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 6 : 12}
+      <Card so={so} thin={!(top > 0 && big.lost > 0)} src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0] ?? 0)}`} title="Session to resolved" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 7 : 12}
         actions={<Segmented label="Break funnel down by" value={by} onChange={setBy} options={[{ id: "all", text: "All" }, ...(caps.multiTool ? [{ id: "tool" as const, text: "Tool" }] : []), { id: "intent", text: "Intent" }]} />}>
         {by === "all" ? <Stages /> : <Minis by={by} />}
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />

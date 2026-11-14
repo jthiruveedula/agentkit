@@ -150,18 +150,18 @@ function ByTool() {
   const soRes = res.length ? <>{srcLabel(res[0].k)} resolves <b>{fmtPct(res[0].p)}</b>{res.length > 1 ? <>, {gap} pts ahead of {srcLabel(res[res.length - 1].k)}</> : null}.</> : "Nothing flagged in this window.";
   return (
     <>
-      <Card so={soRes} thin={!res.length} src={`sessions.outcome \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.t.asked, 0))}`} title="Resolved rate" meta="share of sessions resolved" span={12}>
+      <Card so={soRes} thin={!res.length} src={`sessions.outcome \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.t.asked, 0))}`} title="Resolved rate" meta="share of sessions resolved" span={caps.hasCost ? 4 : 6}>
         <BarList label="Resolved rate by tool. Each filters that tool" rows={rows.filter((x) => x.t.asked).map((x) => { const p = x.t.applied / x.t.asked;
           return row(x, p, fmtPct(p), `${x.t.applied} of ${x.t.asked}${low(x.t.asked)}`, `${fmtPct(p)} resolved of ${x.t.asked}`); })} />
       </Card>
       {caps.hasCost && (
-        <Card so={cheap ? <>{srcLabel(cheap.t.key)} is cheapest: <b>{fmtUSD(cheap.c.value as number)}</b> per resolved session.</> : "Nothing flagged in this window."} thin={!cheap} src={`cost_usd \u00f7 resolved \u00b7 n ${priced.reduce((a, x) => a + x.c.pricedApplied, 0)} priced`} title="Cost / resolved" meta="lower is better" span={6}>
+        <Card so={cheap ? <>{srcLabel(cheap.t.key)} is cheapest: <b>{fmtUSD(cheap.c.value as number)}</b> per resolved session.</> : "Nothing flagged in this window."} thin={!cheap} src={`cost_usd \u00f7 resolved \u00b7 n ${priced.reduce((a, x) => a + x.c.pricedApplied, 0)} priced`} title="Cost / resolved" meta="lower is better" span={4} half>
           <BarList label="Cost per resolved session by tool. Each filters that tool" rows={rows.map((x) => { const c = x.c.value;
             return row(x, c ?? 0, c === null ? "\u2014" : fmtUSD(c), x.t.cost === null ? "no price" : `${x.c.pricedApplied} priced${low(x.c.pricedApplied)}`, c === null ? "no cost per resolved" : `${fmtUSD(c)} per resolved`); })} />
           {unpricedNote(caps) && <p className="note">{unpricedNote(caps)} Unpriced sessions are left out, not shown as $0.</p>}
         </Card>
       )}
-      <Card so={strug ? <>{srcLabel(strug.t.key)} struggles most: <b>{fmtPct(strug.s.p as number)}</b> of sessions.</> : "Nothing flagged in this window."} thin={!strug} src={`friction.rates \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.s.n, 0))}`} title="Struggled by tool" meta="3+ retry loops or friction 0.5+" span={caps.hasCost ? 6 : 12}>
+      <Card so={strug ? <>{srcLabel(strug.t.key)} struggles most: <b>{fmtPct(strug.s.p as number)}</b> of sessions.</> : "Nothing flagged in this window."} thin={!strug} src={`friction.rates \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.s.n, 0))}`} title="Struggled by tool" meta="3+ retry loops or friction 0.5+" span={caps.hasCost ? 4 : 6} half={caps.hasCost}>
         <BarList label="Share of sessions that struggled, by tool. Each filters that tool" rows={rows.filter((x) => x.s.n).map((x) => ({ ...row(x, x.s.p ?? 0, fmtPct(x.s.p ?? 0, 1), `${x.s.k} / ${x.s.n}${low(x.s.n)}`, `${fmtPct(x.s.p ?? 0, 1)} struggled, ${x.s.k} of ${x.s.n}`), color: "var(--bad)" }))} />
       </Card>
     </>

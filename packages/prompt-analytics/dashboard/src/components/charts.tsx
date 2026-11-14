@@ -135,13 +135,14 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
   let o = 0;
   const lines = target.map((l) => ({ ...l, values: mv.slice(o, (o += l.values.length)) }));   // drawn (morphing) series; `target` feeds the labels
   const { group, mark } = useRoving(n);
-  const { w } = useSize(group.ref as unknown as RefObject<HTMLElement>);
+  const { w, h } = useSize(group.ref as unknown as RefObject<HTMLElement>);
+  const H = Math.max(height, Math.min(280, h));   // `height` is the floor: a stretched card's plot grows into its slack, up to 280px
   const drag = useRef<{ x0: number; moved: boolean } | null>(null);
   const swallow = useRef(false);
   const [brush, setBrush] = useState<[number, number] | null>(null);
   const max = Math.max(...lines.flatMap((l) => l.values), 0) || 1;
   const PAD = padFor(max, fmt);
-  const iw = Math.max(1, w - PAD.l - PAD.r), ih = height - PAD.t - PAD.b;
+  const iw = Math.max(1, w - PAD.l - PAD.r), ih = H - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
   const step = n > 1 ? iw / (n - 1) : iw;
@@ -157,11 +158,11 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
     setBrush(null);
   };
   return (
-    <div className="chart" ref={group.ref as never} onKeyDown={group.onKeyDown} style={{ height }}>
+    <div className="chart" ref={group.ref as never} onKeyDown={group.onKeyDown} style={{ minHeight: height }}>
       {w > 0 && n > 0 && (
-        <svg width={w} height={height} role="group" aria-label={label} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={() => { drag.current = null; setBrush(null); }}>
+        <svg width={w} height={H} style={{ position: "absolute", left: 0, top: 0 }} role="group" aria-label={label} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={() => { drag.current = null; setBrush(null); }}>
           {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
-          {[0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map((i, k, a) => <text key={i} className="ax" x={x(i)} y={height - 6} textAnchor={k === 0 ? "start" : k === a.length - 1 ? "end" : "middle"}>{labels[i]}</text>)}
+          {[0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map((i, k, a) => <text key={i} className="ax" x={x(i)} y={H - 6} textAnchor={k === 0 ? "start" : k === a.length - 1 ? "end" : "middle"}>{labels[i]}</text>)}
           {brush && <rect className="brush" x={x(Math.min(...brush)) - step / 2} y={PAD.t} width={Math.abs(x(brush[1]) - x(brush[0])) + step} height={ih} />}
           {[...lines].reverse().map((l) => <polyline key={l.name} className={l.dashed ? "line fade" : "line draw"} pathLength={l.dashed ? undefined : 1} fill="none" stroke={l.color} strokeDasharray={l.dashed ? "4 3" : undefined} points={l.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} />)}
           {n <= 40 && lines[0].values.map((v, i) => <circle key={i} className="dot pt" style={{ "--i": i } as React.CSSProperties} cx={x(i)} cy={y(v)} r={2.5} fill={lines[0].color} />)}
