@@ -1,10 +1,16 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 42,
+  "count": 46,
   "skills": [
     {
       "name": "agentkit-audit",
       "description": "Score an agentkit repo (prompt density, orchestration, context, security, site) into audit.json with APS. Use when auditing skill/agent prompts or refreshing the audit dashboard.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "chart-design",
+      "description": "Pick the chart form that answers the question, then make it honest, accessible and good-looking in any medium (SVG, D3, Vega, Recharts, matplotlib, plotly, dashboards). Use when creating, reviewing or restyling a chart, graph, plot, KPI tile or dashboard, or choosing chart colours.",
       "version": "0.1.0",
       "kind": "native"
     },
@@ -71,6 +77,12 @@
     {
       "name": "genai-engineering",
       "description": "Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "humanizer",
+      "description": "Fix grammar and rewrite prose, docs or slide text so it stops reading like AI output, with a deterministic AI-tell detector. Use when asked to humanize, de-AI, proofread or tighten text, docs or a deck.",
       "version": "0.1.0",
       "kind": "native"
     },
@@ -165,6 +177,12 @@
       "kind": "native"
     },
     {
+      "name": "ext-archify",
+      "description": "Route architecture, sequence, dataflow, ERD and lifecycle diagrams of a real codebase or system to the pinned tt-a1i/archify. Use when asked to diagram a codebase or repo architecture, draw how a service works, or make a sequence, dataflow or ERD diagram of our system.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
       "name": "ext-aws",
       "description": "Route AWS tasks to pinned aws-samples/sample-agent-skills and zxkane/aws-skills. Use when the user wants AWS-specific help (Lambda, S3, IAM, CDK) from vendor or community skills.",
       "version": "0.1.0",
@@ -239,6 +257,12 @@
     {
       "name": "ext-seo",
       "description": "Route SEO setup and audits to the pinned AgriciDaniel/claude-seo collection. Use when building or changing any website, landing page or frontend that serves public pages, or when asked for an SEO audit, schema markup, sitemap, Core Web Vitals or GEO/AI-search readiness.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-slides",
+      "description": "Route HTML slide decks and presentations to the pinned zarazhangrui/frontend-slides. Use when asked to build a presentation, slide deck, or pitch or talk slides for the web/browser, or to convert PPT/PPTX to web slides; not for producing .pptx files.",
       "version": "0.1.0",
       "kind": "router"
     },

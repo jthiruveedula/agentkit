@@ -1,0 +1,46 @@
+[
+  {
+    "query": "This blog intro sounds like ChatGPT wrote it, can you humanize it? \"In today's fast-paced world, our team embarked on a journey to cut nightly ETL time from 95 to 40 minutes...\"",
+    "files": [],
+    "expected_behavior": [
+      "Runs scripts/detect.py on the original and reports the score",
+      "Rewrites without the stock phrases while keeping 95 and 40 minutes exactly",
+      "Runs detect.py on the rewrite and the --against fact guard, reporting 0 lost and 0 added",
+      "Ends with one line giving the score before and after"
+    ]
+  },
+  {
+    "query": "Proofread and de-AI the README in docs/setup.md, but don't touch the code samples.",
+    "files": ["docs/setup.md"],
+    "expected_behavior": [
+      "Fixes grammar and spelling in prose only",
+      "Leaves fenced code, inline code, commands and link targets byte-identical",
+      "Edits the file in place and reports which sections were covered"
+    ]
+  },
+  {
+    "query": "Make my deck's slide text less AI-sounding: titles like 'Key Takeaways' and emoji bullets everywhere.",
+    "files": ["deck.pptx"],
+    "expected_behavior": [
+      "Uses the pptx skill to extract and write back slide text instead of re-implementing pptx handling",
+      "Runs detect.py --slides and rewrites titles as claims with short concrete bullets and no emoji",
+      "Hands the visual pass to doc-standards"
+    ]
+  },
+  {
+    "query": "Make this paragraph sound more human and add a couple of stats to make it convincing.",
+    "files": [],
+    "expected_behavior": [
+      "Does not invent statistics; asks the user for real numbers or leaves a labeled placeholder",
+      "Rewrites the existing claims plainly"
+    ]
+  },
+  {
+    "query": "Humaniza este párrafo, suena a IA: 'En el vertiginoso mundo actual, es importante destacar que...'",
+    "files": [],
+    "expected_behavior": [
+      "Replies and rewrites in Spanish",
+      "Notes that the detector is English-only and rewrites by judgment instead of quoting a score"
+    ]
+  }
+]

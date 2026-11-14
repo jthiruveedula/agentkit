@@ -37,7 +37,7 @@ judging.
 
 | | |
 |---|---|
-| **42 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
+| **46 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
 | **4 tools, 1 source** | Each skill is one `SKILL.md`; `build.py` emits the Claude Code, Copilot, Cursor and Antigravity adapters. |
 | **Session costs you can see** | Live context budget with pause/resume, per-session spend audits, prompt analytics. |
 | **Private** | MIT licensed. No telemetry, no external calls beyond what you run yourself (`sync-external.sh`, `gh`, `npm`). |
@@ -97,6 +97,7 @@ python3 ~/.claude/skills/context-budget/scripts/install_hooks.py
 | RAG, LLM features, agents, evals, LLM cost | `genai-engineering` | `ml-engineer` |
 | Train, evaluate, deploy, monitor a model | `ml-lifecycle` | `ml-engineer` |
 | UI, animation, scroll effects, 3D / WebGL | `frontend-motion-3d` | `frontend-engineer` |
+| Charts, graphs, KPI tiles, dashboards | `chart-design` | — |
 | Rough idea → spec → task list | `spec-writer` | — |
 | Failing test or crash | `debug-loop` | — |
 | Prove a change works (tests, lint, types) | — | `verifier` |
@@ -163,7 +164,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 
 ## Skill catalog
 
-42 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
+46 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
 `skills/*/SKILL.md` on every `make build`.
 
 <details open>
@@ -210,6 +211,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 | Skill | What it does |
 |---|---|
 | `frontend-motion-3d` | Effect → lightest tool (CSS, Motion, GSAP/ScrollTrigger, three.js/R3F, HyperFrames), with a 60fps/LCP budget, reduced-motion, and WebGL fallback. |
+| `chart-design` | Question → chart form via a deterministic picker, honest axes, direct labels, takeaway titles; `chart_check.py palette` gates WCAG contrast and colour-blind separation. |
 
 </details>
 
@@ -228,6 +230,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 | `mcp-security-review` | `mcp_scan.py` flags unpinned packages, secrets in config (names only), broad filesystem roots, unauthenticated remotes, shell wrappers. |
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
+| `humanizer` | Grammar fix and rewrite of text, docs and slides that keeps facts, code and voice; `detect.py` scores AI tells with line refs and guards numbers/code. |
 | `data-storytelling` | Big idea, structure, storyboard and action titles for decks, explainers, launch posts and exec updates; `story_lint.py` flags topic-label headlines, filler and a missing ask. |
 
 </details>
@@ -376,9 +379,9 @@ becomes Copilot `applyTo` and Cursor `globs` for file-type-specific skills.
 
 ## External skills
 
-[`external/skills.lock.json`](external/skills.lock.json) pins 16 outside skill sources by commit
+[`external/skills.lock.json`](external/skills.lock.json) pins 19 outside skill sources by commit
 SHA and license (diagrams, UI/UX, codebase reads, cloud provider skills, system design
-references, gap discovery, security audit, SEO, frontend design). They are **not** vendored;
+references, gap discovery, security audit, SEO, frontend design, prose humanizing). They are **not** vendored;
 `scripts/sync-external.sh` fetches them on demand into the gitignored `external/<name>/`,
 verifying each tarball's SHA-256. One source (`systems-design-resources`) is GPL-3.0 and kept
 reference-only.
