@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import "./investigate.css";
 import { useStore } from "../state";
-import { addDays, weekStart } from "../lib/filter";
+import { addDays, views, weekStart } from "../lib/filter";
 import { bucketSeries, buckets, cumulative, median, METRICS, monthProjection } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { golden, GOLD_MIN_N } from "../lib/econ";
@@ -25,7 +25,8 @@ export const dumbMedian = (rows: DumbRow[]) => median(rows.filter((r) => r.k !==
  *  `median` draws a thin rule at the median of the now values; `sort` orders rows by now, largest first, with the `all` row pinned first. */
 export function Dumb({ rows, max, median: med = false, sort = false }: { rows: DumbRow[]; max: number; median?: boolean; sort?: boolean }) {
   const pm = med && rows.some((r) => r.k !== "all") ? (dumbMedian(rows) / max) * 100 : null;
-  return (
+  const cmp = rows.some((r) => r.a !== null);
+  return (<>
     <div className="dbs">{pm !== null && <div className="dbm" aria-hidden="true"><span /><div><span style={{ left: `${pm}%` }}>median</span></div><span /></div>}
       {(sort ? [...rows].sort((x, y) => +(y.k === "all") - +(x.k === "all") || y.b - x.b) : rows).map((r) => {
       const tn = r.bad == null ? "" : r.bad ? "bad" : "good", pa = ((r.a ?? r.b) / max) * 100, pb = (r.b / max) * 100;
@@ -34,13 +35,14 @@ export function Dumb({ rows, max, median: med = false, sort = false }: { rows: D
           <div className="dbt" role="img" aria-label={r.a === null ? `${r.name}: ${r.fb}` : `${r.name}: ${r.fa} before, ${r.fb} now`}>
             {r.a !== null && <><i className={`seg ${tn}`} style={{ left: `${Math.min(pa, pb)}%`, width: `${Math.abs(pb - pa)}%` }} /><i className="p" style={{ left: `${pa}%` }} /></>}
             {pm !== null && <i className="md" style={{ left: `${pm}%` }} />}
-            <i className={`c ${tn}`} style={{ left: `${pb}%` }} />
+            <i className={`c ${tn}${r.a !== null && !tn ? " n" : ""}`} style={{ left: `${pb}%` }} />
           </div>
           <b>{r.a === null ? r.fb : `${r.fa} \u2192 ${r.fb}`}</b>
         </div>
       );
     })}</div>
-  );
+    {cmp && <p className="note">Grey = before, filled = now; red worse, green better, hollow = within noise.</p>}
+  </>);
 }
 
 const ttrMed = (rows: SessionRow[]) => { const xs = rows.filter((r) => r.applied && r.ttr_min != null).map((r) => r.ttr_min as number); return xs.length ? { m: median(xs), n: xs.length } : null; };
@@ -204,8 +206,13 @@ function CalGrid() {
   const [anchor, setAnchor] = useState<string | null>(null);
   const end = d.range.end;
   const first = addDays(weekStart(end), -(WEEKS - 1) * 7);
-  const byDay = useMemo(() => new Map(v.calendar.map((c) => [c.date, c])), [v.calendar]);
-  const peak = Math.max(...v.calendar.filter((c) => c.date >= first).map((c) => c[m]), 1e-9);
+  // a date filter leaves only in-window days in v.calendar: draw the grid from every other filter, dim the days outside the window
+  const dated = f.from !== undefined || f.to !== undefined;
+  const wide = useMemo(() => (dated ? views(d, { ...f, from: undefined, to: undefined }).calendar : null), [d, f, dated]);
+  const cal = wide ?? v.calendar;
+  const byDay = useMemo(() => new Map(cal.map((c) => [c.date, c])), [cal]);
+  const peak = Math.max(...cal.filter((c) => c.date >= first).map((c) => c[m]), 1e-9);
+  const out = (dt: string) => dated && ((f.from !== undefined && dt < f.from) || (f.to !== undefined && dt > f.to));
   const { group, mark } = useRoving(WEEKS * 7, 7, 1, 0);
   const days = Array.from({ length: WEEKS * 7 }, (_, i) => ({ i, date: addDays(first, i) }));
   const inSel = (dt: string) => f.from !== undefined && f.to !== undefined && dt >= f.from && dt <= f.to;
@@ -226,7 +233,7 @@ function CalGrid() {
   const busy = v.calendar.length ? v.calendar.reduce((a, b) => (b.sessions > a.sessions ? b : a)) : null;
   const months = days.filter((x) => x.i % 7 === 0 && x.date.slice(8, 10) <= "07");
   return (
-    <Card so={busy && busy.sessions > 0 ? <>Busiest day was {fmtDate(busy.date)}: <b>{fmtInt(busy.sessions)}</b> sessions.</> : "Nothing flagged in this window."} thin={!busy || busy.sessions <= 0} src="calendar \u00b7 sessions per day" title="Activity calendar" meta="click a day, shift-click to extend" span={8}
+    <Card so={busy && busy.sessions > 0 ? <>Busiest day was {fmtDate(busy.date)}: <b>{fmtInt(busy.sessions)}</b> sessions.</> : "Nothing flagged in this window."} thin={!busy || busy.sessions <= 0} src="calendar · sessions per day" title="Activity calendar" meta="click a day, shift-click to extend" span={8}
       actions={<><Segmented label="Calendar metric" value={m} onChange={setM} options={[{ id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts" }, ...(caps.hasCost ? [{ id: "cost" as const, text: "Cost" }] : [])]} />
         <button type="button" className="btn tog3" aria-pressed={three} onClick={() => setThree(!three)} title="Raise each day into a column, height by value">3D</button></>}>
       {v.calendar.length === 0 ? <Empty /> : (
@@ -246,8 +253,8 @@ function CalGrid() {
                 if (x.date > end) return <span key={x.i} className="cell none" aria-hidden="true" />;
                 const c = byDay.get(x.date), val = c ? c[m] : 0;
                 return (
-                  <button key={x.i} type="button" className="cell" data-zero={!val || undefined} data-sel={inSel(x.date) || undefined} aria-pressed={inSel(x.date)} style={{ "--v": val / peak, "--d": Math.floor(x.i / 7) + (x.i % 7), "--wk": Math.floor(x.i / 7) } as React.CSSProperties} data-w={Math.floor(x.i / 7)}
-                    aria-label={`${fmtDate(x.date)}: ${FMT[m](val)} ${m}. Filter to this day`} title={`${fmtDate(x.date)}: ${FMT[m](val)}`}
+                  <button key={x.i} type="button" className="cell" data-zero={!val || undefined} data-sel={inSel(x.date) || undefined} data-out={out(x.date) || undefined} aria-pressed={inSel(x.date)} style={{ "--v": val / peak, "--d": Math.floor(x.i / 7) + (x.i % 7), "--wk": Math.floor(x.i / 7) } as React.CSSProperties} data-w={Math.floor(x.i / 7)}
+                    aria-label={`${fmtDate(x.date)}: ${FMT[m](val)} ${m}${out(x.date) ? ", outside this view" : ""}. Filter to this day`} title={`${fmtDate(x.date)}: ${FMT[m](val)}`}
                     onClick={(e) => pick(x.date, e.shiftKey)} {...mark(x.i)}>{three && val > 0 && <i aria-hidden="true" />}</button>
                 );
               })}
@@ -288,7 +295,7 @@ function HourWeek() {
   );
   const so = best.prompts > 0 ? <>Most prompts land {DOW[best.dow]} {best.hour}:00: <b>{fmtInt(best.prompts)}</b>.</> : "Nothing flagged in this window.";
   return (
-    <Card so={so} thin={best.prompts <= 0} src="hour_week \u00b7 all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
+    <Card so={so} thin={best.prompts <= 0} src="hour_week · all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={4}
       actions={<>{gold && <Segmented quiet label="Heatmap shows" value={mode} onChange={setMode} options={[{ id: "prompts", text: "Prompts" }, { id: "success", text: "Success" }]} />}
         <span className="tog3d"><Segmented quiet label="Heatmap view" value={view} onChange={setView} options={[{ id: "2d", text: "2D" }, { id: "3d", text: "3D" }]} /></span></>}>
       {d.hour_week.length === 0 ? <Empty /> : succ ? (
@@ -341,7 +348,7 @@ function Cumulative() {
   const dPct = prevAt ? Math.round(((nowC - prevAt) / prevAt) * 100) : null;
   const so = !priced ? "Nothing flagged in this window." : <><b>{fmtUSD(nowC)}</b> so far{dPct === null ? "." : dPct === 0 ? ", level with last period at this point." : <>, <span className={dPct > 0 ? "bad" : undefined}>{Math.abs(dPct)}% {dPct > 0 ? "above" : "below"}</span> last period at this point.</>}</>;
   return (
-    <Card so={so} thin={!priced} src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={caps.hasTtrRows ? 7 : 12}>
+    <Card so={so} thin={!priced} src="cost_usd · priced only" title="Cumulative cost" meta="this period against the previous one" span={caps.hasTtrRows ? 7 : 12}>
       {!priced ? <Empty>No priced sessions in this period.</Empty> : (
         <>
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
@@ -365,7 +372,7 @@ function TokenEfficiency() {
   const tPct = wk.length > 1 ? Math.round(((tNow - tFirst) / tFirst) * 100) : null;
   const so = !wk.length ? "Nothing flagged in this window." : <>Each applied change costs <b>{fmtCompact(tNow)}</b> tokens{tPct === null ? "." : <>, <span className={tPct > 0 ? "bad" : undefined}>{Math.abs(tPct)}% {tPct >= 0 ? "more" : "less"}</span> than the first week.</>}</>;
   return (
-    <Card so={so} thin={!wk.length} src="tokens \u00f7 applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={caps.hasTtrRows ? 7 : 12}>
+    <Card so={so} thin={!wk.length} src="tokens ÷ applied" id="s-tokens" title="Tokens per applied change, weekly" meta={`${unpricedNote(caps) || "No prices recorded."} Tokens stand in for cost.`} span={caps.hasTtrRows ? 7 : 12}>
       {cur.every((x) => x === 0) ? <Empty>No session applied a change in this period.</Empty> : (
         <>
           <LineChart label="Tokens per applied change by week. Click a week to filter it" labels={labels} fmt={fmtCompact} height={180}

@@ -35,13 +35,14 @@ function WhereWent() {
   const filterOf = (id: string, key: string) => (id === "tools" ? { source: key as Source } : id === "intents" ? { intent: key as never } : { project: key });
   const fr = (x: number | null) => (x === null ? "–" : x.toFixed(2)), vs = (x: number | null) => (x === null ? "" : fmtSigned(x, 2));
   const o = dm.outlier;
+  const big = Math.max(...dm.rows.map((r) => r.share), dm.other?.share ?? 0, 1e-9);   // bars scale to the largest share, not to 100%
   return (
     <Panel id="s-where" src="priced cost share · one denominator" title="Where it went" meta={`top ${dm.rows.length} by ${dm.note}${dm.byCost ? "" : " (nothing priced, so tokens stand in)"}; one click filters`} span={12}
       actions={dims.length > 1 ? <Segmented quiet label="Break down by" value={dm.id} onChange={setPick} options={dims.map((x) => ({ id: x.id, text: x.name }))} /> : undefined}>
       <div className="wh" role="group" aria-label={`${dm.name} by ${dm.note}`}>
-        <div className="wh-r wh-h" aria-hidden="true"><span>{dm.name.slice(0, -1)}</span><span className="wh-t">0 to 100%</span><span className="wh-v">{dm.byCost ? "Cost · share" : "Tokens · share"}</span><span className="wh-f">Friction (vs median)</span><span className="wh-p">{dm.byCost ? "$ / session" : "tok / session"}</span></div>
+        <div className="wh-r wh-h" aria-hidden="true"><span>{dm.name.slice(0, -1)}</span><span className="wh-t">Share (longest = {fmtPct(big)})</span><span className="wh-v">{dm.byCost ? "Cost · share" : "Tokens · share"}</span><span className="wh-f">Friction (vs median)</span><span className="wh-p">{dm.byCost ? "$ / session" : "tok / session"}</span></div>
         {dm.rows.map((r) => (
-          <button key={r.key} type="button" className="wh-r wh-b" aria-pressed={undefined} disabled={!r.filterable} style={{ "--w": r.share } as React.CSSProperties}
+          <button key={r.key} type="button" className="wh-r wh-b" aria-pressed={undefined} disabled={!r.filterable} style={{ "--w": r.share / big } as React.CSSProperties}
             onClick={() => drill(filterOf(dm.id, r.key))}
             aria-label={`${r.label}: ${text(r.value)}, ${fmtPct(r.share)} of ${dm.note.replace("share of ", "")}, friction ${fr(r.friction)}${r.vsMedian === null ? "" : `, ${vs(r.vsMedian)} against the median`}, ${fmtInt(r.sessions)} sessions.${r.filterable ? " Filter" : " Cannot be filtered"}`}>
             <span className="wh-l" title={r.label}>{r.label}</span>
@@ -52,7 +53,7 @@ function WhereWent() {
           </button>
         ))}
         {dm.other && (
-          <div className="wh-r wh-o" style={{ "--w": dm.other.share } as React.CSSProperties} aria-label={`${dm.other.n} more: ${fmtPct(dm.other.share)}`}>
+          <div className="wh-r wh-o" style={{ "--w": dm.other.share / big } as React.CSSProperties} aria-label={`${dm.other.n} more: ${fmtPct(dm.other.share)}`}>
             <span className="wh-l">Other ({dm.other.n})</span><span className="bar-t wh-t" aria-hidden="true"><i /></span><span className="wh-v"><b>{text(dm.other.value)}</b> · {fmtPct(dm.other.share)}</span><span className="wh-f" /><span className="wh-p" />
           </div>
         )}

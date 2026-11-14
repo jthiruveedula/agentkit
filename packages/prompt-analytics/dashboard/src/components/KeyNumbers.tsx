@@ -5,7 +5,7 @@ import { useStore } from "../state";
 import { bucketSeries, costPerApplied, dayDiff, isWide, METRICS, tokensPerApplied, wilson } from "../lib/compare";
 import { fmtCompact, fmtInt, fmtPct, fmtRange, fmtUSD } from "../lib/format";
 import { Count, DataTable, Segmented } from "./ui";
-import { Donut, Gauge, WeekCols } from "./charts";
+import { Bullet, Donut, WeekCols } from "./charts";
 import { Icon } from "./icons";
 import type { Metric } from "./Trend";
 import type { Basis } from "../lib/brief";
@@ -92,7 +92,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
   const lead = out && `${out.top.length} session${out.top.length === 1 ? " is" : "s are"} ${fmtPct(out.share)} of priced spend`;
   const spent = out ? v.rows.reduce((a, r) => a + (r.cost_usd ?? 0), 0) : 0;
   const OUT_C = ["var(--kx-o1)", "var(--kx-o2)", "var(--kx-o3)"];
-  // split mode: the headline, gauge, range and change are all the last 4 weeks; the whole window's rate is named in the sub
+  // split mode: the headline, bullet, range and change are all the last 4 weeks; the whole window's rate is named in the sub
   const ar = appliedRate(v.rows), cr = cut ? appliedRate(bs.cur) : ar, ci = cr.n ? wilson(cr.k, cr.n) : null, wide = cr.n > 0 && isWide(cr.k, cr.n);
   const dated = f.from !== undefined || f.to !== undefined;
   const within = cut ? "within the last 4 weeks' likely range" : "within this window's likely range";
@@ -167,7 +167,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
   tiles.push({ id: "applied", label: "Applied rate", value: cr.p === null ? "–" : fmtPct(cr.p), delta: <KD x={dl.applied} sense="higher" vs={vs} within={within} />,
     vis: cr.p !== null && ci ? (
       <div className="kg">
-        <Gauge p={cr.p} lo={ci[0]} hi={ci[1]} was={dl.applied?.was} />
+        <Bullet p={cr.p} lo={ci[0]} hi={ci[1]} was={dl.applied?.was} />
         <p className="kg-l"><span>likely {fmtPct(ci[0])} to {fmtPct(ci[1])}</span>{dl.applied?.was != null && <span>earlier: {fmtPct(dl.applied.was, 1)}</span>}</p>
       </div>
     ) : undefined,

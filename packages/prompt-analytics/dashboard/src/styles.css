@@ -22,10 +22,6 @@
   --rw: 24px;   /* widget radius: cards and the brief (16px at a <=600px container); nested blocks use --r2 inside the 12px padding */
   --wall-min: oklch(0.72 0.055 264); --gfloor: 0.66;   /* darkest wallpaper stop and the glass fill floor: scripts/contrast.mjs checks text and marks on white at --gfloor over --wall-min */
 }
-/* accent presets (settings panel); scripts/contrast.mjs checks each one over the :root tokens */
-:root[data-accent="teal"] { --accent: oklch(0.48 0.1 205); --accent-soft: oklch(0.95 0.025 205); }
-:root[data-accent="violet"] { --accent: oklch(0.5 0.2 300); --accent-soft: oklch(0.95 0.03 300); }
-:root[data-accent="graphite"] { --accent: oklch(0.42 0.03 260); --accent-soft: oklch(0.94 0.008 260); }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--bg); overflow-x: clip; }
@@ -208,6 +204,7 @@ button.cell:hover { box-shadow: 0 0 0 1px var(--ink); }
 .cal .cell { height: 16px; }
 .cal .cell:not([data-zero]) { --cf: color-mix(in oklab, var(--accent) calc(14% + var(--v, 0) * 41%), var(--sunk)); background: var(--cf); }
 .cal .cell[data-zero] { background: var(--sunk); }
+.cal .cell[data-out] { opacity: 0.35; }
 .hw { display: grid; grid-template-columns: 30px repeat(24, minmax(0, 1fr)); gap: 2px; align-items: center; }
 .hw .cell { height: 16px; }
 .hw .cell[data-zero] { background: var(--sunk); }
@@ -472,7 +469,7 @@ span.play-copy { font-style: italic; }
 .lb-call { margin-bottom: var(--s2); }
 .lb { position: relative; width: 100%; min-width: 0; }
 .lb svg { display: block; }
-.lb-line { stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.lb-line { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
 .lb-ci { stroke: var(--accent); stroke-width: 3; opacity: 0.55; stroke-linecap: butt; }
 .lb-dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
 .lb-dot[data-be] { fill: var(--surface); stroke: var(--ink); }
@@ -778,7 +775,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .grid > .card > .card-h + .so { margin-top: 0; }   /* flex items keep both margins: hold the 12px block rhythm */
 .grid > .card > :is(.btn, .seg, .chip, .link) { align-self: flex-start; }
 .grid > .card > :is(.bars, .dbs, .mx, .mf-recs, .chart) { flex: 1 1 auto; }
-.grid > .card > :is(.bars, .dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
+.grid > .card > :is(.dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
 .grid > .card > :is(.bars) { grid-auto-rows: minmax(min-content, 42px); }
 .grid > .card > :is(.bars) > li { display: grid; }   /* the row button fills its stretched track */
 .grid > .card > .dbs { grid-auto-rows: minmax(min-content, 30px); }
@@ -902,10 +899,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 
 /* display settings popover (top bar) */
 .prefs { position: absolute; top: 100%; right: var(--s4); z-index: 35; width: 260px; max-width: calc(100vw - 32px); display: grid; gap: var(--s3); padding: var(--s3) var(--s4); background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r3); box-shadow: 0 12px 32px -12px oklch(0.3 0.03 262 / 0.3); }
-.prefs fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: var(--s2); }
-.prefs legend, .prefs label > span { font-weight: 600; margin-bottom: var(--s1); }
-.prefs-opts { display: flex; flex-wrap: wrap; gap: var(--s2); }
-.prefs-opts label { display: inline-flex; align-items: center; gap: 6px; }
+.prefs label > span { font-weight: 600; margin-bottom: var(--s1); }
 .prefs input[type="range"] { width: 100%; accent-color: var(--accent); }
 .prefs output { color: var(--muted); }
 .setbtn svg { display: block; }

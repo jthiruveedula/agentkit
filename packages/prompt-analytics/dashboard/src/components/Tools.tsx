@@ -101,7 +101,7 @@ function Router() {
   const lead = best[0];
   const so = lead ? <>{lead.i} lands best in {colName(lead.c.source)}: <b>{fmtPct(lead.c.rate)}</b>.</> : <>No clear winner yet: no {what} stands out for any intent.</>;
   return (
-    <Card so={so} thin={!lead} src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
+    <Card so={so} thin={!lead} src="sessions · tool × intent" id="s-router" title={title} meta={meta} span={12}>
       {srcs.length === 0 || ints.length === 0 ? <Empty /> : (
         <>
           <div className="mx rt" role="group" aria-label={`Applied rate by ${what} and intent. Each cell filters that pair`} style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>

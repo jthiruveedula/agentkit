@@ -98,7 +98,7 @@ function Switches() {
   const moves = d.tool_switch.filter((t) => t.from !== t.to && srcs.includes(t.from) && srcs.includes(t.to));
   const topMove = moves.reduce<(typeof moves)[number] | null>((a, b) => (!a || b.count > a.count ? b : a), null);
   return (
-    <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={5}>
+    <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch · all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={5}>
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
           <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>

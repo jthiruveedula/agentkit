@@ -23,9 +23,9 @@ describe("Key numbers and usage mix", () => {
   it("six tiles in one card, each with a visual; spend shows its priced coverage", () => {
     mount();
     expect(el.querySelectorAll(".kcard .kpis.k6 > li")).toHaveLength(6);
-    expect(tile("sessions").querySelectorAll("rect.wc-b").length).toBeGreaterThan(1);
+    expect(tile("sessions").querySelectorAll("path.wc-b").length).toBeGreaterThan(1);
     expect(tile("spend").querySelector(".km-l")!.textContent).toMatch(/^\d+% priced/);
-    expect(tile("applied").querySelector("svg.gauge")).not.toBeNull();
+    expect(tile("applied").querySelector(".bul .bu-now")).not.toBeNull();
     expect(tile("exposed").querySelectorAll(".kx > li")).toHaveLength(3);
   });
 
@@ -117,12 +117,12 @@ describe("Key numbers and usage mix", () => {
     expect(sub.textContent).toMatch(/^Few sessions: \d+ priced of \d+ applied$/);
   });
 
-  it("applied gauge: one plain range, 0/100 ends; tier bucket is 'Unrecognised' and defined", () => {
+  it("applied bullet: one plain range, marker at the rate; tier bucket is 'Unrecognised' and defined", () => {
     mount();
     const a = tile("applied");
     expect(a.querySelector(".kg-l")!.textContent).toMatch(/^likely \d+% to \d+%/);
     expect(a.textContent).not.toMatch(/n=|CI|tick:/);
-    expect([...a.querySelectorAll(".g-end")].map((t) => t.textContent)).toEqual(["0", "100"]);
+    expect(a.querySelector(".bul .bu-ci")).not.toBeNull();
     for (const g of el.querySelectorAll(".kd-g")) expect(g.textContent).not.toBe("within range");
     const tiers = el.querySelector("#s-mix-tiers")!;
     expect(tiers.querySelector(".tkey")!.textContent).toMatch(/Unrecognised/);

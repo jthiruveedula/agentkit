@@ -1,8 +1,9 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type CSSProperties } from "react";
 import { useStore } from "../state";
 import { median, quantile } from "../lib/compare";
 import { fmtInt, fmtPct } from "../lib/format";
-import { BarList, Card, DataTable, Empty, Section } from "./ui";
+import { Card, DataTable, Empty, Section } from "./ui";
+import { srcLabel } from "../lib/palette";
 import { loopCurve, LOOP_MIN_N, stopRule } from "../lib/loops";
 import { useSize } from "../lib/hooks";
 import { pts } from "../lib/stats";
@@ -17,16 +18,27 @@ const SIGNALS = [
   { id: "abandoned", text: "Abandoned" }, { id: "interrupted", text: "Interrupted" },
 ] as const;
 
-/** Share of prompts with each friction signal, pooled over the tools in view (weighted by prompts). Bars scale to the largest. */
+/** Share of prompts with each friction signal: a heat table, rows = signals, columns = all tools pooled (weighted by prompts) then each tool in view.
+ *  Cell shade scales to the largest value in the table; the value is printed in every cell, in ink (6.4:1 even on the darkest cell). */
 function Signals() {
   const { d, caps } = useStore();
   const rs = d.friction.rates.filter((r) => caps.sources.includes(r.source)), n = rs.reduce((a, r) => a + r.n, 0);
-  const top = n === 0 ? null : SIGNALS.map((sg) => ({ sg, x: rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n })).reduce((a, b) => (b.x > a.x ? b : a));
+  const cols = [{ key: "all", label: "All", get: (id: (typeof SIGNALS)[number]["id"]) => rs.reduce((a, r) => a + r[id] * r.n, 0) / n }, ...(rs.length > 1 ? rs.map((r) => ({ key: r.source as string, label: srcLabel(r.source), get: (id: (typeof SIGNALS)[number]["id"]) => r[id] })) : [])];
+  const top = n === 0 ? null : SIGNALS.map((sg) => ({ sg, x: cols[0].get(sg.id) })).reduce((a, b) => (b.x > a.x ? b : a));
+  const hi = top && rs.length > 1 ? rs.reduce((a, b) => (b[top.sg.id] > a[top.sg.id] ? b : a)) : null;
+  const max = Math.max(...SIGNALS.flatMap((sg) => cols.map((c) => (n ? c.get(sg.id) : 0))), 1e-9);
   return (
-    <Card so={top ? <>{top.sg.text} is your top struggle signal: <b>{fmtPct(top.x)}</b> of prompts.</> : <>Nothing flagged in this window.</>} thin={!top} src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={5} half>
+    <Card so={top ? <>{top.sg.text} is your top struggle signal: <b>{fmtPct(top.x)}</b> of prompts{hi ? <>, highest in {srcLabel(hi.source)} ({fmtPct(hi[top.sg.id])})</> : null}.</> : <>Nothing flagged in this window.</>} thin={!top} src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={5} half>
       {n === 0 ? <Empty /> : (
-        <BarList label="Friction signals" rows={SIGNALS.map((sg) => { const x = rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n;
-          return { key: sg.id, label: sg.text, value: x, color: sg.id === "rephrase" ? "var(--accent)" : "var(--prior)", text: fmtPct(x, 1), aria: `${sg.text}: ${fmtPct(x, 1)} of ${fmtInt(n)} prompts` }; })} />
+        <div className="sg-wrap">
+          <table className="sg">
+            <caption className="sr-only">Share of prompts with each friction signal, all tools and by tool</caption>
+            <thead><tr><th scope="col">Signal</th>{cols.map((c) => <th key={c.key} scope="col">{c.label}</th>)}</tr></thead>
+            <tbody>{SIGNALS.map((sg) => (
+              <tr key={sg.id}><th scope="row">{sg.text}</th>{cols.map((c) => { const x = c.get(sg.id); return <td key={c.key} style={{ "--v": x / max } as CSSProperties}>{fmtPct(x, 1)}</td>; })}</tr>
+            ))}</tbody>
+          </table>
+        </div>
       )}
     </Card>
   );
@@ -84,7 +96,7 @@ function LoopBreaker() {
               <svg width={w} height={H} aria-hidden="true" focusable="false">
                 {[0, 0.5, 1].map((t) => <g key={t}><line className="grid-l" x1={P.l} x2={w - P.r} y1={y(t)} y2={y(t)} /><text className="ax" x={P.l - 6} y={y(t) + 4} textAnchor="end">{fmtPct(t)}</text></g>)}
                 {stop && cut !== null && <g><line className="lb-be" x1={(x(cut) + x(cut + 1)) / 2} x2={(x(cut) + x(cut + 1)) / 2} y1={P.t} y2={P.t + ih} /><text className="tr-end lb-bet" x={(x(cut) + x(cut + 1)) / 2 + 6} y={P.t + 10}>lower from here</text></g>}
-                {ok.length > 1 && <polyline className="lb-line" fill="none" points={ok.map((b) => `${x(b.k)},${y(b.rate)}`).join(" ")} />}
+                {ok.slice(1).map((b, i) => ok[i].k === b.k - 1 && <line key={b.k} className="lb-line" x1={x(ok[i].k)} y1={y(ok[i].rate)} x2={x(b.k)} y2={y(b.rate)} />)}
                 {curve.map((b) => (
                   <g key={b.k}>
                     <rect x={x(b.k) - iw / curve.length / 2} y={P.t} width={iw / curve.length} height={ih + 34} fill="transparent"><title>{b.enough ? `${b.label}: ${fmtPct(b.rate)} applied, 95% Wilson CI ${fmtPct(b.lo)} to ${fmtPct(b.hi)}, ${b.ok} of ${fmtInt(b.n)} sessions` : `${b.label}: ${fmtInt(b.n)} sessions, fewer than ${LOOP_MIN_N}, so no rate`}</title></rect>

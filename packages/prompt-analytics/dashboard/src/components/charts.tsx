@@ -4,6 +4,7 @@ import type React from "react";
 import { useId, useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
 import { useMorph, useRoving, useSize } from "../lib/hooks";
 import { iqr } from "../lib/baseline";
+import { niceTicks } from "../lib/trend";
 import "./baseline.css";
 
 /** Sparkline ceiling. `cap` clips at 2x the 75th percentile of non-zero values, so one spike day cannot flatten the rest. */
@@ -44,36 +45,29 @@ export function Spark({ values, w = 120, h = 24, cap = false }: { values: (numbe
  *  window's weekly average: `now` over the compared bars, `was` (dashed) over the earlier ones, or across the whole width when the
  *  earlier window is not drawn (a prior period). Decorative: the caption beside it carries the numbers. */
 export function WeekCols({ values, from, now, was, h = 34 }: { values: number[]; from: number; now?: number | null; was?: number | null; h?: number }) {
-  const n = values.length, w = Math.max(1, n * 4), top = Math.max(...values, now ?? 0, was ?? 0, 1), y = (v: number) => +(h - (v / top) * (h - 2)).toFixed(2);
-  const split = from > 0 && from < n;
+  // 12-unit columns, 2 apart; the svg never grows past its natural width (1 unit = 1px), so a 4-week window is a centred group of thin columns, not a few fat blocks
+  const n = values.length, P = 14, w = Math.max(1, n * P - 2), top = Math.max(...values, now ?? 0, was ?? 0, 1), y = (v: number) => +(h - (v / top) * (h - 2)).toFixed(2);
+  const split = from > 0 && from < n, sx = from * P - 1;
+  const bar = (x: number, t: number) => { const r = Math.min(2, h - t); return `M${x},${h}V${t + r}Q${x},${t} ${x + r},${t}H${x + 12 - r}Q${x + 12},${t} ${x + 12},${t + r}V${h}Z`; };
   return (
-    <svg className="wc" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {values.map((v, i) => <rect key={i} className={i >= from ? "wc-b wc-now" : "wc-b"} x={i * 4 + 0.5} width={3} y={y(v)} height={h - y(v)} />)}
+    <svg className="wc" viewBox={`0 0 ${w} ${h}`} width={w} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      {values.map((v, i) => <path key={i} className={i >= from ? "wc-b wc-now" : "wc-b"} d={bar(i * P, y(v))} />)}
       <line className="wc-ax" x1={0} x2={w} y1={h - 0.5} y2={h - 0.5} vectorEffect="non-scaling-stroke" />
-      {was != null && <line className="wc-was" x1={0} x2={split ? from * 4 : w} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
-      {now != null && <line className="wc-avg" x1={split ? from * 4 : 0} x2={w} y1={y(now)} y2={y(now)} vectorEffect="non-scaling-stroke" />}
+      {was != null && <line className="wc-was" x1={0} x2={split ? sx : w} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
+      {now != null && <line className="wc-avg" x1={split ? sx : 0} x2={w} y1={y(now)} y2={y(now)} vectorEffect="non-scaling-stroke" />}
     </svg>
   );
 }
 
-/** Semicircle gauge for a 0..1 rate: a thin 0-100 track, the fill to `p` (haloed so it reads apart from the band), a wider band for
- *  its interval [lo, hi], a dashed tick at the earlier value, 0 and 100 at the ends. Decorative. */
-export function gaugeArc(a: number, b: number, r = 40, cx = 48, cy = 48): string {
-  const at = (f: number) => `${+(cx - r * Math.cos(Math.PI * f)).toFixed(2)},${+(cy - r * Math.sin(Math.PI * f)).toFixed(2)}`;
-  return `M${at(a)}A${r},${r} 0 0 1 ${at(b)}`;
-}
-export function Gauge({ p, lo, hi, was }: { p: number; lo?: number; hi?: number; was?: number | null }) {
-  const c = (x: number) => Math.min(1, Math.max(0, x)), tick = (f: number, r: number) => [48 - r * Math.cos(Math.PI * c(f)), 48 - r * Math.sin(Math.PI * c(f))].map((v) => +v.toFixed(2));
-  const [x1, y1] = was != null ? tick(was, 31) : [0, 0], [x2, y2] = was != null ? tick(was, 49) : [0, 0];
+/** Horizontal bullet for a 0..1 rate: a 0-100% track, the likely range [lo, hi] as a band, a 2px marker at `p`, a short tick at the earlier value. Decorative: the text beside it carries the numbers. */
+export function Bullet({ p, lo, hi, was }: { p: number; lo?: number; hi?: number; was?: number | null }) {
+  const at = (x: number) => `${+(Math.min(1, Math.max(0, x)) * 100).toFixed(2)}%`;
   return (
-    <svg className="gauge" viewBox="0 0 96 66" aria-hidden="true" focusable="false">
-      <path className="g-track" d={gaugeArc(0, 1)} />
-      {lo != null && hi != null && <path className="g-ci" d={gaugeArc(c(lo), c(hi))} />}
-      <path className="g-halo" d={gaugeArc(0, Math.max(0.002, c(p)))} />
-      <path className="g-fill" d={gaugeArc(0, Math.max(0.002, c(p)))} />
-      <text className="g-end" x={8} y={65} textAnchor="middle">0</text><text className="g-end" x={88} y={65} textAnchor="middle">100</text>
-      {was != null && <line className="g-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
-    </svg>
+    <div className="bul" aria-hidden="true">
+      {lo != null && hi != null && <i className="bu-ci" style={{ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` }} />}
+      {was != null && <i className="bu-was" style={{ left: at(was) }} />}
+      <i className="bu-now" style={{ left: at(p) }} />
+    </div>
   );
 }
 
@@ -127,10 +121,8 @@ export function Ramp({ max, label, fmt = (n: number) => `${Math.round(n * 100)}%
 
 const PAD0 = { l: 44, r: 10, t: 10, b: 22 };
 /** Left gutter wide enough for the longest tick label (so a leading "$" never clips). */
-const padFor = (max: number, fmt: (n: number) => string) => ({ ...PAD0, l: Math.max(PAD0.l, 14 + 6.6 * Math.max(...[0, 0.5, 1].map((t) => fmt(max * t).length))) });
+const padFor = (tk: number[], fmt: (n: number) => string) => ({ ...PAD0, l: Math.max(PAD0.l, 14 + 6.6 * Math.max(...tk.map((t) => fmt(t).length))) });
 const key = (fn: () => void) => (e: RKE) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } };
-const ticks = (max: number, fmt: (n: number) => string) => [0, 0.5, 1].map((t) => ({ t, text: fmt(max * t) }));
-
 export interface Line { name: string; color: string; values: number[]; dashed?: boolean }
 interface LineProps {
   lines: Line[]; labels: string[]; fmt: (n: number) => string; label: string; height?: number;
@@ -153,8 +145,8 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
   const drag = useRef<{ x0: number; moved: boolean } | null>(null);
   const swallow = useRef(false);
   const [brush, setBrush] = useState<[number, number] | null>(null);
-  const max = Math.max(...lines.flatMap((l) => l.values), 0) || 1;
-  const PAD = padFor(max, fmt);
+  const { ticks: tk, max } = niceTicks(Math.max(...lines.flatMap((l) => l.values), 0));
+  const PAD = padFor(tk, fmt);
   const iw = Math.max(1, w - PAD.l - PAD.r), ih = H - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
@@ -174,7 +166,7 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
     <div className="chart" ref={group.ref as never} onKeyDown={group.onKeyDown} style={{ minHeight: height }}>
       {w > 0 && n > 0 && (
         <svg width={w} height={H} style={{ position: "absolute", left: 0, top: 0 }} role="group" aria-label={label} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={() => { drag.current = null; setBrush(null); }}>
-          {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
+          {tk.map((t) => <g key={t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(t)} y2={y(t)} /><text className="ax" x={PAD.l - 6} y={y(t) + 4} textAnchor="end">{fmt(t)}</text></g>)}
           {[0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map((i, k, a) => <text key={i} className="ax" x={x(i)} y={H - 6} textAnchor={k === 0 ? "start" : k === a.length - 1 ? "end" : "middle"}>{labels[i]}</text>)}
           {brush && <rect className="brush" x={x(Math.min(...brush)) - step / 2} y={PAD.t} width={Math.abs(x(brush[1]) - x(brush[0])) + step} height={ih} />}
           {[...lines].reverse().map((l) => <polyline key={l.name} className={l.dashed ? "line fade" : "line draw"} pathLength={l.dashed ? undefined : 1} fill="none" stroke={l.color} strokeDasharray={l.dashed ? "4 3" : undefined} points={l.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} />)}

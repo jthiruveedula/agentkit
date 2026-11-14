@@ -61,7 +61,7 @@ html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: 
 .kd-g { padding-left: var(--s2); border-left: 1px solid var(--line-2); font-weight: 500; color: var(--muted); }
 
 /* sessions: weekly columns, compared weeks in accent, the two windows' weekly averages as lines */
-.wc { display: block; width: 100%; height: 34px; overflow: visible; }
+.wc { display: block; max-width: 100%; height: 34px; overflow: visible; margin-inline: auto; }
 .wc-b { fill: var(--kx-trk); } .wc-now { fill: var(--accent); }
 .wc-ax { stroke: var(--line-2); stroke-width: 1; }
 .wc-was { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 2 2; }
@@ -92,16 +92,13 @@ html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: 
 .tkey b { font-weight: 600; color: var(--ink); }
 .tkey i { display: inline-block; width: 8px; height: 8px; margin-right: var(--s1); border-radius: 2px; }
 
-/* applied rate: semicircle gauge, the interval as a wide pale band, a tick at the earlier rate */
-.kg { display: flex; flex-wrap: wrap; align-items: end; gap: var(--s1) var(--s3); }
-.gauge { flex: none; width: 96px; height: 66px; overflow: visible; }
-.gauge path { fill: none; stroke-width: 8; }
-.gauge .g-track { stroke: var(--kx-trk); stroke-width: 2; }
-.gauge .g-ci { stroke: var(--kx-ci); stroke-width: 14; }
-.gauge .g-halo { stroke: var(--surface); stroke-width: 11; }
-.g-fill { stroke: var(--accent); }
-.g-was { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 3 2; }
-.g-end { fill: var(--muted); font-size: 10px; }
+/* applied rate: horizontal bullet, the likely range as a pale band, a 2px marker at the rate, a short tick at the earlier rate */
+.kg { display: grid; gap: var(--s1); }
+.bul { position: relative; height: 12px; margin: 4px 0; border-radius: 2px; background: var(--sunk); box-shadow: inset 0 0 0 1px var(--line-2); }
+.bul i { position: absolute; top: 0; bottom: 0; }
+.bul .bu-ci { background: var(--kx-ci); }
+.bul .bu-now { width: 2px; margin-left: -1px; top: -3px; bottom: -3px; background: var(--accent); box-shadow: 0 0 0 1px var(--surface); }
+.bul .bu-was { width: 2px; margin-left: -1px; top: 2px; bottom: 2px; background: var(--ink); }
 .kg-l { display: grid; margin: 0; font-size: 11px; line-height: 16px; color: var(--muted); }
 .kg-l b { font-weight: 600; color: var(--ink); }
 
