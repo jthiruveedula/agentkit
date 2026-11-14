@@ -95,8 +95,16 @@ def test_user_symlink_is_kept_on_uninstall_and_backed_up_on_install(tmp_path):
 
 
 @posix_only
-def test_upgrade_prune_keeps_edited_copy_removed_upstream(tmp_path):
+def test_upgrade_prune_keeps_edited_copy_removed_upstream(tmp_path, monkeypatch):
     import shutil
+
+    # `git commit`/`pull` spawn a detached `git maintenance run --auto` that
+    # repacks (deletes loose objects) while the next clone/pull is reading them
+    # ("unable to read tree"). Disable it for every git this test starts.
+    for i, k in enumerate(("maintenance.auto", "gc.auto")):
+        monkeypatch.setenv("GIT_CONFIG_KEY_%d" % i, k)
+        monkeypatch.setenv("GIT_CONFIG_VALUE_%d" % i, "false" if i == 0 else "0")
+    monkeypatch.setenv("GIT_CONFIG_COUNT", "2")
 
     git = ["git", "-c", "user.name=t", "-c", "user.email=t@t"]
     git += ["-c", "commit.gpgsign=false"]
