@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 41,
+  "count": 42,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -41,6 +41,12 @@
     {
       "name": "data-quality-standards",
       "description": "Apply schema, freshness, volume, idempotency and PII checks to a data pipeline before it ships. Use when writing tests for a dbt model/pipeline, reviewing a pipeline PR, or asked \"what checks should this have\".",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "data-storytelling",
+      "description": "Shapes analysis, metrics, a feature or a project into a memorable story with a big idea, structure, storyboard, action titles and a closing ask. Use when drafting or reviewing a deck, explainer, exec update, launch post, README hero, dashboard narrative or demo-video script.",
       "version": "0.1.0",
       "kind": "native"
     },
