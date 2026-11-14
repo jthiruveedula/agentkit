@@ -32,7 +32,7 @@ const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface",
   // adjacent in the concentration bar (costliest, 2nd, 3rd, the rest of spend): every neighbour clearly apart
   ["ink", "kx-o2", 1.6], ["kx-o2", "kx-o3", 1.6], ["kx-o3", "kx-rest", 1.6],
   // liquid glass at its thinnest: white at --gfloor over the darkest wallpaper stop (--wall-min), the "glass" background built below
-  ...["ink", "muted", "accent", "warn-ink", "good-ink"].map((t) => [t, "glass", 4.5]),
+  ...["ink", "muted", "accent", "warn-ink", "good-ink"].map((t) => [t, "glass", 4.5]), ["ink", "wall-min", 4.5],   // section subtitles and why-tags sit on the wallpaper itself
   ...["good", "bad", "warn", ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `s${i}c`), ...["claude_code", "copilot", "cursor", "opencode", "antigravity", "other"].map((s) => `src-${s}`), ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `t${i}`)].map((t) => [t, "glass", 3])];
 // categorical hues must differ enough in lightness or hue to tell apart: Antigravity vs Claude (the old pair was both blue)
 const dist = (a, b) => Math.hypot(a[0] - b[0], 0.5 * (a[1] * Math.cos(a[2] * Math.PI / 180) - b[1] * Math.cos(b[2] * Math.PI / 180)) , 0.5 * (a[1] * Math.sin(a[2] * Math.PI / 180) - b[1] * Math.sin(b[2] * Math.PI / 180)));
