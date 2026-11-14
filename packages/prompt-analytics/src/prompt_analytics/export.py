@@ -374,7 +374,14 @@ def build(con: duckdb.DuckDBPyConnection, cfg: Config) -> dict[str, Any]:
             "n": r[5],
             "direction": r[6],
             **(
-                {"uplift": {"pts": r[7], "n_with": r[8], "n_without": r[9], "strata": r[10]}}
+                {
+                    "uplift": {
+                        "pts": r[7],
+                        "n_with": r[8],
+                        "n_without": r[9],
+                        "strata": r[10],
+                    }
+                }
                 if r[7] is not None
                 else {}
             ),
@@ -563,7 +570,11 @@ def _sessions(
                 "friction": float(x.get("friction") or 0.0),
                 "cluster": int(cl.get(r["session_id"], -1)),
                 "features": feats.get(r["session_id"], []),
-                **({"struggle_p": x["struggle_p"]} if x.get("struggle_p") is not None else {}),
+                **(
+                    {"struggle_p": x["struggle_p"]}
+                    if x.get("struggle_p") is not None
+                    else {}
+                ),
                 "ttr_min": None
                 if x.get("ttr_s") is None
                 else round(float(x["ttr_s"]) / 60.0, 2),

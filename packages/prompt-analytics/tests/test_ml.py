@@ -247,7 +247,10 @@ def _hold(late_p_with, seed=1):
     rng = np.random.default_rng(seed)
     n = 600
     day = np.array(
-        [date(2026, 1, 1).toordinal() + int(d) for d in np.sort(rng.integers(0, 120, n))]
+        [
+            date(2026, 1, 1).toordinal() + int(d)
+            for d in np.sort(rng.integers(0, 120, n))
+        ]
     )
     late = day > day.max() - 21
     x = rng.random(n) < 0.5

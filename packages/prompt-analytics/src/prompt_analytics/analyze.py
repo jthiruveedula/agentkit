@@ -471,7 +471,9 @@ def run(
         qc = [whatworks.COLS[f] for f in whatworks.FEATURES]
         whatworks.annotate(
             ww,
-            pfs.filter((pl.col("cluster_id") >= 0) & pl.col("q_specificity").is_not_null())
+            pfs.filter(
+                (pl.col("cluster_id") >= 0) & pl.col("q_specificity").is_not_null()
+            )
             .group_by("session_id", "cluster_id")
             .agg([pl.col(c).max() for c in qc]),
             sm.select("session_id", "intent", "source", "has_applied").join(
@@ -486,10 +488,13 @@ def run(
             sess_h.select("session_id", "project_id"), on="session_id", how="left"
         )
         struggle = friction.struggle_prob(
-            sw, sw.select(pl.coalesce("project_id", "session_id"))["project_id"].to_numpy()
+            sw,
+            sw.select(pl.coalesce("project_id", "session_id"))["project_id"].to_numpy(),
         )
     sm = sm.with_columns(
-        pl.col("session_id").replace_strict(struggle, default=None, return_dtype=pl.Float64).alias("struggle_p")
+        pl.col("session_id")
+        .replace_strict(struggle, default=None, return_dtype=pl.Float64)
+        .alias("struggle_p")
     )
 
     # ---- daily + anomaly z (per source, cost)
