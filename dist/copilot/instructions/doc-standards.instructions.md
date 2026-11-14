@@ -17,6 +17,9 @@ A styling layer, not a document builder: it defines "professional" for the forma
    Load that skill first for the actual file-format mechanics (this skill
    doesn't duplicate its API).
 
+   Shaping the argument itself (structure, headlines, the closing ask)
+   is `data-storytelling`; do that before styling a deck or report.
+
 2. **Apply house style** from `_doc-standards/reference/house-style.md` — palette,
    typography, table/chart formatting, layout, accessibility. Apply it in one pass.
 

@@ -37,7 +37,7 @@ judging.
 
 | | |
 |---|---|
-| **45 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
+| **46 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
 | **4 tools, 1 source** | Each skill is one `SKILL.md`; `build.py` emits the Claude Code, Copilot, Cursor and Antigravity adapters. |
 | **Session costs you can see** | Live context budget with pause/resume, per-session spend audits, prompt analytics. |
 | **Private** | MIT licensed. No telemetry, no external calls beyond what you run yourself (`sync-external.sh`, `gh`, `npm`). |
@@ -164,7 +164,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 
 ## Skill catalog
 
-45 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
+46 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
 `skills/*/SKILL.md` on every `make build`.
 
 <details open>
@@ -231,6 +231,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
 | `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 | `humanizer` | Grammar fix and rewrite of text, docs and slides that keeps facts, code and voice; `detect.py` scores AI tells with line refs and guards numbers/code. |
+| `data-storytelling` | Big idea, structure, storyboard and action titles for decks, explainers, launch posts and exec updates; `story_lint.py` flags topic-label headlines, filler and a missing ask. |
 
 </details>
 
@@ -289,7 +290,7 @@ Repeatable decisions live in stdlib-only scripts with tests, so behavior is iden
 tools.
 
 <details>
-<summary><b>All 17 scripts</b></summary>
+<summary><b>All 18 scripts</b></summary>
 
 | Script | Does |
 |---|---|
@@ -300,6 +301,7 @@ tools.
 | `token-saver/scripts/estimate.py` | File token estimate + read strategy |
 | `mcp-security-review/scripts/mcp_scan.py` | MCP config risk scan; exit 1 on high findings |
 | `prompt-enhancer/scripts/classify.py` | Intent classification (`--selftest` golden cases) |
+| `data-storytelling/scripts/story_lint.py` | Topic-label vs action-title headlines, filler, hook and closing ask (`--strict`) |
 | `data-eng-router/scripts/classify.py` | Cloud/platform detection |
 | `data-architect/scripts/adr.py` | ADR scaffolding |
 | `pipeline-scaffold/scripts/scaffold_pipeline.py` | Pipeline scaffolding |
