@@ -81,18 +81,11 @@ describe("Markdown summary Applied line", () => {
   });
 });
 
-describe("Repeats spend line", () => {
-  const reps = (ids: string[]) => ({ repeats: [{ cluster: 1, count: 5, exemplar: "do the thing", sessions: ids }] });
-  it("shows tokens when no session is priced", () => {
+describe("Repeats so line", () => {
+  it("names the most-typed prompt and its count", () => {
     const ss = [sess({ id: "a", cost_usd: null }), sess({ id: "b", cost_usd: null })];
-    const h = text(render(<Repeats />, ss, reps(["a", "b"])));
-    expect(h).toContain("Repeated prompts used ~200 tokens across 2 sessions.");
-    expect(h).not.toContain("priced)");
-  });
-  it("shows dollars and (N priced) when only some are priced", () => {
-    const ss = [sess({ id: "a", cost_usd: 2 }), sess({ id: "b", cost_usd: null })];
-    const h = text(render(<Repeats />, ss, reps(["a", "b"])));
-    expect(h).toContain("Repeated prompts cost $2.00 across 2 sessions (1 priced).");
+    const h = text(render(<Repeats />, ss, { repeats: [{ cluster: 1, count: 5, exemplar: "do the thing", sessions: ["a", "b"] }] }));
+    expect(h).toContain("You typed \u201cdo the thing\u201d 5 times: make it a slash command.");
   });
 });
 
@@ -107,15 +100,15 @@ describe("no-gain card", () => {
   });
   it("renders 'no comparison yet' with too little data", () => {
     const h = text(render(<Works />, [...many(10, 40, 8), ...many(5, 10, 15)]));
-    expect(h).toContain("so there is no comparison yet.");
+    expect(h).toContain("Not enough sessions yet: 10 of 30 needed.");
   });
   it("renders the neutral 'more often' text, not 'no more often', when clearly higher", () => {
     const h = text(render(<Works />, [...many(8, 40, 8), ...many(36, 40, 15)]));
-    expect(h).toContain("Sessions past 10 prompts applied more often");
-    expect(h).not.toContain("applied no more often");
+    expect(h).toContain("Past 10 prompts, applied rate rises to");
+    expect(h).not.toContain("falls to");
   });
   it("renders the flat text when not clearly higher", () => {
     const h = text(render(<Works />, [...many(20, 40, 8), ...many(18, 40, 15)]));
-    expect(h).toContain("applied no more often");
+    expect(h).toMatch(/applied rate (falls to|stays)/);
   });
 });

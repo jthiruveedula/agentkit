@@ -134,7 +134,7 @@ export function Sessions() {
   const exp = useExporter();
   return (
     <Section id="s-sessions" title="Sessions" q="Which sessions are behind these numbers?">
-      <Card title="All sessions in view" meta={`${fmtInt(v.rows.length)} sessions, click one for detail`} span={12}
+      <Card so={v.rows.length ? <><b>{fmtInt(v.rows.length)}</b> sessions in view, {Math.round((v.rows.filter((r) => r.applied).length / v.rows.length) * 100)}% resolved.</> : "Nothing flagged in this window."} thin={!v.rows.length} title="All sessions in view" meta={`${fmtInt(v.rows.length)} sessions, click one for detail`} span={12}
         actions={<><SavedViews /><ExportMenu count={v.rows.length} onPick={exp} /></>}>
         {!v.legacy && <label className="field s-search"><span>Search titles</span>
           <input type="search" value={f.q ?? ""} placeholder="Type to filter sessions by title" autoComplete="off" onChange={(e) => set({ q: e.target.value || undefined })} /></label>}

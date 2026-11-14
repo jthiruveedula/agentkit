@@ -51,8 +51,10 @@ function Playbook() {
       {ps.length === 0 ? <p className="note">No effect in this direction passes the FDR check.</p> : <ul className="plays">{ps.map((p) => <PlayCard key={p.key} p={p} lim={lim} copySlot={copySlot} on={f.cluster === p.cluster} onPick={() => drill({ cluster: p.cluster })} />)}</ul>}
     </div>
   );
+  const best = more.length ? more.reduce((a, b) => (b.pts > a.pts ? b : a)) : null;
+  const so = best ? <>{((t) => t.charAt(0).toUpperCase() + t.slice(1))(best.title.split(": ").pop() ?? "")} lifts applied rate by <b>{fmtInt(best.pts)}</b> pts: do more of it.</> : <>Nothing flagged in this window.</>;
   return (
-    <Card id="s-playbook" src="what_works · overlapping groups" title="Prompt playbook" meta={d.what_works_tested ? `${fmtInt(b.tested)} tested · ${fmtInt(b.pass)} pass FDR 10% · all sessions. Click a card to filter to its topic` : "all sessions"} span={12}>
+    <Card so={so} thin={!best} id="s-playbook" src="what_works · overlapping groups" title="Prompt playbook" meta={d.what_works_tested ? `${fmtInt(b.tested)} tested · ${fmtInt(b.pass)} pass FDR 10% · all sessions. Click a card to filter to its topic` : "all sessions"} span={12}>
       {d.what_works_tested === 0 ? <Empty>No prompt effects were tested yet. The ml or deep analysis tier runs them once there are enough sessions.</Empty>
         : cards.length === 0 ? <Empty>{`None of the ${fmtInt(b.tested)} tested effects passes the false-discovery check (Benjamini-Hochberg, 10%), so there is no advice to give yet.`}</Empty> : (
           <>
@@ -98,8 +100,9 @@ function Topics() {
   const cl = d.galaxy.clusters.filter((k) => k.size > 0);
   const flat = d.galaxy.points.x.length === 0, up = d.engine.upgrade;
   const rows = cl.map((k) => ({ k, n: v.legacy ? k.size : v.clusterCounts.get(k.id) ?? 0 })).sort((a, b) => b.n - a.n).slice(0, 12);
+  const big = rows[0];
   return (
-    <Card title={flat ? "Topics, grouped by keywords" : "Topics"} src="galaxy.clusters · sessions per topic" span={5}
+    <Card so={big ? <>{big.k.label} is your biggest topic: <b>{fmtInt(big.n)}</b> sessions.</> : "Nothing flagged in this window."} thin={!big} title={flat ? "Topics, grouped by keywords" : "Topics"} src="galaxy.clusters · sessions per topic" span={5}
       meta={flat ? <>Install the ml extra to cluster by meaning.{up ? <> <code>{up.command}</code></> : null}</> : "sessions per topic, live"}>
       {rows.length === 0 ? <Empty>No topics yet</Empty> : (
         <BarList label="Topics. Each filters its sessions" rows={rows.map(({ k, n }) => ({
@@ -122,8 +125,9 @@ function Quality({ wide }: { wide: boolean }) {
   const mine = tool === "all" ? you : bs.find((b) => b.source === tool)?.values ?? you;
   if (!(you.length === axes.length && you.length > 0)) return null;
   const rows = axes.map((a, i) => ({ a, you: mine[i] ?? 0, top: top[i] ?? 0 })).map((x) => ({ ...x, gap: x.top - x.you })).sort((p, q) => q.gap - p.gap);
+  const gap = rows[0];
   return (
-    <Card title="Quality profile" src="quality.you vs quality.top" meta="you against the top-outcome tercile, biggest gap first" span={wide ? 12 : 7}
+    <Card so={gap && gap.gap > 0 ? <>Biggest gap to your best sessions: {gap.a}, <b>{fmtInt(gap.gap * 100)}</b> pts behind.</> : "You match your best sessions on every axis."} thin={!(gap && gap.gap > 0)} title="Quality profile" src="quality.you vs quality.top" meta="you against the top-outcome tercile, biggest gap first" span={wide ? 12 : 7}
       actions={caps.multiTool && bs.length > 1 ? <Segmented label="Quality by tool" value={tool} onChange={setTool} options={[{ id: "all", text: "All" }, ...bs.map((b) => ({ id: b.source as string, text: srcLabel(b.source) }))]} /> : undefined}>
       <div className="dbs" role="group" aria-label="Prompt quality: you against your top-outcome tercile, per axis">{rows.map((x) => (
         <div key={x.a} className="db"><span className="gap-l">{x.a}</span>
@@ -146,14 +150,14 @@ function NoGain() {
   const bs = useMemo(() => promptBuckets(v.rows), [v.rows]), g = useMemo(() => noGain(v.rows), [v.rows]);
   const n = bs.reduce((a, b) => a + b.n, 0);
   if (n === 0) return null;
-  const cmp = g ? `(${fmtPct(g.over.rate ?? 0)} vs ${fmtPct(g.mid.rate ?? 0)})` : "";
+  const so = !g ? <>Not enough sessions yet: {bs[2].n < bs[3].n + bs[4].n ? bs[2].n : bs[3].n + bs[4].n} of {MIN_N} needed.</>
+    : g.over.rate! < g.mid.rate! && g.flat ? <>Past <b>10</b> prompts, applied rate falls to {fmtPct(g.over.rate ?? 0)}: start fresh.</>
+    : g.flat ? <>Past <b>10</b> prompts, applied rate stays {fmtPct(g.over.rate ?? 0)}: longer does not help.</>
+    : <>Past <b>10</b> prompts, applied rate rises to {fmtPct(g.over.rate ?? 0)}.</>;
   // whisker x = centre of column i in a flex row with a 3px gap (matches .cols)
   const cx = (i: number) => `calc(${i + 0.5} * (100% + 3px) / ${bs.length} - 1.5px)`;
   return (
-    <Card id="s-nogain" src={`sessions.prompts \u00b7 n ${fmtInt(n)}`} title="Applied rate by session length" meta="change sessions (not explain), in view, 95% Wilson CI" span={12}>
-      <p className="lb-call">{!g ? `Fewer than ${MIN_N} sessions on one side of 10 prompts, so there is no comparison yet.`
-        : g.flat ? <><b>Past 10 prompts, sessions applied no more often {cmp}.</b> Consider restarting with a fresh prompt.</>
-        : `Sessions past 10 prompts applied more often ${cmp}.`}</p>
+    <Card so={so} thin={!g} id="s-nogain" src={`sessions.prompts \u00b7 n ${fmtInt(n)}`} title="Applied rate by session length" meta="change sessions (not explain), in view, 95% Wilson CI" span={12}>
       <div className="ng-plot">
         <Cols label="Applied rate by prompts per session" height={96} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--accent)" : "var(--line-2)" }],
           aria: b.n ? `${b.label} prompts: ${fmtPct(b.rate ?? 0)} applied, 95% CI ${fmtPct(b.lo)} to ${fmtPct(b.hi)}, n=${b.n}${b.n < MIN_N ? ", too few to read alone" : ""}` : `${b.label} prompts: no sessions` }))} />
@@ -175,7 +179,7 @@ function Best() {
   const top = useMemo(() => v.rows.filter((r) => r.prompts > 0 && r.applied && r.loops === 0 && r.cost_usd !== null).sort((a, b) => (a.cost_usd as number) - (b.cost_usd as number) || a.friction - b.friction).slice(0, 5), [v.rows]);
   if (top.length === 0) return null;
   return (
-    <Card title="Best sessions to copy" src="sessions · top resolved" meta="applied, no retries, cheapest first" span={12}>
+    <Card so={<><b>{top.length}</b> session{top.length === 1 ? "" : "s"} applied first try, from {fmtUSD(top[0].cost_usd as number)} each.</>} title="Best sessions to copy" src="sessions · top resolved" meta="applied, no retries, cheapest first" span={12}>
       <div className="tw"><table className="best">
         <thead><tr><th scope="col">Session</th><th scope="col">Project</th><th scope="col">Intent</th><th scope="col" className="n">Cost</th></tr></thead>
         <tbody>{top.map((r) => (

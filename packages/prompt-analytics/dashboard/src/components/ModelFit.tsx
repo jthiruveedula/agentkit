@@ -34,6 +34,9 @@ export function ModelFit() {
     ["Underpowered", p(fit.under), "smaller than needed"],
     ["Est. saving", saving === null ? "–" : `≥ ${fmtUSD(saving)}`, saving === null || !v.totals.cost ? "no priced data" : `${fmtPct(saving / v.totals.cost)} of spend`],
   ];
+  const light = fit.m[0].reduce((a, x) => a + x, 0);
+  const soMx = light ? <><b>{Math.round((fit.m[0][2] / light) * 100)}%</b> of light tasks ran on the top tier.</> : "Nothing flagged in this window.";
+  const soChg = saving ? <>Move light tasks to a smaller model: saves at least <b>{fmtUSD(saving)}</b> (estimate).</> : "Nothing flagged in this window.";
   return (
     <Section id="s-models" title="Model fit" q="Is the model sized to the task?">
       {n === 0 ? <div className="s12"><Empty>No sessions with a known model</Empty></div> : <>
@@ -42,7 +45,7 @@ export function ModelFit() {
             <li key={l} className="kpi"><span className="lbl">{l}</span><b className="val">{val}</b><span className="sub">{sub}</span></li>
           ))}
         </ul>
-        <Card title="Task size × model tier" span={6} src={`model fit (offline model) · n ${n} · estimate`}>
+        <Card so={soMx} thin={!light} title="Task size × model tier" span={6} src={`model fit (offline model) · n ${n} · estimate`}>
           <table className="mf-mx" aria-label="Task size against model tier, session counts">
             <thead><tr><td aria-hidden="true" style={{ border: 0 }} />{TIERS.map((t) => <th key={t} scope="col">{t}</th>)}</tr></thead>
             <tbody>{SIZES.map((sz, z) => (
@@ -53,7 +56,7 @@ export function ModelFit() {
             ))}</tbody>
           </table>
         </Card>
-        <Card title="What to change" span={6} src="model fit · estimate, untested">
+        <Card so={soChg} thin={!saving} title="What to change" span={6} src="model fit · estimate, untested">
           <ul className="mf-recs">{tools.map(([src, e]) => {
             const msg = e.n < MIN_TOOL_N ? "too few sessions"
               : e.over / e.n >= 0.3 ? `Use a smaller model on light tasks (${e.over}/${e.n} oversized).`

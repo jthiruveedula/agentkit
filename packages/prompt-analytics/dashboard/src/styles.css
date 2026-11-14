@@ -122,6 +122,10 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s5 { grid-column: span 5; } .s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s8 { grid-column: span 8; } .s12 { grid-column: span 12; }
 .card-h { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3); margin-bottom: var(--s3); min-height: 28px; }
 .card-h h3 { font: 600 15px/20px var(--sans); }
+.so { color: var(--ink); font-size: 14px; font-weight: 500; line-height: 1.4; max-width: 68ch; margin: 4px 0 12px; }
+.so b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.so .bad { color: var(--bad); }
+.so[data-thin] { color: var(--muted); font-weight: 400; } .so[data-thin] b { font-weight: inherit; }
 .card-h .meta { flex: 1 1 10rem; min-width: 0; }
 .card-acts { display: inline-flex; gap: var(--s2); flex-wrap: wrap; margin-left: auto; }
 

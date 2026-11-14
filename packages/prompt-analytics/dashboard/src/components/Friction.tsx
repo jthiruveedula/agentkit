@@ -3,7 +3,7 @@ import { useStore } from "../state";
 import { median, quantile } from "../lib/compare";
 import { fmtInt, fmtPct } from "../lib/format";
 import { BarList, Card, DataTable, Empty, Section } from "./ui";
-import { loopCurve, loopHeadline, LOOP_MIN_N, rephraseEffect, stopRule } from "../lib/loops";
+import { loopCurve, LOOP_MIN_N, stopRule } from "../lib/loops";
 import { useSize } from "../lib/hooks";
 import { pts } from "../lib/stats";
 import { Repeats } from "./Repeats";
@@ -21,8 +21,9 @@ const SIGNALS = [
 function Signals() {
   const { d, caps } = useStore();
   const rs = d.friction.rates.filter((r) => caps.sources.includes(r.source)), n = rs.reduce((a, r) => a + r.n, 0);
+  const top = n === 0 ? null : SIGNALS.map((sg) => ({ sg, x: rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n })).reduce((a, b) => (b.x > a.x ? b : a));
   return (
-    <Card src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={7}>
+    <Card so={top ? <>{top.sg.text} is your top struggle signal: <b>{fmtPct(top.x)}</b> of prompts.</> : <>Nothing flagged in this window.</>} thin={!top} src={`friction.rates \u00b7 n ${fmtInt(n)} prompts`} title="Signals behind struggle" meta="share of prompts with each signal, all sessions" span={7}>
       {n === 0 ? <Empty /> : (
         <BarList label="Friction signals" rows={SIGNALS.map((sg) => { const x = rs.reduce((a, r) => a + r[sg.id] * r.n, 0) / n;
           return { key: sg.id, label: sg.text, value: x, color: sg.id === "rephrase" ? "var(--accent)" : "var(--prior)", text: fmtPct(x, 1), aria: `${sg.text}: ${fmtPct(x, 1)} of ${fmtInt(n)} prompts` }; })} />
@@ -38,8 +39,10 @@ function ByIntent() {
   const mean = (rows: SessionRow[], k: string) => { const xs = rows.filter((r) => r.intent === k && r.prompts > 0); return xs.length ? xs.reduce((a, r) => a + r.loops, 0) / xs.length : null; };
   const rows = v.frictionByIntent.map((x) => ({ k: x.intent, n: x.n, b: mean(v.rows, x.intent) ?? 0, a: prior ? mean(prior.v.rows, x.intent) : null }));
   const max = Math.max(...rows.flatMap((x) => [x.a ?? 0, x.b]), 0.5) * 1.15;
+  const worst = rows.length ? rows.reduce((a, b) => (b.b > a.b ? b : a)) : null;
+  const so = worst ? <>{worst.k} retries most: <b className={worst.a !== null && worst.b - worst.a >= 0.15 ? "bad" : undefined}>{worst.b.toFixed(1)}</b> per session{worst.a !== null ? `, was ${worst.a.toFixed(1)}` : ""}.</> : <>Nothing flagged in this window.</>;
   return (
-    <Card src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={5}>
+    <Card so={so} thin={!worst} src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={5}>
       {rows.length === 0 ? <Empty /> : (
         <>
           <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: x.k, name: x.k, a: x.a, b: x.b, fa: x.a === null ? "" : x.a.toFixed(1), fb: x.b.toFixed(1), bad: x.a !== null && Math.abs(x.b - x.a) >= 0.15 ? x.b > x.a : null }))} />
@@ -59,19 +62,22 @@ const reph = (l: string) => `${l} rephrase${l === "1" ? "" : "s"}`;
 function LoopBreaker() {
   const { v } = useStore();
   const curve = useMemo(() => loopCurve(v.rows), [v.rows]);
-  const rule = stopRule(curve), eff = rephraseEffect(curve), head = loopHeadline(eff);
+  const rule = stopRule(curve);
   const box = useRef<HTMLDivElement>(null), { w } = useSize(box);
   const H = 200, P = { l: 40, r: 12, t: 16, b: 40 }, iw = Math.max(1, w - P.l - P.r), ih = H - P.t - P.b;
   const x = (k: number) => P.l + ((k + 0.5) / curve.length) * iw, y = (r: number) => P.t + (1 - r) * ih;
   const ok = curve.filter((b) => b.enough), total = curve.reduce((a, b) => a + b.n, 0);
   const stop = rule?.stop ?? null, cut = rule?.after ?? null;
   const few = iw / curve.length < 56 ? "few" : "too few";   // narrow columns (375px): "too few too few" ran together
+  const maxN = Math.max(...curve.map((b) => b.n), 0);
+  const so = total === 0 ? <>Nothing flagged in this window.</>
+    : !rule ? <>Not enough sessions yet: {fmtInt(maxN)} of {LOOP_MIN_N} needed.</>
+    : rule.stop ? <>After <b>{rule.after}</b> rephrases, applied rate drops to {fmtPct(rule.stop.rate)}: restart instead.</>
+    : <>No rephrase count clearly lowers your applied rate yet.</>;
   return (
-    <Card id="s-loopbreak" title="Loop breaker" meta="applied rate by rephrase count, 95% Wilson CI. Feature, bugfix and refactor sessions with 2+ prompts, in view" span={12}>
+    <Card so={so} thin={total === 0 || !rule} id="s-loopbreak" title="Loop breaker" meta="applied rate by rephrase count, 95% Wilson CI. Feature, bugfix and refactor sessions with 2+ prompts, in view" span={12}>
       {total === 0 ? <Empty>No feature, bugfix or refactor session with 2 or more prompts in this view.</Empty> : (
         <>
-          {head ? <p className="lb-call"><b>{head.text}.</b> Of {fmtInt(head.n)} sessions compared, {fmtInt(eff?.n1 ?? 0)} rephrased (1+ loops) and {fmtInt(eff?.n0 ?? 0)} did not. Harder tasks need more follow-ups, so this is association, not cause.</p>
-            : <p className="lb-call">{rule ? <b>Too few sessions with and without a rephrase to compare them.</b> : <>Every loop count has fewer than {LOOP_MIN_N} sessions here, so there is no curve to read.</>}</p>}
           {rule && <p className="lb-eff"><b>Stop rule.</b> {rule.stop && rule.effect ? `${rule.text}: ${fmtPct(rule.stop.rate)} at ${reph(rule.stop.label)} against ${fmtPct(rule.peak.rate)} at ${reph(rule.peak.label)} (${pts(rule.effect.diff)}, 95% CI ${pts(rule.effect.lo).replace(" pts", "")} to ${pts(rule.effect.hi)}).` : "No later bucket is clearly below the best one once both intervals are compared."}</p>}
           <div className="lb" ref={box} style={{ height: H }}>
             {w > 0 && (

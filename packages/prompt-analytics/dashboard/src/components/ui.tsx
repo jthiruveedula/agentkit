@@ -19,7 +19,7 @@ export function Section({ id, title, q, actions, children }: { id: string; title
 }
 
 /** Titled block on the grid. `meta` is the one-line method/scope caption ("all sessions" marks aggregates that ignore filters). */
-export function Card({ title, meta, span = 6, actions, children, id, src }: { title: string; meta?: ReactNode; span?: Span; actions?: ReactNode; children: ReactNode; id?: string; src?: string }) {
+export function Card({ title, meta, span = 6, actions, children, id, src, so, thin }: { title: string; so?: ReactNode; thin?: boolean; meta?: ReactNode; span?: Span; actions?: ReactNode; children: ReactNode; id?: string; src?: string }) {
   return (
     <div className={`card s${span}`} id={id} role="group" aria-label={title} data-src={src}>
       <header className="card-h">
@@ -27,6 +27,7 @@ export function Card({ title, meta, span = 6, actions, children, id, src }: { ti
         {meta ? <span className="meta">{meta}</span> : null}
         {actions ? <span className="card-acts">{actions}</span> : null}
       </header>
+      {so ? <p className="so" data-thin={thin || undefined}>{so}</p> : null}
       {children}
     </div>
   );
