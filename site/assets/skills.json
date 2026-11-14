@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 41,
+  "count": 42,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -233,6 +233,12 @@
     {
       "name": "ext-seo",
       "description": "Route SEO setup and audits to the pinned AgriciDaniel/claude-seo collection. Use when building or changing any website, landing page or frontend that serves public pages, or when asked for an SEO audit, schema markup, sitemap, Core Web Vitals or GEO/AI-search readiness.",
+      "version": "0.1.0",
+      "kind": "router"
+    },
+    {
+      "name": "ext-slides",
+      "description": "Route HTML slide decks and presentations to the pinned zarazhangrui/frontend-slides. Use when asked to build a presentation, slide deck, or pitch or talk slides for the web/browser, or to convert PPT/PPTX to web slides; not for producing .pptx files.",
       "version": "0.1.0",
       "kind": "router"
     },
