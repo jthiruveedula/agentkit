@@ -5,7 +5,7 @@ trigger: model_decision
 
 # Doc Standards
 
-A styling layer, not a document builder: it defines "professional" for the format-specific build skill.
+A styling layer, not a document builder: it defines "professional" for the format-specific build skill. For the words themselves (grammar, de-AI rewrite of prose or slide text) use `humanizer`.
 
 ## Procedure
 
@@ -13,7 +13,7 @@ A styling layer, not a document builder: it defines "professional" for the forma
    - Word → `docx` skill
    - Excel → `xlsx` skill
    - PDF → `pdf` skill
-   - PowerPoint → `pptx` skill
+   - PowerPoint → `pptx` skill (HTML/web slide deck instead → `ext-slides`)
 
    Load that skill first for the actual file-format mechanics (this skill
    doesn't duplicate its API).
