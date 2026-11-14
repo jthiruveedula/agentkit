@@ -98,6 +98,10 @@ python3 ~/.claude/skills/context-budget/scripts/install_hooks.py
 | Train, evaluate, deploy, monitor a model | `ml-lifecycle` | `ml-engineer` |
 | UI, animation, scroll effects, 3D / WebGL | `frontend-motion-3d` | `frontend-engineer` |
 | Charts, graphs, KPI tiles, dashboards | `chart-design` | — |
+| Deck, explainer or exec update that lands one point | `data-storytelling` | — |
+| Text, docs or slides that read like AI | `humanizer` | — |
+| HTML slide deck | `ext-slides` | — |
+| Diagram of a real codebase or system | `ext-archify` | — |
 | Rough idea → spec → task list | `spec-writer` | — |
 | Failing test or crash | `debug-loop` | — |
 | Prove a change works (tests, lint, types) | — | `verifier` |
@@ -211,7 +215,18 @@ Script paths are relative to `skills/`; run them with `python3`.
 | Skill | What it does |
 |---|---|
 | `frontend-motion-3d` | Effect → lightest tool (CSS, Motion, GSAP/ScrollTrigger, three.js/R3F, HyperFrames), with a 60fps/LCP budget, reduced-motion, and WebGL fallback. |
-| `chart-design` | Question → chart form via a deterministic picker, honest axes, direct labels, takeaway titles; `chart_check.py palette` gates WCAG contrast and colour-blind separation. |
+
+</details>
+
+<details open>
+<summary><b>Docs, charts & storytelling</b></summary>
+
+| Skill | What it does |
+|---|---|
+| `doc-standards` | House style for Word, Excel, PDF and PowerPoint output. |
+| `chart-design` | Question → chart form, honest axes, direct labels; `chart_check.py` gates contrast and colour-blind safety. |
+| `data-storytelling` | Big idea, storyboard and action titles; `story_lint.py` flags topic headlines, filler and a missing ask. |
+| `humanizer` | Grammar fix and de-AI rewrite that keeps facts, code and voice; `detect.py` scores AI tells and guards numbers. |
 
 </details>
 
@@ -229,18 +244,17 @@ Script paths are relative to `skills/`; run them with `python3`.
 | `memory-sync` | Mines recent sessions for recurring agent mistakes and writes durable fixes. |
 | `mcp-security-review` | `mcp_scan.py` flags unpinned packages, secrets in config (names only), broad filesystem roots, unauthenticated remotes, shell wrappers. |
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
-| `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
-| `humanizer` | Grammar fix and rewrite of text, docs and slides that keeps facts, code and voice; `detect.py` scores AI tells with line refs and guards numbers/code. |
-| `data-storytelling` | Big idea, structure, storyboard and action titles for decks, explainers, launch posts and exec updates; `story_lint.py` flags topic-label headlines, filler and a missing ask. |
 
 </details>
 
 <details>
-<summary><b>External routers</b>: 15 thin skills that wire in the pinned <a href="#external-skills">external sources</a> on demand</summary>
+<summary><b>External routers</b>: 17 thin skills that wire in the pinned <a href="#external-skills">external sources</a> on demand</summary>
 
 | Skill | Routes to |
 |---|---|
 | `ext-diagrams` | Architecture diagrams, flowcharts, sequence diagrams (`diagram-design`) |
+| `ext-archify` | Diagrams derived from a real codebase: architecture, sequence, dataflow, ERD (`tt-a1i/archify`) |
+| `ext-slides` | HTML slide decks and PPTX-to-web conversion (`zarazhangrui/frontend-slides`) |
 | `ext-ui-ux` | UI/UX design toolkit, when named explicitly |
 | `ext-hallmark` | Frontend design via `nutlope/hallmark`: every UI change passes its anti-slop Floor and `sloplint`; new pages get its full design flow |
 | `ext-seo` | SEO setup and audits via `AgriciDaniel/claude-seo`; `frontend-engineer` ships its baseline on every public page |
@@ -380,8 +394,9 @@ becomes Copilot `applyTo` and Cursor `globs` for file-type-specific skills.
 ## External skills
 
 [`external/skills.lock.json`](external/skills.lock.json) pins 19 outside skill sources by commit
-SHA and license (diagrams, UI/UX, codebase reads, cloud provider skills, system design
-references, gap discovery, security audit, SEO, frontend design, prose humanizing). They are **not** vendored;
+SHA and license (diagrams, code-derived architecture, slides, UI/UX, codebase reads, cloud
+skills, system design, gap discovery, security audit, SEO, frontend design, prose humanizing).
+They are **not** vendored;
 `scripts/sync-external.sh` fetches them on demand into the gitignored `external/<name>/`,
 verifying each tarball's SHA-256. One source (`systems-design-resources`) is GPL-3.0 and kept
 reference-only.
