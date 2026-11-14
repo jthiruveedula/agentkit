@@ -73,3 +73,32 @@
 /* headers wrap to two lines rather than run into the next column */
 #s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: normal; line-height: 14px; }
 @media (pointer: coarse) { #s-overview .b-act, .b-top .b-acts .btn { height: auto; min-height: 40px; } }
+
+/* first row: the Brief ring. Under 980px of page width the Brief is full width (ring left, why right); at 980px+ it takes 5 of 12 columns beside the Key numbers (7). */
+.b-ring { position: relative; width: 136px; height: 136px; flex: none; display: grid; place-items: center; }
+.ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ring circle { fill: none; stroke-width: 11; }
+.ring .r-track { stroke: var(--line); }
+.ring .r-fill { stroke: var(--tone-ink); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 60px 60px; }
+.ring .r-was { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+#s-overview .b-ring .b-num { position: relative; font-size: 32px; letter-spacing: -0.02em; font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) { html.fx .ring .r-fill { animation: pa-ring 900ms cubic-bezier(.2, .8, .2, 1) backwards; } }
+@keyframes pa-ring { from { stroke-dasharray: 0.4 100; } }
+@container pa (min-width: 980px) {
+  #s-overview .grid > .brief { grid-column: span 5; }
+  #s-overview .grid > .kcard { grid-column: span 7; }
+  #s-overview .brief:has(> .b-side) { grid-template-columns: minmax(0, 1fr); }
+  #s-overview .brief { align-content: start; row-gap: var(--s4); }
+  #s-overview .brief .b-ring { width: 184px; height: 184px; }
+  #s-overview .brief .b-ring .b-num { font-size: 40px; }
+  #s-overview .brief h3 { font-size: 20px; line-height: 26px; }
+  #s-overview .brief .lead { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--s4); }
+  #s-overview .brief .lead > .b-n { grid-column: 2; }
+  #s-overview .brief .b-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s4); }
+  #s-overview .brief .story { grid-template-columns: minmax(0, 1fr); }
+  #s-overview .brief .story > div { display: grid; }
+  #s-overview .brief .story dd { grid-column: auto; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; }
+  #s-overview .brief .story dd > .b-act { grid-column: auto; justify-self: start; }
+}
+/* Slate polish: 20px between cards on a wide page */
+@container pa (min-width: 1001px) { .grid, #s-overview .grid { gap: 20px; } }

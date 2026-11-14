@@ -3,9 +3,10 @@ import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
 import { Empty, Segmented } from "./ui";
-import { Recommend, useNext, useRowOps } from "./Recommend";
+import { Recommend } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
+import { Ring } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
@@ -102,7 +103,6 @@ const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
 /** Briefing: the struggled rate, what it is compared against, how sure the change is, and the driver once. Honest copy for every state. */
 function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b: Briefing; bs: Basis; cmp: Cmp; win: number; scope: Scope; all: SessionRow[] }) {
   const { d, v, f, ids, apply, clear, win: wn } = useStore();
-  const rows = useNext(), ops = useRowOps();
   const openIds = useMemo(() => openExposure(d), [d]);
   // the Key numbers tiles' verdicts on the same basis (lib/mix): an Also moved chip with a tile is grey when its tile is (mixed, within range),
   // and dropped when its tile shows no change, so the brief never reads as a win the tile below calls mixed
@@ -114,7 +114,6 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
   const tone = real ? (up ? "bad" : "good") : "flat";
   const pct = (x: number) => fmtPct(x, 1);
   const drv = real ? b.drivers?.headline ?? null : null;
-  const top = rows[0], topN = top ? ops.count(top) : 0, topSec = top ? ops.sec(top) : null;
   const st = useMemo(() => story(bs.cur), [bs]);
   // raw session counts are not comparable across a 4-week vs a 22-week split, so the Sessions mover only runs against an equal prior window
   const all = useMemo(() => movers(bs.cur, bs.base, 5).filter((m) => (bs.mode !== "split" || m.id !== "sessions") && (!tiled(m.id) || dl[m.id] !== undefined)).slice(0, 2), [bs, dl]);
@@ -151,18 +150,21 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
       <div className="lead">
         {p !== null ? (
           <>
-            <p className="b-n">
+            <div className="b-ring" role="group" aria-label={`Struggle rate ${pct(p)}${was !== null ? `, earlier ${pct(was)}` : ""}`}
+              title={dd && prev ? `${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before` : undefined}>
+              <Ring p={p} was={was} />
               <button type="button" className="b-num" onClick={() => apply({ struggled: true, ...scope }, { list: true })}
                 aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}>{pct(p)}</button>
-              {was !== null && <span className="was">{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span>}
-            </p>
-            <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
-            {dd && prev && (
-              <p className="ci" title={`${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before`}>
-                <b className="ci-pt">{pts(dd.diff, 1)}</b> <CiBar lo={dd.lo} hi={dd.hi} d={dd.diff} /> <span className="ci-n">{sure} {end(dd.lo)} to {end(dd.hi)}</span>
-              </p>
-            )}
-            {dd && prev && <p className="b-foot">{fmtInt(now.n)} vs {fmtInt(prev.n)} sessions with a prompt</p>}
+            </div>
+            {was !== null && <p className="b-n"><span className="was">{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span></p>}
+            {/* the sentence, interval and counts stay for screen readers; sighted readers get them in the ring's tooltip */}
+            <div className="sr-only">
+              <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
+              {dd && prev && (
+                <p className="ci"><b className="ci-pt">{pts(dd.diff, 1)}</b> <CiBar lo={dd.lo} hi={dd.hi} d={dd.diff} /> <span className="ci-n">{sure} {end(dd.lo)} to {end(dd.hi)}</span></p>
+              )}
+              {dd && prev && <p className="b-foot">{fmtInt(now.n)} vs {fmtInt(prev.n)} sessions with a prompt</p>}
+            </div>
             {vd.kind === "none" && <p className="b-foot">{prev ? `Too few sessions with a prompt to compare yet (${fmtInt(now.n)} vs ${fmtInt(prev.n)})` : "No earlier window to compare yet"}</p>}
           </>
         ) : (
@@ -173,18 +175,11 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
           </>
         )}
       </div>
-      {(why || top || mv.length > 0) && (
+      {(why || mv.length > 0) && (
         <div className="b-side">
-          {(why || top) && (
+          {why && (
             <dl className="story">
-              {why && <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>}
-              {top && (
-                <div><dt>Do next</dt><dd><span className="b-say">{top.action}</span>
-                  {/* the same button as row 1 of Do next; an action that would open 0 sessions is hidden, not offered */}
-                  {top.filter && topN > 0 ? <button type="button" className="btn b-act" onClick={() => ops.open(top)} aria-label={`Open ${nSess(topN)} behind: ${top.action}`}>Open {nSess(topN)}</button>
-                    : topSec && <button type="button" className="btn b-act" onClick={() => ops.see(top)} aria-label={`See ${topSec.title}: evidence for ${top.action}`}>See {topSec.title}</button>}
-                </dd></div>
-              )}
+              <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>
             </dl>
           )}
           {mv.length > 0 && (
@@ -267,8 +262,8 @@ export function Overview() {
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
         {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} />}
-        <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <KeyNumbers bs={bs} setMetric={setMetric} />
+        <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">
           <span className="meta">All time</span><span>{fmtInt(t.active_days)} active days</span><span>streak {t.longest_streak} longest, {t.current_streak} now</span><span>{fmtInt(t.projects)} projects</span><span>{fmtInt(t.commits_linked)} commits linked</span>
         </p>

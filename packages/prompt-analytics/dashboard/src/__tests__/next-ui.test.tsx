@@ -16,12 +16,13 @@ afterEach(() => { act(() => root?.unmount()); el?.remove(); root = null; locatio
 const mount = () => { el = document.createElement("div"); document.body.append(el); root = createRoot(el); act(() => root!.render(<Dashboard d={d} />)); };
 
 describe("Do next card", () => {
-  it("sits under the Brief with Drivers after it, and replaces the retired sections", () => {
+  it("sits in the row under the Brief and Key numbers, with Drivers after it, and replaces the retired sections", () => {
     mount();
     const kids = [...el.querySelectorAll("#s-overview .grid > *")].map((c) => c.id || c.className);
     expect(kids[0]).toMatch(/brief/);
-    expect(kids[1]).toBe("s-next");
-    expect(kids[2]).toBe("s-driver");
+    expect(kids[1]).toMatch(/kcard/);
+    expect(kids[2]).toBe("s-next");
+    expect(kids[3]).toBe("s-driver");
     expect(el.querySelector("#s-attention, #s-recs")).toBeNull();
     expect(el.querySelector("#main")?.textContent).not.toMatch(/Needs attention|Recommendations/);
   });

@@ -6,6 +6,7 @@ import { bucketSeries, costPerApplied, dayDiff, isWide, METRICS, tokensPerApplie
 import { fmtCompact, fmtInt, fmtPct, fmtRange, fmtUSD } from "../lib/format";
 import { Count, DataTable, Segmented } from "./ui";
 import { Donut, Gauge, WeekCols } from "./charts";
+import { Icon } from "./icons";
 import type { Metric } from "./Trend";
 import type { Basis } from "../lib/brief";
 import { appliedRate, spendOutliers } from "../lib/baseline";
@@ -208,7 +209,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
             {/* the tile is not a button: its main button stretches over it (::after), so the outlier buttons sit in flow without nesting */}
             <div className="kt" data-kpi={c.id} data-primary={c.primary || undefined}>
               <button type="button" className="kpi-main" onClick={c.open} aria-label={`${c.label}: ${c.value === "–" ? c.sub ?? "no data" : c.value}${c.small ? `, ${c.small}` : ""}. Open the sessions behind it`}>
-                <span className="lbl">{c.label}</span>
+                <span className="lbl"><i className="ti" aria-hidden="true"><Icon n={c.id === "tpa" ? "cpa" : c.id} /></i>{c.label}</span>
                 <span className="kv"><Count className="val" text={c.value} />{c.small && <small>{c.small}</small>}</span>
               </button>
               {c.delta}

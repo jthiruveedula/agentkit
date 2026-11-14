@@ -77,6 +77,19 @@ export function Gauge({ p, lo, hi, was }: { p: number; lo?: number; hi?: number;
   );
 }
 
+/** Closed ring for a 0..1 rate: track, fill from 12 o'clock to `p`, a short tick across the ring at the earlier value `was`. Decorative; the caller names it. */
+export function Ring({ p, was }: { p: number; was?: number | null }) {
+  const c = (x: number) => Math.min(1, Math.max(0, x)), R = 50, at = (f: number, r: number) => [60 + r * Math.sin(2 * Math.PI * c(f)), 60 - r * Math.cos(2 * Math.PI * c(f))].map((v) => +v.toFixed(2));
+  const [x1, y1] = was != null ? at(was, R - 9) : [0, 0], [x2, y2] = was != null ? at(was, R + 9) : [0, 0];
+  return (
+    <svg className="ring" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+      <circle className="r-track" cx="60" cy="60" r={R} />
+      <circle className="r-fill" cx="60" cy="60" r={R} pathLength="100" strokeDasharray={`${Math.max(0.4, c(p) * 100)} 100`} />
+      {was != null && <line className="r-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
+    </svg>
+  );
+}
+
 export interface DonutSeg { key: string; value: number; color: string; hatch?: boolean; on?: boolean; title: string; onPick?: () => void }
 /** Donut of shares, starting at 12 o'clock, clockwise. Slices are mouse targets only (`onPick`); the caller's legend carries the
  *  keyboard route and the numbers, so the SVG is hidden from assistive tech. `children` sit in the hole. */

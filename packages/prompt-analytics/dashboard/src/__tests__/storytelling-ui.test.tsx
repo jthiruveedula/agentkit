@@ -82,13 +82,12 @@ describe("storytelling UI", () => {
     expect(params().get("pn")).toBe("list");
   });
 
-  it("story has both rows and the driver button opens its sessions", () => {
+  it("story has the Why row and the driver button opens its sessions; Do next is the list under the first row", () => {
     mount();
     const dl = el.querySelector("dl.story")!;
     expect(dl.textContent).toContain("Why");
-    expect(dl.textContent).toContain("Do next");
-    expect(dl.querySelector(":scope > div:last-child .b-say")!.textContent).toBe(el.querySelector("#s-next li")!.querySelector("h4")!.textContent);   // Do next is row 1 of the list
-    expect([...dl.querySelectorAll("button")].some((b) => b.textContent === "See Exposure")).toBe(true);   // an open secret leads, and it has no filter, so the button jumps to its evidence
+    expect(dl.textContent).not.toContain("Do next");
+    expect([...el.querySelectorAll("#s-next button")].some((b) => b.textContent === "See Exposure")).toBe(true);   // an open secret leads, and it has no filter, so the button jumps to its evidence
     click(dl.querySelector(".btn.primary"));
     expect(params().get("prj")).toBe("billing-api");
     expect(params().get("pn")).toBe("list");
