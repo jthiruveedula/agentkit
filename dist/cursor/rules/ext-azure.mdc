@@ -16,6 +16,8 @@ Both nest skills under `skills/`.
 
 ## Procedure
 
+`./scripts/` and `external/` are relative to the agentkit checkout, not the user's project: `cd` there first (the installed skill is a symlink into it); the script needs `jq`. No checkout: say so, do not guess upstream content.
+
 1. Sync what the task needs: `./scripts/sync-external.sh azure-skills agent-skills-ms`
 2. Find the skill: `grep -rl "<keyword>" external/azure-skills/skills external/agent-skills-ms/skills`
 3. Read the matching `SKILL.md`. Keep CC-BY-4.0 attribution if copying from `agent-skills-ms`.

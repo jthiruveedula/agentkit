@@ -2,6 +2,7 @@
 per-tool asset path rewriting."""
 
 import posixpath
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -130,7 +131,10 @@ def test_asset_references_resolve_in_every_tool():
             if prefix_tmpl is not None:
                 scrubbed = _strip_rewritten(content, rewritten_refs)
                 for asset in assets:
-                    assert asset not in scrubbed, (tool, skill, asset)
+                    # a ref inside a longer path (skills/x/scripts/a.py) is
+                    # repo-relative on purpose, not a dangling bare ref
+                    bare = r"(?<![\w./~-])" + re.escape(asset)
+                    assert not re.search(bare, scrubbed), (tool, skill, asset)
 
 
 def test_non_asset_references_are_not_rewritten():
@@ -166,8 +170,8 @@ def test_globs_map_to_copilot_applyto_and_cursor_globs(tmp_path):
     skills = _fake_skill(tmp_path, globs="**/*.py")
     cop = build.emit_copilot(skills, [])["instructions/demo.instructions.md"].decode()
     cur = build.emit_cursor(skills, [])["rules/demo.mdc"].decode()
-    assert "applyTo: **/*.py" in cop
-    assert "globs: **/*.py" in cur and "alwaysApply: false" in cur
+    assert "applyTo: '**/*.py'" in cop
+    assert "globs: '**/*.py'" in cur and "alwaysApply: false" in cur
     plain = build.emit_cursor(_fake_skill(tmp_path), [])["rules/demo.mdc"].decode()
     assert "globs" not in plain
 
@@ -197,3 +201,9 @@ def test_marketplace_lists_every_skill_and_agent():
     agents = {p.name for p in (REPO_ROOT / "agents").glob("*.md")}
     assert {s.split("/", 1)[1] for s in plugin["skills"]} == skills
     assert {a.split("/", 1)[1] for a in plugin["agents"]} == agents
+
+
+def test_rewrite_asset_refs_skips_already_prefixed_paths():
+    body = "run `scripts/a.py` or python3 skills/x/scripts/a.py\n"
+    out = build._rewrite_asset_refs(body, ["scripts/a.py"], "_x")
+    assert out == "run `_x/scripts/a.py` or python3 skills/x/scripts/a.py\n"

@@ -29,13 +29,16 @@ independent work or separate context.
 3. **Delegate wave by wave.** Launch every task in a wave in one message
    so they run in parallel. Each delegation carries: objective, exact
    output format, files/tools in scope, what's out of scope, and a turn
-   budget. Vague delegation ("look into X") causes duplicate work.
+   budget. A task's `tier`, when set, is passed as the Agent `model`
+   argument. Vague delegation ("look into X") causes duplicate work.
 
 4. **Keep context flat.** Workers write bulky results to files and return
    a summary plus paths. Workers do not spawn agents; a worker that needs
    `researcher`, `test-writer` or `data-platform-architect` output returns a
    `blocked: needs <agent>` line; the lead dispatches that agent, then
-   re-dispatches the worker with its output.
+   re-dispatches the worker with its output. A task is re-dispatched after
+   `blocked` at most once; a second block on it is reported as an open risk,
+   not dispatched again.
 
 5. **Verify externally.** After implementation waves, send the diff to
    `verifier` (runs tests/lint/types/schema checks — never self-grades),
@@ -60,4 +63,4 @@ independent work or separate context.
 
 ## Token economy
 
-Keep one plan file, re-read on demand; never paste worker transcripts into lead context. Workers run on cheaper models. Checkpoint long runs with `context-compressor` and write the plan to disk before compaction.
+Keep one plan file, re-read on demand; never paste worker transcripts into lead context. Set a task `tier` to run mechanical work on a cheaper model. Checkpoint long runs with `context-compressor` and write the plan to disk before compaction.

@@ -387,3 +387,17 @@ def test_agent_roster_must_name_existing_agents(tmp_path):
     errors = _check(tmp_path, agents)
     assert any("unknown agent 'ghost'" in e for e in errors), errors
     assert not any("'b'" in e for e in errors), errors
+
+
+def test_non_string_frontmatter_value_is_an_error_not_a_crash(tmp_path):
+    skill_dir = tmp_path / "skills" / "listy"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(
+        "---\nname: listy\ndescription: [Use when foo and bar]\nversion: 0.1.0\n---\n\nbody\n"
+    )
+    validate.SKILLS_DIR = tmp_path / "skills"
+    try:
+        errors = validate.validate()
+        assert any("'description' must be a string" in e for e in errors), errors
+    finally:
+        validate.SKILLS_DIR = REPO_ROOT / "skills"

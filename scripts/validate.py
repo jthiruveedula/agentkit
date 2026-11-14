@@ -306,6 +306,18 @@ def validate():
                     "%s: missing required frontmatter key '%s'" % (origin, key)
                 )
 
+        bad_type = [
+            k
+            for k in ("name", "description", "version")
+            if k in meta and not isinstance(meta[k], str)
+        ]
+        if bad_type:
+            errors.append(
+                "%s: frontmatter %s must be a string"
+                % (origin, ", ".join("'%s'" % k for k in bad_type))
+            )
+            continue
+
         name = meta.get("name", "")
         if name and not NAME_RE.match(name):
             errors.append("%s: name '%s' is not kebab-case" % (origin, name))

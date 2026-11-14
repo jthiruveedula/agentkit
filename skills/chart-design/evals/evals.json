@@ -1,0 +1,38 @@
+[
+  {
+    "query": "Chart monthly revenue for our 3 regions over the last 3 years in this React dashboard (we use Recharts).",
+    "files": [],
+    "expected_behavior": [
+      "Runs chart_check.py pick with intent trend and a temporal x, and uses the line chart it ranks first",
+      "Labels each line directly at its end instead of adding a legend, and writes a title that states the takeaway",
+      "Stays in Recharts, reads colours from theme tokens and disables animation under prefers-reduced-motion",
+      "Runs chart_check.py palette on the series colours against the background and reports the result"
+    ]
+  },
+  {
+    "query": "Make a pie chart of market share for our 11 product lines, in red and green shades to match the brand.",
+    "files": [],
+    "expected_behavior": [
+      "Explains that 11 slices cannot be compared by angle and proposes a sorted bar of shares (or tail folded into Other) instead of a pie",
+      "Runs chart_check.py palette on the proposed colours and does not ship a red/green pair that fails deuteranopia separation",
+      "Offers a fix that keeps the brand hues where they pass, shifting lightness or adding direct labels as a second channel"
+    ]
+  },
+  {
+    "query": "Add a chart to the homepage showing that we have 12,480 active users.",
+    "files": [],
+    "expected_behavior": [
+      "Recognises a single number is not a chart and builds a stat tile with value, unit and a comparison to a named baseline",
+      "Does not wrap the number in a gauge, donut or single-bar chart"
+    ]
+  },
+  {
+    "query": "Review this matplotlib figure: a bar chart of conversion rate by plan with the y-axis starting at 40%, plus a second y-axis showing signups as a line.",
+    "files": [],
+    "expected_behavior": [
+      "Flags the truncated bar axis and the dual y-axis as honesty violations, worst first",
+      "Proposes a zero-based bar chart (or a dot plot if the zoomed range is needed) and two stacked panels sharing x instead of dual axes",
+      "Does not restyle parts of the figure that already pass"
+    ]
+  }
+]

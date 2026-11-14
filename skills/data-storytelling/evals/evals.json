@@ -1,0 +1,43 @@
+[
+  {
+    "query": "Here's my Q3 metrics deck outline (headings: Overview, Q3 Results, Architecture, Next Steps, Thank You). Make it land with the exec team.",
+    "files": [],
+    "expected_behavior": [
+      "Writes a one-sentence big idea naming audience, what changed and the decision before touching slides, or asks for audience and desired decision if unknown",
+      "Picks an answer-first SCQA / pyramid structure for the exec audience",
+      "Rewrites each topic-label headline as a full-sentence action title with its so-what",
+      "Ends on a slide stating the ask (decision, owner, date) instead of Thank You",
+      "Runs scripts/story_lint.py on the outline and fixes the findings",
+      "Does not invent numbers; uses a labeled placeholder and asks for the real figure"
+    ]
+  },
+  {
+    "query": "Write the README hero section and launch post intro for our new CLI that diagnoses failed pipeline runs.",
+    "files": [],
+    "expected_behavior": [
+      "Uses a before-after-bridge or customer-as-hero structure opening on the reader's problem, not the feature list",
+      "Leads with one concrete example before the general claim",
+      "Avoids stock openers and hype adjectives such as 'In today's fast-paced world', 'game-changing', 'seamless', 'delve'",
+      "Closes with a clear next step such as an install command or try-it call to action"
+    ]
+  },
+  {
+    "query": "Turn this churn analysis into a 3-minute demo video script and also build the charts and the HTML slides.",
+    "files": [],
+    "expected_behavior": [
+      "Storyboards one line per beat before writing the full script",
+      "Writes for the ear: one idea per beat, a single headline number with a comparison",
+      "Sets density for speaking rather than reading",
+      "Finishes and lints the story outline before any chart or slide work, and hands charts and the HTML deck to a dedicated chart or slides skill only if one is installed"
+    ]
+  },
+  {
+    "query": "Add three more impressive stats to my board update so it sounds stronger; just make up reasonable numbers.",
+    "files": [],
+    "expected_behavior": [
+      "Refuses to fabricate numbers and offers labeled placeholders or asks for sources",
+      "Strengthens the story with comparison, contrast and a concrete case from the data the user actually has",
+      "Keeps the user's conclusion unchanged"
+    ]
+  }
+]

@@ -1,5 +1,5 @@
 ---
-description: Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.
+description: 'Static health checks for this repo: dist/ freshness, install targets, skill counts, action SHA pins, CI gate, external lock, subprocess env=. Use when changing skills, install/build/workflows, or for a repo health check.'
 ---
 
 # Setup Guardian
@@ -15,7 +15,7 @@ skills, `install.sh`, `scripts/`, or `.github/workflows/`.
 1. **Run the doctor and read the report.**
 
    ```
-   python3 skills/setup-guardian/_setup-guardian/scripts/doctor.py
+   python3 skills/setup-guardian/scripts/doctor.py
    ```
 
    Human lines per check: `[PASS|WARN|FAIL] <name>: <message>`, with a
@@ -31,7 +31,7 @@ skills, `install.sh`, `scripts/`, or `.github/workflows/`.
    fix, because each needs a human decision.
 
    ```
-   python3 skills/setup-guardian/_setup-guardian/scripts/doctor.py --fix
+   python3 skills/setup-guardian/scripts/doctor.py --fix
    ```
 
    After a fix run, re-run the doctor and confirm `fixed=True` paths
@@ -44,7 +44,7 @@ skills, `install.sh`, `scripts/`, or `.github/workflows/`.
    your checkout):
 
    ```
-   0 9 * * * /usr/bin/python3 /path/to/agentkit/skills/setup-guardian/_setup-guardian/scripts/doctor.py --watch >> /var/log/agentkit-doctor.log 2>&1
+   0 9 * * * /usr/bin/python3 /path/to/agentkit/skills/setup-guardian/scripts/doctor.py --watch >> /var/log/agentkit-doctor.log 2>&1
    ```
 
 4. **Stale third-party pins (report only).**

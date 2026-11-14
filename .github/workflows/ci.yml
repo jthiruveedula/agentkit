@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # release.yml dispatches CI on the release PR branch: PRs opened with the
+  # default GITHUB_TOKEN do not trigger pull_request runs.
+  workflow_dispatch:
 
 # Cancel superseded runs for the same workflow/ref (e.g. rapid pushes to a PR).
 concurrency:
@@ -38,7 +41,7 @@ jobs:
           cache: pip
 
       - name: Install test dependencies
-        run: python -m pip install --quiet pytest pytest-cov
+        run: python -m pip install --quiet pytest pytest-cov pyyaml
 
       - name: Validate skill frontmatter/links/secrets
         run: python scripts/validate.py
@@ -167,13 +170,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: ${{ matrix.language }}
           build-mode: none
           config-file: ./.github/codeql/codeql-config.yml
 
-      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: /language:${{ matrix.language }}
 
@@ -236,10 +239,17 @@ jobs:
         run: |
           python -m pip install --quiet -e ".[dev]"
           python -m pytest -q
+          # viz extra (umap) is optional; exercise project2d's UMAP path and the golden pin too
+          python -m pip install --quiet -e ".[dev,viz]"
+          python -m pytest -q tests/test_ml.py tests/test_golden.py
 
       - name: Install dashboard dependencies
         working-directory: packages/prompt-analytics/dashboard
         run: npm ci --ignore-scripts
+
+      - name: Audit dashboard dependencies
+        working-directory: packages/prompt-analytics/dashboard
+        run: npm audit --audit-level=high
 
       - name: Typecheck, unit tests, contrast
         working-directory: packages/prompt-analytics/dashboard

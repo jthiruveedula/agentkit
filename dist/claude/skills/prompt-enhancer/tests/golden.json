@@ -141,5 +141,27 @@
     "id": "ambiguous-mixed",
     "prompt": "can you help improve this",
     "expect_intent": "ambiguous"
+  },
+  {
+    "id": "review-fleet-fix",
+    "prompt": "review the whole agentkit repo with an agent fleet, investigate gaps, fix them and build improvements",
+    "expect_intent": "review"
+  },
+  {
+    "id": "review-audit-sec",
+    "prompt": "audit the codebase for security gaps",
+    "expect_intent": "review"
+  },
+  {
+    "id": "debug-still-debug",
+    "prompt": "fix the 500 error, here is the stack trace",
+    "expect_intent": "debug",
+    "expect_band": "high"
+  },
+  {
+    "id": "lone-weak-not-high",
+    "prompt": "please tidy this",
+    "expect_intent": "refactor",
+    "expect_band": "medium"
   }
 ]

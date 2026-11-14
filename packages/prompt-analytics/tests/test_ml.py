@@ -6,6 +6,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import polars as pl
+import pytest
 
 from prompt_analytics.analytics import funnel
 from prompt_analytics.ml import anomaly, friction, intent, quality, topics, whatworks
@@ -309,3 +310,11 @@ def test_annotate_adds_uplift_and_holdout():
     whatworks.annotate(ww, pc, sf)
     assert ww[0]["uplift"]["strata"] == 1 and ww[0]["uplift"]["pts"] > 20
     assert ww[0]["holdout"] == {"held": True, "weeks": 3}
+
+
+def test_project2d_umap_is_seeded():
+    pytest.importorskip("umap")  # viz extra; CI installs it
+    E = np.random.default_rng(0).normal(size=(40, 8)).astype(np.float32)
+    a = topics.project2d(E)
+    assert a.shape == (40, 2) and np.isfinite(a).all()
+    assert np.allclose(a, topics.project2d(E))

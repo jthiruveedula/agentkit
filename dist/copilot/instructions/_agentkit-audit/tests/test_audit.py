@@ -226,3 +226,13 @@ def test_repo_test_loading_skill_scripts_counts(tmp_path):
         'P = ROOT / "skills" / "foo" / "scripts" / "x.py"\n'
     )
     assert "srs.tests" not in _heur(audit.audit(root))
+
+
+def test_whole_file_flag_only_for_instructions(tmp_path):
+    prose = "sloplint grades whole files, so run the linter before editing\n"
+    assert "cri.whole_file" not in _heur(audit.audit(_mk(tmp_path, prose)))
+
+
+def test_whole_file_flag_still_fires_on_instruction(tmp_path):
+    r = audit.audit(_mk(tmp_path, "Read the whole file.\n"))
+    assert "cri.whole_file" in _heur(r)
