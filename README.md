@@ -433,6 +433,8 @@ frontmatter (`site/scripts/build-catalog.py` → `site/assets/skills.json`). Red
 no-JS visitors get the same plates as a static printed manual. Deploys via GitHub Pages when a
 release is published. The [audit dashboard](https://jthiruveedula.github.io/agentkit/audit/)
 shows live repo scores from the `agentkit-audit` skill (`skills/agentkit-audit/scripts/audit.py`).
+The social card `site/assets/og.png` is rendered from the hero by `bash site/scripts/build-og.sh`
+(local headless Chrome, Chromium or Edge); rerun it after adding or removing skills.
 
 ## Security
 
