@@ -55,7 +55,7 @@ describe("mind map sunburst", () => {
     expect(few.length).toBeGreaterThan(0);
     for (const a of few) expect(s.querySelector(`.sb-edge[data-edge="${a.dataset.id}"]`)).toBeNull();
     expect(hub(s).textContent).toMatch(/\d+% (of [\d,]+ )?struggled/);   // the short form on a small hub (jsdom: R 188)
-    expect(s.querySelector(".k-heat")?.textContent).toContain("15+ sessions");
+    expect(s.querySelector(".k-heat")?.getAttribute("title")).toContain("15+ sessions");
   });
   it("pointer focus does not select; a double-click applies the node its first click picked", () => {
     const s = mount(), cursor = item(s, "root/cursor");
@@ -170,7 +170,7 @@ describe("mind map sunburst", () => {
     expect(s.querySelectorAll(".mm-hots .chip").length).toBeGreaterThan(0);
     expect(s.querySelectorAll(".sb-call").length).toBe(s.querySelectorAll(".mm-hots .chip").length);
     expect(s.querySelector(".sb-call .sb-rank")?.textContent).toBe("1");
-    for (const c of s.querySelectorAll(".sb-call")) expect(c.textContent).toMatch(/[\d,]+ of [\d,]+ sessions here|[\d,]+\/[\d,]+ sessions/);
+    for (const c of s.querySelectorAll(".mm-hots .mm-note")) expect(c.textContent).toMatch(/[\d,]+ of [\d,]+ sessions here/);   // the names and counts live in the inspector's rows
     expect(s.querySelectorAll(".sb-call .sb-hit")).toHaveLength(s.querySelectorAll(".sb-call").length);
     // the chip row stays short (share and friction; the lede names the basis), the chip's name keeps the count
     expect(s.querySelector(".mm-hots > .muted")!.textContent).toBe("Hotspots by cost × friction (% of sessions):");
@@ -191,7 +191,7 @@ describe("mind map sunburst", () => {
   it("narrow cards (375px) get the indented list instead", () => {
     const real = HTMLElement.prototype.getBoundingClientRect;
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
-      return this.classList.contains("mm") ? ({ width: 343, height: 600, top: 0, left: 0, right: 343, bottom: 600, x: 0, y: 0, toJSON() {} } as DOMRect) : real.call(this);
+      return this.classList.contains("mm-wrap") ? ({ width: 343, height: 600, top: 0, left: 0, right: 343, bottom: 600, x: 0, y: 0, toJSON() {} } as DOMRect) : real.call(this);
     });
     const s = mount();
     expect(tree(s)).toBeNull();
@@ -210,5 +210,33 @@ describe("mind map sunburst", () => {
     const was = row.getAttribute("aria-expanded");
     click(row);
     expect(row.getAttribute("aria-expanded")).toBe(was === "true" ? "false" : "true");
+  });
+  it("the inspector previews the arc under the pointer and returns to the selection on leave", () => {
+    const s = mount(), side = s.querySelector(".mm-side")!, name = () => side.querySelector(".mm-nm")!.textContent;
+    expect(name()).toBe("Your AI work");
+    const e = new PointerEvent("pointermove", { bubbles: true });
+    Object.defineProperties(e, { movementX: { value: 2 }, movementY: { value: 0 } });
+    act(() => { item(s, "root/cursor").dispatchEvent(e); });
+    expect(name()).toBe("Cursor");
+    expect(side.querySelector(".mm-prev")).not.toBeNull();
+    act(() => { tree(s).dispatchEvent(new PointerEvent("pointerout", { bubbles: true })); });
+    expect(name()).toBe("Your AI work");
+  });
+  it("hovering or focusing a hotspot row highlights exactly one arc; blur clears it", () => {
+    const s = mount(), chip = s.querySelector<HTMLButtonElement>(".mm-hots .chip")!;
+    expect(s.querySelectorAll(".sb-arc[data-hi]")).toHaveLength(0);
+    act(() => chip.focus());
+    expect(s.querySelectorAll(".sb-arc[data-hi]")).toHaveLength(1);
+    expect(s.querySelector(".mm-prev")).not.toBeNull();
+    act(() => chip.blur());
+    expect(s.querySelectorAll(".sb-arc[data-hi]")).toHaveLength(0);
+  });
+  it("Keys help sits in a closed disclosure that the tree still points at", () => {
+    const s = mount(), d = s.querySelector<HTMLDetailsElement>("details.mm-keys-d")!;
+    expect(d.open).toBe(false);
+    expect(d.querySelector("summary")!.textContent).toBe("Keys");
+    expect(d.querySelector(`#${CSS.escape(tree(s).getAttribute("aria-describedby")!)}`)).not.toBeNull();
+    act(() => { d.open = true; });
+    expect(d.open).toBe(true);
   });
 });

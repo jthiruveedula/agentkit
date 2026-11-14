@@ -313,7 +313,7 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 .mm-hots .chip { gap: 6px; height: auto; min-height: 24px; white-space: normal; text-align: left; }
 .chip .meta { margin-left: 6px; }
 .mm-acts { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
-.mm { position: relative; height: clamp(420px, 61vh, 640px); border-radius: var(--r2); background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.mm { position: relative; height: clamp(400px, 56vh, 560px); border-radius: var(--r2); overflow: hidden; }
 .mm:has(.mm-list) { height: auto; max-height: none; overflow: visible; }
 .mm-list { display: grid; gap: 2px; padding: var(--s1); }
 .mm-list li { display: flex; align-items: center; gap: var(--s1); min-width: 0; }
