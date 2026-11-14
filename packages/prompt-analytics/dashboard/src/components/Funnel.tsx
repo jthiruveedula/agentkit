@@ -69,8 +69,9 @@ function NetValue() {
   const { v, f, drill } = useStore();
   const rows = useMemo(() => netValue(v.rows), [v.rows]);
   if (rows.length === 0) return null;
+  const dear = rows.filter((r) => r.cpa !== null).reduce<(typeof rows)[number] | null>((a, b) => (!a || (b.cpa as number) > (a.cpa as number) ? b : a), null);
   return (
-    <Card src={`sessions by intent \u00b7 n ${fmtInt(rows.reduce((a, r) => a + r.n, 0))}`} title="Net value per intent" meta="cost per applied change counts priced sessions only; cheapest first" span={12}>
+    <Card so={dear ? <>{dear.intent} is dearest: <b>{fmtUSD(dear.cpa as number)}</b> per applied change.</> : "Nothing flagged in this window."} thin={!dear} src={`sessions by intent \u00b7 n ${fmtInt(rows.reduce((a, r) => a + r.n, 0))}`} title="Net value per intent" meta="cost per applied change counts priced sessions only; cheapest first" span={12}>
       <div className="tbl-wrap"><table className="tbl nv">
         <thead><tr><th scope="col">Intent</th><th scope="col" className="n">Sessions</th><th scope="col" className="n">Applied</th><th scope="col" className="n">Cost per applied</th><th scope="col" className="n">Median prompts</th></tr></thead>
         <tbody>{rows.map((r) => (
@@ -94,8 +95,10 @@ function Switches() {
   const get = (a: string, b: string) => d.tool_switch.find((t) => t.from === a && t.to === b)?.count ?? 0;
   const peak = Math.max(...d.tool_switch.map((t) => t.count), 1);
   const { group, mark } = useRoving(srcs.length * srcs.length, 1, Math.max(1, srcs.length));
+  const moves = d.tool_switch.filter((t) => t.from !== t.to && srcs.includes(t.from) && srcs.includes(t.to));
+  const topMove = moves.reduce<(typeof moves)[number] | null>((a, b) => (!a || b.count > a.count ? b : a), null);
   return (
-    <Card src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
+    <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch \u00b7 all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={6}>
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
           <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
@@ -126,9 +129,12 @@ export function Funnel() {
   const [want, setBy] = useState<By>("all");
   const by: By = want === "tool" && !caps.multiTool ? "intent" : want;   // one tool: break down by intent instead
   const switches = caps.multiTool && d.tool_switch.some((t) => t.from !== t.to && caps.sources.includes(t.from) && caps.sources.includes(t.to));
+  const drops = STAGES.slice(0, -1).map((s, i) => ({ s, to: STAGES[i + 1], lost: (v.funnel[i] ?? 0) - (v.funnel[i + 1] ?? 0) }));
+  const big = drops.reduce((a, b) => (b.lost > a.lost ? b : a), drops[0]), top = v.funnel[0] ?? 0;
+  const so = top > 0 && big.lost > 0 ? <>Biggest drop is {big.s.toLowerCase()} to {big.to.toLowerCase()}: <b>{Math.round((big.lost / top) * 100)}%</b> of sessions stop there.</> : "Nothing flagged in this window.";
   return (
     <Section id="s-funnel" title="Funnel" q="Where do sessions stop?">
-      <Card src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0] ?? 0)}`} title="Session to resolved" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 6 : 12}
+      <Card so={so} thin={!(top > 0 && big.lost > 0)} src={`funnel.stages \u00b7 n ${fmtInt(v.funnel[0] ?? 0)}`} title="Session to resolved" meta={d.engine.methods.funnel ?? "sessions reaching each stage"} span={switches ? 6 : 12}
         actions={<Segmented label="Break funnel down by" value={by} onChange={setBy} options={[{ id: "all", text: "All" }, ...(caps.multiTool ? [{ id: "tool" as const, text: "Tool" }] : []), { id: "intent", text: "Intent" }]} />}>
         {by === "all" ? <Stages /> : <Minis by={by} />}
         <DataTable caption="Funnel stages" head={["Stage", "Sessions"]} rows={STAGES.map((s, i) => [s, v.funnel[i] ?? 0])} />

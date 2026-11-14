@@ -9,6 +9,7 @@ import { buildTree, hotspots, ROOT_ID, type Hotspot, visible, type MapMetric, ty
 import { BASIS_NOTE, projectKey } from "../lib/share";
 import { EDGE_OVER, edgeOf, focusOf, partition, struggleNote } from "../lib/sunburst";
 import { MIN_N, ROUTER_MIN_N } from "../lib/thresholds";
+import { struggled } from "../lib/metrics";
 import { fmtCompact, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { intentColor, srcColor, srcLabel } from "../lib/palette";
 import { useSize } from "../lib/hooks";
@@ -141,11 +142,15 @@ export function MindMap() {
   const announce = inTree ? "" : `${nameOf(sel.node)}, ${sel.node.kind}, ${amount(sel.node)}, friction ${sel.node.friction.toFixed(2)}. ${sel.node.children.length ? (open.has(curId) ? "Expanded" : "Collapsed") : "No children"}. Level ${sel.depth + 1}.`;
   const avg = root.struggled;
 
-  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
+  const hit = v.rows.filter(struggled), byProj = new Map<string, number>();
+  for (const r of hit) byProj.set(r.project, (byProj.get(r.project) ?? 0) + 1);
+  const hotP = [...byProj].sort((a, b) => b[1] - a[1])[0];
+  const so = hotP ? <>{hotP[0]} is the hotspot: <b>{Math.round((hotP[1] / hit.length) * 100)}%</b> of struggled sessions.</> : <>Nothing flagged in this window.</>;
+  if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card so="Nothing flagged in this window." thin title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
 
   return (
     <Section id="s-map" title="Mind map" q="How does your AI work branch?">
-      <Card title="How your work connects" src={`sessions graph · n ${fmtInt(v.rows.length)}`} meta={narrow ? "tool, intent, project, session" : "tool, intent, project, session. Click to open and zoom, double-click to filter"} span={12}
+      <Card so={so} thin={!hotP} title="How your work connects" src={`sessions graph · n ${fmtInt(v.rows.length)}`} meta={narrow ? "tool, intent, project, session" : "tool, intent, project, session. Click to open and zoom, double-click to filter"} span={12}
         actions={<Segmented label="Size nodes by" value={metric} onChange={setMetric} options={[{ id: "sessions" as const, text: "Sessions" }, { id: "prompts" as const, text: "Prompts" }, ...(hasCost ? [{ id: "cost" as const, text: "Cost" }] : [])]} />}>
         <div className="mm-bar">
           <nav className="mm-path" aria-label="Expanded path">

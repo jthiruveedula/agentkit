@@ -66,18 +66,17 @@ export function Repeats() {
   const { xs: rows, spend } = data;
   if (d.repeats === undefined || d.sessions.length === 0) return null;
   const shown = all ? rows : rows.slice(0, SHOW);
+  const top = rows.reduce<(typeof rows)[number] | null>((a, b) => (!a || b.r.count > a.r.count ? b : a), null);
+  const words = top ? top.r.exemplar.trim().split(/\s+/) : [];
+  const so = top ? <>You typed &ldquo;{words.slice(0, 5).join(" ")}{words.length > 5 ? "..." : ""}&rdquo; <b>{fmtInt(top.r.count)}</b> times: make it a slash command.</> : <>Nothing flagged in this window.</>;
   return (
-    <Card title="Repeated prompts" meta="ignores filters" span={12}
+    <Card so={so} thin={!top} title="Repeated prompts" meta="ignores filters" span={12}
       actions={<><span className="chip">Whole export</span>{rows.length > 1 && <Segmented quiet label="Sort repeated prompts" value={sort} onChange={setSort} options={[{ id: "count", text: "Most typed" }, { id: "cost", text: "Most spend" }]} />}</>}>
       {rows.length === 0 ? <p className="note">No prompt came up three or more times across sessions. Nothing to turn into a command yet.</p> : (
         <>
-          <p className="rep-sum">{spend.cost !== null
-            ? <><b>Repeated prompts cost {fmtUSD(spend.cost)}</b> across {fmtInt(spend.sessions)} session{spend.sessions === 1 ? "" : "s"}{spend.priced < spend.sessions ? ` (${fmtInt(spend.priced)} priced)` : ""}.</>
-            : <><b>Repeated prompts used ~{fmtCompact(spend.tokens)} tokens</b> across {fmtInt(spend.sessions)} session{spend.sessions === 1 ? "" : "s"}.</>}
-            {spend.top && rows.length > 1 ? <> Costliest: <q>{spend.top.r.exemplar}</q>, {spend.cost !== null ? fmtUSD(spend.top.cost ?? 0) : `~${fmtCompact(spend.top.tokens)} tokens`}.</> : null}</p>
           <ul className="reps">{shown.map((x) => <Row key={x.r.cluster + x.r.exemplar} {...x} />)}</ul>
           {rows.length > SHOW && <button type="button" className="link rep-more" aria-expanded={all} onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show ${rows.length - SHOW} more`}</button>}
-          <p className="note">Drafts are checked for secrets before they can be copied or downloaded. Cost is the whole of those sessions, not only the repeated prompt.</p>
+          <p className="note">{spend.cost !== null ? `Together they cost ${fmtUSD(spend.cost)} across ${fmtInt(spend.sessions)} sessions.` : `Together they used ~${fmtCompact(spend.tokens)} tokens across ${fmtInt(spend.sessions)} sessions.`} Drafts are checked for secrets before they can be copied or downloaded. Cost is the whole of those sessions, not only the repeated prompt.</p>
         </>
       )}
     </Card>

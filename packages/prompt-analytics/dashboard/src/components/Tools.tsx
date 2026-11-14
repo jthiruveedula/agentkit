@@ -20,6 +20,16 @@ const COLS: { id: Col; text: string; hide?: boolean }[] = [
   { id: "cpa", text: "$ / applied", hide: true }, { id: "applied", text: "Applied" }, { id: "friction", text: "Friction" }, { id: "ttr", text: "Median TTR", hide: true },
 ];
 
+type Src = ReturnType<typeof useStore>["v"]["sources"][number];
+const resolvedOf = (sources: Src[]) => sources.filter((t) => t.asked > 0).map((t) => ({ k: t.key, p: t.applied / t.asked, n: t.asked })).sort((a, b) => b.p - a.p);
+/** One-line finding for the scorecard: the tool with the best resolved rate among those with enough sessions. */
+function scoreSo(sources: Src[]) {
+  const ok = resolvedOf(sources).filter((x) => x.n >= MIN_N);
+  if (ok.length) return { so: <>{srcLabel(ok[0].k)} leads on resolved rate: <b>{fmtPct(ok[0].p)}</b>.</>, thin: false };
+  const most = Math.max(0, ...sources.map((t) => t.asked));
+  return { so: <>Not enough sessions yet: {fmtInt(most)} of {MIN_N} needed.</>, thin: true };
+}
+
 function Scorecard() {
   const { d, v, f, win, drill, caps } = useStore();
   const cols = COLS.filter((c) => (caps.hasCost || (c.id !== "cost" && c.id !== "cpa")) && (caps.hasTtr || c.id !== "ttr"));
@@ -88,12 +98,12 @@ function Router() {
   const filterOf = (s: string, i: string) => (byProject ? { project: s === NO_PROJECT ? "" : s, intent: i as never } : { source: s as never, intent: i as never });
   const title = byProject ? "Where each kind of change lands" : pair ? `${pair}, by intent` : "Tool router";
   const meta = byProject ? `applied rate by intent and project in your ${caps.names} sessions${v.projects.length > PROJECT_COLS ? `, top ${PROJECT_COLS} projects` : ""}` : "applied rate by tool and intent, cross-filtered";
+  const lead = best[0];
+  const so = lead ? <>{lead.i} lands best in {colName(lead.c.source)}: <b>{fmtPct(lead.c.rate)}</b>.</> : <>No clear winner yet: no {what} stands out for any intent.</>;
   return (
-    <Card src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
+    <Card so={so} thin={!lead} src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
       {srcs.length === 0 || ints.length === 0 ? <Empty /> : (
         <>
-          <p className="rt-best">{best.length ? <>{byProject ? "Lands best in" : pair ? "Clear edge" : "Best tool"}: {best.map(({ i, c }, k) => <span key={i}>{k > 0 && "; "}<b>{i}</b> {colName(c.source)} {fmtPct(c.rate)}</span>)}.</>
-            : <>No clear winner yet: no {what}'s lower bound beats the runner-up for any intent{srcs.length < 2 ? ` (needs two ${what}s with ${ROUTER_MIN_N}+ sessions)` : ""}.</>}</p>
           <div className="mx rt" role="group" aria-label={`Applied rate by ${what} and intent. Each cell filters that pair`} style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
             <span />{srcs.map((s) => <span key={s} className="mx-h" title={colName(s)}>{colName(s)}</span>)}
             {ints.map((i, r) => (
@@ -134,20 +144,24 @@ function ByTool() {
   });
   const low = (n: number) => (n < MIN_N ? " \u00b7 low n" : "");
   const priced = rows.filter((x) => x.t.cost !== null);
+  const res = resolvedOf(v.sources), pricedRows = rows.filter((x) => x.c.value !== null), cheap = pricedRows.reduce<(typeof rows)[number] | null>((a, b) => (!a || (b.c.value as number) < (a.c.value as number) ? b : a), null);
+  const strug = rows.filter((x) => x.s.n > 0 && x.s.p !== null).reduce<(typeof rows)[number] | null>((a, b) => (!a || (b.s.p as number) > (a.s.p as number) ? b : a), null);
+  const gap = res.length > 1 ? Math.round((res[0].p - res[res.length - 1].p) * 100) : 0;
+  const soRes = res.length ? <>{srcLabel(res[0].k)} resolves <b>{fmtPct(res[0].p)}</b>{res.length > 1 ? <>, {gap} pts ahead of {srcLabel(res[res.length - 1].k)}</> : null}.</> : "Nothing flagged in this window.";
   return (
     <>
-      <Card src={`sessions.outcome \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.t.asked, 0))}`} title="Resolved rate" meta="share of sessions resolved" span={12}>
+      <Card so={soRes} thin={!res.length} src={`sessions.outcome \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.t.asked, 0))}`} title="Resolved rate" meta="share of sessions resolved" span={12}>
         <BarList label="Resolved rate by tool. Each filters that tool" rows={rows.filter((x) => x.t.asked).map((x) => { const p = x.t.applied / x.t.asked;
           return row(x, p, fmtPct(p), `${x.t.applied} of ${x.t.asked}${low(x.t.asked)}`, `${fmtPct(p)} resolved of ${x.t.asked}`); })} />
       </Card>
       {caps.hasCost && (
-        <Card src={`cost_usd \u00f7 resolved \u00b7 n ${priced.reduce((a, x) => a + x.c.pricedApplied, 0)} priced`} title="Cost / resolved" meta="lower is better" span={6}>
+        <Card so={cheap ? <>{srcLabel(cheap.t.key)} is cheapest: <b>{fmtUSD(cheap.c.value as number)}</b> per resolved session.</> : "Nothing flagged in this window."} thin={!cheap} src={`cost_usd \u00f7 resolved \u00b7 n ${priced.reduce((a, x) => a + x.c.pricedApplied, 0)} priced`} title="Cost / resolved" meta="lower is better" span={6}>
           <BarList label="Cost per resolved session by tool. Each filters that tool" rows={rows.map((x) => { const c = x.c.value;
             return row(x, c ?? 0, c === null ? "\u2014" : fmtUSD(c), x.t.cost === null ? "no price" : `${x.c.pricedApplied} priced${low(x.c.pricedApplied)}`, c === null ? "no cost per resolved" : `${fmtUSD(c)} per resolved`); })} />
           {unpricedNote(caps) && <p className="note">{unpricedNote(caps)} Unpriced sessions are left out, not shown as $0.</p>}
         </Card>
       )}
-      <Card src={`friction.rates \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.s.n, 0))}`} title="Struggled by tool" meta="3+ retry loops or friction 0.5+" span={caps.hasCost ? 6 : 12}>
+      <Card so={strug ? <>{srcLabel(strug.t.key)} struggles most: <b>{fmtPct(strug.s.p as number)}</b> of sessions.</> : "Nothing flagged in this window."} thin={!strug} src={`friction.rates \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.s.n, 0))}`} title="Struggled by tool" meta="3+ retry loops or friction 0.5+" span={caps.hasCost ? 6 : 12}>
         <BarList label="Share of sessions that struggled, by tool. Each filters that tool" rows={rows.filter((x) => x.s.n).map((x) => ({ ...row(x, x.s.p ?? 0, fmtPct(x.s.p ?? 0, 1), `${x.s.k} / ${x.s.n}${low(x.s.n)}`, `${fmtPct(x.s.p ?? 0, 1)} struggled, ${x.s.k} of ${x.s.n}`), color: "var(--bad)" }))} />
       </Card>
     </>
@@ -155,7 +169,7 @@ function ByTool() {
 }
 
 export function Tools() {
-  const { caps, capsAll } = useStore();
+  const { caps, capsAll, v } = useStore();
   // One tool in the export: no scorecard ("1 of 1") or cost split; the router pivots to projects.
   // (Filtering a multi-tool export to one tool keeps the table so the row can be toggled off.)
   if (!capsAll.multiTool) return (
@@ -163,12 +177,13 @@ export function Tools() {
       <Router />
     </Section>
   );
+  const sc = scoreSo(v.sources);
   if (!caps.multiTool) {   // a multi-tool export filtered to one tool: never a "1 of 1" scorecard; the row clears the filter
     const one = caps.names || "this tool";
     return (
       <Section id="s-tools" title="Tools" q={`How does ${one} land your work?`}>
         {null /* keeps the scorecard mounted when a row filters to one tool */}
-        <Card src="totals.by_source" title={`Tool: ${one}, click to clear`} meta="filtered to one tool" span={12}><Scorecard /></Card>
+        <Card so={sc.so} thin={sc.thin} src="totals.by_source" title={`Tool: ${one}, click to clear`} meta="filtered to one tool" span={12}><Scorecard /></Card>
         <Router />
       </Section>
     );
@@ -177,7 +192,7 @@ export function Tools() {
   return (
     <Section id="s-tools" title="Tools" q={caps.hasCost ? (pair ? `${pair}: which earns its cost?` : "Which tool earns its cost?") : (pair ? `${pair}: which lands the work?` : "Which tool lands the work?")}>
       <ByTool />
-      <Card src="totals.by_source" title={pair ? `${pair}, side by side` : "Tool scorecard"} meta="click a row to filter" span={12}><Scorecard /></Card>
+      <Card so={sc.so} thin={sc.thin} src="totals.by_source" title={pair ? `${pair}, side by side` : "Tool scorecard"} meta="click a row to filter" span={12}><Scorecard /></Card>
       <Router />
       
     </Section>

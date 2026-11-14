@@ -16,9 +16,10 @@ const ICON: Record<string, [string, number]> = {
 export function Recommend() {
   const { d, apply } = useStore();
   const byId = new Map(d.insights.map((i) => [i.id, i]));
+  const first = d.recommendations[0];
   return (
     <Section id="s-recs" title="Recommendations" q="What should you change?">
-      <Card title="Do next, in order" src="insights + recommendations" meta="each cites the insight behind it. whole export, ignores filters" span={12}>
+      <Card so={first ? <>Start with {first.title.charAt(0).toLowerCase() + first.title.slice(1)}: worth about <b>{first.impact}</b>.</> : "Nothing flagged in this window."} thin={!first} title="Do next, in order" src="insights + recommendations" meta="each cites the insight behind it. whole export, ignores filters" span={12}>
         {d.recommendations.length === 0 ? <Empty>No recommendations yet</Empty> : (
           <ol className="todo">
             {d.recommendations.map((r, i) => {
