@@ -37,7 +37,7 @@ judging.
 
 | | |
 |---|---|
-| **42 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
+| **43 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
 | **4 tools, 1 source** | Each skill is one `SKILL.md`; `build.py` emits the Claude Code, Copilot, Cursor and Antigravity adapters. |
 | **Session costs you can see** | Live context budget with pause/resume, per-session spend audits, prompt analytics. |
 | **Private** | MIT licensed. No telemetry, no external calls beyond what you run yourself (`sync-external.sh`, `gh`, `npm`). |
@@ -163,7 +163,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 
 ## Skill catalog
 
-42 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
+43 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
 `skills/*/SKILL.md` on every `make build`.
 
 <details open>
