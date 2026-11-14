@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.25.0](https://github.com/jthiruveedula/agentkit/compare/v0.24.0...v0.25.0) (2026-11-14)
+
+
+### Features
+
+* add chart-design skill with deterministic chart picker and palette check ([#121](https://github.com/jthiruveedula/agentkit/issues/121)) ([4ebe792](https://github.com/jthiruveedula/agentkit/commit/4ebe792c64ca0b32cf802f46def762dd99f06051))
+* add data-storytelling skill with story_lint ([#122](https://github.com/jthiruveedula/agentkit/issues/122)) ([c947bca](https://github.com/jthiruveedula/agentkit/commit/c947bca5b93d6d3966f84b5ad50e0428b9989802))
+* add ext-archify router for code-derived architecture diagrams ([#119](https://github.com/jthiruveedula/agentkit/issues/119)) ([06763d3](https://github.com/jthiruveedula/agentkit/commit/06763d3bf8b6295f98c60b97d87cacfae017a1af))
+* add ext-slides router for HTML slide decks ([#118](https://github.com/jthiruveedula/agentkit/issues/118)) ([a6c4bb9](https://github.com/jthiruveedula/agentkit/commit/a6c4bb9bd63d8492444d122fb28f007031391dd0))
+* add humanizer skill with AI-tell detector and fact guard ([#120](https://github.com/jthiruveedula/agentkit/issues/120)) ([5a4e1a1](https://github.com/jthiruveedula/agentkit/commit/5a4e1a14785c515a98e6a0f6abd45d4b16bcfd1c))
+
+
+### Bug Fixes
+
+* harden build frontmatter, installer safety and intent classifier ([#113](https://github.com/jthiruveedula/agentkit/issues/113)) ([5d2aa28](https://github.com/jthiruveedula/agentkit/commit/5d2aa28553fc465aca22641739c7893a0c524f1b))
+
 ## [0.24.0](https://github.com/jthiruveedula/agentkit/compare/v0.23.0...v0.24.0) (2026-11-09)
 
 
