@@ -150,10 +150,7 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .hit { fill: transparent; cursor: pointer; }
 .hit:hover { fill: color-mix(in oklab, var(--accent) 10%, transparent); }
 .hit:focus-visible { outline: 2px solid var(--accent); }
-.sel-band { fill: var(--accent-soft); opacity: 0.8; pointer-events: none; }
 .brush { fill: var(--accent); opacity: 0.15; pointer-events: none; }
-.band { cursor: pointer; stroke: var(--surface); stroke-width: 1; }
-[data-sel] > .band:not([data-on]) { opacity: 0.35; }
 .bars { display: grid; gap: 2px; }
 .bar-row { display: grid; grid-template-columns: minmax(70px, 28%) minmax(0, 1fr) auto; align-items: center; gap: 0 var(--s2); width: 100%; min-height: 28px; padding: 2px var(--s1); border-radius: var(--r1); }
 .bar-row:hover:not(:disabled) { background: var(--sunk); }
@@ -222,9 +219,6 @@ button.cell:hover { box-shadow: 0 0 0 1px var(--ink); }
 .dot { position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--c); border: 2px solid var(--surface); }
 button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-index: 2; }
 [data-sel] .dot:not([data-on]) { opacity: 0.35; }
-.outl li button { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--s2); width: 100%; min-height: 28px; padding: 2px var(--s1); border-radius: var(--r1); }
-.outl li button:hover { background: var(--sunk); }
-.ol-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .forest { display: grid; gap: 2px; }
 .fr { display: grid; grid-template-columns: minmax(90px, 34%) minmax(0, 1fr) 68px; align-items: center; gap: var(--s2); width: 100%; min-height: 34px; padding: 2px var(--s1); border-radius: var(--r1); }
 .fr:hover { background: var(--sunk); }
@@ -382,7 +376,7 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 
 /* ---- motion: only transform / opacity / stroke-dashoffset; every rule below is gated on prefers-reduced-motion (and html.fx, set only in real browsers) ---- */
 @media (prefers-reduced-motion: no-preference) {
-  .bar-t i, .col i, .dot, .band, .bar-row, .mini, .fr { transition: opacity 300ms ease, background-color 300ms ease; }
+  .bar-t i, .col i, .dot, .bar-row, .mini, .fr { transition: opacity 300ms ease, background-color 300ms ease; }
   .bar-t i { transition: opacity 300ms ease, --w 320ms cubic-bezier(.2, .7, .2, 1); }
   .col i { transition: opacity 300ms ease, height 320ms cubic-bezier(.2, .7, .2, 1); }
   .cell { transition: --v 320ms ease, background-color 200ms, opacity 200ms, box-shadow 160ms, translate 460ms cubic-bezier(.2, .8, .2, 1.1), transform 200ms cubic-bezier(.2, .8, .2, 1); }
@@ -486,8 +480,6 @@ span.play-copy { font-style: italic; }
 .lb-bet { fill: var(--ink); }
 .lb-na { font-style: italic; }
 .col { position: relative; }
-.col-pk { position: absolute; left: 50%; translate: -50% 0; bottom: calc(100% + 2px); font-size: 12px; line-height: 14px; font-weight: 600; color: var(--ink); white-space: nowrap; }
-.cols:has(.col-pk) { margin-top: 18px; }
 
 /* sessions table: pager, density, export menu */
 .pager { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); padding-top: var(--s3); }
@@ -592,11 +584,10 @@ td[data-low] { color: var(--muted); }
 
 /* ---- 6b: linked hover, chart-type switch, tilt / lift / glow, ripple, tooltip. Dimming is never the only cue: the highlighted mark is outlined too. ---- */
 [data-hl] > .bar-row, [data-hl].mini, .mini[data-hl], .tbl tr[data-hl] > th, button.col[data-hl], .col[data-hl] { outline: 2px solid var(--accent); outline-offset: -2px; }
-g[data-hl] > .band { stroke: var(--ink); stroke-width: 2; }
 g[data-hl] > .hit { fill: color-mix(in oklab, var(--accent) 14%, transparent); stroke: var(--accent); stroke-width: 1.5; }
-.bars > li[data-dim], .mini[data-dim], .tbl tr[data-dim], .col[data-dim], g[data-dim] > .band { opacity: 0.4; }
+.bars > li[data-dim], .mini[data-dim], .tbl tr[data-dim], .col[data-dim] { opacity: 0.4; }
 @media (prefers-reduced-motion: no-preference) {
-  .bars > li, .mini, .tbl tr, .col, .band { transition: opacity 180ms ease; }
+  .bars > li, .mini, .tbl tr, .col { transition: opacity 180ms ease; }
   .fx .card { transition: translate 160ms ease, transform 160ms ease-out, box-shadow 200ms ease; }
   .fx .kpi[data-tilt] { transform: perspective(900px) translateY(-2px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); box-shadow: 0 10px 28px -12px color-mix(in oklab, var(--accent) 38%, transparent), var(--shadow); }
   .fx .kpi { transition: transform 160ms ease-out, box-shadow 200ms ease, border-color 120ms; }
@@ -628,9 +619,6 @@ g[data-hl] > .hit { fill: color-mix(in oklab, var(--accent) 14%, transparent); s
 }
 
 
-.wk-strip { fill: transparent; stroke: none; cursor: pointer; }   /* a hover target, not a row of empty boxes */
-.wk-strip:hover, g[data-hl] > .wk-strip, .wk-strip[data-on] { fill: var(--accent); stroke: var(--accent); }
-g[data-dim] > .wk-strip { opacity: 0.5; }
 
 .hw .cell[data-neutral] { background: color-mix(in oklab, var(--muted) 14%, var(--sunk)); }
 

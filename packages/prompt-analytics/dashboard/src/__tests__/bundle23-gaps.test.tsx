@@ -119,15 +119,3 @@ describe("no-gain card", () => {
     expect(h).toContain("applied no more often");
   });
 });
-
-describe("Friction distribution labels", () => {
-  const dist = (f: number) => render(<Friction />, Array.from({ length: 12 }, () => sess({ friction: f })));
-  const rules = (h: string) => [...h.matchAll(/<i [^>]*class="q-rule"[^>]*>/g)].map((m) => m[0]);
-  it("flips to the end side only when the value is above 0.5", () => {
-    const lo = rules(dist(0.2)), hi = rules(dist(0.8));
-    expect(lo).toHaveLength(2); expect(hi).toHaveLength(2);
-    expect(lo.every((r) => !r.includes("data-end"))).toBe(true);
-    expect(hi.every((r) => r.includes('data-end="true"'))).toBe(true);
-    expect(rules(dist(0.5)).some((r) => r.includes("data-end"))).toBe(false);   // boundary: 0.5 is not > 0.5
-  });
-});

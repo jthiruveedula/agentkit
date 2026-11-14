@@ -1,15 +1,5 @@
 /* Bundle 3: section polish and insights (Friction rules, Funnel net value, What works gap chart and no-gain columns, Repeats spend). Light only, no animation. */
 
-/* median / p90 rules over the friction histogram: the Dumb median look (muted dashed rule, upright 11px label, no box).
-   Labels are staggered by row (median above, p90 one row lower; the p90 rule starts under the median label), each on the
-   roomier side of its rule; a halo keeps a label legible where the other rule passes behind it. */
-.q-plot { position: relative; padding-top: 36px; }
-.q-rule { position: absolute; top: 4px; bottom: 0; width: 0; border-left: 1px dashed color-mix(in oklab, var(--ink) 45%, transparent); pointer-events: none; font-style: normal; }
-.q-rule span { position: absolute; z-index: 1; top: -4px; left: 4px; font-size: 11px; line-height: 14px; color: var(--muted); white-space: nowrap;
-  text-shadow: 0 0 2px var(--surface), 0 0 2px var(--surface), 0 0 3px var(--surface); }
-.q-rule[data-row] { top: 20px; } .q-rule[data-row] span { top: -4px; }
-.q-rule[data-end] span { left: auto; right: 4px; }
-
 /* What works: you-vs-top gap rows reuse the dumbbell (.db) look; axis names come lowercase from the export */
 .gap-l { text-transform: capitalize; }
 
