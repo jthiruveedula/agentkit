@@ -27,7 +27,7 @@ function Habits({ r }: { r: SessionRow }) {
   );
 }
 
-export function Detail({ id }: { id: string }) {
+function Detail({ id }: { id: string }) {
   const { d, v, openSession, clusterLabel } = useStore();
   const r = useMemo(() => d.sessions.find((x) => x.id === id), [d.sessions, id]);
   if (!r) return <p className="empty">This session is not in the export.</p>;
