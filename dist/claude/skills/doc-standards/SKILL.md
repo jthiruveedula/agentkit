@@ -7,7 +7,7 @@ version: 0.1.0
 
 # Doc Standards
 
-A styling layer, not a document builder: it defines "professional" for the format-specific build skill.
+A styling layer, not a document builder: it defines "professional" for the format-specific build skill. For the words themselves (grammar, de-AI rewrite of prose or slide text) use `humanizer`.
 
 ## Procedure
 
