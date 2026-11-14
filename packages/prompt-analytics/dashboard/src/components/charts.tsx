@@ -2,12 +2,7 @@
 // and activates through the same callback a click does. Each chart is paired with an sr-only DataTable by its caller.
 import type React from "react";
 import { useId, useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
-import { press, useMorph, useRoving, useSize } from "../lib/hooks";
-import { linkProps } from "../lib/motion";
-import { fmtDate } from "../lib/format";
-import { SOURCES, srcColor, srcLabel } from "../lib/palette";
-import type { Week } from "../lib/filter";
-import { Empty } from "./ui";
+import { useMorph, useRoving, useSize } from "../lib/hooks";
 import { iqr } from "../lib/baseline";
 import "./baseline.css";
 
@@ -177,60 +172,6 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
               <title>{`${l}: ${target.map((s) => `${s.name} ${fmt(s.values[i] ?? 0)}`).join(" · ")}`}</title>
             </rect>
           ))}
-        </svg>
-      )}
-    </div>
-  );
-}
-
-/** Stacked weekly cost by tool. Click a band to filter the tool, a week to filter that week. Unpriced tools never draw ($0 is not "not priced"). */
-export function River({ weeks, sel, onBand, onWeek, activeWeek, fmt, label, height = 190 }: {
-  weeks: Week[]; sel?: string; onBand: (s: string) => void; onWeek: (i: number) => void; activeWeek?: (i: number) => boolean; fmt: (n: number) => string; label: string; height?: number;
-}) {
-  const srcs = SOURCES.filter((s) => weeks.some((w) => (w.bySource[s] ?? 0) > 0));
-  const n = weeks.length, m = srcs.length + n;
-  const { group, mark } = useRoving(m);
-  const { w } = useSize(group.ref as unknown as RefObject<HTMLElement>);
-  const mv = useMorph(srcs.flatMap((s) => weeks.map((x) => x.bySource[s] ?? 0)));
-  const ser = srcs.map((_, k) => mv.slice(k * n, (k + 1) * n));   // per-tool weekly values, morphing toward the data
-  const total = weeks.map((_, i) => ser.reduce((a, v) => a + (v[i] ?? 0), 0));
-  const max = Math.max(...total, 0) || 1;
-  const PAD = { ...padFor(max, fmt), b: 36 };   // room for the week strip under the plot
-  const iw = Math.max(1, w - PAD.l - PAD.r), ih = height - PAD.t - PAD.b;
-  const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
-  const y = (v: number) => PAD.t + (1 - v / max) * ih;
-  const step = n > 1 ? iw / (n - 1) : iw;
-  const base = weeks.map(() => 0);
-  const bands = srcs.map((s, k) => {
-    const lo = [...base], hi = weeks.map((_, i) => (base[i] += ser[k][i] ?? 0));
-    return { s, d: `M${hi.map((v, i) => `${x(i)},${y(v)}`).join("L")}L${lo.map((v, i) => `${x(i)},${y(v)}`).reverse().join("L")}Z` };
-  });
-  const ok = n >= 2 && srcs.length > 0;
-  return (
-    <div className="chart" ref={group.ref as never} onKeyDown={group.onKeyDown} style={{ height }}>
-      {!ok && <Empty>{srcs.length === 0 ? "No priced tool has sessions here" : "Needs at least two weeks of data"}</Empty>}
-      {ok && w > 0 && (
-        <svg width={w} height={height} role="group" aria-label={label}>
-          {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
-          <text className="ax" x={PAD.l} y={height - 6}>{fmtDate(weeks[0].week)}</text><text className="ax" x={w - PAD.r} y={height - 6} textAnchor="end">{fmtDate(weeks[n - 1].week)}</text>
-          {/* week columns sit under the bands: a band wins the pointer where it is drawn (tool), the column catches the empty space above it (week) */}
-          {weeks.map((wk, i) => (
-            <g key={wk.week} {...linkProps(`week:${wk.week}`)}><rect className="hit" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} role="button" aria-label={`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}. Filter to this week`}
-              {...mark(srcs.length + i)} {...press(() => onWeek(i))} /></g>
-          ))}
-          <g className="rise" data-sel={sel ? "1" : undefined}>
-            {bands.map((b, i) => (
-              <g key={b.s} {...linkProps(`tool:${b.s}`)}>
-                <path className="band" d={b.d} fill={srcColor(b.s)} data-on={sel === b.s || undefined} role="button" aria-label={`${srcLabel(b.s)} cost band. Filter to this tool`} aria-pressed={sel === b.s}
-                  {...mark(i)} {...press(() => onBand(b.s))}><title>{srcLabel(b.s)}</title></path>
-              </g>
-            ))}
-          </g>
-          {/* the strip is the mouse route to a week: the bands cover the columns, so each week also gets a thin target below the plot */}
-          {weeks.map((wk, i) => (
-            <g key={`s${wk.week}`} {...linkProps(`week:${wk.week}`)} aria-hidden="true"><rect className="wk-strip" data-on={activeWeek?.(i) || undefined} x={x(i) - Math.max(step, 2) / 2 + 1} y={PAD.t + ih + 4} width={Math.max(step - 2, 2)} height={10} rx={2} onClick={() => onWeek(i)}><title>{`Week of ${fmtDate(wk.week)}: ${fmt(total[i])}. Click to filter`}</title></rect></g>
-          ))}
-          {activeWeek && weeks.map((_, i) => (activeWeek(i) ? <rect key={i} className="sel-band" x={x(i) - step / 2} y={PAD.t} width={Math.max(step, 2)} height={ih} /> : null))}
         </svg>
       )}
     </div>

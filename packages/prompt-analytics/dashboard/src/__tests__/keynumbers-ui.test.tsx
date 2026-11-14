@@ -137,4 +137,16 @@ describe("Key numbers and usage mix", () => {
     expect(x.querySelector(".val")!.textContent).toBe(`${(Math.round((+m[1] / +m[2]) * 1000) / 10).toFixed(1)}%`);
     expect(x.querySelector(".val")!.textContent).not.toBe(m[3]);
   });
+
+  it("Retries by intent: friction summary line, and its button sorts Sessions by friction, descending", () => {
+    mount("#/s-friction");
+    const card = [...el.querySelectorAll(".card")].find((c) => c.querySelector("h3")?.textContent === "Retries by intent")!;
+    expect(card.textContent).toMatch(/Median session friction \d\.\d\d, p90 \d\.\d\d, n=\d+\./);
+    const btn = [...card.querySelectorAll("button")].find((b) => b.textContent === "Sort sessions by friction")!;
+    act(() => btn.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    expect(params().get("so")).toBe("friction-d");
+    const fr = [...el.querySelectorAll("#s-sessions tbody tr td.cx.num")].map((td) => td.textContent ?? "").filter((t) => /^\d\.\d\d$/.test(t)).map(Number);
+    expect(fr.length).toBeGreaterThan(1);
+    expect(fr).toEqual([...fr].sort((a, b) => b - a));
+  });
 });

@@ -5,12 +5,12 @@ import { addDays, weekStart } from "../lib/filter";
 import { bucketSeries, buckets, cumulative, median, METRICS, monthProjection } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { golden, GOLD_MIN_N } from "../lib/econ";
-import { SOURCES, srcColor, srcLabel } from "../lib/palette";
+import { srcLabel } from "../lib/palette";
 import { useRoving } from "../lib/hooks";
 import { billboard, clampPitch, fitScale, DEFAULT_VIEW, describeView, edgeFade, inertia, nearestYaw, viewTransform, wrapYaw, zoomAround } from "../lib/calorbit";
 import type { TCell } from "./Terrain";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
-import { LineChart, River } from "./charts";
+import { LineChart } from "./charts";
 import { tokensPerApplied } from "../lib/compare";
 import { unpricedNote } from "../lib/capabilities";
 import { ToolLogo } from "./Shell";
@@ -325,23 +325,6 @@ function HourWeek() {
   );
 }
 
-function Spend() {
-  const { v, f, drill, caps } = useStore();
-  const unpriced = SOURCES.filter((s) => v.sources.some((t) => t.key === s && t.cost === null));
-  const weeks = v.weeks;
-  return (
-    <Card src="cost_river \u00b7 priced only" title={caps.multiTool ? "Cost by tool, weekly" : "Cost, weekly"} meta={caps.multiTool ? "priced tools only" : `your ${caps.names} sessions`} span={7}>
-      <River weeks={weeks} sel={f.source} label="Weekly cost by tool. Click a band to filter a tool, a column to filter a week" fmt={fmtUSD} height={200}
-        onBand={(s) => drill({ source: s as never })} onWeek={(i) => drill({ from: weeks[i].week, to: addDays(weeks[i].week, 6) })} activeWeek={(i) => f.from === weeks[i].week} />
-      {caps.multiTool && <ul className="legend">
-        {SOURCES.filter((s) => weeks.some((w) => (w.bySource[s] ?? 0) > 0)).map((s) => <li key={s} style={{ "--c": srcColor(s) } as React.CSSProperties}>{srcLabel(s)}</li>)}
-        {unpriced.length > 0 && <li className="hatch">{unpriced.map(srcLabel).join(", ")}: not priced</li>}
-      </ul>}
-      <DataTable caption="Weekly cost by tool" head={["Week", ...SOURCES.map(srcLabel)]} rows={weeks.map((w) => [w.week, ...SOURCES.map((s) => +(w.bySource[s] ?? 0).toFixed(2))])} />
-    </Card>
-  );
-}
-
 function Cumulative() {
   const { v, prior, win, apply } = useStore();
   const bks = useMemo(() => buckets(win, 1), [win]);
@@ -351,7 +334,7 @@ function Cumulative() {
   const labels = bks.map((b) => fmtDate(b.from));
   const priced = cur.length > 0 && cur[cur.length - 1] > 0;
   return (
-    <Card src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={5}>
+    <Card src="cost_usd \u00b7 priced only" title="Cumulative cost" meta="this period against the previous one" span={12}>
       {!priced ? <Empty>No priced sessions in this period.</Empty> : (
         <>
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
@@ -389,7 +372,7 @@ export function Time() {
   const { caps } = useStore();
   return (
     <Section id="s-time" title="Time" q={caps.hasCost ? "When and how much?" : "When does the work happen?"}>
-      <Calendar /><HourWeek />{caps.hasCost ? <><Spend /><Cumulative /></> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
+      <Calendar /><HourWeek />{caps.hasCost ? <Cumulative /> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
     </Section>
   );
 }

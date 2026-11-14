@@ -124,17 +124,16 @@ export const pct = (n: number, total: number) => (total > 0 ? `${Math.round((n /
 
 export interface ColData { ent?: Ent; key: string; label: string; segs: { v: number; color: string }[]; active?: boolean; onClick?: () => void; aria: string }
 /** Vertical stacked columns, one button each (roving tabindex: one tab stop, arrows move). Heights are relative to the tallest column. */
-export function Cols({ cols, label, height, max, peak }: { cols: ColData[]; label: string; height?: number; max?: number; peak?: boolean }) {
+export function Cols({ cols, label, height, max }: { cols: ColData[]; label: string; height?: number; max?: number }) {
   const sums = cols.map((c) => c.segs.reduce((a, s) => a + s.v, 0));
-  const top = max ?? Math.max(...sums, 0), pk = peak && top > 0 ? sums.indexOf(Math.max(...sums)) : -1;
+  const top = max ?? Math.max(...sums, 0);
   const first = Math.max(0, cols.findIndex((c) => c.onClick));
   const { group, mark } = useRoving(cols.length, 1, 1, first);
   const sel = cols.some((c) => c.active);
   return (
     <div className="cols" role="group" aria-label={label} style={height ? { height } : undefined} data-sel={sel || undefined} {...group}>
       {cols.map((c, i) => {
-        const bars = [...c.segs.map((s, j) => (s.v > 0 ? <i key={j} style={{ height: `${top > 0 ? Math.max(2, (s.v / top) * 100) : 0}%`, "--c": s.color } as CSSProperties} /> : null)),
-          i === pk ? <b key="pk" className="col-pk" aria-hidden="true">{fmtInt(sums[i])}</b> : null];
+        const bars = c.segs.map((s, j) => (s.v > 0 ? <i key={j} style={{ height: `${top > 0 ? Math.max(2, (s.v / top) * 100) : 0}%`, "--c": s.color } as CSSProperties} /> : null));
         const lp = c.ent ? linkProps(c.ent) : null;
         // inert columns are plain divs: they may sit inside another button (funnel minis)
         return c.onClick
