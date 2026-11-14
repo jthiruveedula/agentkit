@@ -17,6 +17,7 @@
     { "name": "awesome-agent-skills", "repo": "VoltAgent/awesome-agent-skills",               "sha": "459d2421bdfe2f8111d291fff161926815939288", "license": "MIT",       "for": "gap discovery" },
     { "name": "security-audit",   "repo": "cloudflare/security-audit-skill",                 "sha": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8", "license": "MIT",       "for": "security review/audit" },
     { "name": "claude-seo",       "repo": "AgriciDaniel/claude-seo",                         "sha": "6be93f45064ffbadced572b5d5c95f55fd263af0", "license": "MIT",       "for": "seo for frontends/sites" },
-    { "name": "hallmark",         "repo": "nutlope/hallmark",                                "sha": "4f6a46c6dc325d40ab268c93e25c7b96676ebccd", "license": "MIT",       "for": "anti-AI-slop frontend design" }
+    { "name": "hallmark",         "repo": "nutlope/hallmark",                                "sha": "4f6a46c6dc325d40ab268c93e25c7b96676ebccd", "license": "MIT",       "for": "anti-AI-slop frontend design" },
+    { "name": "humanizer",        "repo": "blader/humanizer",                                "sha": "b48c832f0f809c1b5658edbb838c2521b72f2413", "license": "MIT",       "for": "anti-AI writing patterns (prose rewrite reference)" }
   ]
 }

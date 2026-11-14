@@ -1,6 +1,6 @@
 {
   "generated_by": "site/scripts/build-catalog.py",
-  "count": 41,
+  "count": 42,
   "skills": [
     {
       "name": "agentkit-audit",
@@ -65,6 +65,12 @@
     {
       "name": "genai-engineering",
       "description": "Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.",
+      "version": "0.1.0",
+      "kind": "native"
+    },
+    {
+      "name": "humanizer",
+      "description": "Fix grammar and rewrite prose, docs or slide text so it stops reading like AI output, with a deterministic AI-tell detector. Use when asked to humanize, de-AI, proofread or tighten text, docs or a deck.",
       "version": "0.1.0",
       "kind": "native"
     },
