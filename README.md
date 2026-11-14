@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://jthiruveedula.github.io/agentkit/">
-  <img src="site/assets/og.png" alt="agentkit: one kit, every agent. 41 skills, 12 subagents, 4 tools, zero telemetry." width="820">
+  <img src="site/assets/og.png" alt="agentkit: one kit, every agent. Skills and subagents for 4 tools, zero telemetry." width="820">
 </a>
 
 # agentkit
@@ -37,7 +37,7 @@ judging.
 
 | | |
 |---|---|
-| **41 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
+| **42 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
 | **4 tools, 1 source** | Each skill is one `SKILL.md`; `build.py` emits the Claude Code, Copilot, Cursor and Antigravity adapters. |
 | **Session costs you can see** | Live context budget with pause/resume, per-session spend audits, prompt analytics. |
 | **Private** | MIT licensed. No telemetry, no external calls beyond what you run yourself (`sync-external.sh`, `gh`, `npm`). |
@@ -97,6 +97,7 @@ python3 ~/.claude/skills/context-budget/scripts/install_hooks.py
 | RAG, LLM features, agents, evals, LLM cost | `genai-engineering` | `ml-engineer` |
 | Train, evaluate, deploy, monitor a model | `ml-lifecycle` | `ml-engineer` |
 | UI, animation, scroll effects, 3D / WebGL | `frontend-motion-3d` | `frontend-engineer` |
+| Charts, graphs, KPI tiles, dashboards | `chart-design` | — |
 | Rough idea → spec → task list | `spec-writer` | — |
 | Failing test or crash | `debug-loop` | — |
 | Prove a change works (tests, lint, types) | — | `verifier` |
@@ -163,7 +164,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 
 ## Skill catalog
 
-41 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
+42 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
 `skills/*/SKILL.md` on every `make build`.
 
 <details open>
@@ -210,6 +211,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 | Skill | What it does |
 |---|---|
 | `frontend-motion-3d` | Effect → lightest tool (CSS, Motion, GSAP/ScrollTrigger, three.js/R3F, HyperFrames), with a 60fps/LCP budget, reduced-motion, and WebGL fallback. |
+| `chart-design` | Question → chart form via a deterministic picker, honest axes, direct labels, takeaway titles; `chart_check.py palette` gates WCAG contrast and colour-blind separation. |
 
 </details>
 

@@ -14,6 +14,7 @@
       "license": "MIT",
       "skills": [
         "skills/agentkit-audit",
+        "skills/chart-design",
         "skills/context-budget",
         "skills/context-compressor",
         "skills/daily-standup",

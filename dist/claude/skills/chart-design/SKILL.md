@@ -1,0 +1,85 @@
+---
+name: chart-design
+description: Pick the chart form that answers the question, then make it honest, accessible and good-looking in any medium (SVG, D3, Vega, Recharts, matplotlib, plotly, dashboards). Use when creating, reviewing or restyling a chart, graph, plot, KPI tile or dashboard, or choosing chart colours.
+allowed-tools: Bash(python3 ${CLAUDE_SKILL_DIR}/scripts/chart_check.py *), Bash(python3 scripts/chart_check.py *), Read, Edit, Write, Grep
+version: 0.1.0
+---
+
+# Chart Design
+
+A chart is an argument: one question, one answer, readable in five seconds.
+Decide the sentence first, then draw only what proves it.
+
+## Procedure
+
+1. **Write the takeaway before any code.** One sentence with a number in
+   it ("Churn doubled after the March price change"). It becomes the
+   title. Cannot write it? Explore the data first, do not chart yet.
+
+2. **Pick the form from the question, not the data type.** Name the intent
+   (comparison, trend, part-to-whole, distribution, relationship, flow,
+   geo) and let the deterministic picker rank forms:
+
+   ```
+   python3 scripts/chart_check.py pick --intent trend --x temporal --series 3 --points 40
+   python3 scripts/chart_check.py pick --csv data.csv        # infers column types and intent
+   ```
+
+   Take rank 1 unless its printed reasons do not fit; say why if you
+   deviate. Never ship anything on its `avoid` list.
+
+3. **Do not chart what is not a chart.** One number is a stat tile, two
+   numbers are a sentence, exact values to look up are a table.
+
+4. **Keep it honest.**
+   - Bars and areas start at zero. Always. Lines and dots may zoom, with
+     the range obvious from the axis.
+   - No dual y-axes: two stacked panels sharing x, or index both to 100.
+     Small multiples share one scale unless a visible note says otherwise.
+   - Time is spaced as time: gaps stay gaps, no interpolation over
+     missing data, no smoothing passed off as observations.
+   - Amounts as length or position, never volume or 3D. Show n, units,
+     source and date range; rates need their denominator.
+
+5. **Label the data, delete the rest.** Direct-label series at the line
+   end or on the bar; a legend is a lookup the reader should not need.
+   Remove borders, tick marks and gridlines nobody reads. Round to what
+   the reader can use (`4.2M`). If labels need rotating, flip the chart.
+
+6. **Colour is an encoding, not decoration.** Default: grey context plus
+   **one** accent for what the title is about. Categorical only when
+   identity matters, capped at 6-8 (then small multiples or "Other").
+   Ordered data gets a sequential ramp, a meaningful midpoint a diverging
+   one. Never rainbow or red vs green alone. Validate per theme background:
+
+   ```
+   python3 scripts/chart_check.py palette "#0072B2" "#D55E00" "#009E73" --bg "#ffffff"
+   ```
+
+   Exit 1 means a mark under 3:1 contrast or a pair closer than CIEDE2000
+   10 under normal, protan, deutan or tritan vision.
+   Fix and re-run until it passes (max 3 attempts, then report what still fails).
+   Palettes that already pass: `reference/color.md`.
+
+7. **Theme with tokens**, a validated light and a dark set, no hex literals in chart code (`reference/color.md`).
+8. **Dashboards**: KPI tile row, then the one explaining chart, then detail; one metric = one colour and scale (`reference/craft.md`).
+9. **Interaction and motion** only where they earn it; the static view carries the takeaway (`reference/craft.md`; motion budget and reduced-motion: `frontend-motion-3d`).
+
+10. **Check before shipping.** Squint test (does the accent land on the
+    takeaway?), greyscale, 320 px width, both themes, text contrast 4.5:1
+    (`--min-contrast 4.5`), a text alternative stating the takeaway.
+    Report the form chosen and why, and the `palette` result.
+
+## Rules
+
+- Quote the picker and palette output; never eyeball contrast or colour-blind safety.
+- Stay in the charting library the project already uses.
+- Reviewing a chart: list violations by step, worst first; do not restyle what passes.
+
+## Token economy
+
+One-off need? Skip the skill: run `chart_check.py pick ...` or `palette ...`
+(`--json` for machines). Load one reference only when a step needs it:
+`reference/chart-forms.md` (forms, failure modes), `reference/color.md`
+(palettes, ramps, tokens), `reference/craft.md` (axes, dashboards,
+interaction, a11y, per-library switches). Page design: `ext-hallmark`.
