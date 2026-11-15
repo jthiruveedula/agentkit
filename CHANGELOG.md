@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.28.0](https://github.com/jthiruveedula/agentkit/compare/v0.27.0...v0.28.0) (2026-11-15)
+
+
+### Features
+
+* **prompt-analytics:** compact widget strip on Overview — gauge, trend, heatmap, cost, why, terrain ([#142](https://github.com/jthiruveedula/agentkit/issues/142)) ([3102e90](https://github.com/jthiruveedula/agentkit/commit/3102e901c390ebe1a40b3466953342170cf46c0e))
+* **video:** fill curve-card shots and re-render release video ([#138](https://github.com/jthiruveedula/agentkit/issues/138)) ([0672797](https://github.com/jthiruveedula/agentkit/commit/06727975cb89b7c310c7bc1e89eee745104531a4))
+
+
+### Bug Fixes
+
+* **video:** credit curve cards to PR [#136](https://github.com/jthiruveedula/agentkit/issues/136) in close scene ([#143](https://github.com/jthiruveedula/agentkit/issues/143)) ([22fd8fe](https://github.com/jthiruveedula/agentkit/commit/22fd8fe1e8b21671d0c5bb5c8bbf2306927e1acd))
+
 ## [0.27.0](https://github.com/jthiruveedula/agentkit/compare/v0.26.0...v0.27.0) (2026-11-15)
 
 
