@@ -232,3 +232,15 @@ def test_project2d_umap_is_seeded():
     a = topics.project2d(E)
     assert a.shape == (40, 2) and np.isfinite(a).all()
     assert np.allclose(a, topics.project2d(E))
+
+
+def test_level_shift_found_and_flat_or_noise_rejected():
+    from prompt_analytics.ml import changepoint
+
+    rng = np.random.default_rng(1)
+    shifted = list(0.3 + rng.normal(0, 0.03, 8)) + list(0.6 + rng.normal(0, 0.03, 8))
+    cp = changepoint.level_shift(shifted)
+    assert cp and cp["index"] == 8 and cp["after"] - cp["before"] > 0.25
+    assert changepoint.level_shift([0.4] * 16) is None
+    assert changepoint.level_shift(list(0.4 + rng.normal(0, 0.05, 16))) is None
+    assert changepoint.level_shift(shifted[:6]) is None  # too short

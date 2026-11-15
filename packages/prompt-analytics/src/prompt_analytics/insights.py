@@ -13,7 +13,7 @@ from typing import Any, Callable
 import numpy as np
 import polars as pl
 
-from .ml import curves
+from .ml import anomaly, changepoint, curves
 from .sensitive import ADVICE
 
 CHAPTERS = ["footprint", "time", "funnel", "friction", "works", "recommend"]
@@ -436,6 +436,83 @@ def _anomalies(anoms: list[dict]) -> list[dict]:
             )
         )
     return sorted(out, key=lambda c: -c["score"])[:3]
+
+
+def _weekly(sm: pl.DataFrame, sess: pl.DataFrame) -> list[dict]:
+    """Per calendar week: sessions, sessions with applied code, cost. Weeks with < MIN_N sessions are dropped."""
+    d = (
+        sess.filter(~pl.col("is_subagent") & pl.col("date").is_not_null())
+        .join(sm.select("session_id", "has_applied"), on="session_id", how="left")
+        .with_columns(
+            pl.col("date").dt.truncate("1w").alias("week"),
+            pl.col("has_applied").fill_null(False),
+        )
+        .group_by("week")
+        .agg(
+            pl.len().alias("n"),
+            pl.col("has_applied").sum().alias("applied"),
+            pl.col("cost").sum().alias("cost"),
+        )
+        .filter(pl.col("n") >= MIN_N)
+        .sort("week")
+    )
+    return d.to_dicts()
+
+
+def _trends(sm: pl.DataFrame, sess: pl.DataFrame) -> list[dict]:
+    wk = _weekly(sm, sess)
+    out = []
+    if len(wk) >= changepoint.MIN_WEEKS:
+        rate = [w["applied"] / w["n"] for w in wk]
+        cp = changepoint.level_shift(rate)
+        if cp and abs(cp["after"] - cp["before"]) >= 0.1:
+            up = cp["after"] > cp["before"]
+            since = wk[cp["index"]]["week"]
+            out.append(
+                _cand(
+                    "time.shift.applied",
+                    "time",
+                    f"Sessions landing code {'rose' if up else 'fell'} {cp['before']:.0%} to {cp['after']:.0%} since {since:%b} {since.day}",
+                    "weekly share of sessions with applied code",
+                    cp["after"] * 100,
+                    "%",
+                    cp["after"] - cp["before"],
+                    sum(w["n"] for w in wk),
+                    "level shift on weekly series, permutation test",
+                    abs(cp["after"] - cp["before"]) * 10 * math.log(len(wk)),
+                    "shift",
+                    {},
+                    None,
+                    {"since": since.isoformat(), "up": up},
+                )
+            )
+    pc = [(w["week"], w["cost"] / w["applied"]) for w in wk if w["applied"] >= 3]
+    if len(pc) >= 8:
+        rows = anomaly.detect(
+            [w for w, _ in pc], [v for _, v in pc], window_days=84, min_prior=6
+        )
+        hot = [r for r in anomaly.flagged(rows, min_value=5.0) if r["z"] > 0]
+        if hot:
+            r = max(hot, key=lambda r: r["date"])
+            out.append(
+                _cand(
+                    f"time.anomaly.cost_per_change.{r['date']}",
+                    "time",
+                    f"Cost per landed change hit ${r['value']:.0f} (usually ${r['median']:.0f})",
+                    "weekly cost per applied change",
+                    r["value"],
+                    "USD",
+                    r["value"] / r["median"] - 1 if r["median"] else None,
+                    r["n_prior"],
+                    "rolling median/MAD robust z over 12 weeks",
+                    min(r["z"], 20) / 4 * math.log(max(r["n_prior"], 2)),
+                    "cost_per_change",
+                    {},
+                    None,
+                    {"date": r["date"].isoformat(), "value": r["value"]},
+                )
+            )
+    return out
 
 
 def _footprint(sec: dict) -> list[dict]:
@@ -1278,6 +1355,7 @@ def generate(inp: dict[str, Any]) -> tuple[list[dict], list[dict]]:
         + _dupes(inp.get("dupes"))
         + _exposure(inp["exposure"])
         + _anomalies(inp["anoms"])
+        + _trends(sm, inp["sess"])
         + _works(inp["what_works"], inp["labels"], inp["validation"])
         + _costliest_hour(inp["sess"])
         + _months(sm, inp["sess"])
