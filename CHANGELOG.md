@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.26.0](https://github.com/jthiruveedula/agentkit/compare/v0.25.2...v0.26.0) (2026-11-15)
+
+
+### Features
+
+* **prompt-analytics:** echarts-gl 3D bars, scroll-in motion and curve insights ([#135](https://github.com/jthiruveedula/agentkit/issues/135)) ([5c2c62a](https://github.com/jthiruveedula/agentkit/commit/5c2c62a71164b84a52786eee53767012bfc8e2f2))
+* **prompt-analytics:** matched uplift, held-out check and calibrated struggle score ([#132](https://github.com/jthiruveedula/agentkit/issues/132)) ([8ec3e7c](https://github.com/jthiruveedula/agentkit/commit/8ec3e7cbbe28d2517ac5aa8cb0ffbf472d1496c2))
+* **prompt-analytics:** weekly level-shift and cost-per-change insights ([#134](https://github.com/jthiruveedula/agentkit/issues/134)) ([18909e6](https://github.com/jthiruveedula/agentkit/commit/18909e61582931196ed33dd7e4d2a2910cf4f6d9))
+
 ## [0.25.2](https://github.com/jthiruveedula/agentkit/compare/v0.25.1...v0.25.2) (2026-11-14)
 
 
