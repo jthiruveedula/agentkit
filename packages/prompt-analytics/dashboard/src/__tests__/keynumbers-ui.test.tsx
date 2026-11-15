@@ -101,7 +101,7 @@ describe("Key numbers and usage mix", () => {
 
   it("Key numbers names the top model and keeps spend's floor note at All; plurals read right", () => {
     mount();
-    expect(tile("sessions").querySelector(".sub")!.textContent).toMatch(/\nTop model \S+ · \d+% of sessions$/);
+    expect(tile("sessions").querySelector(".sub")!.textContent).toMatch(/\nTop model \S+ · \d+% of sessions( · |$)/);
     // the model id breaks only after "claude-", never inside "sonnet-4-5"
     expect([...tile("sessions").querySelectorAll(".sub .mn")].map((m) => m.textContent)).toEqual(["claude-", "sonnet-4-5"]);
     // split mode (All on the sample): totals cover all time but Applied and Exposed headline the last 4 weeks, and the title says so

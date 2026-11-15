@@ -61,7 +61,7 @@ describe("review fixes", () => {
   });
   it("Brief names the driver once, with its counts and sessions button", () => {
     const h = win([[4, 24], [4, 4], [4, 4]]);
-    expect(h).toMatch(/<b>p0 \/ bugfix<\/b>: 24 of its 40 sessions struggled, up from 4 of 40\./);
+    expect(h).toMatch(/aria-label="p0 \/ bugfix: 24 of its 40 sessions struggled, up from 4 of 40\./);
     expect(h).toMatch(/>Open 40 sessions</);
     expect(h).not.toMatch(/mostly|partly/);
     const spread = win([[4, 16], [4, 16], [4, 16]]);

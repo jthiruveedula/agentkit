@@ -1,0 +1,45 @@
+/* Cycle 9 panel details that the shared sheets do not cover. Tokens only; one blue accent, red and green stay for worse and better. */
+
+/* Key numbers: the Sessions bars fill the tile (12 weeks, 28px), earlier weeks in the prior grey; the Applied caption is one 12px line */
+.kt .wc { width: 100%; height: 28px; }
+.kt .wc-b:not(.wc-now) { fill: var(--prior); }
+.kt .kg-l { font-size: 12px; }
+
+/* Where the change came from: the brief keeps the one solid button, this is a text link */
+#s-overview .drv + .drv-open { margin-top: var(--s1); align-self: start; min-height: 24px; }
+
+/* Retries by intent: n after each row label */
+.db-n { margin-left: 6px; font-size: 11px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Loop breaker with no stop rule: one 48px row (title, so line, Show chart) */
+.grid > .card.lb-quiet { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3); min-height: 48px; padding-block: var(--s2); }
+.lb-quiet h3 { font: 600 14px/20px var(--sans); }
+.grid > .card.lb-quiet > .so { flex: 1 1 16rem; margin: 0; }
+.lb-quiet .link { min-height: 24px; }
+
+/* Applied rate by session length: y labels in a 32px left gutter (they sat on the last bar); the long meta drops under the title */
+#s-nogain .card-h .meta { flex-basis: 100%; }
+#s-nogain .ng-plot { padding-left: 32px; }
+#s-nogain .ng-ci { left: 32px; }
+#s-nogain .ng-top, #s-nogain .ng-mid { right: calc(100% + 6px); translate: 0 50%; }
+#s-nogain .ng-x { padding-left: 32px; }
+
+/* Review queue, static export: no row controls, 32px rows */
+.xf1.ro { grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); min-height: 32px; padding-block: 4px; }
+
+/* Tool switches: flow ladder (from names | ribbons | to names) */
+.fl { display: grid; grid-template-columns: max-content minmax(56px, 1fr) max-content; column-gap: var(--s2); max-width: 560px; font-size: 12px; line-height: 16px; }
+.fl-h { font-size: 11px; line-height: 14px; color: var(--muted); padding-bottom: 2px; }
+.fl-h:first-child { text-align: right; padding-right: var(--s1); }
+.fl ul { display: grid; grid-auto-rows: var(--rh); margin: 0; padding: 0; list-style: none; }
+.fl-from button, .fl-to-i { display: flex; align-items: center; gap: 6px; width: 100%; height: 100%; white-space: nowrap; color: var(--ink); }
+.fl-from button { justify-content: flex-end; padding: 0 var(--s1); border-radius: var(--r1); font: inherit; }
+.fl-from button:hover { background: var(--sunk); }
+.fl-from button[aria-pressed="true"] { font-weight: 600; color: var(--accent); }
+.fl small { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fl-mid { position: relative; }
+.fl-mid svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fl-mid line { stroke: var(--prior); opacity: 0.6; }
+.fl-mid line.fl-top { stroke: var(--accent); opacity: 1; }
+.fl-n { position: absolute; translate: -50% -50%; padding: 0 4px; border-radius: 7px; background: var(--surface); color: var(--ink); font: 600 11px/14px var(--sans); font-variant-numeric: tabular-nums; pointer-events: none; }
+html.glass .fl-n { background: oklch(1 0 0 / 0.9); }

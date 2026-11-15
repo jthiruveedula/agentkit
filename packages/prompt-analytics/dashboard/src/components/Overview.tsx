@@ -3,10 +3,10 @@ import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
 import { Empty, Segmented } from "./ui";
-import { Recommend } from "./Recommend";
+import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
-import { Ring } from "./charts";
+import { Bullet, Ring, UnitDots } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
@@ -40,7 +40,7 @@ function WhereWent() {
     <Panel id="s-where" src="priced cost share · one denominator" title="Where it went" meta={`top ${dm.rows.length} by ${dm.note}${dm.byCost ? "" : " (nothing priced, so tokens stand in)"}; one click filters`} span={12}
       actions={dims.length > 1 ? <Segmented quiet label="Break down by" value={dm.id} onChange={setPick} options={dims.map((x) => ({ id: x.id, text: x.name }))} /> : undefined}>
       <div className="wh" role="group" aria-label={`${dm.name} by ${dm.note}`}>
-        <div className="wh-r wh-h" aria-hidden="true"><span>{dm.name.slice(0, -1)}</span><span className="wh-t">Share (longest = {fmtPct(big)})</span><span className="wh-v">{dm.byCost ? "Cost · share" : "Tokens · share"}</span><span className="wh-f">Friction (vs median)</span><span className="wh-p">{dm.byCost ? "$ / session" : "tok / session"}</span></div>
+        <div className="wh-r wh-h" aria-hidden="true"><span>{dm.name.slice(0, -1)}</span><span className="wh-t">Share (longest = {fmtPct(big)})</span><span className="wh-v">{dm.byCost ? "Cost · share" : "Tokens · share"}</span><span className="wh-f" title="Mean friction, and its gap to the median of the group">Friction vs med.</span><span className="wh-p">{dm.byCost ? "$ / session" : "tok / session"}</span></div>
         {dm.rows.map((r) => (
           <button key={r.key} type="button" className="wh-r wh-b" aria-pressed={undefined} disabled={!r.filterable} style={{ "--w": r.share / big } as React.CSSProperties}
             onClick={() => drill(filterOf(dm.id, r.key))}
@@ -103,7 +103,8 @@ const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
 
 /** Briefing: the struggled rate, what it is compared against, how sure the change is, and the driver once. Honest copy for every state. */
 function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b: Briefing; bs: Basis; cmp: Cmp; win: number; scope: Scope; all: SessionRow[] }) {
-  const { d, v, f, ids, apply, clear, win: wn } = useStore();
+  const { d, v, f, ids, apply, clear, goto, win: wn } = useStore();
+  const next = useNext();
   const openIds = useMemo(() => openExposure(d), [d]);
   // the Key numbers tiles' verdicts on the same basis (lib/mix): an Also moved chip with a tile is grey when its tile is (mixed, within range),
   // and dropped when its tile shows no change, so the brief never reads as a win the tile below calls mixed
@@ -119,7 +120,7 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
   // raw session counts are not comparable across a 4-week vs a 22-week split, so the Sessions mover only runs against an equal prior window
   const all = useMemo(() => movers(bs.cur, bs.base, 5).filter((m) => (bs.mode !== "split" || m.id !== "sessions") && (!tiled(m.id) || dl[m.id] !== undefined)).slice(0, 2), [bs, dl]);
   // a grey (mixed / within range) change never leads the headline
-  const lead = vd.kind === "noise" ? all.find((m) => !greyOf(m)) : undefined, mv = all.filter((m) => m !== lead);
+  const lead = vd.kind === "noise" ? all.find((m) => !greyOf(m)) : undefined, mv = all.filter((m) => m !== lead && !tiled(m.id));   // a chip whose metric has a Key numbers tile repeats it
   const toneOf = (g: boolean | null) => (g === null ? "flat" : g ? "good" : "bad");
   const n = bs.cur.length, p = now.p;
   const head = p === null ? (n ? `${fmtInt(n)} session${n === 1 ? "" : "s"}, none with a prompt${bs.mode === "split" ? " in the last 4 weeks" : ""}` : bs.mode === "split" ? "No prompts in the last 4 weeks" : "No prompts in this window")
@@ -134,10 +135,28 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
   const k = (r: number | null, nn: number) => Math.round((r ?? 0) * nn);
   const drvN = drv ? segCount(bs.cur, drv) : 0;
   // each story row: its sentence, then one compact "Open N sessions" action (the driver drill is the single primary)
+  const k0 = drv ? k(drv.r0, drv.n0) : 0, k1 = drv ? k(drv.r1, drv.n1) : 0;
+  const dsum = b.drivers?.delta ?? 0, share = drv && dsum ? drv.total / dsum : 0;
+  // the receipt: culprit -> its share of the change -> the Do next row that fixes it (the row filtered to the culprit, else row 1)
+  const hit = drv && drv.project !== undefined ? next.findIndex((r) => !!r.filter && r.filter.project === drv.project && (!r.filter.intent || !drv.intent || r.filter.intent === drv.intent)) : -1;
+  const fix = drv && next.length ? { n: Math.max(0, hit) + 1, row: next[Math.max(0, hit)] } : null;
+  const toFix = (id: string) => {   // scroll to the Do next card, then put focus on that row's first control (rows past the first three stay folded)
+    goto("s-next");
+    requestAnimationFrame(() => [...document.querySelectorAll<HTMLElement>("#s-next [data-next]")].find((e) => e.dataset.next === id)?.querySelector<HTMLElement>("button, summary")?.focus({ preventScroll: true }));
+  };
+  const open = drv && drvN > 0 && <button type="button" className="btn primary b-act" onClick={() => apply({ ...(drv.project !== undefined ? { project: drv.project } : {}), ...(drv.intent ? { intent: drv.intent as never } : {}), ...scope }, { list: true })}
+    aria-label={`Open ${nSess(drvN)}: ${drv.key}`}>Open {nSess(drvN)}</button>;
+  // the Why sentence is carried by the figure's label and, visibly, by its two rows (before / now)
   const why = drv ? (
-    <><span className="b-say"><b>{drv.key}</b>: {k(drv.r1, drv.n1)} of its {nSess(drv.n1)} struggled, {(drv.r1 ?? 0) < (drv.r0 ?? 0) ? "down" : "up"} from {k(drv.r0, drv.n0)} of {fmtInt(drv.n0)}.</span>{" "}
-      {drvN > 0 && <button type="button" className="btn primary b-act" onClick={() => apply({ ...(drv.project !== undefined ? { project: drv.project } : {}), ...(drv.intent ? { intent: drv.intent as never } : {}), ...scope }, { list: true })}
-        aria-label={`Open ${nSess(drvN)}: ${drv.key}`}>Open {nSess(drvN)}</button>}</>
+    <><figure className="b-fig" role="group" aria-label={`${drv.key}: ${k1} of its ${nSess(drv.n1)} struggled, ${(drv.r1 ?? 0) < (drv.r0 ?? 0) ? "down" : "up"} from ${k0} of ${fmtInt(drv.n0)}.${share > 0 && share <= 1 ? ` It accounts for ${pts(drv.total, 1)} of the ${pts(dsum, 1)} change.` : ""}`}>
+        <figcaption>{drv.key}</figcaption>
+        {drv.n0 > 24 || drv.n1 > 24 ? <Bullet p={drv.r1 ?? 0} was={drv.r0} /> : null}
+        {([["Before", k0, drv.n0, "prior"], ["Now", k1, drv.n1, "now"]] as const).map(([l, kk, nn, c]) => (
+          <div key={l} className="ud-r" data-r={c}><span className="ud-l">{l}</span>{drv.n0 > 24 || drv.n1 > 24 ? null : <UnitDots k={kk} n={nn} />}<span className="ud-n">{kk} of {fmtInt(nn)}</span></div>
+        ))}
+        {!fix && share > 0 && share <= 1 && <div className="ud-s" aria-hidden="true"><span className="ud-t" style={{ "--w": share } as React.CSSProperties}><i /></span><span>{pts(drv.total, 1)} of {pts(dsum, 1)}</span></div>}
+      </figure>
+      {open}</>
   ) : st.why && <span className="b-say">{st.why}</span>;
   const sure = vd.kind === "noise" ? "could be" : "likely";
   return (
@@ -182,6 +201,14 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
             <dl className="story">
               <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>
             </dl>
+          )}
+          {drv && fix && (
+            <div className="receipt" role="group" aria-label="What changed, how much of the change it is, and the fix" data-tone={tone}>
+              <span title={drv.key}>{drv.key}</span>
+              <span>{share > 0 && share <= 1 ? `${end(drv.total)} of ${pts(dsum, 1)}` : pts(drv.total, 1)}</span>
+              <button type="button" title={fix.row.detail} onClick={() => toFix(fix.row.id)}
+                aria-label={`Fix #${fix.n}: ${fix.row.action} (${fix.row.impact}). Go to this Do next row`}>Fix #{fix.n}: {fix.row.action} ({fix.row.impact})</button>
+            </div>
           )}
           {mv.length > 0 && (
             <p className="movers"><span className="meta">Also moved</span>
@@ -231,8 +258,8 @@ function Drivers({ b, scope, label, rows: cur }: { b: Briefing; scope: Scope; la
               <span className="dv" data-neg={tot < 0 || undefined} style={{ "--w": Math.abs(tot) / top } as React.CSSProperties}><i aria-hidden="true" /><b className="n">{pts(tot, 1)}</b></span>
             </li>
           </ul>
-          {h && <button type="button" className="btn b-act" onClick={() => apply({ project: h.project, ...(h.intent ? { intent: h.intent as never } : {}), ...scope }, { list: true })}
-            aria-label={`Open ${nSess(segCount(cur, h))}: ${h.key}`}>Open {nSess(segCount(cur, h))}</button>}
+          {h && <button type="button" className="link drv-open" onClick={() => apply({ project: h.project, ...(h.intent ? { intent: h.intent as never } : {}), ...scope }, { list: true })}
+            aria-label={`Open these ${nSess(segCount(cur, h))}: ${h.key}`}>Open these {fmtInt(segCount(cur, h))}</button>}
         </>
       )}
     </Panel>
@@ -263,7 +290,7 @@ export function Overview() {
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
         {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} />}
-        <KeyNumbers bs={bs} setMetric={setMetric} />
+        <KeyNumbers bs={bs} setMetric={setMetric} all={all} />
         <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">
           <span className="meta">All time</span><span>{fmtInt(t.active_days)} active days</span><span>streak {t.longest_streak} longest, {t.current_streak} now</span><span>{fmtInt(t.projects)} projects</span><span>{fmtInt(t.commits_linked)} commits linked</span>

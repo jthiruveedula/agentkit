@@ -16,8 +16,9 @@ import { tierOf, TIERS } from "../lib/models";
 import { listNames } from "../lib/capabilities";
 import { MIN_N } from "../lib/thresholds";
 import { srcColor, srcLabel } from "../lib/palette";
-import type { Source } from "../data/types";
+import type { SessionRow, Source } from "../data/types";
 import "./mix.css";
+import "./panels9.css";
 
 const srcNames = (xs: Source[]) => listNames(xs.map(srcLabel));
 const total = (xs: number[]) => xs.reduce((a, x) => a + x, 0);
@@ -66,7 +67,7 @@ const KINDS = [["pii", "PII"], ["secret", "Secrets"], ["phi", "PHI"]] as const;
 interface Tile { id: string; label: string; value: string; small?: string; delta?: ReactNode; sub?: string; /** `sub` as shown, when it needs markup (title and aria keep the string) */ subEl?: ReactNode; hint?: string; low?: boolean; vis?: ReactNode; note?: ReactNode; primary?: boolean; go: () => void; open: () => void }
 
 /** Key numbers: Sessions, Total spend, Tokens, Cost per applied change, Applied rate, Exposed. Deltas compare on the brief's basis. */
-export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric) => void }) {
+export function KeyNumbers({ bs, setMetric, all: undated }: { bs: Basis; setMetric: (m: Metric) => void; /** the selection without its date window: feeds the 12-week bars */ all: SessionRow[] }) {
   const { d, f, v, prior, win, exposed, goto, caps, apply, openList, openSession, setView, secs } = useStore();
   const t = v.totals;
   const open = useMemo(() => openExposure(d), [d]);
@@ -79,8 +80,12 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
 
   // Sessions: whole weeks ending on the window's last day (a partial week is dropped from the start), the compared weeks in accent
   const wk = win.days >= 7 && win.days % 7 ? { from: addDays(win.from, win.days % 7), to: win.to, days: win.days - (win.days % 7) } : win;
-  const all = bucketSeries(v.rows, wk, 7, METRICS.sessions), off = Math.max(0, all.length - 24), weeks = all.slice(off);
-  const from = cut ? Math.max(0, weeks.findIndex((_, i) => addDays(wk.from, (off + i) * 7) >= cut)) : 0;
+  // the bars: up to 12 whole weeks ending on the window's last day (never before the export's first day), so the compared weeks sit in context
+  const nowFrom = cut ?? wk.from, first = d.range.start < nowFrom ? d.range.start : nowFrom;
+  const some = v.rows.length > 0 && !Number.isNaN(Date.parse(first)) && !Number.isNaN(Date.parse(win.to));   // an empty export has no dates
+  const nW = some ? Math.min(12, Math.max(1, Math.floor((dayDiff(first, win.to) + 1) / 7))) : 0, w0 = some ? addDays(win.to, 1 - nW * 7) : "";
+  const weeks = some ? bucketSeries(undated, { from: w0, to: win.to, days: nW * 7 }, 7, METRICS.sessions) : [];
+  const from = Math.max(0, weeks.findIndex((_, i) => addDays(w0, i * 7 + 6) >= nowFrom));
   const curDays = cut ? dayDiff(cut, win.to) + 1 : win.days, baseDays = cut ? dayDiff(win.from, cut) : prior?.win.days ?? win.days;
   const perWk = (n: number, days: number) => (days > 0 ? (n * 7) / days : null);
   const wNow = dl.sessions ? perWk(bs.cur.length, curDays) : null, wWas = dl.sessions && bs.base ? perWk(bs.base.length, baseDays) : null;
@@ -110,11 +115,11 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
 
   const med = dl.cpa?.grey === "mixed" && dl.cpa.med ? `median ${dl.cpa.med[1] > dl.cpa.med[0] ? "rose" : "fell"} ${fmtUSD(dl.cpa.med[0])} to ${fmtUSD(dl.cpa.med[1])}` : undefined;
   const sx = dl.spend;
-  const sesHead = lines(wNow !== null && wWas !== null && `${wFmt(wNow)} a week, was ${wFmt(wWas)}`,
-    `${fmtInt(t.prompts)} prompts${t.asked ? ` · ${(t.prompts / t.asked).toFixed(1)} per session with prompts` : ""}`);
+  const sesHead = `${fmtInt(t.prompts)} prompts${t.asked ? ` · ${(t.prompts / t.asked).toFixed(1)} each` : ""}`;
   const tiles: Tile[] = [
     { id: "sessions", label: "Sessions", value: fmtInt(t.sessions), delta: <KD x={dl.sessions} sense="volume" vs={vs} />,
-      vis: weeks.length > 1 ? <WeekCols values={weeks} from={from} now={wNow} was={wWas} /> : undefined,
+      vis: weeks.length > 1 ? <WeekCols values={weeks} from={from} now={wNow} was={wWas} h={28} /> : undefined,
+      hint: wNow !== null && wWas !== null ? `${wFmt(wNow)} a week, was ${wFmt(wWas)}` : undefined,
       sub: lines(sesHead, topModel && `Top model ${topModel.label} · ${fmtPct(topModel.share)} of sessions`),
       // the model id breaks only between its word parts ("claude-" | "sonnet-4-5"), as in Model mix
       subEl: topModel ? <>{sesHead && `${sesHead}\n`}Top model <MN s={topModel.label} /> · {fmtPct(topModel.share)} of sessions</> : undefined,
@@ -139,7 +144,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
         <span className="tkey">{tm.tokens.map((x, i) => (x > 0 ? <span key={i}><i className={`tb-${i}`} aria-hidden="true" />{TIER_KEY[i]} <b>{fmtPct(x / total(tm.tokens))}</b></span> : null))}</span>
       </div>
     ) : undefined,
-    sub: !tok.counted ? "no token data" : tok.counted < t.sessions ? `Per session counts the ${fmtInt(tok.counted)} of ${fmtInt(t.sessions)} sessions that recorded tokens` : undefined,
+    sub: !tok.counted ? "no token data" : tok.counted < t.sessions ? `${fmtInt(tok.counted)} of ${fmtInt(t.sessions)} sessions report tokens` : undefined,
     go: () => goto(secs.has("s-models") ? "s-models" : "s-tools"), open: sorted("tokens-d", openList) });
   tiles.push(caps.hasCost
     ? { id: "cpa", primary: true, label: "Cost per applied change", value: cpa.value === null ? "–" : fmtUSD(cpa.value), delta: <KD x={dl.cpa} sense="lower" vs={vs} mean={!!dl.cpa?.med} />,
@@ -147,6 +152,11 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
           : med ?? lead ?? `${fmtInt(cpa.pricedApplied)} priced of ${fmtInt(cpa.applied)} applied sessions`, low: cpaLow,
         vis: out ? (
           <span className="meter conc" aria-hidden="true">{out.top.map((r, i) => <span key={r.id} style={{ flexGrow: r.cost_usd ?? 0, background: OUT_C[i] }} />)}<span className="m-rest" style={{ flexGrow: Math.max(0, spent - total(out.top.map((r) => r.cost_usd ?? 0))) }} /></span>
+        ) : cpa.applied > 0 ? (
+          <div className="km">
+            <span className="meter" aria-hidden="true">{cpa.pricedApplied > 0 && <span className="m-on" style={{ flexGrow: cpa.pricedApplied }} />}{cpa.applied > cpa.pricedApplied && <span className="m-off" style={{ flexGrow: cpa.applied - cpa.pricedApplied }} />}</span>
+            <span className="km-l"><span><b>{fmtPct(cpa.pricedApplied / cpa.applied)}</b> priced</span>{cpa.applied > cpa.pricedApplied && <span>{fmtInt(cpa.applied - cpa.pricedApplied)} unpriced</span>}</span>
+          </div>
         ) : undefined,
         note: out && lead ? (
           <div className="kpi-note">
@@ -168,7 +178,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
     vis: cr.p !== null && ci ? (
       <div className="kg">
         <Bullet p={cr.p} lo={ci[0]} hi={ci[1]} was={dl.applied?.was} />
-        <p className="kg-l"><span>likely {fmtPct(ci[0])} to {fmtPct(ci[1])}</span>{dl.applied?.was != null && <span>earlier: {fmtPct(dl.applied.was, 1)}</span>}</p>
+        <p className="kg-l">likely {fmtPct(ci[0])} to {fmtPct(ci[1])}{dl.applied?.was != null && ` · earlier ${fmtPct(dl.applied.was, 1)}`}</p>
       </div>
     ) : undefined,
     sub: lines(wide && "Few sessions, wide range",
@@ -184,8 +194,8 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
       </ul>
     ) : undefined,
     sub: cut ? lines(`Last 4 weeks: ${fmtInt(ex.size)} of ${nSess(exN)} with open findings`, t.sessions > 0 && `${dated ? "Whole period" : "All time"}: ${fmtPct(exposed.size / t.sessions, 1)}`)
-      : `${nSess(exposed.size)} with open findings${exposed.size ? "; one can hold several kinds" : ""}`,
-    hint: cut && ex.size ? "one session can hold several kinds" : undefined,
+      : `${nSess(exposed.size)} with open findings`,
+    hint: ex.size ? "one session can hold several kinds" : undefined,
     go: () => goto("s-exposure"), open: () => apply({ exposed: true }, { list: true }) });
 
   // split mode: Sessions, spend and tokens total the window; Applied and Exposed headline the last 4 weeks. The title names both.
@@ -215,7 +225,7 @@ export function KeyNumbers({ bs, setMetric }: { bs: Basis; setMetric: (m: Metric
               {c.delta}
               {c.sub ? <p className="sub" data-low={c.low || undefined} title={c.hint ? `${c.sub} · ${c.hint}` : c.sub}>{c.subEl ?? c.sub}{c.hint && <span className="sr-only"> · {c.hint}</span>}</p> : null}
               {c.note}
-              {c.vis && <div className="kt-vis">{c.vis}</div>}
+              {c.vis && <div className="kt-vis kpi-foot">{c.vis}</div>}
             </div>
             <button type="button" className="link kpi-go" onClick={c.go} aria-label={`Jump to the ${c.label} details`}>Details</button>
           </li>
@@ -349,10 +359,13 @@ function TierMix() {
         </div>
         <p className="tkey" aria-hidden="true">{TIER_KEY.map((k, i) => <span key={k}><i className={`tb-${i}`} />{k}</span>)}</p>
       </div>
-      <p className="note">
-        {members.map((ms, i) => (ms.length ? <Fragment key={i}>{TIERS[i]}: {ms.map((m, j) => <Fragment key={m}>{j ? ", " : ""}<MN s={m} /></Fragment>)}. </Fragment> : null))}
-        {tm.sessions[3] ? `Unrecognised: ${nSess(tm.sessions[3])} with no model id or an id the tier table does not know.` : null}
-      </p>
+      <details>
+        <summary>Which models are in each tier</summary>
+        <p className="note">
+          {members.map((ms, i) => (ms.length ? <Fragment key={i}>{TIERS[i]}: {ms.map((m, j) => <Fragment key={m}>{j ? ", " : ""}<MN s={m} /></Fragment>)}. </Fragment> : null))}
+          {tm.sessions[3] ? `Unrecognised: ${nSess(tm.sessions[3])} with no model id or an id the tier table does not know.` : null}
+        </p>
+      </details>
       <DataTable caption="Share by model tier" head={["Measure", ...TIER_KEY]} rows={bars.map(([name, a]) => [name, ...a.map((x) => fmtPct(x / total(a)))])} />
     </MixCard>
   );

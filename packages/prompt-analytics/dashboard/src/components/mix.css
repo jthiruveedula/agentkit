@@ -16,7 +16,7 @@
 #s-overview .card.kcard { padding: 0; container: kc / inline-size; }
 .fx .card.kcard:hover { translate: none; }   /* six tiles do not lift as one slab (no per-tile motion either) */
 .kc-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--s1) var(--s4); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); }
-.kc-h h3 { font: 600 16px/22px var(--sans); }
+.kc-h h3 { font: 600 14px/20px var(--sans); }
 .kc-p { font-weight: 400; color: var(--muted); }
 .kc-key { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s4); margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); }
 .kc-key b { font-weight: 600; color: var(--ink); }
@@ -25,26 +25,26 @@
 .k-grey { display: inline-block; width: 10px; height: 10px; margin-right: var(--s1); vertical-align: -1px; border-radius: 2px; background: var(--muted); }
 
 /* six tiles: nested flat blocks (3x2; 2x3 on phones), each a rounded block of its own inside the card */
-.kcard ul.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); margin: 0; padding: var(--s4); list-style: none; }
+.kcard ul.kpis { flex: 1 1 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: var(--s3); margin: 0; padding: var(--s3) var(--s4) var(--s4); list-style: none; }
 .kcard ul.kpis.k5 > li:last-child { grid-column: span 2; }
 @media (max-width: 699px) { .kcard ul.kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); padding: var(--s3); } .kcard ul.kpis.k5 > li:last-child { grid-column: span 2; } }
-.kcard ul.kpis > li { position: relative; container-type: inline-size; background: var(--sunk); border: 1px solid var(--line); border-radius: 14px; }
+.kcard ul.kpis > li { position: relative; container-type: inline-size; background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r3); }
 html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: var(--rim); }   /* nested block on glass: flat, no blur */
 
-.kt { position: relative; display: flex; flex-direction: column; gap: var(--s1); height: 100%; min-width: 0; padding: var(--s3) var(--s4) var(--s4); overflow-wrap: anywhere; }
+.kt { position: relative; display: flex; flex-direction: column; gap: var(--s1); min-height: 100%; min-width: 0; padding: var(--s3); overflow-wrap: anywhere; }   /* min-height, not height: a tile grows with its content, nothing is clipped */
 .kt .kpi-main { gap: 2px; }
-.kt .kpi-main::after { border-radius: 13px; }
+.kt .kpi-main::after { border-radius: 9px; }
 .kt .kpi-main:hover::after { background: color-mix(in oklab, var(--accent) 4%, transparent); }
 .kt .kpi-main:focus-visible::after { outline: 2px solid var(--accent); outline-offset: -2px; }
-/* the label keeps a two-line slot and clears the Details link pinned top right (~48px from the tile edge, 16px of it is tile padding) */
-.kt .lbl { display: flex; align-items: center; gap: var(--s2); min-height: 28px; padding-right: 36px; font: 600 11px/14px var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+/* the label keeps a two-line slot and clears the Details link pinned top right (10px down, 12px in) */
+.kt .lbl { display: flex; align-items: center; gap: var(--s2); min-height: 28px; padding-right: 52px; font: 600 11px/14px var(--sans); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .kt .kv { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 var(--s2); }
 .kt .val { font: 600 clamp(24px, 19cqi, 40px)/1.15 var(--sans); letter-spacing: -0.02em; white-space: nowrap; }
 .kt .kv small { font-size: 13px; line-height: 18px; color: var(--muted); white-space: nowrap; }
-.kt .sub { margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); white-space: pre-line; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }   /* two lines; the full text is the tooltip */   /* one fact per line */
+.kt .sub { margin: 0; font-size: 12px; line-height: 16px; color: var(--muted); white-space: pre-line; }   /* two lines; the full text is the tooltip */   /* one fact per line */
 .kt .sub[data-low] { color: var(--warn-ink); }
 .kt-vis { margin-top: auto; padding-top: var(--s2); }
-.kcard .kpi-go { top: var(--s2); right: var(--s2); }
+.kcard .kpi-go { top: 10px; right: 12px; }
 /* narrow tiles (two up on a phone, list panel open): Details gets its own row above the label instead of covering it.
    190px: above it the label has 123px beside Details, enough for "Tokens per applied" on one line, so labels stay at two */
 @container (max-width: 190px) {
@@ -94,7 +94,7 @@ html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: 
 
 /* applied rate: horizontal bullet, the likely range as a pale band, a 2px marker at the rate, a short tick at the earlier rate */
 .kg { display: grid; gap: var(--s1); }
-.bul { position: relative; height: 12px; margin: 4px 0; border-radius: 2px; background: var(--sunk); box-shadow: inset 0 0 0 1px var(--line-2); }
+.bul { position: relative; container-type: inline-size; height: 12px; margin: 4px 0; border-radius: 2px; background: var(--sunk); box-shadow: inset 0 0 0 1px var(--line-2); }
 .bul i { position: absolute; top: 0; bottom: 0; }
 .bul .bu-ci { background: var(--kx-ci); }
 .bul .bu-now { width: 2px; margin-left: -1px; top: -3px; bottom: -3px; background: var(--accent); box-shadow: 0 0 0 1px var(--surface); }
@@ -112,29 +112,32 @@ html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: 
 
 /* ---------- Usage mix cards ---------- */
 .mixc { container: mixc / inline-size; display: flex; flex-direction: column; }
-#s-overview .mixc { align-self: stretch; }   /* one height per row (beats styles.css .grid > .card); the notes pin to the bottom */
+#s-overview .mixc { align-self: stretch; align-content: start; }   /* one height per row (beats styles.css .grid > .card); content packs to the top, notes follow it */
 .mixc .lede { margin: 0 0 var(--s3); font-size: 13px; line-height: 18px; color: var(--muted); text-wrap: pretty; }
 .mixc .lede b { font-weight: 600; color: var(--ink); }
-.mixc .note { margin-top: auto; padding-top: var(--s3); }
+.mixc .note { margin-top: 0; padding-top: var(--s2); }
+.mixc details { margin-top: var(--s2); font-size: 12px; line-height: 16px; color: var(--muted); }   /* tier definitions, closed by default */
+.mixc details > summary { width: fit-content; cursor: pointer; border-radius: var(--r1); }
+.mixc details .note { padding-top: var(--s1); }
 .mixc .note:empty { display: none; }
 
 /* model donut + legend */
-.dn-row { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: var(--s4); align-items: center; }
-.dn { position: relative; width: 168px; aspect-ratio: 1; }
+.dn-row { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: var(--s4); align-items: center; }
+.dn { position: relative; width: 148px; aspect-ratio: 1; }
 .dn svg { display: block; width: 100%; height: 100%; }
 .dn circle { fill: none; stroke-width: 5; }
 .dn-track { stroke: var(--line); }
 .dn-s[data-pick] { cursor: pointer; }
 .dn-s[data-pick]:hover, .dn-s[data-on] { stroke-width: 6.5; }
 .dn-hb { fill: var(--sunk); } .dn-hl { fill: var(--line-2); }
-/* the hole is ~107px across at the middle but ~88px at the caption rows: 40px side padding keeps every line off the ring */
-.dn-hole { position: absolute; inset: 0; display: grid; place-content: center; padding: 0 40px; text-align: center; pointer-events: none; }
-.dn-big { font: 650 28px/30px var(--sans); }
+/* inner radius 47px (148 x 13.4 / 42): 34px side padding keeps every caption line 6px+ off the stroke */
+.dn-hole { position: absolute; inset: 0; display: grid; place-content: center; padding: 0 34px; text-align: center; pointer-events: none; }
+.dn-big { font: 650 24px/26px var(--sans); }
 .dn-who { margin: 4px 0 1px; font: 600 11px/14px var(--sans); }
 .mn { white-space: nowrap; }   /* a model id's word part ("sonnet-4-5"): lines break only between parts */
 .dn-of { font-size: 11px; line-height: 14px; color: var(--muted); }
 .mlg { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 16px; }
-.mlg th { width: 55%; max-width: 0; padding: 0; text-align: left; font-weight: 500; }
+.mlg th { min-width: 132px; padding: 0; text-align: left; font-weight: 500; white-space: nowrap; }   /* "claude-sonnet-4-5" stays on one line */
 .mlg td { padding: var(--s1) 0 var(--s1) var(--s2); text-align: right; white-space: nowrap; }
 .mlg tr + tr > * { border-top: 1px solid var(--line); }
 .mlg .mlg-tier { text-align: left; font-size: 11px; color: var(--muted); }
@@ -190,8 +193,8 @@ html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: 
 .tm-r { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: var(--s2); align-items: center; font-size: 12px; line-height: 16px; }
 .tm .tb { height: 22px; }
 .mixc .tkey { margin-top: var(--s2); }
-/* stretched to the row's height, the bars and their key sit centred between the lede and the member note, not above a gap */
-.tm-w { margin-block: auto; }
+/* the bars and their key follow the lede; nothing is pushed to the card foot */
+.tm-w { margin-block: 0; }
 #s-mix-tiers .note { margin-top: 0; }
 
 /* tile icon chip: tinted with an existing series token (contrast.mjs covers s1c-s9c, warn-pii) */

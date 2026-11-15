@@ -5,7 +5,7 @@
 .sec.quiet h2 { font: 600 16px/24px var(--sans); }
 .sec.quiet .meta { font-size: 13px; line-height: 20px; color: var(--muted); }
 .sec.quiet .link { margin-left: auto; min-height: 24px; }
-/* The reason line is an eyebrow of the section under it: the 40px (28px at <=699px) section gap from styles.css
+/* The reason line is an eyebrow of the section under it: the 28px section gap from styles.css
    (.sec + .why-tag) sits above the tag, and the tag hangs 4px over its .sec-h. Gap between sections stays 40/28 either way. */
 .why-tag { margin: 0 0 var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); }
 .why-tag b { color: var(--accent); }
@@ -15,3 +15,21 @@
 /* a jump to a promoted section keeps its reason line in view under the sticky header (mirrors the .sec scroll-margin in styles.css, + the tag) */
 .why-tag + .sec { scroll-margin-top: calc(var(--hh) + 48px); }
 @media (max-width: 699px) { .why-tag + .sec { scroll-margin-top: 100px; } }
+
+/* quiet strip on the glass page: a tinted pill, not an opaque box. The fill is --gfloor (0.66), not 0.55: the muted label and the accent link
+   only hold 4.5:1 over the darkest wallpaper stop at the floor scripts/contrast.mjs checks */
+html.glass .sec.quiet { height: 40px; background: oklch(1 0 0 / var(--gfloor)); border-color: var(--rim); border-radius: 12px; }
+
+/* Do next on a phone (#s-next outranks govern.css whatever the bundle order): number + action on the first line, then chip, link, button
+   and "Why this" share one wrapping row; 32px controls */
+@media (max-width: 640px) {
+  #s-next .todo li { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+  #s-next .todo .num { align-self: flex-start; }
+  #s-next .todo .act { flex: 1 1 calc(100% - 32px - var(--s2)); }
+  #s-next .todo .tag { margin-left: calc(24px + var(--s2)); }   /* lines up under the action text */
+  #s-next .todo .go { display: contents; }
+  #s-next .todo .go :is(.link, .btn), #s-next .todo summary { height: 32px; min-height: 32px; display: inline-flex; align-items: center; }
+  #s-next .todo .go .link { padding: 0 var(--s1); }
+  #s-next .todo details { margin-left: auto; }
+  #s-next .todo details[open] { flex: 1 1 100%; margin-left: calc(24px + var(--s2)); }
+}

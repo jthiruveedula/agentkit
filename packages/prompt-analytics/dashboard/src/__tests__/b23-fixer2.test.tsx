@@ -60,9 +60,9 @@ describe("funnel previous-period drop", () => {
 });
 
 describe("tool switch headers", () => {
-  it("wrap long tool names at a break hint instead of truncating, with the full name in the title", () => {
+  it("print long tool names in full, never truncated, with the direction in the title", () => {
     const ss = [sess({ source: "claude_code" }), sess({ source: "antigravity" })];
     const h = render(<Funnel />, ss, { tool_switch: [{ from: "claude_code", to: "antigravity", count: 3 }, { from: "antigravity", to: "claude_code", count: 2 }] });
-    expect(h).toMatch(/class="mx-h" title="to Antigravity">Anti­gravity</);
+    expect(h).toMatch(/class="fl-to-i" title="to Antigravity"><small>3<\/small>Antigravity</);
   });
 });

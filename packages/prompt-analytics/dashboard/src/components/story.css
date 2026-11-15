@@ -21,20 +21,18 @@
 .brief .movers .tag b[data-tone="bad"] { color: var(--bad); } .brief .movers .tag b[data-tone="good"] { color: var(--good-ink); }
 .brief .movers button.tag:hover { border-color: var(--line-2); background: var(--surface); }
 
-.kpi-go { position: absolute; top: var(--s2); right: var(--s2); z-index: 2; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; font-size: 12px; }
+.kpi-go { position: absolute; top: 10px; right: 12px; z-index: 2; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; font-size: 12px; }
 
 .drv li:has(> button) { display: block; padding: 0; }
 .drv li > button { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 50%); gap: var(--s3); align-items: center; width: 100%; padding: var(--s2) var(--s1); background: transparent; font: inherit; color: inherit; text-align: left; }
 .drv li > button:hover { background: color-mix(in oklab, var(--accent) 6%, transparent); }
 .drv li > button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: var(--r1); }
 
-/* Overview as one page: the brief's rhythm carries down. 16px between blocks, 24px card padding,
-   one card header (title 16/600 + 13px subtitle on the left, actions centred on the right), no tinted washes. */
-#s-overview .grid { gap: var(--s4); }
-#s-overview .card { padding: var(--s5); }
-#s-overview .card-h { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t a" "m a"; align-items: start; gap: 2px var(--s4); min-height: 0; margin-bottom: var(--s4); }
-#s-overview .card-h h3 { grid-area: t; font: 600 16px/22px var(--sans); overflow-wrap: break-word; min-width: 0; }
-#s-overview .card-h .meta { grid-area: m; font-size: 13px; line-height: 18px; }
+/* Overview uses the shared card system (styles.css: 16px padding, 12px gap); only the header layout differs:
+   title 14/600 + 12px subtitle on the left, actions centred on the right, no tinted washes. */
+#s-overview .card-h { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t a" "m a"; align-items: start; gap: 2px var(--s4); min-height: 0; margin-bottom: var(--s3); }
+#s-overview .card-h h3 { grid-area: t; font: 600 14px/20px var(--sans); overflow-wrap: break-word; min-width: 0; }
+#s-overview .card-h .meta { grid-area: m; font-size: 12px; line-height: 16px; }
 #s-overview .card-acts { grid-area: a; align-self: center; margin: 0; flex-wrap: nowrap; gap: var(--s2); }
 /* card toggles share the header toolbar's look: a sunk track, the picked option raised */
 #s-overview .card-acts .seg { gap: 2px; padding: 2px; background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r2); }
@@ -43,7 +41,6 @@
 #s-overview .card-acts .seg button:hover:not([aria-pressed="true"]) { color: var(--ink); background: none; }
 #s-overview .card-acts .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 @container pa (max-width: 699px) {
-  #s-overview .card { padding: var(--s4); }
   #s-overview .card-h { grid-template-columns: minmax(0, 1fr); grid-template-areas: "t" "m" "a"; }
   #s-overview .card-acts { align-self: start; flex-wrap: wrap; margin-top: var(--s2); }
 }
@@ -70,8 +67,8 @@
 #s-overview .wh { max-width: none; }
 #s-overview .wh-v, #s-overview .wh-f, #s-overview .wh-p { font: 13px/20px var(--sans); font-variant-numeric: tabular-nums; }
 @media (min-width: 700px) { #s-overview .wh-r { grid-template-columns: minmax(80px, 22%) minmax(60px, 1fr) 13ch 13ch 9ch; } }
-/* headers wrap to two lines rather than run into the next column */
-#s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: normal; line-height: 14px; }
+/* headers stay on one line, numeric ones right-aligned over their columns */
+#s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: nowrap; line-height: 14px; }
 @media (pointer: coarse) { #s-overview .b-act, .b-top .b-acts .btn { height: auto; min-height: 40px; } }
 
 /* first row: the Brief ring. Under 980px of page width the Brief is full width (ring left, why right); at 980px+ it takes 5 of 12 columns beside the Key numbers (7). */
@@ -100,5 +97,43 @@
   #s-overview .brief .story dd { grid-column: auto; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; }
   #s-overview .brief .story dd > .b-act { grid-column: auto; justify-self: start; }
 }
-/* Slate polish: 20px between cards on a wide page */
-@container pa (min-width: 1001px) { .grid, #s-overview .grid { gap: 20px; } }
+
+/* brief: smaller ring, the culprit as before/now unit dots, share-of-change bar */
+.b-fig { margin: 0 0 var(--s3); display: grid; gap: 4px; }
+.b-fig figcaption { font: 600 13px/20px var(--sans); color: var(--ink); }
+.ud-r { display: flex; align-items: center; gap: var(--s2); min-height: 16px; font: 12px/16px var(--sans); color: var(--muted); min-width: 0; }
+.ud-l { width: 48px; flex: none; }
+.ud-n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ud { flex: 0 1 auto; min-width: 0; max-width: 100%; height: auto; }   /* viewBox keeps dots round as they shrink in narrow columns */
+.ud-s > span:last-child { white-space: nowrap; }
+.ud circle { fill: none; stroke: var(--line-2); stroke-width: 1; }
+.ud-r[data-r="prior"] .ud circle.ud-on { fill: var(--prior); stroke: var(--prior); }
+.ud-r[data-r="now"] .ud circle.ud-on { fill: var(--tone-ink); stroke: var(--tone-ink); }
+.ud-s { display: flex; align-items: center; gap: var(--s2); font: 12px/16px var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 4px; }
+.ud-t { flex: 0 1 240px; height: 4px; border-radius: 2px; background: var(--sunk); position: relative; min-width: 60px; }
+.ud-t i { position: absolute; inset: 0 auto 0 0; width: calc(var(--w) * 100%); background: var(--tone-ink); border-radius: 2px; }
+@container pa (min-width: 980px) {
+  #s-overview .brief .b-ring { width: 96px; height: 96px; }
+  #s-overview .brief .b-ring .b-num { font-size: 22px; }
+  #s-overview .brief .ring circle { stroke-width: 9; }   /* a thinner stroke at 96px: the number clears it */
+  #s-overview .grid > .brief { align-self: start; }   /* no stretched blank glass under the content */
+}
+
+/* brief: the "from" chip sits to the right of the ring at every width; between 700 and 979px the Why column centres on the ring */
+.lead:has(> .b-ring) { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--s4); }
+.lead:has(> .b-ring) > .b-foot { grid-column: 1 / -1; }
+@container pa (min-width: 700px) and (max-width: 979px) { .brief > .b-side { align-self: center; } }
+
+/* the receipt: culprit -> size of the move -> the fix. Three direct children (the last a <button>), 28px cells joined by 12px hairline arrows */
+.receipt { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) 12px; clip-path: inset(-4px -4px -4px 0); margin: 0; padding: 0; list-style: none; font-size: 12px; line-height: 16px; }
+.receipt > * { position: relative; display: inline-flex; align-items: center; min-width: 0; max-width: 100%; min-height: 28px; padding: 0 var(--s2); background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r1); color: var(--ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.receipt > :first-child { border-left: 2px solid var(--bad); }
+.receipt > * + *::before { content: ""; position: absolute; right: calc(100% + 1px); top: 50%; width: 12px; height: 1px; background: var(--muted); }
+.receipt > * + *::after { content: ""; position: absolute; right: calc(100% + 2px); top: calc(50% - 2.5px); width: 5px; height: 5px; border-top: 1px solid var(--muted); border-right: 1px solid var(--muted); rotate: 45deg; }
+.receipt > button { font-weight: 600; color: var(--accent); text-align: left; }
+.receipt > button:hover { border-color: var(--accent); }
+.receipt > button:focus-visible { outline-offset: -2px; }   /* inside the cell: the clip-path above cuts anything left of the row, a wrapped button sits on that edge */
+html.glass .receipt > * { background: oklch(1 0 0 / 0.55); border-color: var(--rim); }
+html.glass .receipt > :first-child { border-left-color: var(--bad); }
+html.glass .receipt > button:hover { border-color: var(--accent); }
+@media (pointer: coarse) { .receipt > button { min-height: 40px; } }

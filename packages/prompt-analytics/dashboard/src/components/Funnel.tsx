@@ -5,9 +5,10 @@ import { MIN_PRIOR_N } from "../lib/thresholds";
 import { fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { netValue } from "../lib/insights";
 import { intentColor, SOURCES, srcColor, srcLabel } from "../lib/palette";
-import { useRoving } from "../lib/hooks";
 import { linkProps } from "../lib/motion";
 import { BarList, Card, Cols, DataTable, Empty, Section, Segmented, pct } from "./ui";
+import { FlowLadder } from "./charts";
+import type { Source } from "../data/types";
 import "./investigate.css";
 import "./polish.css";
 
@@ -86,37 +87,18 @@ function NetValue() {
   );
 }
 
-/** Header text with a break hint, so a narrow column wraps the name instead of truncating it ("Antigr…"). */
-const WRAP: Record<string, string> = { opencode: "Open\u200bCode", antigravity: "Anti\u00adgravity" };
-
 function Switches() {
   const { d, drill, f } = useStore();
   const srcs = SOURCES.filter((s) => d.tool_switch.some((t) => t.from === s || t.to === s));
-  const get = (a: string, b: string) => d.tool_switch.find((t) => t.from === a && t.to === b)?.count ?? 0;
-  const peak = Math.max(...d.tool_switch.map((t) => t.count), 1);
-  const { group, mark } = useRoving(srcs.length * srcs.length, 1, Math.max(1, srcs.length));
   const moves = d.tool_switch.filter((t) => t.from !== t.to && srcs.includes(t.from) && srcs.includes(t.to));
   const topMove = moves.reduce<(typeof moves)[number] | null>((a, b) => (!a || b.count > a.count ? b : a), null);
   return (
     <Card so={topMove ? <><b>{fmtInt(moves.reduce((a, t) => a + t.count, 0))}</b> switches, most often {srcLabel(topMove.from)} to {srcLabel(topMove.to)}.</> : "Nothing flagged in this window."} thin={!topMove} src="tool_switch · all sessions" title="Tool switches" meta="all sessions: same project, under 24 h apart" span={5}>
       {srcs.length === 0 ? <Empty>No switches</Empty> : (
         <>
-          <div className="mx" role="group" aria-label="Tool switches, from row to column. Each cell filters by the tool switched from" style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>
-            <span className="mx-h" />{srcs.map((s) => <span key={s} className="mx-h" title={`to ${srcLabel(s)}`}>{WRAP[s] ?? srcLabel(s)}</span>)}
-            {srcs.map((a, r) => (
-              <div key={a} style={{ display: "contents" }}>
-                <span className="mx-l" title={`from ${srcLabel(a)}`}>{srcLabel(a)}</span>
-                {srcs.map((b, c) => {
-                  const n = get(a, b);
-                  return n === 0 ? <span key={b} className="cell none" aria-hidden="true" /> : (
-                    <button key={b} type="button" className="cell" aria-pressed={f.source === a} style={{ "--v": n / peak, "--d": r + c } as React.CSSProperties} title={`${srcLabel(a)} to ${srcLabel(b)}: ${n}`}
-                      aria-label={`${srcLabel(a)} to ${srcLabel(b)}: ${n} switches. Filter to sessions that started in ${srcLabel(a)}`} onClick={() => drill({ source: a })} {...mark(r * srcs.length + c)}>{n}</button>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-          <p className="note">Rows are the tool left, columns the tool moved to. A click filters by the origin tool only.</p>
+          <FlowLadder label="Tool switches: the tool left on the left, the tool moved to on the right. A name on the left filters by the tool switched from"
+            names={srcs.map((k) => ({ key: k, text: srcLabel(k) }))} flows={moves.map((t) => ({ from: t.from, to: t.to, n: t.count }))} on={f.source} onPick={(k) => drill({ source: k as Source })} />
+          <p className="note">Line width is the number of switches; the three most common are blue and carry their count. A name on the left filters by the origin tool.</p>
           <DataTable caption="Tool switches" head={["From", "To", "Count"]} rows={d.tool_switch.map((t) => [srcLabel(t.from), srcLabel(t.to), t.count])} />
         </>
       )}
