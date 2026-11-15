@@ -61,7 +61,7 @@ describe("repeats", () => {
     const r = structuredClone(raw); r.repeats = [{ cluster: 0, count: 5, exemplar: "deploy using AKIAIOSFODNN7EXAMPLE to prod", sessions: [r.sessions[0].id] }];
     mount(r, "#/s-friction");
     expect(el.textContent).toContain("times typed");
-    act(() => { [...el.querySelectorAll("button")].find((b) => b.textContent === "Turn into a slash command")!.click(); });
+    act(() => { [...el.querySelectorAll("button")].find((b) => b.textContent === "Make slash command")!.click(); });
     const copy = [...el.querySelectorAll("button")].find((b) => b.textContent === "Copy draft")!;
     expect(copy.disabled).toBe(true);
     expect(el.querySelector(".rep-d [role=status]")?.textContent).toBeTruthy();

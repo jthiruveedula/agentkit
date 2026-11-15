@@ -61,7 +61,7 @@ function Scorecard() {
             <tr key={r.key} {...linkProps(`tool:${r.key}`)} data-sel={f.source === r.key || undefined} style={{ "--i": sorted.indexOf(r) } as React.CSSProperties}>
               <th scope="row"><button type="button" aria-pressed={f.source === r.key} onClick={() => drill({ source: r.key as never })} aria-label={`${srcLabel(r.key)}: ${r.t.sessions} sessions. Filter to this tool`}>
                 {toolName(r.key)}</button></th>
-              <td>{fmtInt(r.t.sessions)}</td><td className="hide-s">{fmtInt(r.t.prompts)}</td><td className="hide-s">{fmtCompact(r.t.tokens)}</td>
+              <td>{fmtInt(r.t.sessions)}</td><td className="hide-s">{fmtInt(r.t.prompts)}</td><td className="hide-s">{r.t.tokens > 0 ? fmtCompact(r.t.tokens) : <span className="tag" title="no token data">no data</span>}</td>
               {on("cost") && <td>{r.t.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(r.t.cost)}{r.est ? <span className="tag">estimate</span> : null}</>}</td>}
               {on("cpa") && <td className="hide-s">{r.cpa === null ? "-" : fmtUSD(r.cpa)}</td>}
               <td data-low={r.t.asked < MIN_N || undefined} title={r.t.asked ? ciText(r.t.applied, r.t.asked) : undefined}>{r.t.asked ? <>{fmtPct(r.t.applied / r.t.asked)} <small className="n">n={fmtInt(r.t.asked)}{r.t.asked < MIN_N ? ", low" : ""}</small></> : "-"}</td><td>{r.t.asked ? r.t.friction.toFixed(2) : "-"}</td>
@@ -101,7 +101,7 @@ function Router() {
   const lead = best[0];
   const so = lead ? <>{lead.i} lands best in {colName(lead.c.source)}: <b>{fmtPct(lead.c.rate)}</b>.</> : <>No clear winner yet: no {what} stands out for any intent.</>;
   return (
-    <Card so={so} thin={!lead} src="sessions \u00b7 tool \u00d7 intent" id="s-router" title={title} meta={meta} span={12}>
+    <Card so={so} thin={!lead} src="sessions · tool × intent" id="s-router" title={title} meta={meta} span={12}>
       {srcs.length === 0 || ints.length === 0 ? <Empty /> : (
         <>
           <div className="mx rt" role="group" aria-label={`Applied rate by ${what} and intent. Each cell filters that pair`} style={{ "--cols": srcs.length } as React.CSSProperties} {...group}>

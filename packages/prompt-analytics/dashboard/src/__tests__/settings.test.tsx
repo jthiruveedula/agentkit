@@ -6,21 +6,20 @@ import { applySettings, loadSettings } from "../lib/settings";
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 const root = document.documentElement;
-afterEach(() => { localStorage.clear(); root.removeAttribute("data-accent"); root.style.removeProperty("--glass"); document.body.innerHTML = ""; });
+afterEach(() => { localStorage.clear(); root.style.removeProperty("--glass"); document.body.innerHTML = ""; });
 
 describe("display settings", () => {
   it("falls back to defaults on missing or junk storage", () => {
-    expect(loadSettings()).toEqual({ accent: "blue", glass: 2 });
+    expect(loadSettings()).toEqual({ glass: 2 });
     localStorage.setItem("pa.settings", "{not json");
-    expect(loadSettings()).toEqual({ accent: "blue", glass: 2 });
-    localStorage.setItem("pa.settings", JSON.stringify({ accent: "pink", glass: 9 }));
-    expect(loadSettings()).toEqual({ accent: "blue", glass: 2 });
+    expect(loadSettings()).toEqual({ glass: 2 });
+    localStorage.setItem("pa.settings", JSON.stringify({ glass: 9 }));
+    expect(loadSettings()).toEqual({ glass: 2 });
   });
 
   it("applies stored settings to :root", () => {
-    localStorage.setItem("pa.settings", JSON.stringify({ accent: "teal", glass: 0 }));
+    localStorage.setItem("pa.settings", JSON.stringify({ glass: 0 }));
     applySettings(loadSettings());
-    expect(root.dataset.accent).toBe("teal");
     expect(root.style.getPropertyValue("--glass")).toBe("0");
   });
 
@@ -31,12 +30,11 @@ describe("display settings", () => {
     const btn = el.querySelector<HTMLButtonElement>(".setbtn")!;
     act(() => btn.click());
     expect(el.querySelector('[role="dialog"]')).not.toBeNull();
-    act(() => el.querySelector<HTMLInputElement>('input[value="violet"]')!.click());
+    expect(el.querySelector('input[type="radio"]')).toBeNull();   // one accent: no picker
     const range = el.querySelector<HTMLInputElement>('input[type="range"]')!;
     act(() => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(range, "0"); range.dispatchEvent(new Event("input", { bubbles: true })); });
-    expect(root.dataset.accent).toBe("violet");
     expect(root.style.getPropertyValue("--glass")).toBe("0");
-    expect(JSON.parse(localStorage.getItem("pa.settings")!)).toEqual({ accent: "violet", glass: 0 });
+    expect(JSON.parse(localStorage.getItem("pa.settings")!)).toEqual({ glass: 0 });
     expect(el.querySelector("output")!.textContent).toBe("Off (solid)");
     act(() => { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); });
     expect(el.querySelector('[role="dialog"]')).toBeNull();

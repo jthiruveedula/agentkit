@@ -27,7 +27,16 @@ def _frames(rates: list[float], costs: list[float]):
 
 
 def test_shift_and_spike_in_plain_words():
-    rates = [0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3] + [0.7, 0.8, 0.7, 0.7, 0.8, 0.7, 0.7, 0.8]
+    rates = [0.3, 0.3, 0.4, 0.3, 0.3, 0.4, 0.3, 0.3] + [
+        0.7,
+        0.8,
+        0.7,
+        0.7,
+        0.8,
+        0.7,
+        0.7,
+        0.8,
+    ]
     costs = [20.0] * 7 + [21.0] * 8 + [200.0]
     out = insights._trends(*_frames(rates, costs))
     ids = {c["id"].split(".")[1] for c in out}

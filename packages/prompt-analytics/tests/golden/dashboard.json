@@ -5368,7 +5368,7 @@
    ]
   }
  },
- "generated_at": "2026-11-15T07:33:06Z",
+ "generated_at": "2026-11-15T10:01:13Z",
  "hour_week": [
   {
    "applied": 1,
@@ -6481,6 +6481,68 @@
    "rank": 2,
    "unit": "",
    "value": -0.4701
+  },
+  {
+   "chapter": "works",
+   "claim": "Your opening prompts of 155+ characters land code 88%, not 62%",
+   "delta": 0.4319,
+   "drill": {
+    "chapter": "works",
+    "filter": {}
+   },
+   "evidence": {
+    "baseline": 0.6167,
+    "ci": [
+     0.1272,
+     0.3637
+    ],
+    "cumulative": true,
+    "curve": [
+     {
+      "hi": 0.6157,
+      "label": "under 33",
+      "lo": 0.3684,
+      "n": 59,
+      "rate": 0.4915
+     },
+     {
+      "hi": 0.6365,
+      "label": "33-52",
+      "lo": 0.4302,
+      "n": 86,
+      "rate": 0.5349
+     },
+     {
+      "hi": 0.7945,
+      "label": "53-77",
+      "lo": 0.5778,
+      "n": 66,
+      "rate": 0.697
+     },
+     {
+      "hi": 0.8227,
+      "label": "78-154",
+      "lo": 0.6282,
+      "n": 76,
+      "rate": 0.7368
+     },
+     {
+      "hi": 0.9373,
+      "label": "over 154",
+      "lo": 0.7925,
+      "n": 77,
+      "rate": 0.8831
+     }
+    ],
+    "method": "rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m=4",
+    "n": 364,
+    "pick": 4
+   },
+   "id": "works.prompt_length",
+   "metric": "share of sessions with applied code, by opening prompt length (characters)",
+   "rank": 3,
+   "unit": "%",
+   "value": 88.3117
   }
  ],
  "quality": {

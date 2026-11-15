@@ -131,3 +131,6 @@ export function useMorph(target: number[], ms = 380): number[] {
   }, [key]);  // eslint-disable-line react-hooks/exhaustive-deps
   return !fxOn() || v.length !== target.length ? target : v;
 }
+
+/** True when a WebGL context can be made (false in jsdom and on blocklisted GPUs): gates the 3D bars, which fall back to the 2D grid. */
+export const hasWebGL = () => { try { return !!document.createElement("canvas").getContext("webgl"); } catch { return false; } };

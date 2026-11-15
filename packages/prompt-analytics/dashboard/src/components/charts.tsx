@@ -4,6 +4,7 @@ import type React from "react";
 import { useId, useRef, useState, type KeyboardEvent as RKE, type PointerEvent as RPE, type RefObject } from "react";
 import { useMorph, useRoving, useSize } from "../lib/hooks";
 import { iqr } from "../lib/baseline";
+import { niceTicks } from "../lib/trend";
 import "./baseline.css";
 
 /** Sparkline ceiling. `cap` clips at 2x the 75th percentile of non-zero values, so one spike day cannot flatten the rest. */
@@ -44,35 +45,41 @@ export function Spark({ values, w = 120, h = 24, cap = false }: { values: (numbe
  *  window's weekly average: `now` over the compared bars, `was` (dashed) over the earlier ones, or across the whole width when the
  *  earlier window is not drawn (a prior period). Decorative: the caption beside it carries the numbers. */
 export function WeekCols({ values, from, now, was, h = 34 }: { values: number[]; from: number; now?: number | null; was?: number | null; h?: number }) {
-  const n = values.length, w = Math.max(1, n * 4), top = Math.max(...values, now ?? 0, was ?? 0, 1), y = (v: number) => +(h - (v / top) * (h - 2)).toFixed(2);
-  const split = from > 0 && from < n;
+  // 12-unit columns, 2 apart, stretched across the tile's width (the caller passes up to 12 weeks, so the columns stay thin)
+  const n = values.length, P = 14, w = Math.max(1, n * P - 2), top = Math.max(...values, now ?? 0, was ?? 0, 1), y = (v: number) => +(h - (v / top) * (h - 2)).toFixed(2);
+  const split = from > 0 && from < n, sx = from * P - 1;
+  const bar = (x: number, t: number) => { const r = Math.min(2, h - t); return `M${x},${h}V${t + r}Q${x},${t} ${x + r},${t}H${x + 12 - r}Q${x + 12},${t} ${x + 12},${t + r}V${h}Z`; };
   return (
-    <svg className="wc" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      {values.map((v, i) => <rect key={i} className={i >= from ? "wc-b wc-now" : "wc-b"} x={i * 4 + 0.5} width={3} y={y(v)} height={h - y(v)} />)}
+    <svg className="wc" viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      {values.map((v, i) => <path key={i} className={i >= from ? "wc-b wc-now" : "wc-b"} style={{ "--i": i } as React.CSSProperties} d={bar(i * P, y(v))} />)}
       <line className="wc-ax" x1={0} x2={w} y1={h - 0.5} y2={h - 0.5} vectorEffect="non-scaling-stroke" />
-      {was != null && <line className="wc-was" x1={0} x2={split ? from * 4 : w} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
-      {now != null && <line className="wc-avg" x1={split ? from * 4 : 0} x2={w} y1={y(now)} y2={y(now)} vectorEffect="non-scaling-stroke" />}
+      {was != null && <line className="wc-was" x1={0} x2={split ? sx : w} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
+      {now != null && <line className="wc-avg" x1={split ? sx : 0} x2={w} y1={y(now)} y2={y(now)} vectorEffect="non-scaling-stroke" />}
     </svg>
   );
 }
 
-/** Semicircle gauge for a 0..1 rate: a thin 0-100 track, the fill to `p` (haloed so it reads apart from the band), a wider band for
- *  its interval [lo, hi], a dashed tick at the earlier value, 0 and 100 at the ends. Decorative. */
-export function gaugeArc(a: number, b: number, r = 40, cx = 48, cy = 48): string {
-  const at = (f: number) => `${+(cx - r * Math.cos(Math.PI * f)).toFixed(2)},${+(cy - r * Math.sin(Math.PI * f)).toFixed(2)}`;
-  return `M${at(a)}A${r},${r} 0 0 1 ${at(b)}`;
-}
-export function Gauge({ p, lo, hi, was }: { p: number; lo?: number; hi?: number; was?: number | null }) {
-  const c = (x: number) => Math.min(1, Math.max(0, x)), tick = (f: number, r: number) => [48 - r * Math.cos(Math.PI * c(f)), 48 - r * Math.sin(Math.PI * c(f))].map((v) => +v.toFixed(2));
-  const [x1, y1] = was != null ? tick(was, 31) : [0, 0], [x2, y2] = was != null ? tick(was, 49) : [0, 0];
+/** Horizontal bullet for a 0..1 rate: a 0-100% track, the likely range [lo, hi] as a band, a 2px marker at `p`, a short tick at the earlier value. Decorative: the text beside it carries the numbers. */
+export function Bullet({ p, lo, hi, was }: { p: number; lo?: number; hi?: number; was?: number | null }) {
+  const c01 = (x: number) => Math.min(1, Math.max(0, x)), at = (x: number) => `${+(c01(x) * 100).toFixed(2)}%`;
   return (
-    <svg className="gauge" viewBox="0 0 96 66" aria-hidden="true" focusable="false">
-      <path className="g-track" d={gaugeArc(0, 1)} />
-      {lo != null && hi != null && <path className="g-ci" d={gaugeArc(c(lo), c(hi))} />}
-      <path className="g-halo" d={gaugeArc(0, Math.max(0.002, c(p)))} />
-      <path className="g-fill" d={gaugeArc(0, Math.max(0.002, c(p)))} />
-      <text className="g-end" x={8} y={65} textAnchor="middle">0</text><text className="g-end" x={88} y={65} textAnchor="middle">100</text>
-      {was != null && <line className="g-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
+    <div className="bul" aria-hidden="true">
+      {lo != null && hi != null && <i className="bu-ci" style={{ left: at(lo), width: `calc(${at(hi)} - ${at(lo)})` }} />}
+      {was != null && <i className="bu-was" style={{ left: at(was) }} />}
+      <i className="bu-now" style={{ left: at(p), "--d": was != null ? +(c01(was) - c01(p)).toFixed(4) : 0 } as React.CSSProperties} />
+    </div>
+  );
+}
+
+/** Closed ring for a 0..1 rate: track, fill from 12 o'clock to `p`, a short tick across the ring at the earlier value `was`. Decorative; the caller names it. */
+export function Ring({ p, was }: { p: number; was?: number | null }) {
+  const c = (x: number) => Math.min(1, Math.max(0, x)), R = 50, at = (f: number, r: number) => [60 + r * Math.sin(2 * Math.PI * c(f)), 60 - r * Math.cos(2 * Math.PI * c(f))].map((v) => +v.toFixed(2));
+  const [x1, y1] = was != null ? at(was, R - 9) : [0, 0], [x2, y2] = was != null ? at(was, R + 9) : [0, 0];
+  return (
+    <svg className="ring" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+      <circle className="r-track" cx="60" cy="60" r={R} />
+      <circle className="r-fill" cx="60" cy="60" r={R} pathLength="100" strokeDasharray={`${Math.max(0.4, c(p) * 100)} 100`} />
+      {was != null && <line className="r-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
     </svg>
   );
 }
@@ -114,10 +121,8 @@ export function Ramp({ max, label, fmt = (n: number) => `${Math.round(n * 100)}%
 
 const PAD0 = { l: 44, r: 10, t: 10, b: 22 };
 /** Left gutter wide enough for the longest tick label (so a leading "$" never clips). */
-const padFor = (max: number, fmt: (n: number) => string) => ({ ...PAD0, l: Math.max(PAD0.l, 14 + 6.6 * Math.max(...[0, 0.5, 1].map((t) => fmt(max * t).length))) });
+const padFor = (tk: number[], fmt: (n: number) => string) => ({ ...PAD0, l: Math.max(PAD0.l, 14 + 6.6 * Math.max(...tk.map((t) => fmt(t).length))) });
 const key = (fn: () => void) => (e: RKE) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } };
-const ticks = (max: number, fmt: (n: number) => string) => [0, 0.5, 1].map((t) => ({ t, text: fmt(max * t) }));
-
 export interface Line { name: string; color: string; values: number[]; dashed?: boolean }
 interface LineProps {
   lines: Line[]; labels: string[]; fmt: (n: number) => string; label: string; height?: number;
@@ -140,8 +145,8 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
   const drag = useRef<{ x0: number; moved: boolean } | null>(null);
   const swallow = useRef(false);
   const [brush, setBrush] = useState<[number, number] | null>(null);
-  const max = Math.max(...lines.flatMap((l) => l.values), 0) || 1;
-  const PAD = padFor(max, fmt);
+  const { ticks: tk, max } = niceTicks(Math.max(...lines.flatMap((l) => l.values), 0));
+  const PAD = padFor(tk, fmt);
   const iw = Math.max(1, w - PAD.l - PAD.r), ih = H - PAD.t - PAD.b;
   const x = (i: number) => PAD.l + (n > 1 ? i / (n - 1) : 0.5) * iw;
   const y = (v: number) => PAD.t + (1 - v / max) * ih;
@@ -161,7 +166,7 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
     <div className="chart" ref={group.ref as never} onKeyDown={group.onKeyDown} style={{ minHeight: height }}>
       {w > 0 && n > 0 && (
         <svg width={w} height={H} style={{ position: "absolute", left: 0, top: 0 }} role="group" aria-label={label} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={() => { drag.current = null; setBrush(null); }}>
-          {ticks(max, fmt).map((k) => <g key={k.t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(max * k.t)} y2={y(max * k.t)} /><text className="ax" x={PAD.l - 6} y={y(max * k.t) + 4} textAnchor="end">{k.text}</text></g>)}
+          {tk.map((t) => <g key={t}><line className="grid-l" x1={PAD.l} x2={w - PAD.r} y1={y(t)} y2={y(t)} /><text className="ax" x={PAD.l - 6} y={y(t) + 4} textAnchor="end">{fmt(t)}</text></g>)}
           {[0, Math.floor((n - 1) / 2), n - 1].filter((v, i, a) => a.indexOf(v) === i).map((i, k, a) => <text key={i} className="ax" x={x(i)} y={H - 6} textAnchor={k === 0 ? "start" : k === a.length - 1 ? "end" : "middle"}>{labels[i]}</text>)}
           {brush && <rect className="brush" x={x(Math.min(...brush)) - step / 2} y={PAD.t} width={Math.abs(x(brush[1]) - x(brush[0])) + step} height={ih} />}
           {[...lines].reverse().map((l) => <polyline key={l.name} className={l.dashed ? "line fade" : "line draw"} pathLength={l.dashed ? undefined : 1} fill="none" stroke={l.color} strokeDasharray={l.dashed ? "4 3" : undefined} points={l.values.map((v, i) => `${x(i)},${y(v)}`).join(" ")} />)}
@@ -175,6 +180,55 @@ export function LineChart({ lines: target, labels, fmt, label, height = 190, onP
           ))}
         </svg>
       )}
+    </div>
+  );
+}
+
+/** One dot per session with a prompt, struggled first (filled `.ud-on`), the rest outlined: 7px dots, 3px apart, 12 to a row so they never
+ *  shrink in a narrow column. Decorative: the row's label and count carry the numbers. */
+export function UnitDots({ k, n }: { k: number; n: number }) {
+  const W = 10, C = Math.max(1, Math.min(n, 12)), w = C * W, h = 16 + (Math.ceil(n / C) - 1) * W;
+  return (
+    <svg className="ud" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" focusable="false">
+      {Array.from({ length: n }, (_, i) => <circle key={i} className={i < k ? "ud-on" : undefined} style={i < k ? { "--i": i } as React.CSSProperties : undefined} cx={(i % C) * W + 5} cy={8 + Math.floor(i / C) * W} r={3.5} />)}
+    </svg>
+  );
+}
+
+export interface Flow { from: string; to: string; n: number }
+/** Flow ladder: the same names in two columns (left = from, right = to) and one straight ribbon per pair, width = count (14px at the largest).
+ *  The three largest are accent, the rest grey; each end of a ribbon has its own slot on its name, so ribbons never share a pixel there.
+ *  Only the three largest print their count (every count is in the ribbon's tooltip and the caller's DataTable). A from-name is a button (`onPick`). */
+export function FlowLadder({ names, flows, on, onPick, label }: { names: { key: string; text: string }[]; flows: Flow[]; on?: string; onPick: (key: string) => void; label: string }) {
+  const ix = new Map(names.map((x, i) => [x.key, i])), text = (k: string) => names[ix.get(k) ?? 0].text;
+  const fs = flows.filter((x) => x.n > 0 && ix.has(x.from) && ix.has(x.to)), peak = Math.max(...fs.map((x) => x.n), 1), GAP = 2;
+  const wd = (n: number) => Math.max(1.5, (n / peak) * 14);
+  const side = (k: string, end: "from" | "to") => fs.filter((x) => x[end] === k).sort((a, b) => ix.get(a[end === "from" ? "to" : "from"])! - ix.get(b[end === "from" ? "to" : "from"])!);
+  const stack = (xs: Flow[]) => xs.reduce((a, x) => a + wd(x.n), 0) + Math.max(0, xs.length - 1) * GAP;
+  const rh = Math.ceil(Math.max(28, ...names.flatMap((x) => [stack(side(x.key, "from")), stack(side(x.key, "to"))]).map((h) => h + 8)));
+  // y of one ribbon end: its slot in the stack centred on the name's row
+  const yOf = (x: Flow, end: "from" | "to") => { const xs = side(x[end], end); let y = (ix.get(x[end])! + 0.5) * rh - stack(xs) / 2; for (const o of xs) { if (o === x) return +(y + wd(o.n) / 2).toFixed(1); y += wd(o.n) + GAP; } return y; };
+  const ranked = [...fs].sort((a, b) => b.n - a.n), top = ranked.slice(0, 3), H = names.length * rh;
+  const sum = (k: string, end: "from" | "to") => side(k, end).reduce((a, x) => a + x.n, 0);
+  return (
+    <div className="fl" role="group" aria-label={label} style={{ "--rh": `${rh}px` } as React.CSSProperties}>
+      <span className="fl-h" aria-hidden="true">From</span><span /><span className="fl-h" aria-hidden="true">To</span>
+      <ul className="fl-from">
+        {names.map((x) => { const out = side(x.key, "from"), big = out.reduce<Flow | null>((a, b) => (!a || b.n > a.n ? b : a), null);
+          return (
+            <li key={x.key}><button type="button" aria-pressed={on === x.key} title={`from ${x.text}`} onClick={() => onPick(x.key)}
+              aria-label={`${x.text}: ${big ? `${sum(x.key, "from")} switches away, most to ${text(big.to)} (${big.n})` : "no switches away"}. Filter to sessions that started in ${x.text}`}>{x.text}<small>{sum(x.key, "from") || "–"}</small></button></li>
+          ); })}
+      </ul>
+      <div className="fl-mid" style={{ height: H }} aria-hidden="true">
+        <svg viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" focusable="false">
+          {[...ranked].reverse().map((x) => <line key={`${x.from}>${x.to}`} className={top.includes(x) ? "fl-top" : undefined} x1={0} x2={100} y1={yOf(x, "from")} y2={yOf(x, "to")} strokeWidth={+wd(x.n).toFixed(1)} vectorEffect="non-scaling-stroke"><title>{`${text(x.from)} to ${text(x.to)}: ${x.n}`}</title></line>)}
+        </svg>
+        {top.map((x, i) => { const t = [0.3, 0.5, 0.7][i], a = yOf(x, "from"), b = yOf(x, "to"); return <span key={`${x.from}>${x.to}`} className="fl-n" style={{ left: `${t * 100}%`, top: +(a + (b - a) * t).toFixed(1) }}>{x.n}</span>; })}
+      </div>
+      <ul className="fl-to">
+        {names.map((x) => <li key={x.key} className="fl-to-i" title={`to ${x.text}`}><small>{sum(x.key, "to") || "–"}</small>{x.text}</li>)}
+      </ul>
     </div>
   );
 }

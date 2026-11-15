@@ -9,7 +9,7 @@ import type { DashboardData } from "../data/types";
 import { EnginePill } from "./Engine";
 import { Segmented } from "./ui";
 import { openPalette } from "./Palette";
-import { ACCENTS, GLASS, applySettings, loadSettings, saveSettings, type Settings } from "../lib/settings";
+import { GLASS, applySettings, loadSettings, saveSettings, type Settings } from "../lib/settings";
 
 type Period = "30" | "90" | "all" | "custom";
 /** Filters the badge counts: the panel's own selects, plus the model (set from the Model mix legend, shown as a chip). */
@@ -252,11 +252,6 @@ export function Prefs() {
       </button>
       {open && (
         <div id="prefs" ref={box} className="prefs" role="dialog" aria-label="Display settings">
-          <fieldset><legend>Accent</legend>
-            <div className="prefs-opts">{ACCENTS.map(([id, text]) => (
-              <label key={id}><input type="radio" name="pa-accent" value={id} checked={s.accent === id} onChange={() => put({ accent: id })} />{text}</label>
-            ))}</div>
-          </fieldset>
           <label><span>Glass</span>
             <input type="range" min={0} max={GLASS.length - 1} step={1} value={s.glass} aria-valuetext={GLASS[s.glass][1]} onChange={(e) => put({ glass: +e.target.value })} />
             <output>{GLASS[s.glass][1]}</output>

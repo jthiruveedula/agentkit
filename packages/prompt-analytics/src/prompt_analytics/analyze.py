@@ -298,6 +298,11 @@ def run(
             pl.col("quality").first().alias("first_quality"),
         )
     )
+    first_len = (
+        u.filter(pl.Series(sub))
+        .group_by("session_id", maintain_order=True)
+        .agg(pl.col("text_len").first().alias("first_len"))
+    )
     work = (
         pl.concat([b.tool_calls.select("session_id"), b.edits.select("session_id")])
         .unique()
@@ -321,6 +326,7 @@ def run(
         .join(ta, on="session_id", how="left")
         .join(pa, on="session_id", how="left")
         .join(first, on="session_id", how="left")
+        .join(first_len, on="session_id", how="left")
         .join(work, on="session_id", how="left")
         .join(applied, on="session_id", how="left")
         .join(outc, on="session_id", how="left")

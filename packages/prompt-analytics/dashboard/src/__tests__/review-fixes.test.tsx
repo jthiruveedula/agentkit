@@ -56,12 +56,12 @@ describe("review fixes", () => {
     expect(h).toMatch(/Struggling held at about 10\.0%/);
     expect(htmlText(h)).toMatch(/of sessions struggled: 10\.0%, about the same as 10\.0%/);
     expect(htmlText(h)).toMatch(/±0 pts 0 could be -?\d+\.\d to \+\d+\.\d120 vs 120 sessions with a prompt/);   // the range is a visible caption; the bar's "0" labels its zero tick
-    expect(h).toMatch(/<dt>Do next<\/dt>/);   // row 1 of the Do-next list
+    expect(h).toMatch(/id="s-next"/);   // Do next is its own list under the first row, not a Brief row
     expect(h).not.toMatch(/data-kpi="struggled"/);
   });
   it("Brief names the driver once, with its counts and sessions button", () => {
     const h = win([[4, 24], [4, 4], [4, 4]]);
-    expect(h).toMatch(/<b>p0 \/ bugfix<\/b>: 24 of its 40 sessions struggled, up from 4 of 40\./);
+    expect(h).toMatch(/aria-label="p0 \/ bugfix: 24 of its 40 sessions struggled, up from 4 of 40\./);
     expect(h).toMatch(/>Open 40 sessions</);
     expect(h).not.toMatch(/mostly|partly/);
     const spread = win([[4, 16], [4, 16], [4, 16]]);

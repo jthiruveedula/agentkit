@@ -11,7 +11,7 @@ import "./polish.css";
 const SHOW = 3;
 type Rep = ReturnType<typeof shownRepeats>[number];
 
-function Row({ r, slug, cost }: { r: Rep; slug: string; cost: ReturnType<typeof repeatCost> }) {
+function Row({ r, slug, cost, lead }: { r: Rep; slug: string; cost: ReturnType<typeof repeatCost>; /** the card's one solid button */ lead: boolean }) {
   const { openSession } = useStore();
   const [open, setOpen] = useState(false), [name, setName] = useState(slug);
   const [text, setText] = useState(() => draftCommand(r, slug).text);   // editable; the secret scan re-runs on every change
@@ -24,16 +24,14 @@ function Row({ r, slug, cost }: { r: Rep; slug: string; cost: ReturnType<typeof 
     a.href = url; a.download = `${file}.md`; a.click(); URL.revokeObjectURL(url);
   };
   return (
-    <li className="rep">
-      <p className="rep-n"><b>{fmtInt(r.count)}</b><span>times typed, whole export</span></p>
+    <li className="rep-row">
+      <b title="times typed, whole export">{fmtInt(r.count)}<span className="sr-only"> times typed, whole export</span></b>
       <div className="rep-b">
-        <p className="rep-h meta">Across {fmtInt(r.sessions.length)} session{r.sessions.length === 1 ? "" : "s"}</p>
-        <blockquote className="rep-q">{r.exemplar}</blockquote>
-        <p className="meta">~{fmtCompact(cost.tokens)} tokens{cost.cost !== null ? ` / ${fmtUSD(cost.cost)}${cost.priced < r.sessions.length ? ` (${fmtInt(cost.priced)} priced)` : ""}` : ""} across these sessions</p>
-        <div className="rep-a">
-          <button type="button" className="btn primary" aria-expanded={open} aria-controls={id} aria-label={`${open ? "Hide" : "Turn into"} slash command /${slug}, typed ${r.count} times`} onClick={() => setOpen(!open)}>{open ? "Hide draft" : "Turn into a slash command"}</button>
-          <button type="button" className="link" aria-label={`Open latest session where /${slug} was typed`} onClick={() => openSession(r.sessions[0])}>Open latest session</button>
-        </div>
+        <blockquote className="rep-q" title={r.exemplar}>{r.exemplar}</blockquote>
+        <p className="meta">{fmtInt(r.sessions.length)} session{r.sessions.length === 1 ? "" : "s"} · ~{fmtCompact(cost.tokens)} tokens{cost.cost !== null ? ` · ${fmtUSD(cost.cost)}${cost.priced < r.sessions.length ? ` (${fmtInt(cost.priced)} priced)` : ""}` : ""}</p>
+      </div>
+      <button type="button" className={lead ? "btn primary" : "btn"} aria-expanded={open} aria-controls={id} aria-label={`${open ? "Hide draft of" : "Make"} slash command /${slug}, typed ${r.count} times`} onClick={() => setOpen(!open)}>{open ? "Hide draft" : "Make slash command"}</button>
+      <button type="button" className="link" aria-label={`Open latest session where /${slug} was typed`} onClick={() => openSession(r.sessions[0])}>Open latest</button>
         {open && (
           <div className="rep-d" id={id}>
             <label className="rep-f"><span className="meta">Command name</span><input value={name} onChange={(e) => setName(e.target.value)} onBlur={() => setName(file)} spellCheck={false} aria-describedby={`${id}-p`} /></label>
@@ -46,7 +44,6 @@ function Row({ r, slug, cost }: { r: Rep; slug: string; cost: ReturnType<typeof 
             </div>
           </div>
         )}
-      </div>
     </li>
   );
 }
@@ -74,9 +71,9 @@ export function Repeats() {
       actions={<><span className="chip">Whole export</span>{rows.length > 1 && <Segmented quiet label="Sort repeated prompts" value={sort} onChange={setSort} options={[{ id: "count", text: "Most typed" }, { id: "cost", text: "Most spend" }]} />}</>}>
       {rows.length === 0 ? <p className="note">No prompt came up three or more times across sessions. Nothing to turn into a command yet.</p> : (
         <>
-          <ul className="reps">{shown.map((x) => <Row key={x.r.cluster + x.r.exemplar} {...x} />)}</ul>
+          <ul className="reps">{shown.map((x, i) => <Row key={x.r.cluster + x.r.exemplar} {...x} lead={i === 0} />)}</ul>
           {rows.length > SHOW && <button type="button" className="link rep-more" aria-expanded={all} onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show ${rows.length - SHOW} more`}</button>}
-          <p className="note">{spend.cost !== null ? `Together they cost ${fmtUSD(spend.cost)} across ${fmtInt(spend.sessions)} sessions.` : `Together they used ~${fmtCompact(spend.tokens)} tokens across ${fmtInt(spend.sessions)} sessions.`} Drafts are checked for secrets before they can be copied or downloaded. Cost is the whole of those sessions, not only the repeated prompt.</p>
+          <p className="note">{spend.cost !== null ? `Together they cost ${fmtUSD(spend.cost)} across ${fmtInt(spend.sessions)} sessions.` : `Together they used ~${fmtCompact(spend.tokens)} tokens across ${fmtInt(spend.sessions)} sessions.`} Drafts are checked for secrets before they can be copied or downloaded. Tokens and cost are the whole of those sessions, not only the repeated prompt.</p>
         </>
       )}
     </Card>

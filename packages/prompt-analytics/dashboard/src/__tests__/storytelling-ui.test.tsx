@@ -82,13 +82,12 @@ describe("storytelling UI", () => {
     expect(params().get("pn")).toBe("list");
   });
 
-  it("story has both rows and the driver button opens its sessions", () => {
+  it("story has the Why row and the driver button opens its sessions; Do next is the list under the first row", () => {
     mount();
     const dl = el.querySelector("dl.story")!;
     expect(dl.textContent).toContain("Why");
-    expect(dl.textContent).toContain("Do next");
-    expect(dl.querySelector(":scope > div:last-child .b-say")!.textContent).toBe(el.querySelector("#s-next li")!.querySelector("h4")!.textContent);   // Do next is row 1 of the list
-    expect([...dl.querySelectorAll("button")].some((b) => b.textContent === "See Exposure")).toBe(true);   // an open secret leads, and it has no filter, so the button jumps to its evidence
+    expect(dl.textContent).not.toContain("Do next");
+    expect([...el.querySelectorAll("#s-next button")].some((b) => b.textContent === "See Exposure")).toBe(true);   // an open secret leads, and it has no filter, so the button jumps to its evidence
     click(dl.querySelector(".btn.primary"));
     expect(params().get("prj")).toBe("billing-api");
     expect(params().get("pn")).toBe("list");
@@ -105,7 +104,8 @@ describe("storytelling UI", () => {
     expect(txt(".b-cap")).toBe("of sessions struggled: 1 in 9, up from 1 in 39");
     expect(txt(".ci")).toBe("+8.4 pts 0 likely +4.2 to +14.2");   // "0" labels the bar's zero tick
     expect(txt(".b-foot")).toBe("164 vs 623 sessions with a prompt");
-    expect(txt("dl.story dd")).toMatch(/^billing-api \/ bugfix: 12 of its 15 sessions struggled, up from 4 of 37\. Open 15 sessions$/);
+    expect(br.querySelector("figure.b-fig")!.getAttribute("aria-label")).toMatch(/^billing-api \/ bugfix: 12 of its 15 sessions struggled, up from 4 of 37\./);
+    expect(txt("dl.story dd")).toMatch(/^billing-api \/ bugfixBefore4 of 37Now12 of 15.*Open 15 sessions$/);
     expect(el.querySelectorAll(".kpis.k6 > li")).toHaveLength(6);
     expect(el.querySelector("#s-driver")!.textContent).not.toMatch(/Needs an earlier window/);
     expect(el.querySelector("#s-driver .meta")!.textContent).toBe("Last 4 weeks vs the 22 weeks before. Points each row added to the change; right is worse");
@@ -113,8 +113,8 @@ describe("storytelling UI", () => {
     expect([params().get("prj"), params().get("int"), params().get("from"), params().get("pn")]).toEqual(["billing-api", "bugfix", "2026-09-28", "list"]);
   });
 
-  it("movers row renders chips on the 30d window", () => {
+  it("Also moved drops chips whose metric has a Key numbers tile", () => {
     mount();
-    expect(el.querySelectorAll("p.movers .tag").length).toBeGreaterThan(0);
+    for (const t of el.querySelectorAll("p.movers .tag")) expect(t.textContent).not.toMatch(/^(Cost per applied change|Sessions|Applied)/);
   });
 });

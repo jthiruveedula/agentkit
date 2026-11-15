@@ -73,25 +73,23 @@ describe("Do next matching", () => {
     recommendations: [{ ...base.recommendations[0], id: "rX", title: "RECTITLE", evidence_insight: "iX" }] });
   const driver = () => rows("p0", 40, 4, 40, 24);   // driver = p0 / bugfix
   const brief = (h: string) => new DOMParser().parseFromString(h, "text/html").querySelector("section.brief")!.textContent!;
-  it("a recommendation about the driver is Do next, with the same button as its row", () => {
+  const next = (h: string) => new DOMParser().parseFromString(h, "text/html").querySelector("#s-next")!.textContent!;
+  it("a recommendation about the driver is row 1 of Do next, which sits under the first row, not in the Brief", () => {
     const h = html(driver(), ins({ project: "p0" }));
-    expect(brief(h)).toMatch(/RECTITLE/);
-    expect(h.match(/aria-label="Open 40 sessions behind: RECTITLE">Open 40 sessions</g)).toHaveLength(2);   // the Brief and row 1
+    expect(next(h)).toMatch(/RECTITLE/);
+    expect(brief(h)).toMatch(/Fix #1: RECTITLE/);   // the receipt points at the row; the list itself stays out of the Brief
+    expect(brief(h)).not.toMatch(/Do next/);
+    expect(h.match(/aria-label="Open 40 sessions behind: RECTITLE">Open 40 sessions</g)).toHaveLength(1);
   });
   it("matches when project matches and only one side has an intent", () => {
-    expect(brief(html(driver(), ins({ project: "p0", intent: "bugfix" })))).toMatch(/RECTITLE/);
-    expect(brief(html(driver(), ins({ project: "p0" })))).toMatch(/RECTITLE/);
-  });
-  it("the Brief reads row 1 of the list, so a recommendation about another project never leads past the driver's", () => {
-    for (const f of [{ project: "other" }, { project: "p0", intent: "refactor" }, {}, { intent: "bugfix" }]) {
-      const h = html(driver(), ins(f)), doc = new DOMParser().parseFromString(h, "text/html");
-      expect(doc.querySelector("section.brief dl.story > div:last-child .b-say")?.textContent).toBe(doc.querySelector("#s-next li h4")?.textContent);
-    }
+    expect(next(html(driver(), ins({ project: "p0", intent: "bugfix" })))).toMatch(/RECTITLE/);
+    expect(next(html(driver(), ins({ project: "p0" })))).toMatch(/RECTITLE/);
   });
   it("Open N sessions counts what the drill-down returns, prompt-less sessions included", () => {
     const h = html([...driver(), ...Array.from({ length: 3 }, () => sess({ prompts: 0 }))]);
     expect(h).toMatch(/of its 40 sessions struggled/);
-    expect(h.match(/aria-label="Open 43 sessions: p0 \/ bugfix">Open 43 sessions</g)).toHaveLength(2);   // Brief and Drivers panel
+    expect(h.match(/aria-label="Open 43 sessions: p0 \/ bugfix">Open 43 sessions</g)).toHaveLength(1);   // the Brief keeps the one button
+    expect(h.match(/aria-label="Open these 43 sessions: p0 \/ bugfix">Open these 43</g)).toHaveLength(1);   // the Drivers panel links to the same sessions
   });
   it("with no driver the recommendation is listed", () => {
     expect(html(rows("p0", 40, 4, 40, 4), ins({ project: "other" }))).toMatch(/RECTITLE/);

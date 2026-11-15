@@ -5,8 +5,12 @@
 
 /* no-gain columns: 0-100% scale (top labelled), a 95% Wilson whisker per column, one label per column under it */
 .ng-plot { position: relative; padding-top: 16px; }
-.ng-ci { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; border-top: 1px dashed var(--line); pointer-events: none; }
-.ng-top { position: absolute; right: 0; bottom: 100%; font-size: 11px; line-height: 14px; color: var(--muted); }
+.ng-plot .cols { gap: 2px; }
+.ng-plot .col i { border-radius: 4px 4px 0 0; }
+.ng-ci { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; border-top: 1px solid var(--line); pointer-events: none; }
+.ng-ci::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
+.ng-top, .ng-mid { position: absolute; right: 0; bottom: 100%; font-size: 11px; line-height: 14px; color: var(--muted); }
+.ng-mid { bottom: 50%; }
 .ng-ci i { position: absolute; width: 9px; margin-left: -4.5px; box-sizing: border-box; min-height: 2px; border-block: 1.5px solid var(--ink);
   background: linear-gradient(var(--ink), var(--ink)) center / 1.5px 100% no-repeat; }
 .ng-x { display: flex; gap: 3px; margin-top: var(--s1); font-size: 12px; line-height: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -24,8 +28,22 @@
    Selectors carry one extra class: styles.css loads after component CSS, so equal specificity would lose. */
 .card .mx { grid-template-columns: max-content repeat(var(--cols), minmax(0, 1fr)); }
 .mx .mx-l { overflow: visible; text-overflow: clip; }
-.mx .mx-h { align-self: end; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; line-height: 14px; padding-bottom: 2px; }
+.mx .mx-h { align-self: end; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: normal; word-break: keep-all; hyphens: none; min-width: 0; line-height: 14px; padding-bottom: 2px; }
 
 /* Card toggles (Quality profile tool tabs) wrap inside the card at 375 instead of running past its edge */
 .card-acts { max-width: 100%; min-width: 0; }
 .card-acts .seg { flex-wrap: wrap; overflow: visible; }
+
+/* Signals heat table: rows stretch to fill the card (cells cap at 72px), cell shade = value / table max, value always printed in ink */
+/* .sig-wrap (.sg-wrap is the older name): scrolls sideways under 440px of table, the row labels stay put on an opaque surface */
+.sg-wrap, .sig-wrap { display: grid; flex: 1 1 auto; max-height: 392px; max-width: 100%; overflow-x: auto; }
+.sg { width: 100%; min-width: 440px; height: 100%; border-collapse: separate; border-spacing: 2px; table-layout: fixed; }
+.sg caption { text-align: left; }
+.sg th { font-size: 12px; font-weight: 400; color: var(--muted); text-align: center; padding: 0 2px; }
+.sg thead th { height: 28px; max-width: 64px; font-size: 11px; line-height: 14px; white-space: normal; overflow-wrap: anywhere; vertical-align: bottom; }
+.sg tbody th { text-align: left; font-weight: 600; color: var(--ink); white-space: nowrap; padding-right: var(--s2); font-size: 12px; line-height: 16px; }
+.sg :is(thead, tbody) tr > :first-child { width: 88px; position: sticky; left: 0; z-index: 1; background: var(--surface); }
+.sg td { height: 42px; max-height: 72px; text-align: center; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); border-radius: var(--r1);
+  background: color-mix(in oklab, var(--accent) calc(8% + var(--v, 0) * 52%), var(--sunk)); }
+@media (max-width: 699px) { .rt .mx-h { font-size: 11px; letter-spacing: -0.02em; } .card .rt { grid-template-columns: minmax(56px, max-content) repeat(var(--cols), minmax(max-content, 1fr)); overflow-x: auto; } }   /* .card .rt: must outrank `.card .mx` above */
+.sig-wrap[data-more] { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
