@@ -131,7 +131,7 @@ const Close = () => {
           {check && <Lottie animationData={check} loop={false} style={{ width: 120, height: 120 }} />}
           <In at={10}><div style={{ font: `600 60px/1.1 ${SANS}`, letterSpacing: "-.02em", color: C.ink }}>Every claim ships with <Em c={C.good}>n</Em> and a <Em c={C.good}>CI</Em>.</div></In>
         </div>
-        <div style={{ position: "absolute", left: 96, top: 330 }}><In at={20}><Eyebrow>In the dashboard · PR #135</Eyebrow></In></div>
+        <div style={{ position: "absolute", left: 96, top: 330 }}><In at={20}><Eyebrow>In the dashboard · PR #136</Eyebrow></In></div>
         <div style={{ position: "absolute", right: 96, top: 290, display: "flex", flexDirection: "column", gap: 20 }}>
           <Card src="shots/curve-retry.png" at={24} /><Card src="shots/curve-length.png" at={30} /><Card src="shots/curve-daypart.png" at={36} />
         </div>
