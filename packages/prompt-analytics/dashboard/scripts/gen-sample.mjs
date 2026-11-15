@@ -256,6 +256,27 @@ const topFric = friction.by_intent[0];
 const top = tool_switch[0] ?? { from: "cursor", to: "claude_code", count: 0 };
 const NAME = { claude_code: "Claude Code", copilot: "Copilot", cursor: "Cursor", opencode: "opencode", antigravity: "Antigravity" };
 const ev = (n, method = "bootstrap") => ({ n, ci: [0, 1], method });
+// Curve insights (mock; no retry cliff: these rows' applied rate rises with retries, so Loop breaker's "no clear effect" stands), the shape ml/curves.py standout() exports: applied rate per ordered bin with a 95% Wilson interval, the bin the claim
+// is about, and the Newcombe-Wilson CI of its gap to all other sessions at the Bonferroni z for the bins tested. Each session's bin is an id hash
+// whose odds depend on `applied`: a hidden attribute, so no row changes and no rnd() draw (it is independent of the rows' own `loops` and hours).
+const wilson = (k, n, z = 1.96) => { if (!n) return [0, 0, 1]; const p = k / n, d = 1 + (z * z) / n, c = (p + (z * z) / (2 * n)) / d, h = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / d; return [p, Math.max(0, c - h), Math.min(1, c + h)]; };
+const curveInsight = ({ id, chapter, metric, labels, odds, pick, cumulative, z, m, claim }) => {
+  const k = labels.map(() => 0), n = labels.map(() => 0);
+  for (const x of asked) { let u = (fnv(x.id + id) % 10000) / 10000, i = 0; const w = odds[x.applied ? 1 : 0]; while (i < w.length - 1 && (u -= w[i]) > 0) i++; n[i]++; if (x.applied) k[i]++; }
+  const inPick = (i) => (cumulative ? i >= pick : i === pick), tot = (a, f) => a.reduce((t, v, i) => t + (f(i) ? v : 0), 0);
+  const [p1, l1, u1] = wilson(tot(k, inPick), tot(n, inPick), z), [p0, l0, u0] = wilson(tot(k, (i) => !inPick(i)), tot(n, (i) => !inPick(i)), z), d = p1 - p0;
+  const P = (v) => `${Math.round(v * 100)}%`;
+  return { id, chapter, rank: 3, claim: claim(P(p1), P(p0)), metric, value: r2(p1 * 100, 4), unit: "%", delta: r2(p1 / p0 - 1, 4),
+    evidence: { n: asked.length, ci: [r2(d - Math.hypot(p1 - l1, u0 - p0), 4), r2(d + Math.hypot(u1 - p1, p0 - l0), 4)], method: `rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m=${m}`,
+      curve: labels.map((label, i) => { const [rate, lo, hi] = wilson(k[i], n[i]); return { label, rate: r2(rate, 4), lo: r2(lo, 4), hi: r2(hi, 4), n: n[i] }; }), pick, cumulative, baseline: r2(p0, 4) },
+    drill: { chapter, filter: {} } };
+};
+const curveInsights = [
+  curveInsight({ id: "works.prompt_length", chapter: "works", metric: "share of sessions with applied code, by opening prompt length (characters)", labels: ["under 40", "40-79", "80-139", "140-239", "over 239"],
+    odds: [[0.24, 0.22, 0.2, 0.18, 0.16], [0.1, 0.15, 0.2, 0.27, 0.28]], pick: 3, cumulative: true, z: 2.498, m: 4, claim: (a, b) => `Your opening prompts of 140+ characters land code ${a}, not ${b}` }),
+  curveInsight({ id: "time.daypart", chapter: "time", metric: "share of sessions with applied code, by start hour (UTC, 4-hour blocks)", labels: ["12am-4am", "4am-8am", "8am-12pm", "12pm-4pm", "4pm-8pm", "8pm-12am"],
+    odds: [[0.02, 0.06, 0.3, 0.34, 0.18, 0.1], [0.01, 0.05, 0.46, 0.28, 0.14, 0.06]], pick: 2, cumulative: false, z: 2.576, m: 5, claim: (a, b) => `Sessions you start 8am-12pm UTC land code ${a}, not ${b}` }),
+];
 const insights = [
   { id: "i-fp-1", chapter: "footprint", rank: 1, claim: "You ship with AI almost every working day", metric: "active days", value: calendar.length, unit: "", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: {} } },
   { id: "i-fp-2", chapter: "footprint", rank: 2, claim: `Claude Code carries ${claudeShare}% of your sessions`, metric: "session share", value: claudeShare, unit: "%", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: { source: "claude_code" } } },
@@ -267,6 +288,7 @@ const insights = [
   { id: "i-fr-2", chapter: "friction", rank: 2, claim: `${topFric.intent[0].toUpperCase()}${topFric.intent.slice(1)} sessions hit the most friction`, metric: "mean friction", value: pct(topFric.friction, 1), unit: "%", delta: null, evidence: ev(topFric.n), drill: { chapter: "friction", filter: { intent: topFric.intent } } },
   { id: "i-wk-1", chapter: "works", rank: 1, claim: "Naming files lifts success by about 16 points", metric: "success lift", value: 16, unit: "%", delta: 0.16, evidence: { n: 520, ci: [0.1, 0.22], method: "bootstrap" }, drill: { chapter: "works", filter: { cluster: 0 } } },
   { id: "i-wk-2", chapter: "works", rank: 2, claim: "Short vague prompts cost you retries", metric: "success drop", value: 11, unit: "%", delta: -0.11, evidence: ev(310), drill: { chapter: "works", filter: {} } },
+  ...curveInsights,
   { id: "i-rc-1", chapter: "recommend", rank: 1, claim: "Four small habits would remove most friction", metric: "recommendations", value: 4, unit: "", delta: null, evidence: { n: 4, method: "rules" }, drill: { chapter: "recommend", filter: {} } },
 ];
 const recommendations = [
