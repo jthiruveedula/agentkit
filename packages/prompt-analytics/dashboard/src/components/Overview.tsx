@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
-import { Empty, Segmented } from "./ui";
+import { Count, Empty, Segmented } from "./ui";
 import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
-import { Bullet, Ring, UnitDots } from "./charts";
+import { Bullet, Dial, sparkPath, UnitDots } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
@@ -21,6 +21,9 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
+import { Rhythm } from "./Rhythm";
+import { topChanges } from "../lib/changes";
+import "./hero.css";
 import "./story.css";
 
 /** Top 5 projects, tools or intents by share of priced cost (tokens when unpriced). One denominator for every row (lib/share.ts), a fixed 0-100% track,
@@ -101,9 +104,56 @@ function CiBar({ lo, hi, d }: { lo: number; hi: number; d: number }) {
 /** "1 session", "2 sessions". */
 const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
 
+/** The struggled rate per day over the last 30 days of the window, each day pooled with the 6 before it (single days are too thin). null = no prompt in that week. */
+export function trail(rows: SessionRow[], to: string, days = 30): (number | null)[] {
+  return Array.from({ length: days }, (_, i) => { const d = addDays(to, i - days + 1), a = addDays(d, -6); return struggledRate(rows.filter((r) => r.date >= a && r.date <= d)).p; });
+}
+/** 30-day sparkline under the dial: the rate as a line with a soft area, the earlier rate as a dashed line. Decorative; the caption names it. */
+function Trail({ vals, was }: { vals: (number | null)[]; was: number | null }) {
+  const W = 240, H = 64, n = vals.length, real = vals.filter((v): v is number => v !== null);
+  if (real.length < 2) return null;
+  const top = Math.max(...real, was ?? 0, 0.01) * 1.15, x = (i: number) => (i * W) / (n - 1), y = (v: number) => +(H - 2 - (v / top) * (H - 4)).toFixed(2);
+  const line = sparkPath(vals, x, y), full = real.length === n;
+  let last = n - 1;
+  while (vals[last] === null) last--;
+  return (
+    <figure className="hs-w">
+      <svg className="hs" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        {full && <path className="hs-a" d={`${line}L${W},${H}L0,${H}Z`} />}
+        {was !== null && <line className="hs-was" x1={0} x2={W} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
+        <path className="hs-l" d={line} pathLength={1} vectorEffect="non-scaling-stroke" />
+        <circle className="hs-d" cx={x(last)} cy={y(vals[last] as number)} r={3} />
+      </svg>
+      <figcaption>Last 30 days, 7-day rolling{was !== null ? " · dashed: earlier" : ""}</figcaption>
+    </figure>
+  );
+}
+
+/** Under the hero: the three biggest movers among the curve, level-shift and cost-per-change insights; each opens its section. */
+function Changes() {
+  const { d, goto } = useStore();
+  const top = useMemo(() => topChanges(d.insights), [d.insights]);
+  if (!top.length) return null;
+  return (
+    <nav className="ribbon" aria-label="Top changes">
+      <p className="eyebrow">Top changes</p>
+      <ul>
+        {top.map((c, i) => (
+          <li key={c.id} style={{ "--i": i } as React.CSSProperties}>
+            <button type="button" data-tone={c.tone} onClick={() => goto(c.sec)} aria-label={`${c.label}. ${c.delta}. Go to ${c.chapter}`}>
+              <span className="rb-l">{c.label}</span><b className="rb-d">{c.delta}</b><span className="rb-go" aria-hidden="true">→</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 /** Briefing: the struggled rate, what it is compared against, how sure the change is, and the driver once. Honest copy for every state. */
 function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b: Briefing; bs: Basis; cmp: Cmp; win: number; scope: Scope; all: SessionRow[] }) {
   const { d, v, f, ids, apply, clear, goto, win: wn } = useStore();
+  const tr = useMemo(() => trail(v.rows, wn.to), [v.rows, wn.to]);
   const next = useNext();
   const openIds = useMemo(() => openExposure(d), [d]);
   // the Key numbers tiles' verdicts on the same basis (lib/mix): an Also moved chip with a tile is grey when its tile is (mixed, within range),
@@ -159,6 +209,7 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
       {open}</>
   ) : st.why && <span className="b-say">{st.why}</span>;
   const sure = vd.kind === "noise" ? "could be" : "likely";
+  const dmax = [0.25, 0.5].find((m) => m >= Math.max(p ?? 0, was ?? 0)) ?? 1;   // the dial scale: 0-25% unless a rate is past it
   return (
     <section className="s12 brief" aria-labelledby="ov-hd" data-tone={tone}>
       <div className="b-top">
@@ -172,11 +223,14 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
           <>
             <div className="b-ring" role="group" aria-label={`Struggle rate ${pct(p)}${was !== null ? `, earlier ${pct(was)}` : ""}`}
               title={dd && prev ? `${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before` : undefined}>
-              <Ring p={p} was={was} />
+              <Dial p={p} was={was} max={dmax} />
+              <span className="d-ends" aria-hidden="true"><i>0</i><i>{fmtPct(dmax)}</i></span>
               <button type="button" className="b-num" onClick={() => apply({ struggled: true, ...scope }, { list: true })}
-                aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}>{pct(p)}</button>
+                aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}><Count text={pct(p)} /></button>
+              <span className="d-lbl" aria-hidden="true">struggle score</span>
             </div>
             {was !== null && <p className="b-n"><span className="was">{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span></p>}
+            <Trail vals={tr} was={was} />
             {/* the sentence, interval and counts stay for screen readers; sighted readers get them in the ring's tooltip */}
             <div className="sr-only">
               <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
@@ -289,7 +343,7 @@ export function Overview() {
     <section id="s-overview" className="sec" aria-labelledby="s-overview-h">
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
-        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} />}
+        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /><Rhythm /><Changes /></div>}
         <KeyNumbers bs={bs} setMetric={setMetric} all={all} />
         <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">

@@ -71,14 +71,15 @@ export function Bullet({ p, lo, hi, was }: { p: number; lo?: number; hi?: number
   );
 }
 
-/** Closed ring for a 0..1 rate: track, fill from 12 o'clock to `p`, a short tick across the ring at the earlier value `was`. Decorative; the caller names it. */
-export function Ring({ p, was }: { p: number; was?: number | null }) {
-  const c = (x: number) => Math.min(1, Math.max(0, x)), R = 50, at = (f: number, r: number) => [60 + r * Math.sin(2 * Math.PI * c(f)), 60 - r * Math.cos(2 * Math.PI * c(f))].map((v) => +v.toFixed(2));
-  const [x1, y1] = was != null ? at(was, R - 9) : [0, 0], [x2, y2] = was != null ? at(was, R + 9) : [0, 0];
+/** 270-degree gauge, gap at the bottom, on a 0..`max` scale: the fill is `p`, the tick the earlier value. Decorative; the caller labels it. */
+export function Dial({ p, was, max }: { p: number; was?: number | null; max: number }) {
+  const c = (x: number) => Math.min(1, Math.max(0, x / max)), R = 50;
+  const at = (f: number, r: number) => { const a = ((135 + 270 * c(f)) * Math.PI) / 180; return [60 + r * Math.cos(a), 60 + r * Math.sin(a)].map((v) => +v.toFixed(2)); };
+  const [x1, y1] = was != null ? at(was, R - 5) : [0, 0], [x2, y2] = was != null ? at(was, R + 5) : [0, 0];
   return (
-    <svg className="ring" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-      <circle className="r-track" cx="60" cy="60" r={R} />
-      <circle className="r-fill" cx="60" cy="60" r={R} pathLength="100" strokeDasharray={`${Math.max(0.4, c(p) * 100)} 100`} />
+    <svg className="ring dial" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+      <circle className="r-track" cx="60" cy="60" r={R} pathLength="100" strokeDasharray="75 100" />
+      <circle className="r-fill" cx="60" cy="60" r={R} pathLength="100" strokeDasharray={`${Math.max(0.4, c(p) * 75)} 100`} />
       {was != null && <line className="r-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
     </svg>
   );
