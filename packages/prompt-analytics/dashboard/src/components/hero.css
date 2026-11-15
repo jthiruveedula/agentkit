@@ -1,84 +1,123 @@
-/* Overview story hero: the struggle dial (Brief), the mini terrain (Rhythm) and the Top changes ribbon. Design spec: hero-fable.
-   >= 900px: Brief 7 / Rhythm 5, ribbon across. Below: one column; under 700 the Brief stacks and the terrain is 2D. */
-.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s4); align-items: start; }
+/* Overview widget strip: one slim title line, then six small white widgets (struggle gauge, 30-day trend, rhythm heatmap, cost per landed change,
+   the Why, rhythm terrain). Each widget: icon chip + title (20px), one body, one caption (16px). Columns by container width: 6 / 3 / 2 / 1. */
 #s-overview .grid > .kcard { grid-column: span 12; }
-.hero > * { grid-column: 1 / -1; }   /* .card spans 6 by default; inside the hero each piece takes its whole track */
-@container pa (min-width: 900px) {
-  .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
-  .hero > :is(.brief, .rhythm) { grid-column: auto; }
-  .hero > .ribbon { grid-column: 1 / -1; }
-  .hero > .brief:has(> .b-side) { grid-template-columns: minmax(0, 1fr); }
-  .hero > .brief .b-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s4); }
-  .hero > .rhythm { align-self: stretch; }
-}
+.hero { display: grid; min-width: 0; }
+.hero > .brief { display: grid; gap: var(--s2); padding: 0; background: none; border: 0; border-radius: 0; overflow: visible; }
+#s-overview .hero > .brief::before { content: none; }
+html.glass .hero > .brief { -webkit-backdrop-filter: none; backdrop-filter: none; background: none; }
+.hero .b-top { gap: var(--s1) var(--s3); padding-inline: 2px; }
+.hero .brief h3 { grid-column: auto; font: 600 15px/20px var(--sans); letter-spacing: 0; }
+.hero .brief .movers .tag { height: 22px; font-size: 12px; }
 
-/* the dial: a 270-degree gauge, gap at the bottom; the number and its label sit inside */
-.hero .lead:has(> .b-ring) { grid-template-columns: auto minmax(0, 1fr); align-items: center; align-content: center; column-gap: var(--s5); row-gap: var(--s2); }
-.hero .lead > .b-ring { grid-row: 1 / span 2; width: 192px; height: 192px; align-content: center; gap: 2px; }
-.hero .lead > :is(.b-n, .hs-w) { grid-column: 2; }
-.hero .lead > .b-n { align-self: end; }
-.hero .lead > .hs-w { align-self: start; max-width: 360px; padding-right: 6px; }
-.hero .dial circle { stroke-width: 10; stroke-linecap: round; transform: rotate(135deg); transform-origin: 60px 60px; }
-.hero .dial .r-was { stroke: var(--surface); stroke-width: 2; stroke-linecap: butt; }
-#s-overview .hero .b-ring .b-num { font-size: 44px; line-height: 1; letter-spacing: -0.035em; }
-.d-lbl { position: relative; font: 600 12px/16px var(--sans); color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
-.d-ends { position: absolute; inset: auto 14% 4% 14%; display: flex; justify-content: space-between; font: 500 12px/1 var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
-.hero .b-n .was { height: 30px; font-size: 14px; }
+/* under 420px: one swipeable row, each widget 78% wide */
+.strip { display: grid; gap: var(--s3); grid-auto-flow: column; grid-auto-columns: 78%; grid-auto-rows: 160px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding-bottom: 2px; }
+.strip > .w { scroll-snap-align: start; }
+@container pa (min-width: 420px) { .strip { grid-auto-flow: row; grid-auto-columns: auto; overflow: visible; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 150px; } }
+@container pa (min-width: 700px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 160px; } }
+@container pa (min-width: 1100px) { .strip { grid-template-columns: 1.15fr 1.05fr .9fr 1.1fr 1.3fr 1.1fr; } }
 
-/* 30-day sparkline */
-.hs-w { margin: 0; display: grid; gap: 4px; width: 100%; max-width: 300px; }
-.hs { display: block; width: 100%; height: 64px; overflow: visible; }
-.hs-l { fill: none; stroke: var(--tone-ink); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.hs-a { fill: var(--tone); opacity: 0.16; }
-.hs-was { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
-.hs-d { fill: var(--tone-ink); stroke: var(--surface); stroke-width: 1.5; }
-.hs-w figcaption { font-size: 12px; line-height: 16px; color: var(--muted); }
+.w { --w-bg: var(--w1-bg); --w-ink: var(--w1-ink); position: relative; min-width: 0; display: grid; grid-template-rows: 20px minmax(0, 1fr) 16px; gap: 6px; padding: 10px;
+  overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r3); box-shadow: var(--shadow); transition: border-color 160ms, translate 160ms; }
+.w[data-w="2"] { --w-bg: var(--w2-bg); --w-ink: var(--w2-ink); } .w[data-w="3"] { --w-bg: var(--w3-bg); --w-ink: var(--w3-ink); }
+.w[data-w="4"] { --w-bg: var(--w4-bg); --w-ink: var(--w4-ink); } .w[data-w="5"] { --w-bg: var(--w5-bg); --w-ink: var(--w5-ink); }
+.w[data-w="6"] { --w-bg: var(--w6-bg); --w-ink: var(--w6-ink); }
+html.glass .w { background: oklch(1 0 0 / 0.86); border-color: var(--rim); }
+.w p { margin: 0; }
+.w-h { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.w-ic { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; background: var(--w-bg); }
+.w-ic svg { fill: none; stroke: var(--w-ink); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.w-t { min-width: 0; letter-spacing: -0.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 12px/16px var(--sans); color: var(--muted); }
+.w-b { min-width: 0; min-height: 0; display: grid; align-content: center; gap: 4px; }
+.w-c { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12px/16px var(--sans); color: var(--muted); }
+.w-c > * { font: inherit; }
+.w-v { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.w-n { font: 700 24px/28px var(--sans); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.w-u { font-size: 12px; line-height: 16px; color: var(--muted); }
+.w .chip { gap: 3px; height: 18px; padding: 0 6px; border: 0; font: 600 11px/16px var(--sans); color: var(--muted); background: var(--sunk); white-space: nowrap; }
+.w .chip.bad { color: var(--bad-ink); background: var(--bad-soft); }
+.w .chip.good { color: var(--good-ink); background: var(--good-soft); }
+.w-chips { display: flex; flex-wrap: wrap; gap: 4px; min-height: 18px; max-height: 18px; overflow: hidden; }
 
-@container pa (max-width: 699px) {
-  .hero .lead:has(> .b-ring) { grid-template-columns: minmax(0, 1fr); justify-items: center; }
-  .hero .lead > .b-ring { grid-row: auto; width: 168px; height: 168px; }
-  .hero .lead > :is(.b-n, .hs-w) { grid-column: 1; }
-  .hero .dial circle { stroke-width: 8; }
-  #s-overview .hero .b-ring .b-num { font-size: 36px; }
-}
+/* 1 struggle gauge: semicircle 0-25% (green to red), needle, the earlier value as a notch; number and chip beside it */
+.hero .lead .w-b { grid-template-columns: auto minmax(0, 1fr); column-gap: var(--s2); align-items: center; }
+.hero .lead .b-ring { width: 88px; height: auto; display: block; }
+.hero .gauge { position: static; display: block; width: 88px; height: 48px; overflow: visible; }
+.gauge path { fill: none; stroke-width: 9; stroke-linecap: round; }
+.gauge .g-track { stroke: var(--sunk); }
+.g-s0 { stop-color: oklch(0.62 0.15 150); } .g-s1 { stop-color: var(--amber); } .g-s2 { stop-color: var(--bad); }
+.gauge .g-was { stroke: var(--surface); stroke-width: 2.5; }
+.gauge .g-ndl { stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; transform-origin: 60px 58px; rotate: var(--a); }
+.gauge .g-hub { fill: var(--ink); }
+.hero .g-v { flex-direction: column; align-items: flex-start; gap: 4px; }
+#s-overview .hero .b-num { padding: 0; font: 700 24px/28px var(--sans); letter-spacing: -0.02em; }
+.hero .b-num:hover { text-underline-offset: 4px; }
+.hero .lead .b-cap { font-size: 12px; line-height: 16px; }
 
-/* mini terrain: one button over an inert plot; the 3D toolbar and hint are the Time view's, not shown here */
-.rhythm { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: var(--s2); cursor: pointer; transition: border-color 160ms; }
-.rhythm:hover, .rhythm:has(.rh-hit:focus-visible) { border-color: var(--accent); }
+/* 2 30-day trend: line, soft area, earlier rate dashed, the last point as a dot */
+.sp { position: relative; height: 44px; --sp: var(--muted); }
+.sp[data-dir="up"] { --sp: var(--bad); } .sp[data-dir="down"] { --sp: var(--good); }
+.sp svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.sp-l { fill: none; stroke: var(--sp); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.sp-a { fill: var(--sp); opacity: 0.12; }
+.sp-was { stroke: var(--muted); stroke-width: 1.25; stroke-dasharray: 4 3; }
+.sp-d { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--sp); box-shadow: 0 0 0 1.5px var(--surface); }
+
+/* 3 heatmap: 24 hours x 7 days, viridis, zero cells sunk */
+.hm { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 1px; }
+.hm i { height: 6px; border-radius: 1.5px; background: var(--sunk); box-shadow: inset 0 0 0 .5px oklch(0.2 0.02 260 / .12); transition: scale 120ms; }
+.hm-k { display: flex; align-items: center; gap: 6px; }
+.hm-k i { flex: 1 1 auto; max-width: 64px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725); }
+@media (hover: hover) { .hm i:hover { scale: 1.6; position: relative; z-index: 1; } }
+
+.hero .heat .w-v { flex-wrap: nowrap; }
+
+/* 4 cost */
+.hero .cost .w-n { font-size: 28px; line-height: 32px; }
+
+/* 5 the Why: dot rows (earlier, now), one line of counts, the open action; the fix is the caption */
+.hero .why .story, .hero .why .story > div { display: block; margin: 0; }
+.hero .why .story dd { grid-column: auto; grid-template-columns: minmax(0, 1fr); display: grid; gap: 4px; margin: 0; font: 400 12px/16px var(--sans); color: var(--muted); }
+.hero .why .b-fig { margin: 0; gap: 5px; }
+.hero .why .ud-r { min-height: 7px; }
+.wd { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; gap: 3px; }
+.wd i { width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
+.ud-r[data-r="now"] .wd i[data-on] { background: var(--bad); }
+.ud-r[data-r="prior"] .wd i[data-on] { background: var(--prior); }
+.hero .why .bul { margin: 2px 0; }
+#s-overview .hero .why .story dd > .b-act { grid-column: 1; justify-self: start; height: 16px; min-height: 16px; padding: 0; background: none; border: 0; box-shadow: none; color: var(--accent); font: 600 12px/16px var(--sans); }
+#s-overview .hero .why .story dd > .b-act:hover { text-decoration: underline; text-underline-offset: 3px; }
+.hero .why .b-say { font-size: 12px; line-height: 16px; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.w-fix, .rh-go { max-width: 100%; padding: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; background: none; border: 0; color: var(--accent); font-weight: 600; cursor: pointer; }
+.w-fix:hover, .rh-go:hover { text-decoration: underline; }
+.rh-go { font-weight: 500; }
+.rh-go b { font-weight: 700; }
+
+/* 6 terrain: the Bars3D canvas, no toolbar; the plot and the caption go to the Time view */
+.rhythm .rh-plot { min-width: 0; min-height: 0; cursor: pointer; overflow: hidden; margin-inline: -2px; }
 .rhythm :is(.b3d-bar, .b3d-hint, .b3d-reset) { display: none; }
-.rh-plot { min-width: 0; align-self: stretch; display: grid; align-content: center; }
-.rh-2d { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; padding-block: var(--s2); }
-.rh-2d i { height: 12px; border-radius: 2px; background: color-mix(in oklab, var(--accent) calc(var(--v) * 85% + 6%), var(--sunk)); }
+.rhythm:hover { border-color: var(--w6-ink); }
+.rh-2d { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 1px; }
+.rh-2d i { height: 9px; border-radius: 1.5px; background: color-mix(in oklab, var(--w6-ink) calc(var(--v) * 85% + 6%), var(--sunk)); }
 .rh-2d i[data-top] { background: var(--amber); }
-.grid .rh-cap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s1) var(--s3); margin: 0; font-size: 13px; font-weight: 400; line-height: 18px; color: var(--muted); }
-.rh-cap b { color: var(--ink); font-weight: 600; }
-.rh-go { color: var(--accent); font-weight: 600; }
-.rh-hit { position: absolute; inset: 0; z-index: 2; width: 100%; padding: 0; background: transparent; border: 0; border-radius: inherit; cursor: pointer; }
-.rh-hit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Top changes ribbon */
-.ribbon { display: grid; gap: var(--s2); min-width: 0; }
-.ribbon .eyebrow { margin: 0; font: 600 13px/18px var(--sans); color: var(--ink); }
-.ribbon ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); margin: 0; padding: 0; list-style: none; }
-@container pa (max-width: 699px) { .ribbon ul { grid-template-columns: minmax(0, 1fr); } }
-.ribbon li { display: grid; min-width: 0; }
-.ribbon button { --tone: var(--line-2); --tone-ink: var(--muted); position: relative; overflow: clip; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: var(--s2); min-height: 56px; padding: var(--s2) var(--s3) var(--s2) calc(var(--s3) + 3px);
-  text-align: left; background: color-mix(in oklab, var(--surface) 70%, transparent); border: 1px solid var(--line); border-radius: var(--r3); color: var(--ink); cursor: pointer; transition: border-color 160ms, background-color 160ms; }
-.ribbon button[data-tone="good"] { --tone: var(--good); --tone-ink: var(--good-ink); } .ribbon button[data-tone="bad"] { --tone: var(--bad); --tone-ink: var(--bad); }
-.ribbon button::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--tone); }
-.ribbon button:hover { border-color: var(--line-2); background: var(--sunk); }
-.rb-l { font-size: 13px; line-height: 18px; overflow-wrap: break-word; text-wrap: pretty; }
-.rb-d { padding: 2px var(--s2); border-radius: 999px; font: 600 13px/18px var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--tone-ink); background: color-mix(in oklab, var(--tone) 14%, var(--surface)); }
-.rb-go { color: var(--muted); }
+@media (hover: hover) { .w:hover { border-color: var(--line-2); } }
+@media (pointer: coarse) { .hero .why .b-act { min-height: 24px; } }
 
-/* motion: end state is the default; everything below waits for html.fx and the section's reveal, and is off under reduced motion */
+/* motion: the end state is the default; everything waits for html.fx and the section's reveal, and is off under reduced motion.
+   Numbers are never hidden: the count-up starts from 0 at full opacity. */
 @media (prefers-reduced-motion: no-preference) {
-  .fx .sec[data-in] .hero > .brief { animation: pa-up 700ms cubic-bezier(.2, .8, .2, 1) backwards; }
-  .fx .sec[data-in] .hero > .rhythm { animation-delay: 90ms; }
-  html.fx .sec[data-in] .hero .dial .r-fill { animation: pa-ring 1100ms cubic-bezier(.2, .8, .2, 1) 150ms backwards; }
-  .fx .sec[data-in] .hero .hs-l { animation: pa-draw 900ms cubic-bezier(.4, .1, .2, 1) 400ms backwards; }
-  .fx .sec[data-in] .hero :is(.hs-d, .hs-a, .hs-was, .dial .r-was) { animation: pa-fade 400ms ease 1100ms backwards; }
-  .fx .sec[data-in] .hero .b-n .was { animation: pa-pop 420ms cubic-bezier(.2, 1.4, .4, 1) 1100ms backwards; }
-  .fx .sec[data-in] .rh-2d i { animation: pa-cell 520ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(200ms + var(--v, 0) * 300ms); }
-  .fx .sec[data-in] .ribbon li { animation: pa-up 360ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(500ms + var(--i, 0) * 80ms); }
+  .fx .sec[data-in] .strip > .w { animation: pa-up 420ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(var(--i) * 60ms); }
+  html.fx .sec[data-in] .gauge .g-fill { animation: pa-ring 900ms cubic-bezier(.2, .8, .2, 1) 150ms backwards; }
+  .fx .sec[data-in] .gauge .g-ndl { animation: g-swing 1000ms cubic-bezier(.3, 1.3, .5, 1) 150ms backwards; }
+  .fx .sec[data-in] .gauge .g-was, .fx .sec[data-in] .sp :is(.sp-a, .sp-was) { animation: pa-fade 400ms ease 900ms backwards; }
+  .fx .sec[data-in] .g-v .was { animation: pa-pop 420ms cubic-bezier(.2, 1.4, .4, 1) 900ms backwards; }
+  .fx .sec[data-in] .sp-l { animation: pa-draw 800ms cubic-bezier(.4, .1, .2, 1) 360ms backwards; }
+  .fx .sec[data-in] .sp-d { animation: pa-pop 260ms cubic-bezier(.2, 1.4, .4, 1) 1100ms backwards, sp-ping 900ms ease-out 1360ms 1; }
+  .fx .sec[data-in] .wd i { animation: pa-cell 240ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(4 * 60ms + 300ms + var(--k) * 30ms); }
+  .fx .sec[data-in] .ud-r[data-r="now"] .wd i[data-on] { animation: pa-cell 240ms cubic-bezier(.2, 1.2, .4, 1) backwards, wd-flip 300ms ease backwards; animation-delay: calc(4 * 60ms + 600ms + var(--k) * 30ms); }
+  .fx .sec[data-in] .hm i { animation: pa-cell 300ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(2 * 60ms + 200ms + var(--day) * 50ms); }
+  .fx .sec[data-in] .rh-2d i { animation: pa-cell 360ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(5 * 60ms + 200ms + var(--v, 0) * 300ms); }
 }
+@keyframes g-swing { from { rotate: 0deg; } }
+@keyframes sp-ping { 0% { box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 0 color-mix(in oklab, var(--sp) 50%, transparent); } 100% { box-shadow: 0 0 0 1.5px var(--surface), 0 0 0 8px transparent; } }
+@keyframes wd-flip { from { background: var(--line-2); } }

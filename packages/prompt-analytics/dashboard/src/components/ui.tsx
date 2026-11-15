@@ -40,12 +40,32 @@ export const countable = (text: string) => /^\d[\d,]*(\.\d)?[kMB]?$/.test(text) 
 /** A count that ticks up (~800 ms, ease-out) once, the first time its section scrolls into view. Later values (a filter change) and tooltip values snap.
  *  The text node always holds the final string, so format is preserved and jsdom / reduced motion see it at once.
  *  `quick` marks a tooltip value: it never animates. */
-export function Count({ text, className, as: Tag = "span", quick }: { text: string; className?: string; as?: "span" | "b"; quick?: boolean }) {
+/** Widget header icons (16-unit grid, drawn at 12px). */
+const W_ICONS = {
+  gauge: "M2.5 11a5.5 5.5 0 0 1 11 0M8 11l2.5-3.5",
+  trend: "M1.5 11.5l3.5-4 3 3 3.5-5 3 2",
+  heat: "M2.5 2.5h4.5v4.5h-4.5zM9 2.5h4.5v4.5H9zM2.5 9h4.5v4.5h-4.5zM9 9h4.5v4.5H9z",
+  cost: "M10.5 5c-.4-.9-1.4-1.5-2.5-1.5-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1.1 0-2.1-.6-2.5-1.5M8 2v12",
+  why: "M6 6a2 2 0 1 1 3 1.7c-.6.4-1 .8-1 1.5v.6M8 12.4v.1",
+  terrain: "M3.5 13.5v-4M8 13.5v-9M12.5 13.5v-6",
+} as const;
+/** One Overview strip widget: icon chip and title, one body, one caption line. `n` (1-6) picks the hue and the rise-in order. */
+export function W({ n, ic, t, cap, className, label, children }: { n: number; ic: keyof typeof W_ICONS; t: ReactNode; cap?: ReactNode; className?: string; label?: string; children: ReactNode }) {
+  return (
+    <div className={`w${className ? ` ${className}` : ""}`} data-w={n} style={{ "--i": n - 1 } as CSSProperties} {...(label ? { role: "group", "aria-label": label } : {})}>
+      <p className="w-h"><span className="w-ic" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12" focusable="false"><path d={W_ICONS[ic]} /></svg></span><span className="w-t" title={typeof t === "string" ? t : undefined}>{t}</span></p>
+      <div className="w-b">{children}</div>
+      {cap != null && <div className="w-c">{cap}</div>}
+    </div>
+  );
+}
+
+export function Count({ text, className, as: Tag = "span", quick, tick }: { text: string; className?: string; as?: "span" | "b"; quick?: boolean; tick?: boolean }) {
   const ref = useRef<HTMLElement>(null), played = useRef(false), latest = useRef(text);
   latest.current = text;
   useLayoutEffect(() => {
     const node = ref.current?.firstChild, m = /^(.*?)(-?\d[\d,]*)(\.\d+)?(.*)$/.exec(text);
-    if (!ref.current || !node || !m || quick || played.current || !countable(text) || reducedNow()) return;
+    if (!ref.current || !node || !m || quick || played.current || !(tick || countable(text)) || reducedNow()) return;
     const target = parseFloat(`${m[2].replace(/,/g, "")}${m[3] ?? ""}`), dec = m[3] ? m[3].length - 1 : 0, comma = m[2].includes(",");
     const fmt = (n: number) => `${m[1]}${comma ? n.toLocaleString("en-US", { minimumFractionDigits: dec, maximumFractionDigits: dec }) : n.toFixed(dec)}${m[4]}`;
     let raf = 0, off = () => {};

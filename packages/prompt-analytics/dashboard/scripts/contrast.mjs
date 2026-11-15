@@ -37,7 +37,9 @@ const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface",
   // mind map: the 1px outline circle behind the palest ring (--muted) and the highlight stroke (--warn-ink) as marks on the glass floor
   ["muted", "glass", 3], ["warn-ink", "glass", 3],
   // signals heat table: ink text on the darkest cell (60% accent over sunk) and the lightest (8%)
-  ["ink", "heat-max", 4.5], ["ink", "heat-min", 4.5]];
+  ["ink", "heat-max", 4.5], ["ink", "heat-min", 4.5],
+  // Overview strip: icon glyphs on their chip (marks, 3:1), chip text on its tint, captions on the white widget
+  ...[1, 2, 3, 4, 5, 6].map((i) => [`w${i}-ink`, `w${i}-bg`, 3]), ["bad-ink", "bad-soft", 4.5], ["good-ink", "good-soft", 4.5], ["muted", "sunk", 4.5]];
 // categorical hues must differ enough in lightness or hue to tell apart: Antigravity vs Claude (the old pair was both blue)
 const dist = (a, b) => Math.hypot(a[0] - b[0], 0.5 * (a[1] * Math.cos(a[2] * Math.PI / 180) - b[1] * Math.cos(b[2] * Math.PI / 180)) , 0.5 * (a[1] * Math.sin(a[2] * Math.PI / 180) - b[1] * Math.sin(b[2] * Math.PI / 180)));
 const apart = [["src-antigravity", "src-claude_code", 0.15]];

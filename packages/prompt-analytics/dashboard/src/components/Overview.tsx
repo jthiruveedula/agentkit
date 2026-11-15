@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
-import { Count, Empty, Segmented } from "./ui";
+import { Count, Empty, Segmented, W } from "./ui";
 import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { WrappedButton } from "./Wrapped";
-import { Bullet, Dial, sparkPath, UnitDots } from "./charts";
+import { Bullet, Gauge, sparkPath } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
@@ -21,8 +21,7 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
-import { Rhythm } from "./Rhythm";
-import { topChanges } from "../lib/changes";
+import { Heat, Rhythm } from "./Rhythm";
 import "./hero.css";
 import "./story.css";
 
@@ -108,45 +107,47 @@ const nSess = (n: number) => `${fmtInt(n)} session${n === 1 ? "" : "s"}`;
 export function trail(rows: SessionRow[], to: string, days = 30): (number | null)[] {
   return Array.from({ length: days }, (_, i) => { const d = addDays(to, i - days + 1), a = addDays(d, -6); return struggledRate(rows.filter((r) => r.date >= a && r.date <= d)).p; });
 }
-/** 30-day sparkline under the dial: the rate as a line with a soft area, the earlier rate as a dashed line. Decorative; the caption names it. */
-function Trail({ vals, was }: { vals: (number | null)[]; was: number | null }) {
-  const W = 240, H = 64, n = vals.length, real = vals.filter((v): v is number => v !== null);
+/** Strip widget 2: the 30-day struggled rate as a sparkline (7-day rolling), the earlier rate dashed, min / now chips, and how many weeks it has moved one way. */
+function Spark({ vals, was }: { vals: (number | null)[]; was: number | null }) {
+  const W0 = 120, H = 44, n = vals.length, real = vals.filter((v): v is number => v !== null);
   if (real.length < 2) return null;
-  const top = Math.max(...real, was ?? 0, 0.01) * 1.15, x = (i: number) => (i * W) / (n - 1), y = (v: number) => +(H - 2 - (v / top) * (H - 4)).toFixed(2);
+  const top = Math.max(...real, was ?? 0, 0.01) * 1.15, x = (i: number) => (i * W0) / (n - 1), y = (v: number) => +(H - 2 - (v / top) * (H - 4)).toFixed(2);
   const line = sparkPath(vals, x, y), full = real.length === n;
   let last = n - 1;
   while (vals[last] === null) last--;
+  const now = vals[last] as number;
+  // whole weeks (points 7 days apart, back from the last) that moved the same way
+  let wk = 0, dir = 0;
+  for (let i = last; i >= 7 && vals[i] !== null && vals[i - 7] !== null; i -= 7) { const s = Math.sign((vals[i] as number) - (vals[i - 7] as number)); if (!s || (dir && s !== dir)) break; dir = s; wk++; }
+  const pct = (v: number) => fmtPct(v, 1);
   return (
-    <figure className="hs-w">
-      <svg className="hs" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        {full && <path className="hs-a" d={`${line}L${W},${H}L0,${H}Z`} />}
-        {was !== null && <line className="hs-was" x1={0} x2={W} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
-        <path className="hs-l" d={line} pathLength={1} vectorEffect="non-scaling-stroke" />
-        <circle className="hs-d" cx={x(last)} cy={y(vals[last] as number)} r={3} />
-      </svg>
-      <figcaption>Last 30 days, 7-day rolling{was !== null ? " · dashed: earlier" : ""}</figcaption>
-    </figure>
+    <W n={2} ic="trend" t="30-day trend" className="trend" cap={`7-day avg · ${wk ? `${dir > 0 ? "rising" : "falling"} ${wk} wk${wk > 1 ? "s" : ""}` : "steady"}`}
+      label={`Struggle rate, last 30 days, 7-day rolling: lowest ${pct(Math.min(...real))}, now ${pct(now)}`}>
+      <div className="sp" data-dir={dir > 0 ? "up" : dir < 0 ? "down" : undefined}>
+        <svg viewBox={`0 0 ${W0} ${H}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          {full && <path className="sp-a" d={`${line}L${W0},${H}L0,${H}Z`} />}
+          {was !== null && <line className="sp-was" x1={0} x2={W0} y1={y(was)} y2={y(was)} vectorEffect="non-scaling-stroke" />}
+          <path className="sp-l" d={line} pathLength={1} vectorEffect="non-scaling-stroke" />
+        </svg>
+        <i className="sp-d" style={{ left: `${(x(last) / W0) * 100}%`, top: `${(y(now) / H) * 100}%` }} />
+      </div>
+      <p className="w-chips" aria-hidden="true"><span className="chip">low {pct(Math.min(...real))}</span><span className={`chip${dir > 0 ? " bad" : ""}`}>7d {pct(now)}</span></p>
+    </W>
   );
 }
 
-/** Under the hero: the three biggest movers among the curve, level-shift and cost-per-change insights; each opens its section. */
-function Changes() {
-  const { d, goto } = useStore();
-  const top = useMemo(() => topChanges(d.insights), [d.insights]);
-  if (!top.length) return null;
+/** Strip widget 4: the latest cost-per-landed-change spike the analyzer flagged (time.anomaly.cost_per_change.<week>; ids sort by week), against its usual level. */
+function Cost() {
+  const { d } = useStore();
+  const c = useMemo(() => d.insights.filter((i) => i.id.startsWith("time.anomaly.cost_per_change.") && i.delta !== null && i.delta > -1)
+    .sort((a, b) => b.id.localeCompare(a.id))[0], [d.insights]);
+  if (!c || c.delta === null) return null;
+  const usd = (x: number) => (x >= 1 ? `$${fmtInt(Math.round(x))}` : `$${x.toFixed(2)}`), usual = c.value / (1 + c.delta);
+  const dp = `${c.delta >= 0 ? "+" : "-"}${fmtInt(Math.round(Math.abs(c.delta) * 100))}%`;
   return (
-    <nav className="ribbon" aria-label="Top changes">
-      <p className="eyebrow">Top changes</p>
-      <ul>
-        {top.map((c, i) => (
-          <li key={c.id} style={{ "--i": i } as React.CSSProperties}>
-            <button type="button" data-tone={c.tone} onClick={() => goto(c.sec)} aria-label={`${c.label}. ${c.delta}. Go to ${c.chapter}`}>
-              <span className="rb-l">{c.label}</span><b className="rb-d">{c.delta}</b><span className="rb-go" aria-hidden="true">→</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <W n={4} ic="cost" t="Cost / landed change" className="cost" cap={`usually ${usd(usual)}`} label={`${c.claim}, ${dp}`}>
+      <p className="w-v"><Count className="w-n" text={usd(c.value)} tick /><span className={`chip${c.delta > 0 ? " bad" : ""}`}>{dp}</span></p>
+    </W>
   );
 }
 
@@ -196,87 +197,83 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
   };
   const open = drv && drvN > 0 && <button type="button" className="btn primary b-act" onClick={() => apply({ ...(drv.project !== undefined ? { project: drv.project } : {}), ...(drv.intent ? { intent: drv.intent as never } : {}), ...scope }, { list: true })}
     aria-label={`Open ${nSess(drvN)}: ${drv.key}`}>Open {nSess(drvN)}</button>;
-  // the Why sentence is carried by the figure's label and, visibly, by its two rows (before / now)
+  // the Why sentence is carried by the figure's label; sighted readers get two dot rows (before / now) and one line of counts
+  const dots = (kk: number, nn: number) => <span className="wd" aria-hidden="true">{Array.from({ length: nn }, (_, i) => <i key={i} data-on={i < kk || undefined} style={{ "--k": i } as React.CSSProperties} />)}</span>;
+  const many = drv ? drv.n0 > 24 || drv.n1 > 24 : false;
   const why = drv ? (
     <><figure className="b-fig" role="group" aria-label={`${drv.key}: ${k1} of its ${nSess(drv.n1)} struggled, ${(drv.r1 ?? 0) < (drv.r0 ?? 0) ? "down" : "up"} from ${k0} of ${fmtInt(drv.n0)}.${share > 0 && share <= 1 ? ` It accounts for ${pts(drv.total, 1)} of the ${pts(dsum, 1)} change.` : ""}`}>
-        <figcaption>{drv.key}</figcaption>
-        {drv.n0 > 24 || drv.n1 > 24 ? <Bullet p={drv.r1 ?? 0} was={drv.r0} /> : null}
+        <figcaption className="sr-only">{drv.key}</figcaption>
+        {many ? <Bullet p={drv.r1 ?? 0} was={drv.r0} /> : null}
         {([["Before", k0, drv.n0, "prior"], ["Now", k1, drv.n1, "now"]] as const).map(([l, kk, nn, c]) => (
-          <div key={l} className="ud-r" data-r={c}><span className="ud-l">{l}</span>{drv.n0 > 24 || drv.n1 > 24 ? null : <UnitDots k={kk} n={nn} />}<span className="ud-n">{kk} of {fmtInt(nn)}</span></div>
+          <div key={l} className="ud-r" data-r={c}><span className="ud-l sr-only">{l}</span>{many ? null : dots(kk, nn)}<span className="ud-n sr-only">{kk} of {fmtInt(nn)}</span></div>
         ))}
-        {!fix && share > 0 && share <= 1 && <div className="ud-s" aria-hidden="true"><span className="ud-t" style={{ "--w": share } as React.CSSProperties}><i /></span><span>{pts(drv.total, 1)} of {pts(dsum, 1)}</span></div>}
       </figure>
+      <p className="w-v" aria-hidden="true"><span className="w-n">{k1} of {fmtInt(drv.n1)}</span><span className="w-u">was {k0} of {fmtInt(drv.n0)}</span></p>
       {open}</>
   ) : st.why && <span className="b-say">{st.why}</span>;
   const sure = vd.kind === "noise" ? "could be" : "likely";
-  const dmax = [0.25, 0.5].find((m) => m >= Math.max(p ?? 0, was ?? 0)) ?? 1;   // the dial scale: 0-25% unless a rate is past it
+  const dmax = [0.25, 0.5].find((m) => m >= Math.max(p ?? 0, was ?? 0)) ?? 1;   // the gauge scale: 0-25% unless a rate is past it
+  const noneFoot = vd.kind === "none" ? (prev ? `Too few sessions with a prompt to compare yet (${fmtInt(now.n)} vs ${fmtInt(prev.n)})` : "No earlier window to compare yet") : "";
   return (
     <section className="s12 brief" aria-labelledby="ov-hd" data-tone={tone}>
       <div className="b-top">
         <p className="eyebrow"><i className="b-dot" aria-hidden="true" />{vd.eyebrow}</p>
+        <h3 id="ov-hd">{head}</h3>
         <span className="b-basis">{bs.label ? `${bs.label} · ` : ""}{win} days</span>
+        {mv.length > 0 && (
+          <p className="movers"><span className="meta">Also moved</span>
+            {mv.map((m) => {
+              // the arrow carries the sign: "↓43%", never "↓ -43%"
+              const g = greyOf(m), up = !m.text.startsWith("-"), mag = m.text.replace(/^[+-]/, ""), mf = m.filter;
+              const body = <>{m.label} <b data-tone={g ? "flat" : toneOf(m.good)}><span aria-hidden="true">{up ? "↑" : "↓"}</span><span className="sr-only">{up ? "up " : "down "}</span>{mag}</b>{g && <span className="mv-g"> {g}</span>}</>;
+              return mf ? <button key={m.id} type="button" className="tag" onClick={() => apply({ ...mf, ...scope }, { list: true })} aria-label={`${m.label} ${up ? "up" : "down"} ${mag}${g ? `, ${g}` : ""} vs the earlier window. Open these sessions`}>{body}</button>
+                : <span key={m.id} className="tag">{body}</span>;
+            })}
+          </p>
+        )}
         <span className="b-acts"><WrappedButton /><CopySummary /></span>
       </div>
-      <h3 id="ov-hd">{head}</h3>
-      <div className="lead">
-        {p !== null ? (
-          <>
-            <div className="b-ring" role="group" aria-label={`Struggle rate ${pct(p)}${was !== null ? `, earlier ${pct(was)}` : ""}`}
-              title={dd && prev ? `${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before` : undefined}>
-              <Dial p={p} was={was} max={dmax} />
-              <span className="d-ends" aria-hidden="true"><i>0</i><i>{fmtPct(dmax)}</i></span>
-              <button type="button" className="b-num" onClick={() => apply({ struggled: true, ...scope }, { list: true })}
-                aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}><Count text={pct(p)} /></button>
-              <span className="d-lbl" aria-hidden="true">struggle score</span>
-            </div>
-            {was !== null && <p className="b-n"><span className="was">{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span></p>}
-            <Trail vals={tr} was={was} />
-            {/* the sentence, interval and counts stay for screen readers; sighted readers get them in the ring's tooltip */}
-            <div className="sr-only">
-              <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
-              {dd && prev && (
-                <p className="ci"><b className="ci-pt">{pts(dd.diff, 1)}</b> <CiBar lo={dd.lo} hi={dd.hi} d={dd.diff} /> <span className="ci-n">{sure} {end(dd.lo)} to {end(dd.hi)}</span></p>
-              )}
-              {dd && prev && <p className="b-foot">{fmtInt(now.n)} vs {fmtInt(prev.n)} sessions with a prompt</p>}
-            </div>
-            {vd.kind === "none" && <p className="b-foot">{prev ? `Too few sessions with a prompt to compare yet (${fmtInt(now.n)} vs ${fmtInt(prev.n)})` : "No earlier window to compare yet"}</p>}
-          </>
-        ) : (
-          <>
-            {last && <p className="b-cap">Last prompt {fmtDate(last)}</p>}
-            {dated ? <button type="button" className="btn" onClick={() => apply({ from: undefined, to: undefined })}>Show all time</button>
-              : !isEmpty(f) && <button type="button" className="btn" onClick={() => clear()}>Clear filters</button>}
-          </>
-        )}
+      <div className="strip">
+        <W n={1} ic="gauge" t="Struggle score" className="lead"
+          cap={p === null ? undefined : noneFoot ? <span className="b-foot" title={noneFoot}>{noneFoot}</span> : `${oneIn(p)} sessions`}>
+          {p !== null ? (
+            <>
+              <div className="b-ring" role="group" aria-label={`Struggle rate ${pct(p)}${was !== null ? `, earlier ${pct(was)}` : ""}`}
+                title={dd && prev ? `${pts(dd.diff, 1)}, ${sure} ${end(dd.lo)} to ${end(dd.hi)} pts (95% interval). Sessions with a prompt: ${fmtInt(now.n)} now, ${fmtInt(prev.n)} before` : undefined}>
+                <Gauge p={p} was={was} max={dmax} />
+              </div>
+              <p className="w-v g-v">
+                <button type="button" className="b-num w-n" onClick={() => apply({ struggled: true, ...scope }, { list: true })}
+                  aria-label={`${pct(p)} of sessions struggled${bs.mode === "split" ? " in the last 4 weeks" : ""}. Open the ${fmtInt(now.k)} struggled sessions`}><Count text={pct(p)} tick /></button>
+                {was !== null && <span className={`was chip${real && up ? " bad" : real ? " good" : ""}`}>{real && <span aria-hidden="true">{up ? "↑" : "↓"} </span>}from {pct(was)}</span>}
+              </p>
+              {/* the sentence, interval and counts stay for screen readers; sighted readers get them in the gauge's tooltip */}
+              <div className="sr-only">
+                <p className="b-cap">of sessions struggled: <span className="nw">{fr(p)}</span>{was !== null && <>, {vd.kind === "noise" ? "about the same as" : up ? "up from" : "down from"} <span className="nw">{fr(was)}</span></>}</p>
+                {dd && prev && (
+                  <p className="ci"><b className="ci-pt">{pts(dd.diff, 1)}</b> <CiBar lo={dd.lo} hi={dd.hi} d={dd.diff} /> <span className="ci-n">{sure} {end(dd.lo)} to {end(dd.hi)}</span></p>
+                )}
+                {dd && prev && <p className="b-foot">{fmtInt(now.n)} vs {fmtInt(prev.n)} sessions with a prompt</p>}
+              </div>
+            </>
+          ) : (
+            <>
+              {last && <p className="b-cap">Last prompt {fmtDate(last)}</p>}
+              {dated ? <button type="button" className="btn" onClick={() => apply({ from: undefined, to: undefined })}>Show all time</button>
+                : !isEmpty(f) && <button type="button" className="btn" onClick={() => clear()}>Clear filters</button>}
+            </>
+          )}
+        </W>
+        <Spark vals={tr.slice(6)} was={was} />
+        <Heat />
+        <Cost />
+        <W n={5} ic="why" t={drv ? `Why: ${drv.key}` : "Why it matters"} className="why"
+          cap={drv && fix ? <button type="button" className="w-fix" title={`${fix.row.detail} (${fix.row.impact})`} onClick={() => toFix(fix.row.id)}
+            aria-label={`Fix #${fix.n}: ${fix.row.action} (${fix.row.impact}). Go to this Do next row`}>Fix #{fix.n}: {fix.row.action}</button> : undefined}>
+          {why ? <dl className="story"><div><dt className="sr-only">{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div></dl> : <span className="b-say">No single project or intent stands out.</span>}
+        </W>
+        <Rhythm />
       </div>
-      {(why || mv.length > 0) && (
-        <div className="b-side">
-          {why && (
-            <dl className="story">
-              <div><dt>{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div>
-            </dl>
-          )}
-          {drv && fix && (
-            <div className="receipt" role="group" aria-label="What changed, how much of the change it is, and the fix" data-tone={tone}>
-              <span title={drv.key}>{drv.key}</span>
-              <span>{share > 0 && share <= 1 ? `${end(drv.total)} of ${pts(dsum, 1)}` : pts(drv.total, 1)}</span>
-              <button type="button" title={fix.row.detail} onClick={() => toFix(fix.row.id)}
-                aria-label={`Fix #${fix.n}: ${fix.row.action} (${fix.row.impact}). Go to this Do next row`}>Fix #{fix.n}: {fix.row.action} ({fix.row.impact})</button>
-            </div>
-          )}
-          {mv.length > 0 && (
-            <p className="movers"><span className="meta">Also moved</span>
-              {mv.map((m) => {
-                // the arrow carries the sign: "↓43%", never "↓ -43%"
-                const g = greyOf(m), up = !m.text.startsWith("-"), mag = m.text.replace(/^[+-]/, ""), mf = m.filter;
-                const body = <>{m.label} <b data-tone={g ? "flat" : toneOf(m.good)}><span aria-hidden="true">{up ? "↑" : "↓"}</span><span className="sr-only">{up ? "up " : "down "}</span>{mag}</b>{g && <span className="mv-g"> {g}</span>}</>;
-                return mf ? <button key={m.id} type="button" className="tag" onClick={() => apply({ ...mf, ...scope }, { list: true })} aria-label={`${m.label} ${up ? "up" : "down"} ${mag}${g ? `, ${g}` : ""} vs the earlier window. Open these sessions`}>{body}</button>
-                  : <span key={m.id} className="tag">{body}</span>;
-              })}
-            </p>
-          )}
-        </div>
-      )}
     </section>
   );
 }
@@ -343,7 +340,7 @@ export function Overview() {
     <section id="s-overview" className="sec" aria-labelledby="s-overview-h">
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
-        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /><Rhythm /><Changes /></div>}
+        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /></div>}
         <KeyNumbers bs={bs} setMetric={setMetric} all={all} />
         <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">

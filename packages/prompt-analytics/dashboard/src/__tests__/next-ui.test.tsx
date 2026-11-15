@@ -19,7 +19,7 @@ describe("Do next card", () => {
   it("sits in the row under the Brief and Key numbers, with Drivers after it, and replaces the retired sections", () => {
     mount();
     const kids = [...el.querySelectorAll("#s-overview .grid > *")].map((c) => c.id || c.className);
-    expect(kids[0]).toMatch(/hero/);   // the story hero: Brief, rhythm, top changes
+    expect(kids[0]).toMatch(/hero/);   // the widget strip: Brief title line and six widgets
     expect(el.querySelector("#s-overview .hero > .brief")).not.toBeNull();
     expect(kids[1]).toMatch(/kcard/);
     expect(kids[2]).toBe("s-next");

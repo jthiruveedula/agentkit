@@ -21,12 +21,12 @@ describe("first row: Brief ring and Key numbers tiles", () => {
     expect(tiles).toHaveLength(6);
     for (const t of tiles) { expect(t.querySelector(".ti svg")).not.toBeNull(); expect(t.querySelector("button.kpi-main")!.getAttribute("aria-label")).toBeTruthy(); }
   });
-  it("the Brief shows at most 60 words (screen-reader-only text excluded)", () => {
+  it("the Brief shows at most 80 words: a title line and six widgets (screen-reader-only text excluded)", () => {
     mount();
     const c = el.querySelector(".brief")!.cloneNode(true) as HTMLElement;
     c.querySelectorAll(".sr-only").forEach((n) => n.remove());
     const words = (c.textContent ?? "").replace(/([a-z%])([A-Z])/g, "$1 $2").split(/\s+/).filter(Boolean);
-    expect(words.length).toBeLessThanOrEqual(60);
+    expect(words.length).toBeLessThanOrEqual(80);
     expect(words.length).toBeGreaterThan(5);
   });
 });
