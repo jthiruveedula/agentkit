@@ -10,6 +10,7 @@
 .dbt .p, .dbt .c { width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--prior); box-shadow: 0 0 0 2px var(--surface); }
 .dbt .c { width: 18px; height: 18px; margin: -9px 0 0 -9px; background: var(--accent); }
 .dbt .bad { background: var(--bad); } .dbt .good { background: var(--good); }
+.dbt .c.n { background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink); }   /* within noise: hollow ink ring, so only red and green carry meaning */
 .dbt .seg.bad, .dbt .seg.good { background: linear-gradient(90deg, var(--prior), var(--c)); }
 .dbt .seg.bad { --c: var(--bad); } .dbt .seg.good { --c: var(--good); }
 .bar-l .lg { margin-right: 8px; vertical-align: -4px; }

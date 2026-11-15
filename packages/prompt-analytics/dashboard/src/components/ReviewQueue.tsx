@@ -56,13 +56,12 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
   const [found, setFound] = useState<RevealFinding[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
-  const [peek, setPeek] = useState(false); // offline: show masked preview unblurred
   const li = useRef<HTMLLIElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
-  const shown = found !== null || peek;
+  const shown = found !== null;
   const when = fmtDate(it.date);
 
-  const hide = (refocus = false) => { setFound(null); setPeek(false); if (refocus) btn.current?.focus(); };
+  const hide = (refocus = false) => { setFound(null); if (refocus) btn.current?.focus(); };
 
   useEffect(() => {
     if (!shown) return;
@@ -78,14 +77,14 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
 
   const toggle = async () => {
     if (shown) return hide();
-    if (!api) return setPeek(true);
+    if (!api) return;
     setBusy(true); setErr("");
     try { setFound(await api.reveal(it.id)); } catch { setErr("Could not load the original."); } finally { setBusy(false); }
   };
 
   const tog = (to: Status) => review(status === to ? "open" : to);
   return (
-    <li ref={li} className={`xf1${status === "open" ? "" : " done"}`}>
+    <li ref={li} className={`xf1${status === "open" ? "" : " done"}${api ? "" : " ro"}`}>
       <span className="xk">{it.kinds.map((k, i) => <span key={`${i}-${k}`} className="tag" data-cat={it.category}>{name(k)}</span>)}{its.length > 1 && <span className="tag" title={`${its.length} identical findings in this session`}>×{its.length}</span>}</span>
       <div className="xm">
         {found ? (
@@ -95,19 +94,19 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
         ) : it.preview ? (
           <>
             <span className={`mk${shown ? " on" : ""}`} aria-hidden={!shown}><Masked text={it.preview} /></span>
-            {!shown && <span className="sr-only">Preview hidden. Use the reveal button.</span>}
+            {!shown && <span className="sr-only">{api ? "Preview hidden. Use the reveal button." : "Preview hidden in a read-only export."}</span>}
           </>
         ) : <span className="xnone">No preview stored</span>}
-        {peek && <p className="xnote" role="status">Run prompt-analytics serve to view originals.</p>}
         {found && <p className="sr-only" role="status">Original revealed. It hides again in 30 seconds.</p>}
         {err && <p className="xnote" role="alert">{err}</p>}
       </div>
-      <span className="xa">
+      {/* a static export cannot reveal or review: no dead controls, the queue says so once under the filters */}
+      {api && <span className="xa">
         <button type="button" ref={btn} className="xb" disabled={busy} aria-pressed={shown}
           aria-label={`Reveal sensitive prompt from ${when}`} onClick={toggle}>{busy ? "Loading" : "Reveal"}</button>
         <button type="button" className="xb" disabled={!api} aria-pressed={status === "reviewed"} aria-label={`Reviewed: prompt from ${when}`} onClick={() => tog("reviewed")}>Reviewed</button>
         <button type="button" className="xb" disabled={!api} aria-pressed={status === "false_positive"} aria-label={`Not sensitive: prompt from ${when}`} onClick={() => tog("false_positive")}>Not sensitive</button>
-      </span>
+      </span>}
     </li>
   );
 }
@@ -150,7 +149,7 @@ export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat:
         <Seg label="Source" value={src} onChange={f(setSrc)} options={[{ id: "all", text: "All sources" }, ...present.map((s) => ({ id: s, text: srcLabel(s) }))]} />
         <Seg label="Status" value={st} onChange={f(setSt)} options={[{ id: "all", text: "Any status" }, ...(Object.keys(STATUS_NAME) as Status[]).map((s) => ({ id: s, text: STATUS_NAME[s] }))]} />
       </div>
-      {!api && <p className="xnote">Viewing a static export. Reveal and review need <code>prompt-analytics serve</code>.</p>}
+      {!api && <p className="xnote">Read-only export. Run <code>prompt-analytics serve</code> to reveal and review.</p>}
       <p className="sr-only" role="status">{msg}</p>
       {slice.length === 0 ? <p className="xe">No findings match these filters.</p> : slice.map((g) => {
         const open = g.items.filter((i) => (over[i.id] ?? i.status) === "open").length;

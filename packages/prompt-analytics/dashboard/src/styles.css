@@ -19,13 +19,9 @@
   --rim: oklch(1 0 0 / 0.75); --sw: 224px;
   --gshadow: inset 0 1px 0 oklch(1 0 0 / 0.95), inset 0 -1px 1px oklch(0.55 0.03 262 / 0.08), 0 2px 6px -2px oklch(0.35 0.03 262 / 0.1), 0 18px 36px -22px oklch(0.4 0.04 262 / 0.24), 0 0 0 0.5px oklch(0.4 0.03 262 / 0.12);
   --glass: 1;   /* glass strength (settings panel): 0 solid, 1 signed-off, 1.25 clearest */
-  --rw: 24px;   /* widget radius: cards and the brief (16px at a <=600px container); nested blocks use --r2 inside the 12px padding */
+  --rw: 20px;   /* widget radius: cards and the brief (16px at a <=600px container); nested blocks use --r2 inside the 12px padding */
   --wall-min: oklch(0.72 0.055 264); --gfloor: 0.66;   /* darkest wallpaper stop and the glass fill floor: scripts/contrast.mjs checks text and marks on white at --gfloor over --wall-min */
 }
-/* accent presets (settings panel); scripts/contrast.mjs checks each one over the :root tokens */
-:root[data-accent="teal"] { --accent: oklch(0.48 0.1 205); --accent-soft: oklch(0.95 0.025 205); }
-:root[data-accent="violet"] { --accent: oklch(0.5 0.2 300); --accent-soft: oklch(0.95 0.03 300); }
-:root[data-accent="graphite"] { --accent: oklch(0.42 0.03 260); --accent-soft: oklch(0.94 0.008 260); }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--bg); overflow-x: clip; }
@@ -114,8 +110,8 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .sec-h h2 { font: 600 22px/28px var(--sans); }
 .sec-h .q { margin-top: 2px; }
 .q { font-size: 14px; line-height: 20px; color: var(--muted); }
-/* 40px between sections (28px on phones); a promoted section's reason line takes the gap, so the line sits with its section */
-.sec + .sec, .sec + .why-tag { margin-top: 40px; }
+/* 28px between sections; a promoted section's reason line takes the gap, so the line sits with its section */
+.sec + .sec, .sec + .why-tag { margin-top: 28px; }
 .sec.quiet + .sec.quiet { margin-top: var(--s2); }
 @media (max-width: 699px) { .sec + .sec, .sec + .why-tag { margin-top: 28px; } .sec.quiet + .sec.quiet { margin-top: var(--s2); } }
 .acts { display: flex; gap: var(--s2); flex-wrap: wrap; margin-left: auto; justify-content: flex-end; }
@@ -123,8 +119,8 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .card { grid-column: span 6; min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r2); padding: var(--s3) var(--s4); scroll-margin-top: calc(var(--hh) + 16px); }
 .s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s5 { grid-column: span 5; } .s6 { grid-column: span 6; } .s7 { grid-column: span 7; } .s8 { grid-column: span 8; } .s12 { grid-column: span 12; }
 .card-h { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s3); margin-bottom: var(--s3); min-height: 28px; }
-.card-h h3 { font: 600 15px/20px var(--sans); }
-.so { color: var(--ink); font-size: 14px; font-weight: 500; line-height: 1.4; max-width: 68ch; margin: 4px 0 12px; }
+.card-h h3 { font: 600 14px/20px var(--sans); }
+.so { color: var(--ink); font-size: 13px; font-weight: 600; line-height: 18px; max-width: 68ch; margin: 8px 0 10px; }
 .so b { font-weight: 700; font-variant-numeric: tabular-nums; }
 .so .bad { color: var(--bad); }
 .so[data-thin] { color: var(--muted); font-weight: 400; } .so[data-thin] b { font-weight: inherit; }
@@ -136,7 +132,8 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .kpi:hover { border-color: var(--accent); }
 .kpi .lbl { font-size: 12px; line-height: 14px; color: var(--muted); }
 .kpi .val { font: 600 20px/28px var(--sans); white-space: nowrap; }
-.kpi .sub { font-size: 12px; line-height: 16px; color: var(--muted); min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }   /* one line; the full text is its title */
+.kpi .sub { font-size: 12px; line-height: 16px; color: var(--muted); min-width: 0; max-width: 100%; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }   /* up to two lines */
+.kpi-foot { margin-top: auto; }   /* a tile's foot mark sits on the tile's bottom edge */
 .spark { width: 100%; height: 24px; display: block; margin-top: var(--s1); fill: var(--line-2); }
 .allt { color: var(--muted); font-size: 12px; margin-top: calc(-1 * var(--s2)); }
 .legend { display: flex; flex-wrap: wrap; gap: var(--s1) var(--s3); margin-top: var(--s2); font-size: 12px; color: var(--muted); }
@@ -158,12 +155,12 @@ button.chip[aria-pressed="true"] { background: var(--accent-soft); border-color:
 .hit:focus-visible { outline: 2px solid var(--accent); }
 .brush { fill: var(--accent); opacity: 0.15; pointer-events: none; }
 .bars { display: grid; gap: 2px; }
-.bar-row { display: grid; grid-template-columns: minmax(70px, 28%) minmax(0, 1fr) auto; align-items: center; gap: 0 var(--s2); width: 100%; min-height: 28px; padding: 2px var(--s1); border-radius: var(--r1); }
+.bar-row { display: grid; grid-template-columns: minmax(112px, 36%) minmax(0, 1fr) auto; align-items: center; gap: 0 var(--s2); width: 100%; min-height: 28px; padding: 2px var(--s1); border-radius: var(--r1); }
 .bar-row:hover:not(:disabled) { background: var(--sunk); }
 .bar-row[aria-pressed="true"] { background: var(--accent-soft); }
 .bar-row:disabled { opacity: 1; cursor: default; }
 .bar-l { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 699px) { .bar-row { grid-template-columns: minmax(96px, 36%) minmax(0, 1fr) auto; } .bar-l { white-space: normal; overflow-wrap: anywhere; } }
+@media (max-width: 699px) { .bar-row { grid-template-columns: minmax(112px, 40%) minmax(0, 1fr) auto; } .bar-l { white-space: normal; overflow-wrap: anywhere; } }
 .bar-t { position: relative; height: 8px; background: var(--sunk); border-radius: 4px; }
 .bar-t i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--w) * 100%); background: var(--c, var(--accent)); border-radius: 4px; }
 .bar-t[data-mark]::after { content: ""; position: absolute; left: calc(var(--m) * 100%); top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
@@ -208,6 +205,7 @@ button.cell:hover { box-shadow: 0 0 0 1px var(--ink); }
 .cal .cell { height: 16px; }
 .cal .cell:not([data-zero]) { --cf: color-mix(in oklab, var(--accent) calc(14% + var(--v, 0) * 41%), var(--sunk)); background: var(--cf); }
 .cal .cell[data-zero] { background: var(--sunk); }
+.cal .cell[data-out] { opacity: 0.35; }
 .hw { display: grid; grid-template-columns: 30px repeat(24, minmax(0, 1fr)); gap: 2px; align-items: center; }
 .hw .cell { height: 16px; }
 .hw .cell[data-zero] { background: var(--sunk); }
@@ -297,7 +295,7 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 
 /* ledger surfaces: white cards, 1px line, 10px radius, one hairline shadow. No blur except the sticky header and bottom bar. */
 .card, .kpi, .pop, .morebox, .mini { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
-.card, .brief { border-radius: var(--rw); } .kpi { border-radius: var(--r2); }
+.card, .brief { border-radius: var(--rw); } .kpi { border-radius: var(--r3); }
 .mini { box-shadow: none; }
 .kpi:hover { border-color: var(--accent); }
 .mini[data-on] { background: var(--accent-soft); }
@@ -330,50 +328,12 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 .mm-share i { display: block; height: 100%; width: calc(var(--w) * 100%); background: var(--c); border-radius: 3px; }
 .mm-go { flex: none; }
 
-/* ---- 3D calendar (flat is the default; the toggle raises each day into a shaded column) ---- */
+/* ---- 3D toggles (the bars themselves are ECharts GL: components/Bars3D.tsx) ---- */
 @property --h { syntax: "<length>"; inherits: true; initial-value: 0px; }
 @property --v { syntax: "<number>"; inherits: false; initial-value: 0; }
 @property --w { syntax: "<number>"; inherits: true; initial-value: 0; }
-.tog3[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.cal-stage { position: relative; perspective: 1100px; perspective-origin: 50% 20%; }
-.cal-stage[data-3d] { display: grid; align-content: center; height: 320px; padding: 0 var(--s2); perspective-origin: 50% 45%; overflow: clip; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; border-radius: var(--r1); }
-.cal-stage[data-3d][data-active] { touch-action: none; }
-.cal-stage[data-3d][data-live] { cursor: grabbing; }
-.cal-stage[data-3d][data-live] .cal-wrap { will-change: transform; }
-.cal-stage[data-3d] .cal-wrap, .cal-stage[data-3d] .cal, .cal-stage[data-3d] .cal-d, .cal-stage[data-3d] .cal-m { transform-style: preserve-3d; }
 /* billboarded labels: --bb (set per frame on the two label rows) undoes the floor rotation; --fa fades a far edge at low pitch */
-.cal-stage[data-3d] .cal-d span, .cal-stage[data-3d] .cal-m span { display: block; transform: var(--bb, none); opacity: calc(0.8 * var(--fa, 1)); }
-.cal-stage[data-3d] .cal-d span { text-align: right; transform-origin: 100% 50%; }
-.cal-stage[data-3d] .cal-m span { transform-origin: 0 100%; }
-.cal-ctl { position: absolute; top: var(--s1); right: var(--s1); z-index: 2; }
-.cal-ctl .btn { min-height: 0; height: 24px; padding: 0 var(--s2); font-size: 12px; }
-@media (max-width: 699px) { .cal-ctl .btn { height: 32px; } }
-.cal-hint { position: absolute; left: 50%; bottom: var(--s2); z-index: 2; translate: -50% 0; max-width: calc(100% - 2 * var(--s2)); padding: 2px var(--s2); border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0; pointer-events: none; }
-.cal-hint-t { display: none; }
-.cal-stage[data-3d]:hover:not([data-active]) .cal-hint { opacity: 1; }
-.cal-stage[data-3d]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-@media (hover: none) {
-  .cal-hint-f { display: none; } .cal-hint-t { display: inline; }
-  .cal-stage[data-3d]:not([data-active]) .cal-hint { opacity: 1; }
-}
-.cal-stage[data-3d] .cal-wrap { transform-origin: 50% 40%; transform: rotateX(54deg) rotateZ(-30deg) scale(0.74); }
-/* no opacity on the label rows themselves: it would flatten their preserve-3d and break the billboards */
-.cal-stage[data-3d] .cal { gap: 3px; }
-.cal-stage[data-3d] .cal .cell { --h: calc(1px + var(--v) * 46px); transform-style: preserve-3d; translate: 0 0 var(--h); box-shadow: none; }
-.cal-stage[data-3d] .cal .cell[data-zero] { --h: 0px; }
-.cal-stage[data-3d] .cal .cell:not([data-zero])::before, .cal-stage[data-3d] .cal .cell:not([data-zero])::after { content: ""; position: absolute; background: inherit; }
-.cal-stage[data-3d] .cal .cell:not([data-zero])::before { left: 0; top: 100%; width: 100%; height: var(--h); transform-origin: 50% 0; transform: rotateX(-90deg); filter: brightness(0.82); }
-.cal-stage[data-3d] .cal .cell:not([data-zero])::after { left: 100%; top: 0; width: var(--h); height: 100%; transform-origin: 0 50%; transform: rotateY(90deg); filter: brightness(0.66); }
-.cal-stage[data-3d] .cal .cell { position: relative; }
 /* the far two sides (top and left edges), so a column stays solid from every yaw */
-.cal-stage[data-3d] .cal .cell > i { position: absolute; inset: 0; transform-style: preserve-3d; pointer-events: none; }
-.cal-stage[data-3d] .cal .cell > i::before, .cal-stage[data-3d] .cal .cell > i::after { content: ""; position: absolute; background: var(--cf); pointer-events: none; }
-.cal-stage[data-3d] .cal .cell > i::before { left: 0; bottom: 100%; width: 100%; height: var(--h); transform-origin: 50% 100%; transform: rotateX(90deg); filter: brightness(0.9); }
-.cal-stage[data-3d] .cal .cell > i::after { right: 100%; top: 0; width: var(--h); height: 100%; transform-origin: 100% 50%; transform: rotateY(-90deg); filter: brightness(0.74); }
-.cal-stage[data-3d] .cal .cell[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
-.cal-stage[data-3d] .cal .cell:hover { box-shadow: 0 0 0 1px var(--ink); }
-.cal-stage[data-3d] .cal [data-wk] { --h: calc(var(--v) * 46px + 7px); }
-.cal-stage[data-3d] .cal [data-wk][data-zero] { --h: 5px; }
 
 /* ---- motion: only transform / opacity / stroke-dashoffset; every rule below is gated on prefers-reduced-motion (and html.fx, set only in real browsers) ---- */
 @media (prefers-reduced-motion: no-preference) {
@@ -381,14 +341,8 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
   .bar-t i { transition: opacity 300ms ease, --w 320ms cubic-bezier(.2, .7, .2, 1); }
   .col i { transition: opacity 300ms ease, height 320ms cubic-bezier(.2, .7, .2, 1); }
   .cell { transition: --v 320ms ease, background-color 200ms, opacity 200ms, box-shadow 160ms, translate 460ms cubic-bezier(.2, .8, .2, 1.1), transform 200ms cubic-bezier(.2, .8, .2, 1); }
-  .cal-stage .cal-wrap, .cal-stage[data-3d] .cal-d span, .cal-stage[data-3d] .cal-m span { transition: transform 900ms cubic-bezier(.22, 1, .36, 1), opacity 300ms; }
-  .cal-stage[data-live] .cal-wrap, .cal-stage[data-live] .cal-d span, .cal-stage[data-live] .cal-m span { transition: none; }
-  .cal-hint { transition: opacity 200ms; }
-  .cal-stage[data-3d] .cal .cell { transition: --v 320ms ease, translate 520ms cubic-bezier(.2, .8, .2, 1.15), background-color 200ms, box-shadow 160ms; }
-  .cal-stage[data-3d] .cal .cell::before, .cal-stage[data-3d] .cal .cell::after { transition: none; }
   /* hover lifts (flat) */
-  .cal .cell:not(.none):hover, .cal .cell[data-wk] { transform: translateY(-1px) scale(1.14); }
-  .cal-stage[data-3d] .cal .cell:hover, .cal-stage[data-3d] .cal .cell[data-wk] { transform: none; }
+  .cal .cell:not(.none):hover { transform: translateY(-1px) scale(1.14); }
   .hw .cell:hover, .mx .cell:hover { transform: scale(1.18); position: relative; z-index: 2; }
   .bar-row:hover:not(:disabled) .bar-t i { transform: translateY(-1px) scaleY(1.5); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.55), 0 3px 6px -2px color-mix(in srgb, var(--c, var(--accent)) 60%, transparent); }
   .bar-t i { transition: opacity 300ms ease, --w 320ms cubic-bezier(.2, .7, .2, 1), transform 160ms ease, box-shadow 160ms; }
@@ -409,9 +363,19 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
   .fx .sec[data-in] .dot.pt { animation: pa-pop 420ms cubic-bezier(.2, 1.4, .4, 1) backwards; animation-delay: calc(500ms + var(--i, 0) * 28ms); transform-box: fill-box; transform-origin: center; }
   .fx .sec[data-in] .rise { animation: pa-rise 900ms cubic-bezier(.2, .8, .2, 1) 150ms backwards; transform-box: fill-box; transform-origin: 50% 100%; }
   .fx .sec[data-in] .cell:not(.none) { animation: pa-cell 520ms cubic-bezier(.2, 1.2, .4, 1) backwards; animation-delay: calc(120ms + min(var(--d, 0), 44) * 16ms); }
-  .fx .sec[data-in] .cal-stage[data-3d] .cal .cell { animation: none; }
   .fx .sec[data-in] .tbl tbody tr { animation: pa-left 480ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(160ms + var(--i, 0) * 50ms); }
   .fx .sec[data-in] .mm-list li { animation: pa-up 360ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(var(--i, 0) * 30ms); }
+  /* marks that show what the number is: week columns rise in date order and the average lines land after them; the bullet marker travels from the earlier
+     rate to now; tier, priced and share bars fill from zero; unit dots count in one by one; a donut sweeps clockwise from 12, largest share first */
+  .fx .sec[data-in] .wc-b { transform-box: fill-box; transform-origin: 50% 100%; animation: pa-sy 520ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(200ms + var(--i, 0) * 35ms); }
+  .fx .sec[data-in] :is(.wc-was, .wc-avg) { animation: pa-fade 400ms ease 760ms backwards; }
+  .fx .sec[data-in] .bu-now { animation: pa-from 900ms cubic-bezier(.2, .8, .2, 1) 300ms backwards; }
+  .fx .sec[data-in] :is(.tb, .meter) { animation: pa-wipe 800ms cubic-bezier(.2, .8, .2, 1) 240ms backwards; }
+  .fx .sec[data-in] :is(.ud-t, .kx-t, .mm-share) i { transform-origin: 0 50%; animation: pa-sx 800ms cubic-bezier(.2, .8, .2, 1) 240ms backwards; }
+  .fx .sec[data-in] .ud-on { transform-box: fill-box; transform-origin: center; animation: pa-pop 260ms cubic-bezier(.2, 1.4, .4, 1) backwards; animation-delay: calc(300ms + min(var(--i, 0), 30) * 45ms); }
+  .fx .sec[data-in] .dn svg { animation: pa-sweep 900ms cubic-bezier(.3, .6, .2, 1) 200ms backwards; }
+  /* inspector: the struggle bar glides to the node under the pointer, against the fixed average tick */
+  .fx .mm-track i { transition: width 280ms cubic-bezier(.2, .7, .2, 1), background-color 200ms; } .fx .mm-track u { transition: left 280ms cubic-bezier(.2, .7, .2, 1); }
 }
 @keyframes pa-up { from { opacity: 0; translate: 0 14px; } }
 @keyframes pa-left { from { opacity: 0; translate: -10px 0; } }
@@ -421,6 +385,10 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 @keyframes pa-cell { from { opacity: 0; scale: 0.3; } }
 @keyframes pa-fade { from { opacity: 0; } }
 @keyframes pa-rise { from { opacity: 0; scale: 1 0.35; } }
+@property --pa-a { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
+@keyframes pa-from { from { translate: calc(var(--d, 0) * 100cqw) 0; } }   /* --d = earlier minus now, as a share of the .bul track (its container) */
+@keyframes pa-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes pa-sweep { from { --pa-a: 0deg; mask: conic-gradient(#000 var(--pa-a), #0000 0); } to { --pa-a: 360deg; mask: conic-gradient(#000 var(--pa-a), #0000 0); } }
 @keyframes pa-draw { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
 @media print { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
@@ -430,11 +398,6 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 .seg.seg-q button { border-left: 0; color: var(--muted); padding: 3px var(--s2); }
 .seg.seg-q button[aria-pressed="true"] { background: none; box-shadow: inset 0 -2px var(--ink); color: var(--ink); }
 
-/* 3D calendar touch toggle (Time.tsx) */
-.cal-touch { display: none; }
-.cal-touch[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-@media (hover: none), (max-width: 699px) { .cal-stage[data-3d] .cal-touch { display: inline-block; } }
-.cal-ctl { display: flex; gap: var(--s1); }
 .legend .hotkey::before { background: none; border-radius: 50%; border: 2px dashed var(--warn); }
 
 /* touch: comfortable targets */
@@ -472,7 +435,7 @@ span.play-copy { font-style: italic; }
 .lb-call { margin-bottom: var(--s2); }
 .lb { position: relative; width: 100%; min-width: 0; }
 .lb svg { display: block; }
-.lb-line { stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; }
+.lb-line { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
 .lb-ci { stroke: var(--accent); stroke-width: 3; opacity: 0.55; stroke-linecap: butt; }
 .lb-dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
 .lb-dot[data-be] { fill: var(--surface); stroke: var(--ink); }
@@ -562,6 +525,15 @@ td[data-low] { color: var(--muted); }
 .rep-f { display: grid; gap: 2px; max-width: 20rem; } .rep-f input { height: 28px; padding: 0 var(--s2); border: 1px solid var(--line-2); border-radius: var(--r1); background: var(--surface); font-family: ui-monospace, monospace; }
 .rep-a { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); } .rep-d { display: grid; gap: var(--s2); }
 .rep-pre { margin: 0; width: 100%; resize: vertical; color: var(--ink); padding: var(--s3); background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r1); white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, monospace; font-size: 12.5px; max-width: 100%; }
+/* compact row: count | quote + cost line | make command | open latest. Children in order: <b>, .rep-b (.rep-q + .meta), two actions, optional .rep-d */
+.reps:has(> .rep-row) { gap: 0; }
+.rep-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto; align-items: center; gap: 2px var(--s3); min-height: 56px; padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rep-row:last-child { border-bottom: 0; }
+.rep-row > b:first-child { font: 600 24px/28px var(--sans); font-variant-numeric: tabular-nums; color: var(--accent); }
+.rep-row .rep-b { gap: 0; }
+.rep-row .rep-q { padding: 0; background: none; border: 0; border-radius: 0; font-size: 13px; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }
+.rep-row > .rep-d { grid-column: 1 / -1; padding-top: var(--s2); }
+@container pa (max-width: 600px) { .rep-row { grid-template-columns: 48px minmax(0, 1fr) auto; } .rep-row > .rep-b { grid-column: 2 / -1; } .rep-row > .rep-b + * { grid-column: 2; justify-self: start; } }
 .habits { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
 
 /* Weekly Wrapped */
@@ -626,14 +598,17 @@ g[data-hl] > .hit { fill: color-mix(in oklab, var(--accent) 14%, transparent); s
 /* 6c: scorecard cost cell: the price and its tag never overlap */
 .sc td .tag { margin-left: 6px; white-space: nowrap; vertical-align: middle; } .sc td { white-space: nowrap; }
 
-/* 3D terrain (hour-of-week): canvas fills a fixed-height box; tooltip and buttons are overlays */
-.ter { position: relative; height: 280px; border-radius: var(--r1); overflow: clip; background: var(--sunk); }
-.ter canvas { display: block; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; border-radius: var(--r1); }
-.ter canvas:active { cursor: grabbing; }
-.ter-tip { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r1); padding: 2px var(--s2); font-size: 12px; line-height: 18px; white-space: nowrap; box-shadow: 0 2px 8px oklch(0 0 0 / 0.14); }
-.ter-tip[hidden] { display: none; }
-.ter-reset { position: absolute; top: var(--s1); right: var(--s1); height: 24px; min-height: 0; font-size: 12px; }
-.ter-hint { position: absolute; left: var(--s2); top: var(--s2); pointer-events: none; font-size: 12px; line-height: 16px; color: var(--muted); }
+/* 3D bars (Bars3D.tsx): toolbar row, chart, hint line (nothing overlays the canvas). .btn.tog3 (0,3,0) outranks html.glass .btn (0,2,1): the pressed button stays accent, not white */
+.btn.tog3[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25); }
+.b3d { position: relative; }
+.b3d:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r1); }
+.b3d-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s1) var(--s2); min-height: 28px; margin-bottom: 4px; }
+.b3d-bar .note { margin-top: 0; white-space: nowrap; }
+.b3d-ramp { width: 64px; height: 8px; border-radius: 2px; background: linear-gradient(90deg, #d2dff5, #5b8ae1); }
+.b3d-chip { display: inline-flex; align-items: center; gap: 4px; } .b3d-chip i { width: 10px; height: 10px; border-radius: 2px; }
+.b3d-reset { margin-left: auto; height: 24px; min-height: 0; padding: 0 var(--s2); font-size: 12px; }
+.b3d-cv { width: 100%; }
+.b3d-hint { margin: 4px 0 0; }
 @media (max-width: 480px) { .tog3d { display: none; } }
 
 /* live refresh: one-shot pulse on the totals (html.fx only, so absent under reduced motion) */
@@ -769,7 +744,8 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 
 /* compact sizing; widgets reflow on the width of <main> (container query), so zoom and an open panel both fit */
 .sec { scroll-margin-top: calc(var(--hh) + 12px); }
-.card { padding: var(--s3); scroll-margin-top: calc(var(--hh) + 12px); }
+.card { padding: var(--s4); scroll-margin-top: calc(var(--hh) + 12px); }   /* one card system: 16px padding (12px under 700px), 14/600 title, 12px gap */
+@container pa (max-width: 699px) { .card { padding: var(--s3); } }
 @media (max-width: 699px) { .sec, .card { scroll-margin-top: 64px; } }   /* only the toolbar row (~53px, 62px on touch) stays stuck here */
 .grid { gap: var(--s3); }
 /* widget sizes: S span 3, M 4-5, L 6-8, XL 12; no fixed or min heights. Cards stretch to their row as flex columns and hand the extra height
@@ -778,7 +754,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .grid > .card > .card-h + .so { margin-top: 0; }   /* flex items keep both margins: hold the 12px block rhythm */
 .grid > .card > :is(.btn, .seg, .chip, .link) { align-self: flex-start; }
 .grid > .card > :is(.bars, .dbs, .mx, .mf-recs, .chart) { flex: 1 1 auto; }
-.grid > .card > :is(.bars, .dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
+.grid > .card > :is(.dbs, .mx, .mf-recs) { align-content: space-between; }   /* rows past their cap spread to the card foot, so a short list beside a tall card ends level with it, not in blank glass */
 .grid > .card > :is(.bars) { grid-auto-rows: minmax(min-content, 42px); }
 .grid > .card > :is(.bars) > li { display: grid; }   /* the row button fills its stretched track */
 .grid > .card > .dbs { grid-auto-rows: minmax(min-content, 30px); }
@@ -786,7 +762,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .grid > .card > .mx:not(.rt) .cell { height: auto; min-height: 26px; align-self: stretch; display: grid; place-content: center; }
 .grid > .card > .mf-recs { display: grid; grid-auto-rows: minmax(min-content, 72px); }
 .grid > .card > .chart { max-height: 280px; }
-@container pa (min-width: 1001px) { .cal-stage:not([data-3d]) :is(.cal, .cal-d) { grid-template-rows: repeat(7, 22px); } .cal-stage:not([data-3d]) .cal .cell { height: 22px; } }   /* beside Hour by weekday */
+@container pa (min-width: 1001px) { .cal-stage :is(.cal, .cal-d) { grid-template-rows: repeat(7, 22px); } .cal-stage .cal .cell { height: 22px; } }   /* beside Hour by weekday */
 /* <=1000px: one column, except pairs marked .half, which stay 6 + 6 (no half-width orphans). <=600px (phones): every card full width, hugging its content */
 @container pa (max-width: 1000px) { .grid > :is(.s3, .s4, .s5, .s6, .s7, .s8) { grid-column: span 12; } .grid > .half { grid-column: span 6; } }
 @container pa (max-width: 600px) { .grid > :is(.card, .half, .s3, .s4, .s5, .s6, .s7, .s8) { grid-column: span 12; } .grid { --rw: 16px; } }
@@ -800,9 +776,13 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   html.glass body { background: transparent; }
   html.glass body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;   /* fixed, so cards slide over it; nothing darker than --wall-min, no image, no motion */
-    background: radial-gradient(circle at 1px 1px, oklch(1 0 0 / 0.5) 1px, transparent 1.5px) 0 0 / 24px 24px,   /* white dot grid: crisp in the gutters, blurred away under glass */
-      radial-gradient(60vw 62vh at 8% 0%, var(--wall-min), transparent 70%), radial-gradient(46vw 50vh at 96% 12%, oklch(0.95 0.012 250), transparent 68%),
-      radial-gradient(70vw 60vh at 80% 104%, oklch(0.76 0.045 258), transparent 70%), linear-gradient(180deg, oklch(0.86 0.022 258), oklch(0.82 0.028 260)); }
+    /* four soft blooms over a slate ramp, lightness 0.72 to 0.95: no dots, no repeating pattern */
+    background:
+      radial-gradient(60vw 62vh at 8% 0%, var(--wall-min), transparent 70%),
+      radial-gradient(46vw 50vh at 96% 12%, oklch(0.95 0.012 250), transparent 68%),
+      radial-gradient(50vw 44vh at 55% 48%, oklch(0.90 0.020 240 / 0.7), transparent 72%),
+      radial-gradient(70vw 60vh at 80% 104%, oklch(0.76 0.045 258), transparent 70%),
+      linear-gradient(180deg, oklch(0.86 0.022 258), oklch(0.82 0.028 260)); }
   /* page text that sits on the wallpaper, not on a card: ink only (contrast.mjs: ink on --wall-min) */
   html.glass :is(.sec-h .q, .why-tag, .why-tag .link, .why-tag b) { color: var(--ink); }
   /* fill 1 - 0.25g to 1 - 0.34g, never below --gfloor (contrast.mjs: every text and mark token holds over white at --gfloor on --wall-min);
@@ -851,10 +831,11 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
   .b-top .b-acts .btn { flex: 1 1 0; min-width: 0; padding-inline: var(--s1); }
 }
 .b-top .b-acts .btn[data-due]::after { content: ""; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--accent); display: inline-block; vertical-align: middle; }   /* Weekly Wrapped is new this week */
-.brief { --tone: var(--line-2); --tone-ink: var(--muted); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--s3) var(--s5); padding: var(--s5); background: var(--surface); border: 1px solid var(--line); border-radius: var(--rw); }
+.brief { --tone: var(--line-2); --tone-ink: var(--muted); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--s3) var(--s5); padding: var(--s4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--rw); }
 .brief[data-tone="bad"] { --tone: var(--bad); --tone-ink: var(--bad); } .brief[data-tone="good"] { --tone: var(--good); --tone-ink: var(--good-ink); }
+@container pa (max-width: 699px) { .brief { padding: var(--s3); } }
 .brief { position: relative; overflow: clip; }   /* clips the tone bar to the card's corners: a straight 3px rule, no tapered crescent */
-.brief:not([data-tone="flat"])::before { content: ""; position: absolute; inset: 0 0 auto; height: 3px; background: var(--tone); }
+.brief:not([data-tone="flat"])::before { content: ""; position: absolute; inset: 0 var(--rw) auto; height: 3px; border-radius: 0 0 3px 3px; background: var(--tone); }   /* starts and ends where the corner curve ends */
 .brief:has(> .b-side) { grid-template-columns: minmax(260px, 5fr) minmax(0, 7fr); }
 .brief .eyebrow { display: inline-flex; align-items: center; gap: var(--s2); font: 600 13px/18px var(--sans); color: var(--ink); }
 .b-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--tone); }
@@ -898,14 +879,11 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .drv li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(160px, 50%); gap: var(--s3); align-items: center; padding: var(--s2) var(--s1); border-top: 1px solid var(--line); --c: var(--prior); }
 .drv small { display: block; font-size: 12px; color: var(--muted); }
 .drv li[data-tone="bad"] { --c: var(--bad); } .drv li[data-tone="good"] { --c: var(--good); } .drv li[data-tone="bad"] .n { color: var(--bad); } .drv li[data-tone="good"] .n { color: var(--good); }
-@media (max-width: 599px) { .drv li { grid-template-columns: minmax(0, 1fr); } .brief { padding: var(--s4); } .brief h3 { font-size: 20px; line-height: 26px; } .b-num { font-size: 48px; } }
+@media (max-width: 599px) { .drv li { grid-template-columns: minmax(0, 1fr); } .brief h3 { font-size: 20px; line-height: 26px; } .b-num { font-size: 48px; } }
 
 /* display settings popover (top bar) */
 .prefs { position: absolute; top: 100%; right: var(--s4); z-index: 35; width: 260px; max-width: calc(100vw - 32px); display: grid; gap: var(--s3); padding: var(--s3) var(--s4); background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r3); box-shadow: 0 12px 32px -12px oklch(0.3 0.03 262 / 0.3); }
-.prefs fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: var(--s2); }
-.prefs legend, .prefs label > span { font-weight: 600; margin-bottom: var(--s1); }
-.prefs-opts { display: flex; flex-wrap: wrap; gap: var(--s2); }
-.prefs-opts label { display: inline-flex; align-items: center; gap: 6px; }
+.prefs label > span { font-weight: 600; margin-bottom: var(--s1); }
 .prefs input[type="range"] { width: 100%; accent-color: var(--accent); }
 .prefs output { color: var(--muted); }
 .setbtn svg { display: block; }

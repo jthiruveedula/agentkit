@@ -13,6 +13,7 @@ from typing import Any, Callable
 import numpy as np
 import polars as pl
 
+from .ml import curves
 from .sensitive import ADVICE
 
 CHAPTERS = ["footprint", "time", "funnel", "friction", "works", "recommend"]
@@ -873,6 +874,122 @@ def _specific_prompts(sm: pl.DataFrame) -> list[dict]:
     ]
 
 
+def _curve_cand(
+    id_: str,
+    chapter: str,
+    metric: str,
+    labels: list[str],
+    bins: np.ndarray,
+    ok: np.ndarray,
+    claim: Callable[[dict], str | None],
+    cumulative: bool = False,
+) -> list[dict]:
+    """Applied-code rate per ordered bin; a claim only when ``curves.standout`` finds a bin that stands apart
+    (and ``claim`` does not decline it by returning None). The evidence carries the whole curve so the chart can
+    draw the band the claim rests on."""
+    if len(ok) < 40:
+        return []
+    k = [int(ok[bins == i].sum()) for i in range(len(labels))]
+    n = [int((bins == i).sum()) for i in range(len(labels))]
+    curve, pick = curves.standout(labels, k, n, cumulative)
+    text = claim(pick) if pick else None
+    if not text:
+        return []
+    c = _cand(
+        id_,
+        chapter,
+        text,
+        metric,
+        pick["rate"] * 100,
+        "%",
+        pick["rate"] / pick["rest"] - 1 if pick["rest"] else None,
+        len(ok),
+        f"rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m={pick['tested']}",
+        abs(pick["diff"]) * math.log(len(ok)),
+        "curve",
+        {},
+        pick["ci"],
+    )
+    c["evidence"] |= {
+        "curve": curve,
+        "pick": pick["index"],
+        "cumulative": cumulative,
+        "baseline": round(pick["rest"], 4),
+    }
+    return [c]
+
+
+def _retry_cliff(sm: pl.DataFrame) -> list[dict]:
+    d = sm.filter(pl.col("n_user") > 0)
+    return _curve_cand(
+        "friction.retry_cliff",
+        "friction",
+        "share of sessions with applied code, by rephrase retries",
+        ["0", "1", "2", "3+"],
+        np.minimum(d["loops"].to_numpy(), 3),
+        d["has_applied"].to_numpy().astype(bool),
+        lambda p: (
+            f"After {p['index']} {'retry' if p['index'] == 1 else 'retries'}, only {p['rate']:.0%} "
+            f"of your sessions land code (usually {p['rest']:.0%})"
+            if p["diff"] < 0
+            else None
+        ),
+        cumulative=True,
+    )
+
+
+def _length_curve(sm: pl.DataFrame) -> list[dict]:
+    if "first_len" not in sm.columns:
+        return []
+    d = sm.filter(pl.col("first_len").is_not_null() & (pl.col("n_user") > 0))
+    if d.height < 40:
+        return []
+    x = d["first_len"].to_numpy()
+    edges = np.unique(np.quantile(x, [0.2, 0.4, 0.6, 0.8]).round().astype(int))
+    edges = edges[edges > x.min()]
+    if not len(edges):
+        return []
+    labels = (
+        [f"under {edges[0]}"]
+        + [f"{a}-{b - 1}" for a, b in zip(edges, edges[1:])]
+        + [f"over {edges[-1] - 1}"]
+    )
+    return _curve_cand(
+        "works.prompt_length",
+        "works",
+        "share of sessions with applied code, by opening prompt length (characters)",
+        labels,
+        np.digitize(x, edges),
+        d["has_applied"].to_numpy().astype(bool),
+        lambda p: (
+            f"Your opening prompts of {edges[p['index'] - 1]}+ characters land code {p['rate']:.0%}, not {p['rest']:.0%}"
+        ),
+        cumulative=True,
+    )
+
+
+def _daypart(sm: pl.DataFrame, sess: pl.DataFrame) -> list[dict]:
+    if "started" not in sess.columns:
+        return []
+    d = sm.filter(pl.col("n_user") > 0).join(
+        sess.filter(pl.col("started").is_not_null()).select("session_id", "started"),
+        on="session_id",
+        how="inner",
+    )
+    blocks = [f"{_hour_label(h)}-{_hour_label((h + 4) % 24)}" for h in range(0, 24, 4)]
+    return _curve_cand(
+        "time.daypart",
+        "time",
+        "share of sessions with applied code, by start hour (UTC, 4-hour blocks)",
+        blocks,
+        d["started"].dt.hour().to_numpy() // 4,
+        d["has_applied"].to_numpy().astype(bool),
+        lambda p: (
+            f"Sessions you start {blocks[p['index']]} UTC land code {p['rate']:.0%}, not {p['rest']:.0%}"
+        ),
+    )
+
+
 def _intent_mix(sm: pl.DataFrame) -> list[dict]:
     d = sm.filter(pl.col("intent").is_not_null() & (pl.col("intent") != "other"))
     if d.height < 20:
@@ -1166,6 +1283,9 @@ def generate(inp: dict[str, Any]) -> tuple[list[dict], list[dict]]:
         + _months(sm, inp["sess"])
         + _specific_prompts(sm)
         + _intent_mix(sm)
+        + _retry_cliff(sm)
+        + _length_curve(sm)
+        + _daypart(sm, inp["sess"])
     )
     fall = _fallbacks(sec, len(inp["what_works"]))
     kept: list[dict] = []

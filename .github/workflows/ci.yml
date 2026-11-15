@@ -258,14 +258,14 @@ jobs:
           npm test
           npm run contrast
 
-      # Bundle gate (build plan M6): the single-file dashboard stays under 200 kB gzip (raised from 175 kB for the key numbers, usage mix and sunburst charts).
+      # Bundle gate (build plan M6): the single-file dashboard stays under 496 KiB gzip (raised from 200 kB for the ECharts GL 3D bars).
       - name: Build and bundle size gate
         working-directory: packages/prompt-analytics/dashboard
         run: |
           npm run build
           size=$(gzip -9 -c ../src/prompt_analytics/web/index.html | wc -c)
-          echo "dashboard gzip: $size bytes (cap 204800)"
-          test "$size" -le 204800
+          echo "dashboard gzip: $size bytes (cap 507904)"
+          test "$size" -le 507904
 
   packaging:
     name: packaging

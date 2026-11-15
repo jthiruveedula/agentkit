@@ -265,12 +265,8 @@ describe("Filters badge and focus", () => {
 describe("brief honesty (H2) and empty actions (M7 / L11)", () => {
   it("cost per applied change on the sample is not a green win: grey, mixed, one sign", () => {
     mount("#/s-overview");
-    const tag = [...el.querySelectorAll(".brief .movers .tag")].find((t) => t.textContent!.startsWith("Cost per applied change"));
-    expect(tag).toBeDefined();
-    expect(tag!.querySelector("b")!.getAttribute("data-tone")).not.toBe("good");
-    expect(tag!.querySelector(".mv-g")!.textContent!.trim()).toBe("mixed");
-    expect(tag!.textContent).not.toMatch(/[↑↓]\s*[+-]/);
-    expect(tag!.getAttribute("aria-label") ?? tag!.textContent).toMatch(/down 43% mixed/);   // the tile reads "↓43% mean | mixed"
+    // the Key numbers tile owns this metric, so the brief carries no chip for it
+    expect([...el.querySelectorAll(".brief .movers .tag")].find((t) => t.textContent!.startsWith("Cost per applied change"))).toBeUndefined();
   });
   it("no Also moved chip carries a double sign", () => {
     for (const h of ["#/s-overview", "#/s-overview?from=2026-09-26"]) {

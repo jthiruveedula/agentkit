@@ -17,7 +17,14 @@ export interface Insight {
   value: number;
   unit: string;             // "x" | "%" | "min" | "USD" | "tokens" | ""
   delta: number | null;     // relative change vs comparison group, e.g. 1.1 = +110%
-  evidence: { n: number; ci?: [number, number]; method: string };
+  evidence: {
+    n: number; ci?: [number, number]; method: string;
+    /** Optional, absent in older exports. Only on ids friction.retry_cliff, works.prompt_length, time.daypart: applied-code rate (0-1) per ordered bin
+     *  with a 95% Wilson band. `pick` indexes the bin the claim is about; when `cumulative`, the claim covers that bin and
+     *  every later one. `baseline` is the rate of all other sessions; `ci` is then the interval of rate minus baseline. */
+    curve?: { label: string; rate: number; lo: number; hi: number; n: number }[];
+    pick?: number; cumulative?: boolean; baseline?: number;
+  };
   drill: { chapter: Chapter; filter: Partial<{ source: Source; intent: Intent; project: string; cluster: number }> };
 }
 

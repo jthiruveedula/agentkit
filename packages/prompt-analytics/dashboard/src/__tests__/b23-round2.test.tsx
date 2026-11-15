@@ -36,7 +36,7 @@ describe("KPI sparks are whole weeks ending on the last day", () => {
     // Oct 12-14 (5 sessions) is the leftover; Oct 15-21 has 1, Oct 22-28 has 2
     const rows = [...many(5, () => ({ date: "2026-10-13" })), ...many(1, () => ({ date: "2026-10-16" })), ...many(2, () => ({ date: "2026-10-26" }))];
     const h = html(rows, { from: "2026-10-12", to: "2026-10-28" });
-    expect(tile(h, "sessions").match(/class="wc-b[ "]/g)).toHaveLength(2);
+    expect(tile(h, "sessions").match(/class="wc-b wc-now"/g)).toHaveLength(2);   // the grey bars before them are earlier weeks, for context
   });
 });
 

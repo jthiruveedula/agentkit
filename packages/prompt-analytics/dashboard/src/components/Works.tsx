@@ -134,15 +134,15 @@ function NoGain({ span }: { span: 5 | 12 }) {
     : g.over.rate! < g.mid.rate! && g.flat ? <>Past <b>10</b> prompts, applied rate falls to {fmtPct(g.over.rate ?? 0)}: start fresh.</>
     : g.flat ? <>Past <b>10</b> prompts, applied rate stays {fmtPct(g.over.rate ?? 0)}: longer does not help.</>
     : <>Past <b>10</b> prompts, applied rate rises to {fmtPct(g.over.rate ?? 0)}.</>;
-  // whisker x = centre of column i in a flex row with a 3px gap (matches .cols)
-  const cx = (i: number) => `calc(${i + 0.5} * (100% + 3px) / ${bs.length} - 1.5px)`;
+  // whisker x = centre of column i in a flex row with a 2px gap (matches .ng-plot .cols)
+  const cx = (i: number) => `calc(${i + 0.5} * (100% + 2px) / ${bs.length} - 1px)`;
   return (
     <Card so={so} thin={!g} id="s-nogain" src={`sessions.prompts \u00b7 n ${fmtInt(n)}`} title="Applied rate by session length" meta="change sessions (not explain), in view, 95% Wilson CI" span={span}>
       <div className="ng-plot">
-        <Cols label="Applied rate by prompts per session" height={96} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--accent)" : "var(--line-2)" }],
+        <Cols label="Applied rate by prompts per session" height={150} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--accent)" : "var(--line-2)" }],
           aria: b.n ? `${b.label} prompts: ${fmtPct(b.rate ?? 0)} applied, 95% CI ${fmtPct(b.lo)} to ${fmtPct(b.hi)}, n=${b.n}${b.n < MIN_N ? ", too few to read alone" : ""}` : `${b.label} prompts: no sessions` }))} />
         <div className="ng-ci" aria-hidden="true">
-          <span className="ng-top">100%</span>
+          <span className="ng-top">100%</span><span className="ng-mid">50%</span>
           {bs.map((b, i) => b.n > 0 && <i key={b.label} style={{ left: cx(i), bottom: `${b.lo * 100}%`, height: `${(b.hi - b.lo) * 100}%` }} />)}
         </div>
       </div>

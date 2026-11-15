@@ -35,7 +35,9 @@ const pairs = [["ink", "bg", 4.5], ["ink", "surface", 4.5], ["muted", "surface",
   ...["ink", "muted", "accent", "warn-ink", "good-ink"].map((t) => [t, "glass", 4.5]), ["ink", "wall-min", 4.5],   // section subtitles and why-tags sit on the wallpaper itself
   ...["good", "bad", "warn", ...[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => `s${i}c`), ...["claude_code", "copilot", "cursor", "opencode", "antigravity", "other"].map((s) => `src-${s}`), ...[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `t${i}`)].map((t) => [t, "glass", 3]),
   // mind map: the 1px outline circle behind the palest ring (--muted) and the highlight stroke (--warn-ink) as marks on the glass floor
-  ["muted", "glass", 3], ["warn-ink", "glass", 3]];
+  ["muted", "glass", 3], ["warn-ink", "glass", 3],
+  // signals heat table: ink text on the darkest cell (60% accent over sunk) and the lightest (8%)
+  ["ink", "heat-max", 4.5], ["ink", "heat-min", 4.5]];
 // categorical hues must differ enough in lightness or hue to tell apart: Antigravity vs Claude (the old pair was both blue)
 const dist = (a, b) => Math.hypot(a[0] - b[0], 0.5 * (a[1] * Math.cos(a[2] * Math.PI / 180) - b[1] * Math.cos(b[2] * Math.PI / 180)) , 0.5 * (a[1] * Math.sin(a[2] * Math.PI / 180) - b[1] * Math.sin(b[2] * Math.PI / 180)));
 const apart = [["src-antigravity", "src-claude_code", 0.15]];
@@ -44,8 +46,13 @@ const floor = +block.match(/--gfloor:\s*([\d.]+)/)[1];
 const glass = (wall) => ({ rgb: srgb(wall).map((v) => floor + (1 - floor) * v) });   // white at alpha `floor` over the wallpaper, composited in sRGB
 const base = { ...parse(block), ...parse(mixBlock) };
 base.glass = glass(base["wall-min"]);
+// color-mix(in oklab, accent p%, sunk): linear in Lab, kept as an LCh triple
+const mixLab = (a, b, p) => { const lab = ([L, C, h]) => [L, C * Math.cos((h * Math.PI) / 180), C * Math.sin((h * Math.PI) / 180)], [x, y] = [lab(a), lab(b)].map((v) => v), m = x.map((v, i) => y[i] * (1 - p) + v * p);
+  return [m[0], Math.hypot(m[1], m[2]), (Math.atan2(m[2], m[1]) * 180) / Math.PI]; };
+const heat = () => { base["heat-max"] = mixLab(base.accent, base.sunk, 0.6); base["heat-min"] = mixLab(base.accent, base.sunk, 0.08); };
+heat();
 // every accent preset (:root[data-accent="x"]) is checked as its overrides over the base tokens
-const themes = [["default", base], ...[...css.matchAll(/\n:root\[data-accent="(\w+)"\] \{([^}]*)\}/g)].map((m) => [m[1], { ...base, ...parse(m[2]) }])];
+const themes = [["default", base], ...[...css.matchAll(/\n:root\[data-accent="(\w+)"\] \{([^}]*)\}/g)].map((m) => [m[1], { ...base, ...parse(m[2]) }])].map(([n, t]) => [n, { ...t, "heat-max": mixLab(t.accent, t.sunk, 0.6), "heat-min": mixLab(t.accent, t.sunk, 0.08) }]);
 for (const [name, all] of themes) {
   for (const [fg, bg, min] of pairs) {
     const r = ratio(all[fg], all[bg]);
