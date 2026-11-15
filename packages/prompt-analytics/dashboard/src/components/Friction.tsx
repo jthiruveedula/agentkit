@@ -8,6 +8,7 @@ import { loopCurve, LOOP_MIN_N, stopRule } from "../lib/loops";
 import { useSize } from "../lib/hooks";
 import { pts } from "../lib/stats";
 import { Repeats } from "./Repeats";
+import { CurveCard } from "./Curve";
 import { Dumb } from "./Time";
 import type { SessionRow } from "../data/types";
 import "./investigate.css";
@@ -144,7 +145,7 @@ function LoopBreaker() {
 export function Friction() {
   return (
     <Section id="s-friction" title="Friction" q="Where do you fight the tool?">
-      <Signals /><ByIntent /><LoopBreaker /><Repeats />
+      <Signals /><ByIntent /><LoopBreaker /><CurveCard id="friction.retry_cliff" /><Repeats />
     </Section>
   );
 }

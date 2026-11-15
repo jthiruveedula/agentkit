@@ -370,7 +370,7 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
   .fx .sec[data-in] .wc-b { transform-box: fill-box; transform-origin: 50% 100%; animation: pa-sy 520ms cubic-bezier(.2, .8, .2, 1) backwards; animation-delay: calc(200ms + var(--i, 0) * 35ms); }
   .fx .sec[data-in] :is(.wc-was, .wc-avg) { animation: pa-fade 400ms ease 760ms backwards; }
   .fx .sec[data-in] .bu-now { animation: pa-from 900ms cubic-bezier(.2, .8, .2, 1) 300ms backwards; }
-  .fx .sec[data-in] :is(.tb, .meter) { animation: pa-wipe 800ms cubic-bezier(.2, .8, .2, 1) 240ms backwards; }
+  .fx .sec[data-in] :is(.tb, .meter, .cv svg) { animation: pa-wipe 800ms cubic-bezier(.2, .8, .2, 1) 240ms backwards; }
   .fx .sec[data-in] :is(.ud-t, .kx-t, .mm-share) i { transform-origin: 0 50%; animation: pa-sx 800ms cubic-bezier(.2, .8, .2, 1) 240ms backwards; }
   .fx .sec[data-in] .ud-on { transform-box: fill-box; transform-origin: center; animation: pa-pop 260ms cubic-bezier(.2, 1.4, .4, 1) backwards; animation-delay: calc(300ms + min(var(--i, 0), 30) * 45ms); }
   .fx .sec[data-in] .dn svg { animation: pa-sweep 900ms cubic-bezier(.3, .6, .2, 1) 200ms backwards; }
@@ -443,6 +443,21 @@ span.play-copy { font-style: italic; }
 .lb-x { fill: var(--ink); font-weight: 600; }
 .lb-bet { fill: var(--ink); }
 .lb-na { font-style: italic; }
+
+/* curve insight: applied rate per bin (0-100%), Wilson interval bars, the claim's bins tinted and marked, all other sessions dashed */
+.cv-w { max-width: 760px; }
+.cv { position: relative; margin: var(--s2) 0 0 34px; }
+.cv svg { display: block; width: 100%; height: 120px; overflow: visible; }
+.cv-ax { position: absolute; right: calc(100% + 6px); translate: 0 -50%; font-size: 11px; line-height: 14px; color: var(--muted); }
+.cv-on { fill: var(--accent-soft); }
+.cv-band { fill: var(--accent); opacity: 0.28; }
+.cv-l, .cv-d { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.cv-d { stroke-width: 8; }
+.cv-base { stroke: var(--prior); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.cv-x { gap: 0; padding-left: 34px; }
+.cv-x span { border-top: 3px solid transparent; padding: 2px 1px 0; }
+.cv-x [data-on] { border-top-color: var(--accent); }
+.cv-x small { font-size: 11px; }
 .col { position: relative; }
 
 /* sessions table: pager, density, export menu */

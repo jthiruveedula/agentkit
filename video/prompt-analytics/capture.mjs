@@ -1,14 +1,17 @@
 // Re-runnable capture of the MOCK dashboard (sample.dev.json) into shots/*.png + shots.json.
-// Run through capture.sh: it builds the dashboard into out/dash with the mock data inlined, injects
-// __ROOT__ / __BASE__ and pipes this file to `ego-browser nodejs`. Mock data only, never real sessions.
-const ROOT = "__ROOT__";
-const BASE = "__BASE__"; // file:// URL of out/dash/index.html
+// Run through capture.sh (it builds the dashboard into out/dash with the mock data inlined), or directly:
+// `node capture.mjs` drives headless Edge through cdp.mjs. Mock data only, never real sessions.
+//   PA_BASE  URL of the mock dashboard page (default: file:// out/dash/index.html next to this file)
+//   PA_OUT   directory that receives shots/*.png + shots.json (default: this directory)
+import { launch } from "./cdp.mjs";
+const ROOT = process.env.PA_OUT || import.meta.dirname;
+const BASE = process.env.PA_BASE || `file://${import.meta.dirname}/out/dash/index.html`;
 const W30 = "s-overview?from=2026-09-26"; // 30d window: briefing reads 3.9% -> 11.0%
 const fs = await import("node:fs/promises");
 await fs.mkdir(`${ROOT}/shots`, { recursive: true });
 
-const task = await taskSpace("pa video");
-const page = task.page("p1");
+const task = await launch();
+const page = task.page;
 await page.cdp("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 
 const shots = [];
@@ -123,17 +126,19 @@ await open(at30("s-tools"));
 await scrollTo("#s-tools", 98);
 await snap("tools", { resolved: C("Resolved rate"), struggled: C("Struggled by tool"), cost: C("Cost / resolved") });
 
-// 6 Time: calendar 2D -> 3D, hour-of-week 3D terrain
+// 6 Time: calendar 2D -> 3D bars, hour-of-week 3D bars (ECharts GL: WebGL draws async, so wait for its canvas)
+const TOG3 = ".tog3", SEG3 = "#s-golden .tog3d button:last-child";
+const gl3d = async (scope) => { await page.waitForSelector(`${scope} .b3d canvas`, { state: "visible" }); await wait(1500); };
 await open(at30("s-time"));
 await scrollTo("#s-time", 98);
-await snap("time-2d", { cal: C("Activity calendar"), tog3: C("Activity calendar", "3D"), hours: "#s-golden" });
-await click(C("Activity calendar", "3D"), "click");
-await wait(2200);
-await snap("time-cal3d", { cal: C("Activity calendar"), tog3: C("Activity calendar", "3D") });
-await click(C("Activity calendar", "3D"), "click"); // back to 2D
-await click(C("Hour by weekday", "3D"), "click");
-await wait(1800);
-await snap("time-terrain3d", { hours: "#s-golden", seg3d: C("Hour by weekday", "3D") });
+await snap("time-2d", { cal: C("Activity calendar"), tog3: TOG3, hours: "#s-golden" });
+await click(TOG3, "click");
+await gl3d(".card:has(.tog3)");
+await snap("time-cal3d", { cal: C("Activity calendar"), tog3: TOG3 });
+await click(TOG3, "click"); // back to 2D
+await click(SEG3, "click");
+await gl3d("#s-golden");
+await snap("time-terrain3d", { hours: "#s-golden", seg3d: SEG3 });
 
 // 7 Funnel
 await open(at30("s-funnel"));
@@ -155,11 +160,11 @@ await open(at30("s-works"));
 await scrollTo("#s-works", 98);
 await snap("works", { playbook: "#s-playbook" });
 await scrollTo(C("Quality profile"), 110);
-await snap("works-radar", { radar: C("Quality profile"), topics: C("Topics") });
+await snap("works-radar", { radar: C("Quality profile") });
 
-// 11 Recommendations
-await open(at30("s-recs"));
-await scrollTo("#s-recs", 98);
+// 11 Recommendations (the "Do next" card, an anchor inside Overview)
+await open(at30("s-next"));
+await scrollTo("#s-next", 98);
 await snap("recs", { next: C("Do next, in order") });
 
 // 12 Exposure review queue (masked previews)
@@ -205,4 +210,4 @@ await page.keyboard.press("Escape");
 
 await fs.writeFile(`${ROOT}/shots.json`, JSON.stringify({ viewport: [1440, 900], shots }, null, 1));
 console.log("done", shots.length);
-await task.finish({ keep: [] });
+task.close();

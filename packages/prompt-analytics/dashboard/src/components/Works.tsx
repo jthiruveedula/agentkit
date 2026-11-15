@@ -6,6 +6,7 @@ import { srcLabel } from "../lib/palette";
 import { ToolLogo } from "./Shell";
 import { Card, Cols, DataTable, Empty, Section, Segmented } from "./ui";
 import { noGain, promptBuckets } from "../lib/insights";
+import { CurveCard } from "./Curve";
 import { MIN_N } from "../lib/thresholds";
 import "./govern.css";
 import "./investigate.css";
@@ -185,7 +186,7 @@ export function Works() {
           ? "The prompt playbook appears once enough sessions exist to test prompt habits against outcomes."
           : <>The prompt playbook and topic map need the ML engine.{up ? <> Run <code>{up.command}</code> to unlock them.</> : null}</>}</p>
       )}
-      <Quality span={ng ? 7 : 12} /><NoGain span={q ? 5 : 12} /><Best />
+      <Quality span={ng ? 7 : 12} /><NoGain span={q ? 5 : 12} /><CurveCard id="works.prompt_length" /><Best />
     </Section>
   );
 }

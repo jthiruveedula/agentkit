@@ -10,6 +10,7 @@ import { hasWebGL, useRoving } from "../lib/hooks";
 import type { B3Cell } from "./Bars3D";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
 import { LineChart } from "./charts";
+import { CurveCard } from "./Curve";
 import { tokensPerApplied } from "../lib/compare";
 import { unpricedNote } from "../lib/capabilities";
 import { ToolLogo } from "./Shell";
@@ -276,7 +277,7 @@ export function Time() {
   const { caps } = useStore();
   return (
     <Section id="s-time" title="Time" q={caps.hasCost ? "When and how much?" : "When does the work happen?"}>
-      <Calendar /><HourWeek />{caps.hasCost ? <Cumulative /> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
+      <Calendar /><HourWeek /><CurveCard id="time.daypart" />{caps.hasCost ? <Cumulative /> : <TokenEfficiency />}{caps.hasTtrRows && <TimeToResolve />}
     </Section>
   );
 }
