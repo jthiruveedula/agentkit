@@ -277,6 +277,23 @@ const curveInsights = [
   curveInsight({ id: "time.daypart", chapter: "time", metric: "share of sessions with applied code, by start hour (UTC, 4-hour blocks)", labels: ["12am-4am", "4am-8am", "8am-12pm", "12pm-4pm", "4pm-8pm", "8pm-12am"],
     odds: [[0.02, 0.06, 0.3, 0.34, 0.18, 0.1], [0.01, 0.05, 0.46, 0.28, 0.14, 0.06]], pick: 2, cumulative: false, z: 2.576, m: 5, claim: (a, b) => `Sessions you start 8am-12pm UTC land code ${a}, not ${b}` }),
 ];
+// Trend insights (mock), the shapes insights.py _trends() exports: a level shift in the weekly applied rate, and the latest week whose cost per applied change
+// spiked. ponytail: best single split by mean gap and a 5x-median spike rule stand in for the permutation test and the robust z; same output shape.
+const monday = (s) => { const t = new Date(`${s}T00:00:00Z`); return iso(new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5)); };
+const wks = [...asked.reduce((m, x) => { const w = m.get(monday(x.date)) ?? { week: monday(x.date), n: 0, applied: 0, cost: 0 }; w.n++; w.applied += x.applied ? 1 : 0; w.cost += x.cost_usd ?? 0; return m.set(w.week, w); }, new Map()).values()].sort((a, b) => (a.week < b.week ? -1 : 1));
+const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length, med = (xs) => { const s = [...xs].sort((a, b) => a - b), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+const wr = wks.map((w) => w.applied / w.n), cut = wr.map((_, i) => i).filter((i) => i >= 4 && i <= wr.length - 4).reduce((b, i) => (Math.abs(mean(wr.slice(i)) - mean(wr.slice(0, i))) > Math.abs(mean(wr.slice(b)) - mean(wr.slice(0, b))) ? i : b), 4);
+const [b0, a0] = [mean(wr.slice(0, cut)), mean(wr.slice(cut))], since = new Date(`${wks[cut].week}T00:00:00Z`);
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const cpc = wks.filter((w) => w.applied >= 3).map((w) => ({ week: w.week, v: w.cost / w.applied })), pm = med(cpc.map((x) => x.v)), hot = cpc.filter((x) => x.v >= 5 * pm).at(-1);
+const trendInsights = [
+  { id: "time.shift.applied", chapter: "time", rank: 3, claim: `Sessions landing code ${a0 > b0 ? "rose" : "fell"} ${Math.round(b0 * 100)}% to ${Math.round(a0 * 100)}% since ${MON[since.getUTCMonth()]} ${since.getUTCDate()}`,
+    metric: "weekly share of sessions with applied code", value: r2(a0 * 100, 4), unit: "%", delta: r2(a0 - b0, 4),
+    evidence: { n: asked.length, method: "level shift on weekly series, permutation test", since: wks[cut].week, up: a0 > b0 }, drill: { chapter: "time", filter: {} } },
+  ...(hot ? [{ id: `time.anomaly.cost_per_change.${hot.week}`, chapter: "time", rank: 3, claim: `Cost per landed change hit $${hot.v.toFixed(0)} (usually $${pm.toFixed(0)})`,
+    metric: "weekly cost per applied change", value: r2(hot.v, 4), unit: "USD", delta: r2(hot.v / pm - 1, 4),
+    evidence: { n: cpc.length, method: "rolling median/MAD robust z over 12 weeks", date: hot.week, value: r2(hot.v, 4) }, drill: { chapter: "time", filter: {} } }] : []),
+];
 const insights = [
   { id: "i-fp-1", chapter: "footprint", rank: 1, claim: "You ship with AI almost every working day", metric: "active days", value: calendar.length, unit: "", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: {} } },
   { id: "i-fp-2", chapter: "footprint", rank: 2, claim: `Claude Code carries ${claudeShare}% of your sessions`, metric: "session share", value: claudeShare, unit: "%", delta: null, evidence: { n: totSessions, method: "count" }, drill: { chapter: "footprint", filter: { source: "claude_code" } } },
@@ -289,6 +306,7 @@ const insights = [
   { id: "i-wk-1", chapter: "works", rank: 1, claim: "Naming files lifts success by about 16 points", metric: "success lift", value: 16, unit: "%", delta: 0.16, evidence: { n: 520, ci: [0.1, 0.22], method: "bootstrap" }, drill: { chapter: "works", filter: { cluster: 0 } } },
   { id: "i-wk-2", chapter: "works", rank: 2, claim: "Short vague prompts cost you retries", metric: "success drop", value: 11, unit: "%", delta: -0.11, evidence: ev(310), drill: { chapter: "works", filter: {} } },
   ...curveInsights,
+  ...trendInsights,
   { id: "i-rc-1", chapter: "recommend", rank: 1, claim: "Four small habits would remove most friction", metric: "recommendations", value: 4, unit: "", delta: null, evidence: { n: 4, method: "rules" }, drill: { chapter: "recommend", filter: {} } },
 ];
 const recommendations = [

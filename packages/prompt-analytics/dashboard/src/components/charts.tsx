@@ -71,17 +71,31 @@ export function Bullet({ p, lo, hi, was }: { p: number; lo?: number; hi?: number
   );
 }
 
-/** Closed ring for a 0..1 rate: track, fill from 12 o'clock to `p`, a short tick across the ring at the earlier value `was`. Decorative; the caller names it. */
-export function Ring({ p, was }: { p: number; was?: number | null }) {
-  const c = (x: number) => Math.min(1, Math.max(0, x)), R = 50, at = (f: number, r: number) => [60 + r * Math.sin(2 * Math.PI * c(f)), 60 - r * Math.cos(2 * Math.PI * c(f))].map((v) => +v.toFixed(2));
-  const [x1, y1] = was != null ? at(was, R - 9) : [0, 0], [x2, y2] = was != null ? at(was, R + 9) : [0, 0];
+/** Semicircle gauge with a needle on a 0..`max` scale, arc green to amber to red: `p` sets the fill and the needle, `was` a tick. Decorative; the caller labels it.
+ *  The needle is drawn pointing at 0 and turned by `--a` (CSS), so it can swing in from 0. */
+export function Gauge({ p, was, max }: { p: number; was?: number | null; max: number }) {
+  const c = (x: number) => Math.min(1, Math.max(0, x / max)), R = 50, cx = 60, cy = 58;
+  const at = (f: number, r: number) => { const a = Math.PI * (1 - c(f)); return [cx + r * Math.cos(a), cy - r * Math.sin(a)].map((v) => +v.toFixed(2)); };
+  const arc = `M${cx - R},${cy} A${R},${R} 0 0 1 ${cx + R},${cy}`;
+  const [x1, y1] = was != null ? at(was, R - 7) : [0, 0], [x2, y2] = was != null ? at(was, R + 7) : [0, 0];
   return (
-    <svg className="ring" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-      <circle className="r-track" cx="60" cy="60" r={R} />
-      <circle className="r-fill" cx="60" cy="60" r={R} pathLength="100" strokeDasharray={`${Math.max(0.4, c(p) * 100)} 100`} />
-      {was != null && <line className="r-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
+    <svg className="ring gauge" viewBox="0 0 120 64" aria-hidden="true" focusable="false" style={{ "--a": `${(180 * c(p)).toFixed(1)}deg` } as React.CSSProperties}>
+      <defs><linearGradient id="g-arc" gradientUnits="userSpaceOnUse" x1={cx - R} x2={cx + R} y1="0" y2="0"><stop offset="0" className="g-s0" /><stop offset="0.5" className="g-s1" /><stop offset="1" className="g-s2" /></linearGradient></defs>
+      <path className="g-track" d={arc} pathLength={100} />
+      <path className="g-fill" d={arc} pathLength={100} strokeDasharray={`${Math.max(0.5, c(p) * 100).toFixed(2)} 100`} stroke="url(#g-arc)" />
+      {was != null && <line className="g-was" x1={x1} y1={y1} x2={x2} y2={y2} />}
+      <line className="g-ndl" x1={cx} y1={cy} x2={cx - R + 12} y2={cy} />
+      <circle className="g-hub" cx={cx} cy={cy} r={4} />
     </svg>
   );
+}
+
+/** Hour x weekday counts as a 24 x 7 grid of cells on a viridis scale (0 = purple, peak = yellow). Decorative; the caller labels it. */
+export const VIRIDIS = ["#440154", "#414487", "#2a788e", "#22a884", "#7ad151", "#fde725"];
+export function viridis(t: number) {
+  const x = Math.min(1, Math.max(0, t)) * (VIRIDIS.length - 1), i = Math.min(VIRIDIS.length - 2, Math.floor(x)), f = x - i;
+  const h = (s: string, k: number) => parseInt(s.slice(1 + 2 * k, 3 + 2 * k), 16);
+  return `rgb(${[0, 1, 2].map((k) => Math.round(h(VIRIDIS[i], k) + (h(VIRIDIS[i + 1], k) - h(VIRIDIS[i], k)) * f)).join(",")})`;
 }
 
 export interface DonutSeg { key: string; value: number; color: string; hatch?: boolean; on?: boolean; title: string; onPick?: () => void }

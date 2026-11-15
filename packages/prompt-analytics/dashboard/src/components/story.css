@@ -71,7 +71,7 @@
 #s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: nowrap; line-height: 14px; }
 @media (pointer: coarse) { #s-overview .b-act, .b-top .b-acts .btn { height: auto; min-height: 40px; } }
 
-/* first row: the Brief ring. Under 980px of page width the Brief is full width (ring left, why right); at 980px+ it takes 5 of 12 columns beside the Key numbers (7). */
+/* first row: the Brief ring (the story hero dial; layout and sizes in hero.css) */
 .b-ring { position: relative; width: 136px; height: 136px; flex: none; display: grid; place-items: center; }
 .ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .ring circle { fill: none; stroke-width: 11; }
@@ -81,22 +81,6 @@
 #s-overview .b-ring .b-num { position: relative; font-size: 32px; letter-spacing: -0.02em; font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) { html.fx .ring .r-fill { animation: pa-ring 900ms cubic-bezier(.2, .8, .2, 1) backwards; } }
 @keyframes pa-ring { from { stroke-dasharray: 0.4 100; } }
-@container pa (min-width: 980px) {
-  #s-overview .grid > .brief { grid-column: span 5; }
-  #s-overview .grid > .kcard { grid-column: span 7; }
-  #s-overview .brief:has(> .b-side) { grid-template-columns: minmax(0, 1fr); }
-  #s-overview .brief { align-content: start; row-gap: var(--s4); }
-  #s-overview .brief .b-ring { width: 184px; height: 184px; }
-  #s-overview .brief .b-ring .b-num { font-size: 40px; }
-  #s-overview .brief h3 { font-size: 20px; line-height: 26px; }
-  #s-overview .brief .lead { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--s4); }
-  #s-overview .brief .lead > .b-n { grid-column: 2; }
-  #s-overview .brief .b-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: var(--s4); }
-  #s-overview .brief .story { grid-template-columns: minmax(0, 1fr); }
-  #s-overview .brief .story > div { display: grid; }
-  #s-overview .brief .story dd { grid-column: auto; display: grid; grid-template-columns: minmax(0, 1fr); justify-items: start; }
-  #s-overview .brief .story dd > .b-act { grid-column: auto; justify-self: start; }
-}
 
 /* brief: smaller ring, the culprit as before/now unit dots, share-of-change bar */
 .b-fig { margin: 0 0 var(--s3); display: grid; gap: 4px; }
@@ -112,12 +96,6 @@
 .ud-s { display: flex; align-items: center; gap: var(--s2); font: 12px/16px var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 4px; }
 .ud-t { flex: 0 1 240px; height: 4px; border-radius: 2px; background: var(--sunk); position: relative; min-width: 60px; }
 .ud-t i { position: absolute; inset: 0 auto 0 0; width: calc(var(--w) * 100%); background: var(--tone-ink); border-radius: 2px; }
-@container pa (min-width: 980px) {
-  #s-overview .brief .b-ring { width: 96px; height: 96px; }
-  #s-overview .brief .b-ring .b-num { font-size: 22px; }
-  #s-overview .brief .ring circle { stroke-width: 9; }   /* a thinner stroke at 96px: the number clears it */
-  #s-overview .grid > .brief { align-self: start; }   /* no stretched blank glass under the content */
-}
 
 /* brief: the "from" chip sits to the right of the ring at every width; between 700 and 979px the Why column centres on the ring */
 .lead:has(> .b-ring) { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: var(--s4); }

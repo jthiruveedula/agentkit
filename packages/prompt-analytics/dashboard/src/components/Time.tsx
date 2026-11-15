@@ -72,7 +72,7 @@ type M = "sessions" | "prompts" | "cost";
 const WEEKS = 27;
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 /** false under 481px: 3D is off at phone width and both cards fall back to their 2D grids */
-function useWide() {
+export function useWide() {
   const [wide, setWide] = useState(true);
   useEffect(() => { const q = matchMedia("(max-width: 480px)"), f = () => setWide(!q.matches); f(); q.addEventListener("change", f); return () => q.removeEventListener("change", f); }, []);
   return wide;
