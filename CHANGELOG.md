@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.27.0](https://github.com/jthiruveedula/agentkit/compare/v0.26.0...v0.27.0) (2026-11-15)
+
+
+### Features
+
+* **prompt-analytics:** render curve insights and refresh demo video and stills ([#136](https://github.com/jthiruveedula/agentkit/issues/136)) ([ed693dc](https://github.com/jthiruveedula/agentkit/commit/ed693dcbc5b28234281e1151c5083705e5df1c03))
+
 ## [0.26.0](https://github.com/jthiruveedula/agentkit/compare/v0.25.2...v0.26.0) (2026-11-15)
 
 
