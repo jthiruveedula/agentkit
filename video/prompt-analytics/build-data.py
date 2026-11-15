@@ -12,7 +12,12 @@ shots = {s["name"]: s for s in json.loads((HERE / "shots.json").read_text())["sh
 # shot, dur (s), chip, cap; segs = camera push-ins [{b: box name, d: secs, t: callout}];
 # cur = cursor actions [{at, to: box | [box, fx, fy], dur, click}] (to is in the shot's viewport space)
 S = [
-    dict(shot=None, dur=3.0, chip="", cap="What changed in your AI coding, why, and what next?"),
+    dict(
+        shot=None,
+        dur=3.0,
+        chip="",
+        cap="What changed in your AI coding, why, and what next?",
+    ),
     dict(
         shot="overview",
         dur=4.8,
@@ -59,7 +64,10 @@ S = [
         dur=3.4,
         chip="Tools",
         cap="Which tool lands the work, and at what cost.",
-        segs=[dict(b="resolved", t="Resolved rate"), dict(b="struggled", t="Struggled by tool")],
+        segs=[
+            dict(b="resolved", t="Resolved rate"),
+            dict(b="struggled", t="Struggled by tool"),
+        ],
     ),
     dict(
         shot="time-2d",
@@ -69,7 +77,13 @@ S = [
         segs=[dict(b="cal", t="Activity calendar")],
         cur=[dict(at=0.8, to="tog3", dur=1.0), dict(at=2.0, click=1)],
     ),
-    dict(shot="time-cal3d", dur=2.6, chip="Time", cap="Flip it to 3D.", segs=[dict(b="cal", t="3D calendar")]),
+    dict(
+        shot="time-cal3d",
+        dur=2.6,
+        chip="Time",
+        cap="Flip it to 3D.",
+        segs=[dict(b="cal", t="3D calendar")],
+    ),
     dict(
         shot="time-terrain3d",
         dur=2.8,
@@ -82,21 +96,30 @@ S = [
         dur=3.2,
         chip="Funnel",
         cap="Where sessions stall on the way to resolved.",
-        segs=[dict(b="stages", t="Session to resolved"), dict(b="switches", t="Tool switches")],
+        segs=[
+            dict(b="stages", t="Session to resolved"),
+            dict(b="switches", t="Tool switches"),
+        ],
     ),
     dict(
         shot="friction",
         dur=3.0,
         chip="Friction",
         cap="The signals behind the struggle.",
-        segs=[dict(b="signals", t="Signals"), dict(b="byIntent", t="Retries by intent")],
+        segs=[
+            dict(b="signals", t="Signals"),
+            dict(b="byIntent", t="Retries by intent"),
+        ],
     ),
     dict(
         shot="models",
         dur=3.0,
         chip="Model fit",
         cap="Is the model sized to the task?",
-        segs=[dict(b="grid", t="Task size by model tier"), dict(b="change", t="What to change")],
+        segs=[
+            dict(b="grid", t="Task size by model tier"),
+            dict(b="change", t="What to change"),
+        ],
     ),
     dict(
         shot="works",
@@ -164,7 +187,12 @@ S = [
         cap="Press Cmd+K to jump anywhere.",
         segs=[dict(b="palette", t="Command palette")],
     ),
-    dict(shot=None, dur=4.0, chip="", cap="Know where your hours go. Run uvx prompt-analytics run."),
+    dict(
+        shot=None,
+        dur=4.0,
+        chip="",
+        cap="Know where your hours go. Run uvx prompt-analytics run.",
+    ),
 ]
 for s in S:
     s.setdefault("segs", [])
