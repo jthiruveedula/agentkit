@@ -172,7 +172,9 @@ def test_sessions_rows(built):
         "model",
     }
     assert all(
-        set(r) == keys and len(r["title"]) <= 160 and r["intent"] in export.INTENTS
+        set(r) - {"struggle_p"} == keys
+        and len(r["title"]) <= 160
+        and r["intent"] in export.INTENTS
         for r in rows
     )
     assert sum(r["prompts"] for r in rows) <= d["totals"]["prompts"] + 1 and all(

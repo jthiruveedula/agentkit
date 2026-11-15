@@ -1,6 +1,6 @@
 ---
 name: genai-engineering
-description: Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.
+description: 'Build and harden LLM apps: RAG, agents, evals, guardrails, cost/latency. Use when building or debugging a RAG system, LLM feature, agent or eval set, or when an LLM app is slow, costly or hallucinating.'
 allowed-tools: Read, Edit, Write, Grep
 version: 0.1.0
 ---

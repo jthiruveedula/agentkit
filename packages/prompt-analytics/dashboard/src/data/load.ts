@@ -115,6 +115,7 @@ export function normalize(raw: unknown): DashboardData {
       ...(Array.isArray(r.features) ? { features: r.features.map(String) } : {}),
       ...("ttr_min" in r ? { ttr_min: typeof r.ttr_min === "number" && Number.isFinite(r.ttr_min) && r.ttr_min >= 0 ? r.ttr_min : null } : {}),
       ...("model" in r ? { model: typeof r.model === "string" && r.model ? r.model : null } : {}),
+      ...(typeof r.struggle_p === "number" && r.struggle_p >= 0 && r.struggle_p <= 1 ? { struggle_p: r.struggle_p } : {}),
     })),
     ...(Array.isArray(raw.repeats) ? { repeats: normRepeats(raw.repeats) } : {}),
     insights: arr(raw.insights),

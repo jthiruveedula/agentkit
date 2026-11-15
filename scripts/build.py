@@ -9,6 +9,7 @@ Deterministic: same inputs always produce byte-identical output, so
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -148,9 +149,11 @@ def _rewrite_asset_refs(body, assets, assets_dir):
     rewritten; generic prose is left alone. Run on the original body before
     _render.
     """
-    for rel in assets:
-        body = body.replace(rel, "%s/%s" % (assets_dir, rel))
-    return body
+    if not assets:
+        return body
+    # lookbehind: skip refs already inside a longer path (skills/x/scripts/a.py)
+    pat = r"(?<![\w./~-])(?:%s)" % "|".join(re.escape(r) for r in assets)
+    return re.sub(pat, lambda m: "%s/%s" % (assets_dir, m.group(0)), body)
 
 
 def _render(meta, body, order=None):

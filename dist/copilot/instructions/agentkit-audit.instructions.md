@@ -14,7 +14,7 @@ narrates and fixes; it never invents numbers. Heuristics and weights are in
 1. **Run the audit** and keep the report as the baseline:
 
    ```
-   python3 skills/agentkit-audit/_agentkit-audit/scripts/audit.py --out /tmp/baseline.json
+   python3 skills/agentkit-audit/scripts/audit.py --out /tmp/baseline.json
    ```
 
 2. **Read findings**, not the whole report: group by `category`, look at
@@ -26,7 +26,7 @@ narrates and fixes; it never invents numbers. Heuristics and weights are in
 5. **Re-run with the baseline** to get real deltas:
 
    ```
-   python3 skills/agentkit-audit/_agentkit-audit/scripts/audit.py --baseline /tmp/baseline.json --out site/assets/audit.json
+   python3 skills/agentkit-audit/scripts/audit.py --baseline /tmp/baseline.json --out site/assets/audit.json
    ```
 
 6. **Verify** with `python3 scripts/validate.py` and `python3 -m pytest`,

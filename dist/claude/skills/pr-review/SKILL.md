@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Review a GitHub pull request for correctness bugs and scope creep, posting PR-level comments. Use when asked to review a PR, "look at PR #N", or check a branch before merge.
+description: 'Review a GitHub pull request for correctness bugs and scope creep, posting PR-level comments. Use when asked to review a PR, "look at PR #N", or check a branch before merge.'
 allowed-tools: Bash(gh pr view:*), Bash(gh pr diff:*), Bash(git diff:*), Read, Grep
 version: 0.1.0
 ---

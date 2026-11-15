@@ -12,6 +12,8 @@ all-rights-reserved unless the user confirms otherwise.
 
 ## Procedure
 
+`./scripts/` and `external/` are relative to the agentkit checkout, not the user's project: `cd` there first (the installed skill is a symlink into it); the script needs `jq`. No checkout: say so, do not guess upstream content.
+
 1. If `external/databricks-agent-skills/` is missing: `./scripts/sync-external.sh databricks-agent-skills`
 2. Find the skill: `grep -rl "<keyword>" external/databricks-agent-skills/skills/*/SKILL.md`
 3. Read and follow the matching `SKILL.md`.

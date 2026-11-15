@@ -15,7 +15,7 @@ import sample from "../data/sample.dev.json";
 type S = Record<string, unknown>;
 const base = sample as unknown as { sessions: S[] };
 let n = 0;
-const sess = (o: S): S => ({ ...base.sessions[0], id: `r${n++}`, title: `T${n}`, prompts: 3, cost_usd: 1, reached_stage: 6, applied: true, loops: 0, friction: 0.1, source: "cursor", date: "2026-10-20", project: "p0", intent: "bugfix", model: "gpt-5", ...o });
+const sess = (o: S): S => ({ ...base.sessions[0], struggle_p: undefined, id: `r${n++}`, title: `T${n}`, prompts: 3, cost_usd: 1, reached_stage: 6, applied: true, loops: 0, friction: 0.1, source: "cursor", date: "2026-10-20", project: "p0", intent: "bugfix", model: "gpt-5", ...o });
 const many = (c: number, o: (i: number) => S) => Array.from({ length: c }, (_, i) => sess(o(i)));
 const DATED = { from: "2026-10-15", to: "2026-10-28" };   // prior window: Oct 1 - Oct 14
 const data = (sessions: S[], range = { start: "2026-10-01", end: "2026-10-28" }) => normalize({ ...sample, sessions, range } as never);

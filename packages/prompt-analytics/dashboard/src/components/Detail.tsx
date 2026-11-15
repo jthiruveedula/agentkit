@@ -1,3 +1,4 @@
+import { struggleLine } from "../lib/ml";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { flipFrom } from "../lib/live";
 import { fxOn } from "../lib/hooks";
@@ -44,6 +45,7 @@ function Detail({ id }: { id: string }) {
       <ol className="track" aria-label={`Reached ${STAGES[Math.max(0, r.reached_stage - 1)] ?? "no stage"} of ${STAGES.length} stages`}>
         {STAGES.map((s, k) => <li key={s} data-on={r.reached_stage >= k + 1 || undefined} aria-current={r.reached_stage === k + 1 || undefined}><i aria-hidden="true" />{s}</li>)}
       </ol>
+      {struggleLine(r.struggle_p) && <p className="meta">{struggleLine(r.struggle_p)}</p>}
       <dl className="facts">{facts.map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{k === "Tool" ? <><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{x}</> : x}</dd></div>)}</dl>
       <div className="pn">
         <button type="button" className="btn" disabled={!prev} onClick={() => prev && openSession(prev.id)}>Previous in view</button>

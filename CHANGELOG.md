@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.25.2](https://github.com/jthiruveedula/agentkit/compare/v0.25.1...v0.25.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* **prompt-analytics:** exercise umap in CI and pin golden to PCA ([#128](https://github.com/jthiruveedula/agentkit/issues/128)) ([2aa2f50](https://github.com/jthiruveedula/agentkit/commit/2aa2f5033f4bd0940225df181e449d82abe233a6))
+
+## [0.25.1](https://github.com/jthiruveedula/agentkit/compare/v0.25.0...v0.25.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **site:** regenerate og image with current counts and add build-og script ([#124](https://github.com/jthiruveedula/agentkit/issues/124)) ([9b43fe7](https://github.com/jthiruveedula/agentkit/commit/9b43fe75e8e0572b6fcf40f605c9d501d821a465))
+
+## [0.25.0](https://github.com/jthiruveedula/agentkit/compare/v0.24.0...v0.25.0) (2026-11-14)
+
+
+### Features
+
+* add chart-design skill with deterministic chart picker and palette check ([#121](https://github.com/jthiruveedula/agentkit/issues/121)) ([4ebe792](https://github.com/jthiruveedula/agentkit/commit/4ebe792c64ca0b32cf802f46def762dd99f06051))
+* add data-storytelling skill with story_lint ([#122](https://github.com/jthiruveedula/agentkit/issues/122)) ([c947bca](https://github.com/jthiruveedula/agentkit/commit/c947bca5b93d6d3966f84b5ad50e0428b9989802))
+* add ext-archify router for code-derived architecture diagrams ([#119](https://github.com/jthiruveedula/agentkit/issues/119)) ([06763d3](https://github.com/jthiruveedula/agentkit/commit/06763d3bf8b6295f98c60b97d87cacfae017a1af))
+* add ext-slides router for HTML slide decks ([#118](https://github.com/jthiruveedula/agentkit/issues/118)) ([a6c4bb9](https://github.com/jthiruveedula/agentkit/commit/a6c4bb9bd63d8492444d122fb28f007031391dd0))
+* add humanizer skill with AI-tell detector and fact guard ([#120](https://github.com/jthiruveedula/agentkit/issues/120)) ([5a4e1a1](https://github.com/jthiruveedula/agentkit/commit/5a4e1a14785c515a98e6a0f6abd45d4b16bcfd1c))
+
+
+### Bug Fixes
+
+* harden build frontmatter, installer safety and intent classifier ([#113](https://github.com/jthiruveedula/agentkit/issues/113)) ([5d2aa28](https://github.com/jthiruveedula/agentkit/commit/5d2aa28553fc465aca22641739c7893a0c524f1b))
+
+## [0.24.0](https://github.com/jthiruveedula/agentkit/compare/v0.23.0...v0.24.0) (2026-11-09)
+
+
+### Features
+
+* **video:** show redesigned prompt analytics dashboard ([#109](https://github.com/jthiruveedula/agentkit/issues/109)) ([549931a](https://github.com/jthiruveedula/agentkit/commit/549931a58c6b7e13c4d714b2bea852d8b480823d))
+
+## [0.23.0](https://github.com/jthiruveedula/agentkit/compare/v0.22.0...v0.23.0) (2026-11-09)
+
+
+### Features
+
+* **prompt-analytics:** storytelling dashboard with key numbers, usage mix and sunburst ([#107](https://github.com/jthiruveedula/agentkit/issues/107)) ([7ebc70d](https://github.com/jthiruveedula/agentkit/commit/7ebc70d8825ddbb7caf37e2a3ad08efe88381265))
+
 ## [0.22.0](https://github.com/jthiruveedula/agentkit/compare/v0.21.0...v0.22.0) (2026-11-02)
 
 

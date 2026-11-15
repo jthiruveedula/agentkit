@@ -6,6 +6,7 @@ from datetime import date, timedelta
 
 import numpy as np
 import polars as pl
+import pytest
 
 from prompt_analytics.analytics import funnel
 from prompt_analytics.ml import anomaly, friction, intent, quality, topics, whatworks
@@ -223,3 +224,11 @@ def test_embed_lazy_fallback(tmp_path):
 
     emb, warns = embed.get_embedder("tfidf", tmp_path)
     assert emb is not None and isinstance(warns, list)
+
+
+def test_project2d_umap_is_seeded():
+    pytest.importorskip("umap")  # viz extra; CI installs it
+    E = np.random.default_rng(0).normal(size=(40, 8)).astype(np.float32)
+    a = topics.project2d(E)
+    assert a.shape == (40, 2) and np.isfinite(a).all()
+    assert np.allclose(a, topics.project2d(E))

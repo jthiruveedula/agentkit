@@ -14,6 +14,7 @@ section if the original prompt already nails it.
 | `architecture` | system design, scale, microservices, CAP, sharding | Requirements (functional + non-functional: scale, latency, consistency) · constraints (budget, team size, existing stack) · what to produce (diagram, doc, decision) · explicit trade-offs to weigh |
 | `writing` | blog post, README, email, draft, proofread | Audience · tone/voice · length · format (markdown, plain text, slides) · key points that must appear · what NOT to include |
 | `ops-cli` | k8s, terraform, docker, CI/CD, bash, deploy | Target environment (OS, cloud, versions) · current state vs desired state · idempotency requirement · rollback/safety constraints · what "done" looks like (a command that verifies it) |
+| `review` | review/audit/investigate/assess, find gaps, improve/harden | Scope (repo, dir, or diff) and out-of-scope · lens (correctness, security, docs, perf) · output: findings ranked by severity, each with file:line evidence and a proposed fix · read-only unless fixes are requested · what counts as done (all in-scope files covered, findings listed or "none found") |
 | `ambiguous` | evidence too thin or split across intents | Do not rewrite. Ask ≤2 clarifying questions pulled from the top `runners_up` intents in the classifier output. |
 
 ## Confidence bands

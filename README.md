@@ -1,7 +1,7 @@
 <div align="center">
 
 <a href="https://jthiruveedula.github.io/agentkit/">
-  <img src="site/assets/og.png" alt="agentkit: one kit, every agent. 41 skills, 12 subagents, 4 tools, zero telemetry." width="820">
+  <img src="site/assets/og.png" alt="agentkit: one kit, every agent. Skills and subagents for 4 tools, zero telemetry." width="820">
 </a>
 
 # agentkit
@@ -37,7 +37,7 @@ judging.
 
 | | |
 |---|---|
-| **41 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
+| **46 skills, 12 subagents** | Data platforms, pipelines, data quality, RAG and evals, ML lifecycle, frontend motion and 3D, review and debugging. |
 | **4 tools, 1 source** | Each skill is one `SKILL.md`; `build.py` emits the Claude Code, Copilot, Cursor and Antigravity adapters. |
 | **Session costs you can see** | Live context budget with pause/resume, per-session spend audits, prompt analytics. |
 | **Private** | MIT licensed. No telemetry, no external calls beyond what you run yourself (`sync-external.sh`, `gh`, `npm`). |
@@ -97,6 +97,11 @@ python3 ~/.claude/skills/context-budget/scripts/install_hooks.py
 | RAG, LLM features, agents, evals, LLM cost | `genai-engineering` | `ml-engineer` |
 | Train, evaluate, deploy, monitor a model | `ml-lifecycle` | `ml-engineer` |
 | UI, animation, scroll effects, 3D / WebGL | `frontend-motion-3d` | `frontend-engineer` |
+| Charts, graphs, KPI tiles, dashboards | `chart-design` | — |
+| Deck, explainer or exec update that lands one point | `data-storytelling` | — |
+| Text, docs or slides that read like AI | `humanizer` | — |
+| HTML slide deck | `ext-slides` | — |
+| Diagram of a real codebase or system | `ext-archify` | — |
 | Rough idea → spec → task list | `spec-writer` | — |
 | Failing test or crash | `debug-loop` | — |
 | Prove a change works (tests, lint, types) | — | `verifier` |
@@ -163,7 +168,7 @@ Script paths are relative to `skills/`; run them with `python3`.
 
 ## Skill catalog
 
-41 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
+46 skills. The live table is the generated [`AGENTS.md`](AGENTS.md), rebuilt from
 `skills/*/SKILL.md` on every `make build`.
 
 <details open>
@@ -214,6 +219,18 @@ Script paths are relative to `skills/`; run them with `python3`.
 </details>
 
 <details open>
+<summary><b>Docs, charts & storytelling</b></summary>
+
+| Skill | What it does |
+|---|---|
+| `doc-standards` | House style for Word, Excel, PDF and PowerPoint output. |
+| `chart-design` | Question → chart form, honest axes, direct labels; `chart_check.py` gates contrast and colour-blind safety. |
+| `data-storytelling` | Big idea, storyboard and action titles; `story_lint.py` flags topic headlines, filler and a missing ask. |
+| `humanizer` | Grammar fix and de-AI rewrite that keeps facts, code and voice; `detect.py` scores AI tells and guards numbers. |
+
+</details>
+
+<details open>
 <summary><b>Token economy, memory & safety</b></summary>
 
 | Skill | What it does |
@@ -227,16 +244,17 @@ Script paths are relative to `skills/`; run them with `python3`.
 | `memory-sync` | Mines recent sessions for recurring agent mistakes and writes durable fixes. |
 | `mcp-security-review` | `mcp_scan.py` flags unpinned packages, secrets in config (names only), broad filesystem roots, unauthenticated remotes, shell wrappers. |
 | `setup-guardian` | This repo's health checks: dist freshness, install targets, SHA pins, skill counts. |
-| `doc-standards` | Professional house style for Word/Excel/PDF/PowerPoint output. |
 
 </details>
 
 <details>
-<summary><b>External routers</b>: 15 thin skills that wire in the pinned <a href="#external-skills">external sources</a> on demand</summary>
+<summary><b>External routers</b>: 17 thin skills that wire in the pinned <a href="#external-skills">external sources</a> on demand</summary>
 
 | Skill | Routes to |
 |---|---|
 | `ext-diagrams` | Architecture diagrams, flowcharts, sequence diagrams (`diagram-design`) |
+| `ext-archify` | Diagrams derived from a real codebase: architecture, sequence, dataflow, ERD (`tt-a1i/archify`) |
+| `ext-slides` | HTML slide decks and PPTX-to-web conversion (`zarazhangrui/frontend-slides`) |
 | `ext-ui-ux` | UI/UX design toolkit, when named explicitly |
 | `ext-hallmark` | Frontend design via `nutlope/hallmark`: every UI change passes its anti-slop Floor and `sloplint`; new pages get its full design flow |
 | `ext-seo` | SEO setup and audits via `AgriciDaniel/claude-seo`; `frontend-engineer` ships its baseline on every public page |
@@ -286,7 +304,7 @@ Repeatable decisions live in stdlib-only scripts with tests, so behavior is iden
 tools.
 
 <details>
-<summary><b>All 17 scripts</b></summary>
+<summary><b>All 18 scripts</b></summary>
 
 | Script | Does |
 |---|---|
@@ -297,6 +315,7 @@ tools.
 | `token-saver/scripts/estimate.py` | File token estimate + read strategy |
 | `mcp-security-review/scripts/mcp_scan.py` | MCP config risk scan; exit 1 on high findings |
 | `prompt-enhancer/scripts/classify.py` | Intent classification (`--selftest` golden cases) |
+| `data-storytelling/scripts/story_lint.py` | Topic-label vs action-title headlines, filler, hook and closing ask (`--strict`) |
 | `data-eng-router/scripts/classify.py` | Cloud/platform detection |
 | `data-architect/scripts/adr.py` | ADR scaffolding |
 | `pipeline-scaffold/scripts/scaffold_pipeline.py` | Pipeline scaffolding |
@@ -374,9 +393,10 @@ becomes Copilot `applyTo` and Cursor `globs` for file-type-specific skills.
 
 ## External skills
 
-[`external/skills.lock.json`](external/skills.lock.json) pins 16 outside skill sources by commit
-SHA and license (diagrams, UI/UX, codebase reads, cloud provider skills, system design
-references, gap discovery, security audit, SEO, frontend design). They are **not** vendored;
+[`external/skills.lock.json`](external/skills.lock.json) pins 19 outside skill sources by commit
+SHA and license (diagrams, code-derived architecture, slides, UI/UX, codebase reads, cloud
+skills, system design, gap discovery, security audit, SEO, frontend design, prose humanizing).
+They are **not** vendored;
 `scripts/sync-external.sh` fetches them on demand into the gitignored `external/<name>/`,
 verifying each tarball's SHA-256. One source (`systems-design-resources`) is GPL-3.0 and kept
 reference-only.
@@ -413,6 +433,8 @@ frontmatter (`site/scripts/build-catalog.py` → `site/assets/skills.json`). Red
 no-JS visitors get the same plates as a static printed manual. Deploys via GitHub Pages when a
 release is published. The [audit dashboard](https://jthiruveedula.github.io/agentkit/audit/)
 shows live repo scores from the `agentkit-audit` skill (`skills/agentkit-audit/scripts/audit.py`).
+The social card `site/assets/og.png` is rendered from the hero by `bash site/scripts/build-og.sh`
+(local headless Chrome, Chromium or Edge); rerun it after adding or removing skills.
 
 ## Security
 
@@ -427,8 +449,9 @@ shows live repo scores from the `agentkit-audit` skill (`skills/agentkit-audit/s
 
 Every PR runs 3 OS × 4 Python versions, lint (ruff, shellcheck, PowerShell syntax, link check),
 secret scanning, CodeQL, `npm audit`, and packed-artifact tests (npm tarball + Python wheel).
-release-please builds the changelog and version bump from conventional commits; merging the
-release PR tags `vX.Y.Z` and `publish.yml` ships `@jthiruveedula/agentkit` to GitHub Packages.
+release-please builds the changelog and version bump from conventional commits. The release
+workflow runs CI on the release PR and merges it when green, which tags `vX.Y.Z`; `publish.yml`
+then ships `@jthiruveedula/agentkit` to GitHub Packages. No manual release step.
 See [`CHANGELOG.md`](CHANGELOG.md) and [releases](https://github.com/jthiruveedula/agentkit/releases).
 A nightly run catches external drift.
 

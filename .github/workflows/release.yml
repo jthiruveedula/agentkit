@@ -24,6 +24,8 @@ jobs:
       actions: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
     steps:
       # Repo policy blocks Actions from opening PRs, so release-please fails at
       # its last step (PR create) after pushing the release branch. Tolerate
@@ -61,3 +63,46 @@ jobs:
           # environment only allows main, so the site deploys from main.
           gh workflow run publish.yml --ref "$TAG_NAME" --repo "${{ github.repository }}"
           gh workflow run pages.yml --ref main --repo "${{ github.repository }}"
+
+  # Hands-off releases: run CI on the release PR, merge it when green, then
+  # re-run this workflow so release-please tags and publishes. Both steps are
+  # explicit because GITHUB_TOKEN-made PRs and merges trigger no workflows.
+  # Main needs a green "CI success" but no approving review, so the token can merge.
+  automerge:
+    needs: release-please
+    if: needs.release-please.outputs.release_created != 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      BRANCH: release-please--branches--main--components--agentkit
+    steps:
+      - name: Merge the release PR once CI passes
+        run: |
+          pr=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open --json number,headRefOid --jq '.[0] // empty')
+          if [ -z "$pr" ]; then echo "no open release PR"; exit 0; fi
+          num=$(printf '%s' "$pr" | jq -r .number)
+          sha=$(printf '%s' "$pr" | jq -r .headRefOid)
+
+          gh workflow run ci.yml --repo "$REPO" --ref "$BRANCH"
+          run=""
+          for _ in $(seq 1 30); do
+            run=$(gh run list --repo "$REPO" --workflow ci.yml --branch "$BRANCH" --event workflow_dispatch \
+              --json databaseId,headSha --jq "[.[] | select(.headSha == \"$sha\")][0].databaseId // empty")
+            [ -n "$run" ] && break
+            sleep 10
+          done
+          [ -n "$run" ] || { echo "::error::CI run for $sha never started"; exit 1; }
+          gh run watch "$run" --repo "$REPO" --exit-status --interval 30 > /dev/null
+
+          # A newer push to main supersedes this PR head; that push's own run merges it.
+          if ! gh pr merge "$num" --repo "$REPO" --squash --match-head-commit "$sha"; then
+            echo "::warning::release PR #$num moved or is behind main; the next release run retries"
+            exit 0
+          fi
+          gh workflow run release.yml --repo "$REPO" --ref main

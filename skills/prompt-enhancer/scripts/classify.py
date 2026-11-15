@@ -87,6 +87,11 @@ SIGNALS = {
         (r"\bdocumentation\b|\breadme\b|\bchangelog\b", 2),
         (r"\bfor a non[- ]technical\b|\baudience\b|\bexecutive summary\b", 2),
     ],
+    "review": [
+        (r"\breview\b|\baudit\b|\binvestigate\b|\bassess\b|\bfind (the )?gaps?\b", 3),
+        (r"\bimprov(e|ement)s?\b|\bharden\b|\bpolish\b", 1),
+        (r"\bfleet\b|\bwhole (repo|codebase)\b", 1),
+    ],
     "ops-cli": [
         (r"\bkubernetes\b|\bk8s\b|\bterraform\b|\bhelm\b|\bansible\b", 3),
         (r"\bdocker(file)?\b|\bcompose\b|\bsystemd\b|\bnginx\b|\bcron(tab)?\b", 3),
@@ -151,6 +156,9 @@ def classify(text):
     # confidence blends "how much of the evidence points here" with "how far
     # clear of the runner-up" -- either alone mislabels short prompts.
     confidence = round(min(0.97, 0.55 * share + 0.45 * margin + 0.10), 2)
+    if len(ranked) == 1 and total < 3.0:
+        # a lone weight-2 keyword is real but thin: never claim "high"
+        confidence = min(confidence, 0.55)
     return _result(top_name, confidence, ranked, total, None)
 
 

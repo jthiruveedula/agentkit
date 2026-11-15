@@ -180,3 +180,77 @@ def rate_diffs(
     if stats is not None:
         stats["tested"] = tested
     return sorted(out, key=lambda r: (-abs(r["effect"]), r["cluster"], r["feature"]))
+
+
+def uplift(
+    y: np.ndarray, x: np.ndarray, strata: np.ndarray, min_arm: int = 8
+) -> dict | None:
+    """Matched habit uplift: per stratum, applied-rate with the feature minus without, averaged weighted by
+    stratum size. Strata with fewer than ``min_arm`` sessions in either arm are skipped; None if none qualify.
+    Association only. pts = percentage points."""
+    y, x = y.astype(bool), x.astype(bool)
+    num = den = nw = nwo = k = 0
+    for s in np.unique(strata):
+        m = strata == s
+        a, b = m & x, m & ~x
+        if a.sum() < min_arm or b.sum() < min_arm:
+            continue
+        size = int(a.sum() + b.sum())
+        num += size * (y[a].mean() - y[b].mean())
+        den += size
+        nw, nwo, k = nw + int(a.sum()), nwo + int(b.sum()), k + 1
+    if not k:
+        return None
+    return {
+        "pts": round(100 * float(num / den), 1),
+        "n_with": nw,
+        "n_without": nwo,
+        "strata": k,
+    }
+
+
+HOLD_DAYS = 21
+
+
+def holdout(
+    y: np.ndarray,
+    x: np.ndarray,
+    strata: np.ndarray,
+    day: np.ndarray,
+    min_held: int = 20,
+) -> dict | None:
+    """Fit on sessions before the last 3 calendar weeks (``day`` = date ordinals), re-check on those weeks.
+    held = same sign and at least half the size. None if < 2 weeks with data, < ``min_held`` sessions, or either
+    side has no matched estimate. ponytail: held-out arms need only 4 per stratum (3 weeks is thin)."""
+    cut = day.max() - HOLD_DAYS
+    late = day > cut
+    if len({(d - 1) // 7 for d in day[late]}) < 2 or late.sum() < min_held:
+        return None
+    fit = uplift(y[~late], x[~late], strata[~late])
+    new = uplift(y[late], x[late], strata[late], min_arm=4)
+    if not fit or not new:
+        return None
+    f, h = fit["pts"], new["pts"]
+    held = f != 0 and h * (1 if f > 0 else -1) >= abs(f) / 2
+    return {"held": bool(held), "weeks": 3}
+
+
+def annotate(ww: list[dict], pc: pl.DataFrame, sf: pl.DataFrame) -> None:
+    """Add ``uplift`` / ``holdout`` to each effect in place. ``pc``: one row per (session_id, cluster_id) with the
+    max q_* over that session's prompts in the cluster. ``sf``: session_id, intent, source, has_applied, date."""
+    sf = sf.filter(pl.col("date").is_not_null() & pl.col("intent").is_not_null())
+    for r in ww:
+        g = pc.filter(pl.col("cluster_id") == r["cluster"]).join(
+            sf, on="session_id", how="inner"
+        )
+        if not g.height:
+            continue
+        y = g["has_applied"].to_numpy()
+        x = g[COLS[r["feature"]]].fill_null(0.0).to_numpy() >= 0.5
+        st = (g["intent"] + "|" + g["source"].fill_null("?")).to_numpy()
+        up = uplift(y, x, st)
+        if up:
+            r["uplift"] = up
+        r["holdout"] = holdout(
+            y, x, st, np.array([d.toordinal() for d in g["date"].to_list()])
+        )

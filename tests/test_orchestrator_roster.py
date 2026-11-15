@@ -28,3 +28,10 @@ def test_orchestrator_roster_agrees_everywhere():
         if m:
             owners.add(m.group(1))
     assert owners == expected
+
+
+def test_blocked_redispatch_capped_at_once():
+    agent = (REPO_ROOT / "agents" / "orchestrator.md").read_text()
+    assert "at most once" in agent.split("**Blocked workers:**")[1]
+    step4 = (ORCH / "SKILL.md").read_text().split("4. **")[1].split("5. **")[0]
+    assert "at most once" in step4

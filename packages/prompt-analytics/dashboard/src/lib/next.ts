@@ -6,6 +6,8 @@ import { attention, type Item } from "./attention";
 import { estSaving } from "./models";
 import { PREFIX, CHAPTER } from "./rank";
 import { fmtUSD, fmtValue } from "./format";
+import { upliftLine, holdoutLine } from "./ml";
+import { habitLabel } from "./playbook";
 import type { Filter, Views } from "./filter";
 
 export interface Row {
@@ -21,13 +23,21 @@ const fromItem = (it: Item): Row => ({
   filter: it.action.kind === "drill" ? it.action.filter : undefined,
 });
 
+type WW = DashboardData["what_works"][number];
+// Plain words only: uplift and recent-weeks lines when the analyzer sent them, else the claim and its value.
+const whyOf = (e: DashboardData["insights"][number], w?: WW) =>
+  w ? [`${e.claim}.`, upliftLine(habitLabel(w.feature), w.uplift), holdoutLine(w.holdout)].filter(Boolean).join(" ") : `${e.claim}. ${e.metric}: ${fmtValue(e.value, e.unit)} (${e.evidence.n} sessions)`;
+
 export function nextActions(d: DashboardData, v: Views, f: Filter, ids: Set<string> | null, driver: Driver): Row[] {
   const items = attention(d, v, f, ids), byId = new Map(d.insights.map((i) => [i.id, i]));
   let recs = d.recommendations.map((r): Row => {
-    const e = byId.get(r.evidence_insight), k = e?.unit === "%" ? 100 : 1, ci = e?.evidence.ci;
+    const e = byId.get(r.evidence_insight);
+    // The cluster's strongest effect with an uplift: the insight carries the cluster, not the feature.
+    const w = e?.chapter === "works" ? d.what_works.filter((x) => x.cluster === (e.drill.filter as Filter).cluster && x.uplift).sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect))[0] : undefined;
     const sec = e ? CHAPTER[e.chapter] : undefined, flt = e && Object.keys(e.drill.filter).length ? (e.drill.filter as Filter) : undefined;
-    return { id: r.id, action: r.title, detail: r.action, impact: r.impact, tone: "good", ...(sec ? { evidence: { sec } } : {}), ...(flt ? { filter: flt } : {}),
-      ...(e ? { why: `${e.claim}. ${e.metric}: ${fmtValue(e.value, e.unit)}${ci ? ` · range ${fmtValue(ci[0] * k, e.unit)} to ${fmtValue(ci[1] * k, e.unit)}` : ""} · n=${e.evidence.n} · ${e.evidence.method}` } : {}) };
+    const up = w && upliftLine(habitLabel(w.feature), w.uplift);
+    return { id: r.id, action: r.title, detail: r.action, impact: up ?? r.impact, tone: "good", ...(sec ? { evidence: { sec } } : {}), ...(flt ? { filter: flt } : {}),
+      ...(e ? { why: whyOf(e, w) } : {}) };
   });
   const dm = (r: Row) => !!driver && !!r.filter && r.filter.project === driver.project && (!r.filter.intent || !driver.intent || r.filter.intent === driver.intent);
   const hit = recs.findIndex(dm);

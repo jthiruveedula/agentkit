@@ -130,3 +130,33 @@ def rephrase_jaccard(
             for k in range(1, min(lookback, i) + 1)
         )
     return flags
+
+
+STRUGGLE_MIN = 50
+
+
+def struggle_prob(sm: pl.DataFrame, groups: np.ndarray) -> dict[str, float]:
+    """Calibrated P(nothing applied) per session from the f_* friction parts, minus f_abandoned (it feeds the label).
+    ``sm`` needs session_id, has_applied and f_correction/f_frustration/f_loops/f_interrupt; ``groups`` = project per row.
+    Empty when < 50 sessions, one class, too few projects, or sklearn is missing."""
+    try:
+        from sklearn.calibration import CalibratedClassifierCV
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.model_selection import GroupKFold
+    except ImportError:
+        return {}
+    cols = ["f_correction", "f_frustration", "f_loops", "f_interrupt"]
+    X = sm.select(cols).fill_null(0.0).to_numpy()
+    y = (~sm["has_applied"].fill_null(False)).to_numpy().astype(int)
+    k = min(5, len(set(groups.tolist())))
+    if len(y) < STRUGGLE_MIN or len(set(y.tolist())) < 2 or k < 3:
+        return {}
+    try:
+        cv = list(GroupKFold(n_splits=k).split(X, y, groups))
+        m = CalibratedClassifierCV(
+            LogisticRegression(max_iter=200), method="sigmoid", cv=cv
+        ).fit(X, y)
+    except ValueError:  # a fold with one class
+        return {}
+    p = m.predict_proba(X)[:, 1]
+    return {s: round(float(v), 3) for s, v in zip(sm["session_id"].to_list(), p)}

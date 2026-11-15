@@ -225,10 +225,14 @@ const what_works = feats.map((feature, i) => {
   const helps = i < 5; const effect = r2((helps ? 1 : -1) * (0.04 + rnd() * 0.16), 3);
   return { cluster: i % labels.length, feature, effect, ci: [r2(effect - 0.05 - rnd() * 0.04, 3), r2(effect + 0.05 + rnd() * 0.04, 3)], n: Math.round(80 + rnd() * 500), direction: helps ? "helps" : "hurts" };
 }).sort((a, b) => Math.abs(b.effect) - Math.abs(a.effect));
+// schema 1.4 (mock): matched uplift on the first four rows, recent-weeks check true / false / null. Fixed values, no rnd() draws.
+what_works.slice(0, 4).forEach((w, i) => { w.uplift = { pts: r2(w.effect * 100 * 0.7, 1), n_with: Math.round(w.n * 0.4), n_without: Math.round(w.n * 0.6), strata: 4 + i }; w.holdout = [{ held: true, weeks: 3 }, { held: false, weeks: 3 }, null, { held: true, weeks: 3 }][i]; });
 
 // schema 1.2: per-session feature tags and repeated prompts. Both come from id hashes (no rnd() draws, so the rest of the data is unchanged).
 const fnv = (str) => { let h = 2166136261; for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0; return h; };
 for (const x of sessions) x.features = x.prompts ? feats.filter((f) => (fnv(x.id + f) % 1000) / 1000 < (x.applied ? 0.68 : 0.3)) : [];
+// struggle_p: mock score kept on the same side of 0.5 as the old loops/friction rule, so sample-based counts do not shift (id-hash jitter, no rnd() draws).
+for (const x of sessions) if (x.prompts) { const j = (fnv(x.id) % 100) / 100, hard = x.loops >= 3 || x.friction >= 0.5; x.struggle_p = r2(hard ? 0.5 + Math.min(0.45, 0.05 + x.friction * 0.3 + j * 0.1) : Math.min(0.49, 0.03 + x.friction * 0.5 + j * 0.1)); }
 const REPEATS = [
   ["add unit tests for the new handler and keep the existing mocks", 2, 41], ["fix the failing [path] test and explain the root cause", 1, 33],
   ["summarise what changed in this branch for the pull request description", 3, 24], ["explain what this function does and list its edge cases", 3, 19],
