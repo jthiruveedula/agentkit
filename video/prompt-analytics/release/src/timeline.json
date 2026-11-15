@@ -1,0 +1,70 @@
+{
+ "fps": 30,
+ "total": 1737,
+ "scenes": [
+  {
+   "id": "open",
+   "from": 0,
+   "frames": 169,
+   "vo": "Prompt Analytics just shipped. Here is what changed in your AI coding, and why.",
+   "voStart": 0.45,
+   "voDur": 4.678
+  },
+  {
+   "id": "dash",
+   "from": 169,
+   "frames": 181,
+   "vo": "The dashboard now draws its calendar in 3D, and every section moves in as you scroll.",
+   "voStart": 6.083,
+   "voDur": 4.889
+  },
+  {
+   "id": "shift",
+   "from": 350,
+   "frames": 257,
+   "vo": "A level-shift test finds the week things changed. Sessions landing code rose from 32 to 74 percent, since March second.",
+   "voStart": 12.117,
+   "voDur": 7.648
+  },
+  {
+   "id": "cpc",
+   "from": 607,
+   "frames": 203,
+   "vo": "Cost per landed change gets a watchdog. One week hit 25 dollars, against a usual 3.",
+   "voStart": 20.683,
+   "voDur": 5.748
+  },
+  {
+   "id": "length",
+   "from": 810,
+   "frames": 255,
+   "vo": "Longer opening prompts pay off. At 140 characters or more, 37 percent land code, not 23.",
+   "voStart": 27.45,
+   "voDur": 7.273
+  },
+  {
+   "id": "retry",
+   "from": 1065,
+   "frames": 203,
+   "vo": "And there is a retry cliff. After three rephrases, only 25 percent of sessions land code.",
+   "voStart": 35.95,
+   "voDur": 5.825
+  },
+  {
+   "id": "daypart",
+   "from": 1268,
+   "frames": 225,
+   "vo": "Even the hour matters. Sessions started in the late morning land code 42 percent of the time, not 22.",
+   "voStart": 42.717,
+   "voDur": 6.418
+  },
+  {
+   "id": "close",
+   "from": 1493,
+   "frames": 244,
+   "vo": "Every claim ships with its sample size and confidence interval. AgentKit Prompt Analytics.",
+   "voStart": 50.217,
+   "voDur": 5.291
+  }
+ ]
+}

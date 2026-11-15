@@ -1,0 +1,320 @@
+{
+ "insights": [
+  {
+   "id": "time.shift.applied",
+   "chapter": "time",
+   "claim": "Sessions landing code rose 32% to 74% since Mar 2",
+   "metric": "weekly share of sessions with applied code",
+   "value": 73.75,
+   "unit": "%",
+   "delta": 0.4125,
+   "evidence": {
+    "n": 160,
+    "method": "level shift on weekly series, permutation test"
+   },
+   "drill": {
+    "chapter": "time",
+    "filter": {}
+   },
+   "score": 11.4369284792391,
+   "kind": "shift",
+   "meta": {
+    "since": "2026-03-02",
+    "up": true
+   }
+  },
+  {
+   "id": "time.anomaly.cost_per_change.2026-04-20",
+   "chapter": "time",
+   "claim": "Cost per landed change hit $25 (usually $3)",
+   "metric": "weekly cost per applied change",
+   "value": 25.0,
+   "unit": "USD",
+   "delta": 7.3333,
+   "evidence": {
+    "n": 12,
+    "method": "rolling median/MAD robust z over 12 weeks"
+   },
+   "drill": {
+    "chapter": "time",
+    "filter": {}
+   },
+   "score": 12.424533248940001,
+   "kind": "cost_per_change",
+   "meta": {
+    "date": "2026-04-20",
+    "value": 25.0
+   }
+  },
+  {
+   "id": "friction.retry_cliff",
+   "chapter": "friction",
+   "claim": "After 3 retries, only 25% of your sessions land code (usually 72%)",
+   "metric": "share of sessions with applied code, by rephrase retries",
+   "value": 24.5902,
+   "unit": "%",
+   "delta": -0.657,
+   "evidence": {
+    "n": 400,
+    "method": "rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m=3",
+    "ci": [
+     -0.5904,
+     -0.3088
+    ],
+    "curve": [
+     {
+      "label": "0",
+      "rate": 0.8023,
+      "lo": 0.7374,
+      "hi": 0.8542,
+      "n": 177
+     },
+     {
+      "label": "1",
+      "rate": 0.6458,
+      "lo": 0.5462,
+      "hi": 0.7342,
+      "n": 96
+     },
+     {
+      "label": "2",
+      "rate": 0.5909,
+      "lo": 0.4705,
+      "hi": 0.7013,
+      "n": 66
+     },
+     {
+      "label": "3+",
+      "rate": 0.2459,
+      "lo": 0.1551,
+      "hi": 0.3668,
+      "n": 61
+     }
+    ],
+    "pick": 3,
+    "cumulative": true,
+    "baseline": 0.7168
+   },
+   "drill": {
+    "chapter": "friction",
+    "filter": {}
+   },
+   "score": 2.821455668056363,
+   "kind": "curve",
+   "meta": {}
+  },
+  {
+   "id": "works.prompt_length",
+   "chapter": "works",
+   "rank": 3,
+   "claim": "Your opening prompts of 140+ characters land code 37%, not 23%",
+   "metric": "share of sessions with applied code, by opening prompt length (characters)",
+   "value": 36.9637,
+   "unit": "%",
+   "delta": 0.6413,
+   "evidence": {
+    "n": 787,
+    "ci": [
+     0.0612,
+     0.228
+    ],
+    "method": "rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m=4",
+    "curve": [
+     {
+      "label": "under 40",
+      "rate": 0.1582,
+      "lo": 0.1095,
+      "hi": 0.2232,
+      "n": 158
+     },
+     {
+      "label": "40-79",
+      "rate": 0.2276,
+      "lo": 0.1669,
+      "hi": 0.3023,
+      "n": 145
+     },
+     {
+      "label": "80-139",
+      "rate": 0.2818,
+      "lo": 0.2213,
+      "hi": 0.3513,
+      "n": 181
+     },
+     {
+      "label": "140-239",
+      "rate": 0.3882,
+      "lo": 0.3144,
+      "hi": 0.4675,
+      "n": 152
+     },
+     {
+      "label": "over 239",
+      "rate": 0.351,
+      "lo": 0.2794,
+      "hi": 0.43,
+      "n": 151
+     }
+    ],
+    "pick": 3,
+    "cumulative": true,
+    "baseline": 0.2252
+   },
+   "drill": {
+    "chapter": "works",
+    "filter": {}
+   }
+  },
+  {
+   "id": "time.daypart",
+   "chapter": "time",
+   "rank": 3,
+   "claim": "Sessions you start 8am-12pm UTC land code 42%, not 22%",
+   "metric": "share of sessions with applied code, by start hour (UTC, 4-hour blocks)",
+   "value": 41.8327,
+   "unit": "%",
+   "delta": 0.933,
+   "evidence": {
+    "n": 787,
+    "ci": [
+     0.1105,
+     0.2935
+    ],
+    "method": "rate vs all other sessions, Newcombe-Wilson CI of the gap, Bonferroni m=5",
+    "curve": [
+     {
+      "label": "12am-4am",
+      "rate": 0.1538,
+      "lo": 0.0433,
+      "hi": 0.4224,
+      "n": 13
+     },
+     {
+      "label": "4am-8am",
+      "rate": 0.2955,
+      "lo": 0.1816,
+      "hi": 0.4422,
+      "n": 44
+     },
+     {
+      "label": "8am-12pm",
+      "rate": 0.4183,
+      "lo": 0.359,
+      "hi": 0.4801,
+      "n": 251
+     },
+     {
+      "label": "12pm-4pm",
+      "rate": 0.2222,
+      "lo": 0.176,
+      "hi": 0.2765,
+      "n": 261
+     },
+     {
+      "label": "4pm-8pm",
+      "rate": 0.2132,
+      "lo": 0.1528,
+      "hi": 0.2895,
+      "n": 136
+     },
+     {
+      "label": "8pm-12am",
+      "rate": 0.1707,
+      "lo": 0.1045,
+      "hi": 0.2664,
+      "n": 82
+     }
+    ],
+    "pick": 2,
+    "cumulative": false,
+    "baseline": 0.2164
+   },
+   "drill": {
+    "chapter": "time",
+    "filter": {}
+   }
+  }
+ ],
+ "weekly": [
+  {
+   "week": "2026-01-05",
+   "rate": 0.3,
+   "cpc": 6.666666666666667
+  },
+  {
+   "week": "2026-01-12",
+   "rate": 0.3,
+   "cpc": 6.666666666666667
+  },
+  {
+   "week": "2026-01-19",
+   "rate": 0.4,
+   "cpc": 5.0
+  },
+  {
+   "week": "2026-01-26",
+   "rate": 0.3,
+   "cpc": 6.666666666666667
+  },
+  {
+   "week": "2026-02-02",
+   "rate": 0.3,
+   "cpc": 6.666666666666667
+  },
+  {
+   "week": "2026-02-09",
+   "rate": 0.4,
+   "cpc": 5.0
+  },
+  {
+   "week": "2026-02-16",
+   "rate": 0.3,
+   "cpc": 6.666666666666667
+  },
+  {
+   "week": "2026-02-23",
+   "rate": 0.3,
+   "cpc": 7.0
+  },
+  {
+   "week": "2026-03-02",
+   "rate": 0.7,
+   "cpc": 3.0
+  },
+  {
+   "week": "2026-03-09",
+   "rate": 0.8,
+   "cpc": 2.625
+  },
+  {
+   "week": "2026-03-16",
+   "rate": 0.7,
+   "cpc": 3.0
+  },
+  {
+   "week": "2026-03-23",
+   "rate": 0.7,
+   "cpc": 3.0
+  },
+  {
+   "week": "2026-03-30",
+   "rate": 0.8,
+   "cpc": 2.625
+  },
+  {
+   "week": "2026-04-06",
+   "rate": 0.7,
+   "cpc": 3.0
+  },
+  {
+   "week": "2026-04-13",
+   "rate": 0.7,
+   "cpc": 3.0
+  },
+  {
+   "week": "2026-04-20",
+   "rate": 0.8,
+   "cpc": 25.0
+  }
+ ]
+}

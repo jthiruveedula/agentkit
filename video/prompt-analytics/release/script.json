@@ -1,0 +1,10 @@
+[
+ {"id": "open", "vo": "Prompt Analytics just shipped. Here is what changed in your AI coding, and why."},
+ {"id": "dash", "vo": "The dashboard now draws its calendar in 3D, and every section moves in as you scroll."},
+ {"id": "shift", "vo": "A level-shift test finds the week things changed. Sessions landing code rose from 32 to 74 percent, since March second."},
+ {"id": "cpc", "vo": "Cost per landed change gets a watchdog. One week hit 25 dollars, against a usual 3."},
+ {"id": "length", "vo": "Longer opening prompts pay off. At 140 characters or more, 37 percent land code, not 23."},
+ {"id": "retry", "vo": "And there is a retry cliff. After three rephrases, only 25 percent of sessions land code."},
+ {"id": "daypart", "vo": "Even the hour matters. Sessions started in the late morning land code 42 percent of the time, not 22."},
+ {"id": "close", "vo": "Every claim ships with its sample size and confidence interval. AgentKit Prompt Analytics."}
+]

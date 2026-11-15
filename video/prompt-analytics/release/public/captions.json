@@ -1,0 +1,1042 @@
+[
+{
+"text": "Prompt",
+"startMs": 450,
+"endMs": 791,
+"timestampMs": 620,
+"confidence": 0.821,
+"pageBreakAfter": false
+},
+{
+"text": " Analytics",
+"startMs": 872,
+"endMs": 1353,
+"timestampMs": 1112,
+"confidence": 0.882,
+"pageBreakAfter": false
+},
+{
+"text": " just",
+"startMs": 1414,
+"endMs": 1655,
+"timestampMs": 1534,
+"confidence": 0.952,
+"pageBreakAfter": false
+},
+{
+"text": " shipped.",
+"startMs": 1715,
+"endMs": 2016,
+"timestampMs": 1866,
+"confidence": 0.616,
+"pageBreakAfter": true
+},
+{
+"text": "Here",
+"startMs": 2297,
+"endMs": 2438,
+"timestampMs": 2368,
+"confidence": 0.861,
+"pageBreakAfter": false
+},
+{
+"text": " is",
+"startMs": 2518,
+"endMs": 2578,
+"timestampMs": 2548,
+"confidence": 0.754,
+"pageBreakAfter": false
+},
+{
+"text": " what",
+"startMs": 2598,
+"endMs": 2759,
+"timestampMs": 2678,
+"confidence": 0.852,
+"pageBreakAfter": false
+},
+{
+"text": " changed",
+"startMs": 2799,
+"endMs": 3140,
+"timestampMs": 2970,
+"confidence": 0.907,
+"pageBreakAfter": false
+},
+{
+"text": " in",
+"startMs": 3201,
+"endMs": 3261,
+"timestampMs": 3231,
+"confidence": 0.776,
+"pageBreakAfter": false
+},
+{
+"text": " your",
+"startMs": 3281,
+"endMs": 3421,
+"timestampMs": 3351,
+"confidence": 0.968,
+"pageBreakAfter": false
+},
+{
+"text": " AI",
+"startMs": 3482,
+"endMs": 3743,
+"timestampMs": 3612,
+"confidence": 0.85,
+"pageBreakAfter": false
+},
+{
+"text": " coding,",
+"startMs": 3783,
+"endMs": 4184,
+"timestampMs": 3984,
+"confidence": 0.873,
+"pageBreakAfter": false
+},
+{
+"text": " and",
+"startMs": 4445,
+"endMs": 4526,
+"timestampMs": 4486,
+"confidence": 0.848,
+"pageBreakAfter": false
+},
+{
+"text": " why.",
+"startMs": 4586,
+"endMs": 4867,
+"timestampMs": 4726,
+"confidence": 0.968,
+"pageBreakAfter": true
+},
+{
+"text": "The",
+"startMs": 6083,
+"endMs": 6183,
+"timestampMs": 6133,
+"confidence": 0.967,
+"pageBreakAfter": false
+},
+{
+"text": " dashboard",
+"startMs": 6223,
+"endMs": 6704,
+"timestampMs": 6464,
+"confidence": 0.864,
+"pageBreakAfter": false
+},
+{
+"text": " now",
+"startMs": 6764,
+"endMs": 6945,
+"timestampMs": 6854,
+"confidence": 0.918,
+"pageBreakAfter": false
+},
+{
+"text": " draws",
+"startMs": 7005,
+"endMs": 7265,
+"timestampMs": 7135,
+"confidence": 0.855,
+"pageBreakAfter": false
+},
+{
+"text": " its",
+"startMs": 7325,
+"endMs": 7425,
+"timestampMs": 7375,
+"confidence": 0.869,
+"pageBreakAfter": false
+},
+{
+"text": " calendar",
+"startMs": 7486,
+"endMs": 7966,
+"timestampMs": 7726,
+"confidence": 0.934,
+"pageBreakAfter": false
+},
+{
+"text": " in",
+"startMs": 8027,
+"endMs": 8107,
+"timestampMs": 8067,
+"confidence": 0.977,
+"pageBreakAfter": false
+},
+{
+"text": " 3D,",
+"startMs": 8147,
+"endMs": 8608,
+"timestampMs": 8378,
+"confidence": 0.84,
+"pageBreakAfter": false
+},
+{
+"text": " and",
+"startMs": 8868,
+"endMs": 8988,
+"timestampMs": 8928,
+"confidence": 0.676,
+"pageBreakAfter": false
+},
+{
+"text": " every",
+"startMs": 9048,
+"endMs": 9249,
+"timestampMs": 9148,
+"confidence": 0.96,
+"pageBreakAfter": false
+},
+{
+"text": " section",
+"startMs": 9309,
+"endMs": 9670,
+"timestampMs": 9490,
+"confidence": 0.896,
+"pageBreakAfter": false
+},
+{
+"text": " moves",
+"startMs": 9710,
+"endMs": 9950,
+"timestampMs": 9830,
+"confidence": 0.729,
+"pageBreakAfter": false
+},
+{
+"text": " in",
+"startMs": 9990,
+"endMs": 10070,
+"timestampMs": 10030,
+"confidence": 0.844,
+"pageBreakAfter": false
+},
+{
+"text": " as",
+"startMs": 10110,
+"endMs": 10171,
+"timestampMs": 10140,
+"confidence": 0.996,
+"pageBreakAfter": false
+},
+{
+"text": " you",
+"startMs": 10211,
+"endMs": 10331,
+"timestampMs": 10271,
+"confidence": 0.999,
+"pageBreakAfter": false
+},
+{
+"text": " scroll.",
+"startMs": 10371,
+"endMs": 10712,
+"timestampMs": 10542,
+"confidence": 0.958,
+"pageBreakAfter": true
+},
+{
+"text": "A",
+"startMs": 12157,
+"endMs": 12197,
+"timestampMs": 12177,
+"confidence": 0.84,
+"pageBreakAfter": false
+},
+{
+"text": " level-shift",
+"startMs": 12237,
+"endMs": 12738,
+"timestampMs": 12488,
+"confidence": 0.902,
+"pageBreakAfter": false
+},
+{
+"text": " test",
+"startMs": 12778,
+"endMs": 13038,
+"timestampMs": 12908,
+"confidence": 0.82,
+"pageBreakAfter": false
+},
+{
+"text": " finds",
+"startMs": 13098,
+"endMs": 13378,
+"timestampMs": 13238,
+"confidence": 0.855,
+"pageBreakAfter": false
+},
+{
+"text": " the",
+"startMs": 13418,
+"endMs": 13518,
+"timestampMs": 13468,
+"confidence": 0.78,
+"pageBreakAfter": false
+},
+{
+"text": " week",
+"startMs": 13538,
+"endMs": 13759,
+"timestampMs": 13648,
+"confidence": 0.616,
+"pageBreakAfter": false
+},
+{
+"text": " things",
+"startMs": 13779,
+"endMs": 14019,
+"timestampMs": 13899,
+"confidence": 0.796,
+"pageBreakAfter": false
+},
+{
+"text": " changed.",
+"startMs": 14119,
+"endMs": 14560,
+"timestampMs": 14340,
+"confidence": 0.785,
+"pageBreakAfter": true
+},
+{
+"text": "Sessions",
+"startMs": 14920,
+"endMs": 15320,
+"timestampMs": 15120,
+"confidence": 0.9,
+"pageBreakAfter": false
+},
+{
+"text": " landing",
+"startMs": 15380,
+"endMs": 15701,
+"timestampMs": 15541,
+"confidence": 0.984,
+"pageBreakAfter": false
+},
+{
+"text": " code",
+"startMs": 15741,
+"endMs": 15981,
+"timestampMs": 15861,
+"confidence": 0.958,
+"pageBreakAfter": false
+},
+{
+"text": " rose",
+"startMs": 16021,
+"endMs": 16221,
+"timestampMs": 16121,
+"confidence": 0.865,
+"pageBreakAfter": false
+},
+{
+"text": " from",
+"startMs": 16241,
+"endMs": 16381,
+"timestampMs": 16311,
+"confidence": 0.839,
+"pageBreakAfter": false
+},
+{
+"text": " 32",
+"startMs": 16722,
+"endMs": 16882,
+"timestampMs": 16802,
+"confidence": 0.756,
+"pageBreakAfter": false
+},
+{
+"text": " to",
+"startMs": 16942,
+"endMs": 17042,
+"timestampMs": 16992,
+"confidence": 0.732,
+"pageBreakAfter": false
+},
+{
+"text": " 74",
+"startMs": 17162,
+"endMs": 17463,
+"timestampMs": 17312,
+"confidence": 0.57,
+"pageBreakAfter": false
+},
+{
+"text": " percent,",
+"startMs": 17763,
+"endMs": 18223,
+"timestampMs": 17993,
+"confidence": 0.875,
+"pageBreakAfter": false
+},
+{
+"text": " since",
+"startMs": 18524,
+"endMs": 18744,
+"timestampMs": 18634,
+"confidence": 0.922,
+"pageBreakAfter": false
+},
+{
+"text": " March",
+"startMs": 18824,
+"endMs": 19064,
+"timestampMs": 18944,
+"confidence": 0.953,
+"pageBreakAfter": false
+},
+{
+"text": " second.",
+"startMs": 19144,
+"endMs": 19485,
+"timestampMs": 19314,
+"confidence": 0.892,
+"pageBreakAfter": true
+},
+{
+"text": "Cost",
+"startMs": 20703,
+"endMs": 20963,
+"timestampMs": 20833,
+"confidence": 0.917,
+"pageBreakAfter": false
+},
+{
+"text": " per",
+"startMs": 21003,
+"endMs": 21144,
+"timestampMs": 21074,
+"confidence": 0.821,
+"pageBreakAfter": false
+},
+{
+"text": " landed",
+"startMs": 21184,
+"endMs": 21484,
+"timestampMs": 21334,
+"confidence": 0.958,
+"pageBreakAfter": false
+},
+{
+"text": " change",
+"startMs": 21544,
+"endMs": 21825,
+"timestampMs": 21684,
+"confidence": 0.843,
+"pageBreakAfter": false
+},
+{
+"text": " gets",
+"startMs": 21865,
+"endMs": 22085,
+"timestampMs": 21975,
+"confidence": 0.83,
+"pageBreakAfter": false
+},
+{
+"text": " a",
+"startMs": 22125,
+"endMs": 22165,
+"timestampMs": 22145,
+"confidence": 0.501,
+"pageBreakAfter": false
+},
+{
+"text": " watchdog.",
+"startMs": 22205,
+"endMs": 22746,
+"timestampMs": 22475,
+"confidence": 0.938,
+"pageBreakAfter": true
+},
+{
+"text": "One",
+"startMs": 23086,
+"endMs": 23207,
+"timestampMs": 23146,
+"confidence": 0.801,
+"pageBreakAfter": false
+},
+{
+"text": " week",
+"startMs": 23247,
+"endMs": 23447,
+"timestampMs": 23347,
+"confidence": 0.962,
+"pageBreakAfter": false
+},
+{
+"text": " hit",
+"startMs": 23487,
+"endMs": 23928,
+"timestampMs": 23708,
+"confidence": 0.501,
+"pageBreakAfter": false
+},
+{
+"text": " 25",
+"startMs": 23968,
+"endMs": 24208,
+"timestampMs": 24088,
+"confidence": 0.818,
+"pageBreakAfter": false
+},
+{
+"text": " dollars,",
+"startMs": 24268,
+"endMs": 24689,
+"timestampMs": 24478,
+"confidence": 0.882,
+"pageBreakAfter": false
+},
+{
+"text": " against",
+"startMs": 25029,
+"endMs": 25329,
+"timestampMs": 25179,
+"confidence": 0.841,
+"pageBreakAfter": false
+},
+{
+"text": " a",
+"startMs": 25390,
+"endMs": 25410,
+"timestampMs": 25400,
+"confidence": 0.988,
+"pageBreakAfter": false
+},
+{
+"text": " usual",
+"startMs": 25510,
+"endMs": 25810,
+"timestampMs": 25660,
+"confidence": 0.877,
+"pageBreakAfter": false
+},
+{
+"text": " 3.",
+"startMs": 25830,
+"endMs": 25870,
+"timestampMs": 25850,
+"confidence": 1.0,
+"pageBreakAfter": true
+},
+{
+"text": "Longer",
+"startMs": 27510,
+"endMs": 27831,
+"timestampMs": 27670,
+"confidence": 0.888,
+"pageBreakAfter": false
+},
+{
+"text": " opening",
+"startMs": 27911,
+"endMs": 28211,
+"timestampMs": 28061,
+"confidence": 0.935,
+"pageBreakAfter": false
+},
+{
+"text": " prompts",
+"startMs": 28251,
+"endMs": 28612,
+"timestampMs": 28432,
+"confidence": 0.907,
+"pageBreakAfter": false
+},
+{
+"text": " pay",
+"startMs": 28672,
+"endMs": 28893,
+"timestampMs": 28782,
+"confidence": 0.995,
+"pageBreakAfter": false
+},
+{
+"text": " off.",
+"startMs": 29033,
+"endMs": 29794,
+"timestampMs": 29414,
+"confidence": 0.756,
+"pageBreakAfter": true
+},
+{
+"text": "At",
+"startMs": 29914,
+"endMs": 30155,
+"timestampMs": 30034,
+"confidence": 0.295,
+"pageBreakAfter": false
+},
+{
+"text": " 140",
+"startMs": 30235,
+"endMs": 30515,
+"timestampMs": 30375,
+"confidence": 0.662,
+"pageBreakAfter": false
+},
+{
+"text": " characters",
+"startMs": 30556,
+"endMs": 31056,
+"timestampMs": 30806,
+"confidence": 0.768,
+"pageBreakAfter": false
+},
+{
+"text": " or",
+"startMs": 31117,
+"endMs": 31197,
+"timestampMs": 31157,
+"confidence": 0.772,
+"pageBreakAfter": false
+},
+{
+"text": " more,",
+"startMs": 31237,
+"endMs": 31457,
+"timestampMs": 31347,
+"confidence": 0.861,
+"pageBreakAfter": false
+},
+{
+"text": " 37",
+"startMs": 31477,
+"endMs": 32359,
+"timestampMs": 31918,
+"confidence": 0.595,
+"pageBreakAfter": false
+},
+{
+"text": " percent",
+"startMs": 32419,
+"endMs": 32800,
+"timestampMs": 32609,
+"confidence": 0.808,
+"pageBreakAfter": false
+},
+{
+"text": " land",
+"startMs": 32840,
+"endMs": 33060,
+"timestampMs": 32950,
+"confidence": 0.864,
+"pageBreakAfter": false
+},
+{
+"text": " code,",
+"startMs": 33120,
+"endMs": 33421,
+"timestampMs": 33270,
+"confidence": 0.904,
+"pageBreakAfter": false
+},
+{
+"text": " not",
+"startMs": 33681,
+"endMs": 33841,
+"timestampMs": 33761,
+"confidence": 0.73,
+"pageBreakAfter": false
+},
+{
+"text": " 23.",
+"startMs": 33861,
+"endMs": 33922,
+"timestampMs": 33891,
+"confidence": 0.987,
+"pageBreakAfter": true
+},
+{
+"text": "And",
+"startMs": 35970,
+"endMs": 36050,
+"timestampMs": 36010,
+"confidence": 0.919,
+"pageBreakAfter": false
+},
+{
+"text": " there",
+"startMs": 36070,
+"endMs": 36210,
+"timestampMs": 36140,
+"confidence": 0.907,
+"pageBreakAfter": false
+},
+{
+"text": " is",
+"startMs": 36270,
+"endMs": 36350,
+"timestampMs": 36310,
+"confidence": 0.715,
+"pageBreakAfter": false
+},
+{
+"text": " a",
+"startMs": 36370,
+"endMs": 36390,
+"timestampMs": 36380,
+"confidence": 0.958,
+"pageBreakAfter": false
+},
+{
+"text": " retry",
+"startMs": 36450,
+"endMs": 36871,
+"timestampMs": 36660,
+"confidence": 0.794,
+"pageBreakAfter": false
+},
+{
+"text": " cliff.",
+"startMs": 36911,
+"endMs": 37211,
+"timestampMs": 37061,
+"confidence": 0.993,
+"pageBreakAfter": true
+},
+{
+"text": "After",
+"startMs": 37591,
+"endMs": 37812,
+"timestampMs": 37701,
+"confidence": 0.853,
+"pageBreakAfter": false
+},
+{
+"text": " three",
+"startMs": 37872,
+"endMs": 38092,
+"timestampMs": 37982,
+"confidence": 0.76,
+"pageBreakAfter": false
+},
+{
+"text": " rephrases,",
+"startMs": 38152,
+"endMs": 38732,
+"timestampMs": 38442,
+"confidence": 0.918,
+"pageBreakAfter": false
+},
+{
+"text": " only",
+"startMs": 39073,
+"endMs": 39313,
+"timestampMs": 39193,
+"confidence": 0.789,
+"pageBreakAfter": false
+},
+{
+"text": " 25",
+"startMs": 39653,
+"endMs": 39893,
+"timestampMs": 39773,
+"confidence": 0.804,
+"pageBreakAfter": false
+},
+{
+"text": " percent",
+"startMs": 39973,
+"endMs": 40374,
+"timestampMs": 40174,
+"confidence": 0.828,
+"pageBreakAfter": false
+},
+{
+"text": " of",
+"startMs": 40394,
+"endMs": 40454,
+"timestampMs": 40424,
+"confidence": 0.746,
+"pageBreakAfter": false
+},
+{
+"text": " sessions",
+"startMs": 40514,
+"endMs": 40914,
+"timestampMs": 40714,
+"confidence": 0.835,
+"pageBreakAfter": false
+},
+{
+"text": " land",
+"startMs": 40974,
+"endMs": 41174,
+"timestampMs": 41074,
+"confidence": 0.985,
+"pageBreakAfter": false
+},
+{
+"text": " code.",
+"startMs": 41235,
+"endMs": 41555,
+"timestampMs": 41395,
+"confidence": 0.971,
+"pageBreakAfter": true
+},
+{
+"text": "Even",
+"startMs": 42797,
+"endMs": 42958,
+"timestampMs": 42878,
+"confidence": 0.878,
+"pageBreakAfter": false
+},
+{
+"text": " the",
+"startMs": 42998,
+"endMs": 43098,
+"timestampMs": 43048,
+"confidence": 0.678,
+"pageBreakAfter": false
+},
+{
+"text": " hour",
+"startMs": 43118,
+"endMs": 43359,
+"timestampMs": 43238,
+"confidence": 0.841,
+"pageBreakAfter": false
+},
+{
+"text": " matters.",
+"startMs": 43419,
+"endMs": 43800,
+"timestampMs": 43610,
+"confidence": 0.915,
+"pageBreakAfter": true
+},
+{
+"text": "Sessions",
+"startMs": 44181,
+"endMs": 44582,
+"timestampMs": 44382,
+"confidence": 0.882,
+"pageBreakAfter": false
+},
+{
+"text": " started",
+"startMs": 44622,
+"endMs": 44963,
+"timestampMs": 44793,
+"confidence": 0.743,
+"pageBreakAfter": false
+},
+{
+"text": " in",
+"startMs": 45003,
+"endMs": 45064,
+"timestampMs": 45034,
+"confidence": 0.822,
+"pageBreakAfter": false
+},
+{
+"text": " the",
+"startMs": 45104,
+"endMs": 45164,
+"timestampMs": 45134,
+"confidence": 0.998,
+"pageBreakAfter": false
+},
+{
+"text": " late",
+"startMs": 45204,
+"endMs": 45364,
+"timestampMs": 45284,
+"confidence": 0.921,
+"pageBreakAfter": false
+},
+{
+"text": " morning",
+"startMs": 45405,
+"endMs": 45705,
+"timestampMs": 45555,
+"confidence": 0.939,
+"pageBreakAfter": false
+},
+{
+"text": " land",
+"startMs": 45745,
+"endMs": 45966,
+"timestampMs": 45856,
+"confidence": 0.93,
+"pageBreakAfter": false
+},
+{
+"text": " code",
+"startMs": 46006,
+"endMs": 46247,
+"timestampMs": 46126,
+"confidence": 0.985,
+"pageBreakAfter": false
+},
+{
+"text": " 42",
+"startMs": 46287,
+"endMs": 46788,
+"timestampMs": 46537,
+"confidence": 0.618,
+"pageBreakAfter": false
+},
+{
+"text": " percent",
+"startMs": 46849,
+"endMs": 47230,
+"timestampMs": 47040,
+"confidence": 0.92,
+"pageBreakAfter": false
+},
+{
+"text": " of",
+"startMs": 47270,
+"endMs": 47330,
+"timestampMs": 47300,
+"confidence": 0.75,
+"pageBreakAfter": false
+},
+{
+"text": " the",
+"startMs": 47370,
+"endMs": 47470,
+"timestampMs": 47420,
+"confidence": 0.8,
+"pageBreakAfter": false
+},
+{
+"text": " time,",
+"startMs": 47510,
+"endMs": 47831,
+"timestampMs": 47671,
+"confidence": 0.957,
+"pageBreakAfter": false
+},
+{
+"text": " not",
+"startMs": 48152,
+"endMs": 48293,
+"timestampMs": 48222,
+"confidence": 0.997,
+"pageBreakAfter": false
+},
+{
+"text": " 22.",
+"startMs": 48313,
+"endMs": 48393,
+"timestampMs": 48353,
+"confidence": 0.988,
+"pageBreakAfter": true
+},
+{
+"text": "Every",
+"startMs": 50277,
+"endMs": 50478,
+"timestampMs": 50378,
+"confidence": 0.905,
+"pageBreakAfter": false
+},
+{
+"text": " claim",
+"startMs": 50538,
+"endMs": 50818,
+"timestampMs": 50678,
+"confidence": 0.878,
+"pageBreakAfter": false
+},
+{
+"text": " ships",
+"startMs": 50858,
+"endMs": 51119,
+"timestampMs": 50988,
+"confidence": 0.807,
+"pageBreakAfter": false
+},
+{
+"text": " with",
+"startMs": 51139,
+"endMs": 51279,
+"timestampMs": 51209,
+"confidence": 0.92,
+"pageBreakAfter": false
+},
+{
+"text": " its",
+"startMs": 51359,
+"endMs": 51460,
+"timestampMs": 51410,
+"confidence": 0.86,
+"pageBreakAfter": false
+},
+{
+"text": " sample",
+"startMs": 51500,
+"endMs": 51880,
+"timestampMs": 51690,
+"confidence": 0.996,
+"pageBreakAfter": false
+},
+{
+"text": " size",
+"startMs": 51921,
+"endMs": 52201,
+"timestampMs": 52061,
+"confidence": 0.941,
+"pageBreakAfter": false
+},
+{
+"text": " and",
+"startMs": 52241,
+"endMs": 52321,
+"timestampMs": 52281,
+"confidence": 0.924,
+"pageBreakAfter": false
+},
+{
+"text": " confidence",
+"startMs": 52381,
+"endMs": 52963,
+"timestampMs": 52672,
+"confidence": 0.904,
+"pageBreakAfter": false
+},
+{
+"text": " interval.",
+"startMs": 53003,
+"endMs": 53404,
+"timestampMs": 53204,
+"confidence": 0.89,
+"pageBreakAfter": true
+},
+{
+"text": "AgentKit",
+"startMs": 53724,
+"endMs": 54225,
+"timestampMs": 53974,
+"confidence": 0.879,
+"pageBreakAfter": false
+},
+{
+"text": " Prompt",
+"startMs": 54245,
+"endMs": 54586,
+"timestampMs": 54415,
+"confidence": 0.89,
+"pageBreakAfter": false
+},
+{
+"text": " Analytics.",
+"startMs": 54666,
+"endMs": 55207,
+"timestampMs": 54936,
+"confidence": 0.929,
+"pageBreakAfter": true
+}
+]
