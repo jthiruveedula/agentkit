@@ -1,5 +1,5 @@
 // Final QA: Escape steps the panel back one level, attention honours the filters,
-// the Wrapped live region mounts empty, and the header's accessible names.
+// and the header's accessible names.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -7,8 +7,6 @@ import { Dashboard } from "../App";
 import { normalize } from "../data/load";
 import { UNFILTERED, attention } from "../lib/attention";
 import { views } from "../lib/filter";
-import { WRAP_KEY } from "../lib/wrapped";
-import { SAY_MS } from "../components/Wrapped";
 import sample from "../data/sample.dev.json";
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
@@ -77,18 +75,5 @@ describe("attention honours the filters", () => {
     const other = [...new Set(d.sessions.map((r) => r.source))].find((s) => s !== deg.source)!;
     const f = { source: other }, v = views(d, f);
     expect(attention(d, v, f, new Set(v.rows.map((r) => r.id))).map((x) => x.id)).not.toContain(`src-${deg.source}`);
-  });
-});
-
-describe("Weekly Wrapped live region", () => {
-  it("mounts empty and is filled a beat later, so screen readers announce it", () => {
-    vi.useFakeTimers();
-    localStorage.removeItem(WRAP_KEY);
-    mount("#/s-overview");
-    const live = el.querySelector('.brief .b-acts [role="status"]')!;
-    expect(el.querySelector(".brief .b-acts .btn[data-due]")).not.toBeNull();
-    expect(live.textContent).toBe("");
-    act(() => { vi.advanceTimersByTime(SAY_MS); });
-    expect(live.textContent).toBe("Your weekly Wrapped is ready");
   });
 });

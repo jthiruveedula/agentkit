@@ -43,9 +43,11 @@ export function ModelFit() {
     ["Underpowered", p(fit.under), "smaller than needed"],
     ["Est. saving", saving === null ? "–" : `≥ ${fmtUSD(saving)}`, saving === null || !v.totals.cost ? "no priced data" : `${fmtPct(saving / v.totals.cost)} of spend`],
   ];
-  const light = fit.m[0].reduce((a, x) => a + x, 0);
-  const soMx = light ? <><b>{Math.round((fit.m[0][2] / light) * 100)}%</b> of light tasks ran on the top tier.</> : "Nothing flagged in this window.";
-  const soChg = saving ? <>Move light tasks to a smaller model: saves at least <b>{fmtUSD(saving)}</b> (estimate).</> : "Nothing flagged in this window.";
+  const soMx = fit.over ? <><b>{p(fit.over)}</b> of sessions ran on more model than the task needed.</> : "Nothing flagged in this window.";
+  // with no priced saving, the headline still names the first tool the list below tells to downsize (same 30% line, same counts)
+  const big = tools.find(([, e]) => e.n >= MIN_TOOL_N && e.over / e.n >= 0.3);
+  const soChg = saving ? <>Move light tasks to a smaller model: saves at least <b>{fmtUSD(saving)}</b> (estimate).</>
+    : big ? <>{srcLabel(big[0])}: <b>{big[1].over}</b> of {big[1].n} sessions oversized. Use a smaller model on light tasks.</> : "Nothing flagged in this window.";
   return (
     <Section id="s-models" title="Model fit" q="Is the model sized to the task?">
       {n === 0 ? <div className="s12"><Empty>No sessions with a known model</Empty></div> : <>
@@ -54,18 +56,18 @@ export function ModelFit() {
             <li key={l} className="kpi"><span className="lbl">{l}</span><b className="val">{val}</b><span className="sub">{sub}</span></li>
           ))}
         </ul>
-        <Card so={soMx} thin={!light} title="Task size × model tier" span={6} half src={`model fit (offline model) · n ${n} · estimate`}>
+        <Card so={soMx} thin={!fit.over} title="Task size × model tier" span={6} half src={`model fit (offline model) · n ${n} · estimate`}>
           <table className="mf-mx" aria-label="Task size against model tier, session counts">
             <thead><tr><td aria-hidden="true" style={{ border: 0 }} />{TIERS.map((t) => <th key={t} scope="col">{t}</th>)}</tr></thead>
             <tbody>{SIZES.map((sz, z) => (
               <tr key={sz}><th scope="row">{sz}</th>{TIERS.map((t, i) => {
                 const k = i === z ? "ok" : i > z ? "over" : "under";
-                return <td key={t} data-fit={k}><b>{fit.m[z][i]}</b><span>{FIT[k]}</span></td>;
+                return <td key={t} data-fit={k}><b>{fit.m[z][i]}</b>{fit.m[z][i] > 0 && <span>{FIT[k]}</span>}</td>;
               })}</tr>
             ))}</tbody>
           </table>
         </Card>
-        <Card so={soChg} thin={!saving} title="What to change" span={6} half src="model fit · estimate, untested">
+        <Card so={soChg} thin={!saving && !big} title="What to change" span={6} half src="model fit · estimate, untested">
           <ul className="mf-recs">{tools.map(([src, e]) => {
             const msg = e.n < MIN_TOOL_N ? "too few sessions"
               : e.over / e.n >= 0.3 ? `Use a smaller model on light tasks (${e.over}/${e.n} oversized).`
@@ -86,7 +88,7 @@ export function ModelFit() {
                 <caption className="sr-only">Sessions, priced spend and time to applied edit p50 / p95 by model</caption>
                 <thead><tr><th scope="col">Model</th><th scope="col">Sessions</th>{caps.hasCost && <th scope="col">Cost</th>}<th scope="col">Time to applied edit p50 / p95</th></tr></thead>
                 <tbody>{byModel.map((m) => (
-                  <tr key={m.k}>
+                  <tr key={m.k} data-best={m === fast ? "best fit" : undefined}>
                     <th scope="row"><button type="button" aria-pressed={f.model === m.k} onClick={() => drill({ model: m.k })} aria-label={`${m.k || "Unknown model"}: ${fmtInt(m.n)} sessions. Filter to this model`}>{m.k || "Unknown"}</button></th>
                     <td>{fmtInt(m.n)}</td>
                     {caps.hasCost && <td>{m.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(m.cost)}{m.unpriced > 0 && <small className="n"> {fmtInt(m.unpriced)} unpriced</small>}</>}</td>}

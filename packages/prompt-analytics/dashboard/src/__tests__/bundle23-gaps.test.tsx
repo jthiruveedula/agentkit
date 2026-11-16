@@ -100,7 +100,7 @@ describe("no-gain card", () => {
   });
   it("renders 'no comparison yet' with too little data", () => {
     const h = text(render(<Works />, [...many(10, 40, 8), ...many(5, 10, 15)]));
-    expect(h).toContain("Not enough sessions yet: 10 of 30 needed.");
+    expect(h).toContain("Not enough sessions yet: 10 of 30 needed past 10 prompts.");
   });
   it("renders the neutral 'more often' text, not 'no more often', when clearly higher", () => {
     const h = text(render(<Works />, [...many(8, 40, 8), ...many(36, 40, 15)]));

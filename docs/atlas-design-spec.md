@@ -7,7 +7,7 @@ Design pass for `docs/atlas-build-plan-2026-11-15.md`. Spec only. Paths are rela
 - Plumbing already exists (uncommitted): `lib/theme.ts` (`useTheme`, `setTheme`, `applyTheme`, key `pa.theme`),
   `ThemeSwitch` in `components/Shell.tsx`, and `main.tsx` imports `components/atlas.css` (currently 0 bytes).
   `atlas.css` must stay the LAST stylesheet import so equal-specificity rules win.
-- Specificity: `:root[data-theme="atlas"] .x` is (0,3,0); it beats every `html.glass .x` (0,2,1) rule without `!important`.
+- Specificity: `:root .x` is (0,3,0); it beats every `html.glass .x` (0,2,1) rule without `!important`.
   The only `!important` needed is where TSX writes an inline `background` (heatmap cells, section 2.3).
 - "Mind map" is rendered by `Sunburst.tsx` (`.sb-*` arcs), not a node-link graph. See flags.
 - `scripts/contrast.mjs` reads only the first `:root {` block of `styles.css` and `mix.css`; it does not see `atlas.css`.
@@ -28,7 +28,7 @@ Design pass for `docs/atlas-build-plan-2026-11-15.md`. Spec only. Paths are rela
 Paste as the first rule of `components/atlas.css`. All hex. `--sans`, `--mono`, spacing tokens are inherited unchanged.
 
 ```css
-:root[data-theme="atlas"] {
+:root {
   /* paper + ink */
   --bg: #f6efdd; --surface: #fbf6e9; --sunk: #ede3c9; --line: #d8c9a6; --line-2: #8f7a52;
   --ink: #2b2118; --muted: #62523f; --prior: #8a7c66;
@@ -112,10 +112,21 @@ Known limits, all deliberate:
 - `--line-2` is darker than Classic on purpose: with shadows gone it is the only control boundary, so it meets 3:1.
 
 ## 2. Per-section treatments
-Every selector below is prefixed with `:root[data-theme="atlas"]` in `atlas.css`; the prefix is omitted here.
+Every selector below is prefixed with `:root` in `atlas.css`; the prefix is omitted here.
 Write `A` for it in the snippets.
 
 ### 2.0 Global sheet
+- Status (pass 1): ATLAS is the only theme and glass is removed (no `html.glass`, no glass slider, no `initGlass` call).
+  `atlas.css` nests its rules under plain `:root`, so each rule is (0,1,0) above its own selector. Where an older rule
+  still outranks that, the ATLAS selector repeats the older one; no `!important`, no blanket specificity raise.
+- Decision, framed or not: the Key numbers (`.kcard ul.kpis`) are UNFRAMED. They are a hairline legend grid inside one
+  double-ruled card: no tile background, radius or box, only a right and bottom `--rule` hairline per cell. The Overview
+  field readings (`.w`) are the only framed tiles: one 1px `--rule` border, 2px corner, no double rule.
+- One type scale, all sections: h1 24/28 serif; brief h3 18/24 serif; figures 26/28 serif (cost 32/34);
+  caps label 10/16 sans at .1em; stamp 10/16 sans 700 at .08em, one angle (-2deg).
+- One chip: `.tag, .chip, .crumb.fchip, .mm-prev, .mm-hot, .badge` are a flat 2px label on a 1px `--rule` hairline;
+  status and category change only ink and rule colour. One pressed state for `.seg`, `.seg3 .fp`, `.xb`, `.btn.tog3`:
+  `--sunk` plus an ink underline. One empty state: `.empty`, italic serif between dotted rules.
 - `html, body { background: var(--bg) var(--contour) }`; `body::before { background: none; -webkit-backdrop-filter: none; backdrop-filter: none }`
   kills the glass wallpaper (`styles.css:797`).
 - One rule removes blur everywhere it is set: `.card, .kpi, .w, .top, .rail, .pop, .morebox, .prefs, .mm-side, .xs, .brief { -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; background: var(--surface); border: 1px solid var(--rule); }`.
@@ -142,7 +153,7 @@ A :is(.todo .tag, td[data-fit] span, td[data-out]::after, .srow [data-out], [dat
 
 ### 2.1 Header cartouche + compass (`Shell.tsx`, `.top`, `.brand`, `.glyph`)
 - `.top { background: var(--surface); border-bottom: 3px double var(--line-2) }`.
-- `.brand-t h1 { font: 700 21px/26px var(--serif) }`; cartouche bracket rules: `.brand-t { padding: 2px 12px; border-inline: 1px solid var(--rule) }`
+- `.brand-t h1 { font: 700 24px/28px var(--serif) }`; cartouche bracket rules: `.brand-t { padding: 2px 12px; border-inline: 1px solid var(--rule) }`
   with `.brand-t::before, .brand-t::after` as 5px corner ticks (absolute, `border-top/bottom: 1px solid var(--line-2)`).
   `.brand-t` is `position: relative` already and its popover hangs from it; give the pseudo-elements `pointer-events: none`.
 - `.top-meta > * + * { border-left-color: var(--rule) }`; `.top-meta .count { color: var(--inkblue) }`.
@@ -178,10 +189,10 @@ Common: `.w { border: 1px solid var(--rule); border-radius: 2px; background: var
 |---|---|---|---|
 | 1 | Compass-dial struggle gauge | `.gauge .g-track`, `.g-fill`, `.g-s0/.g-s1/.g-s2`, `.g-ndl`, `.g-hub`, `.g-was`, `.b-ring` | Track: `stroke: var(--rule); stroke-width: 9; stroke-dasharray: 1 5; stroke-linecap: butt` (bearing ticks). Fill: `stroke-width: 3`, stops teal `#1f6f6b` / ochre `#b9822e` / brick `#a83a26`. Needle `stroke: var(--brick); stroke-width: 2`; hub `fill: var(--surface); stroke: var(--ink)`. `.g-was { stroke: var(--ink); stroke-width: 1.5 }` (notch). Keep `stroke-linecap` of `.g-fill` as is: `pa-ring` depends on its dash setup |
 | 2 | Route-line sparkline | `.sp`, `.sp-l`, `.sp-a`, `.sp-was`, `.sp-d` | `.sp-l { stroke-width: 1.5; stroke-dasharray: none }` in `--sp` (bad = brick, good = teal via tokens). `.sp-a { opacity: .06 }`. `.sp-was { stroke: var(--line-2); stroke-dasharray: 1 3 }`. `.sp-d` becomes the survey dot: `width/height: 9px; margin: -4.5px; background: var(--surface); box-shadow: 0 0 0 1.5px var(--sp), 0 0 0 4px var(--surface)`. Only one dot exists (the last point); intermediate survey dots would need new SVG nodes: do not add |
-| 3 | Elevation-tint heatmap | `.hm i`, `.hm-k i` | Cells take an inline `background: viridis()`. TSX (`Rhythm.tsx`, `Heat`): add `"--v": x.v / peak` to the existing style object (one token). CSS: `.hm i[style] { background: color-mix(in oklab, #a8683a calc(var(--v) * 100%), #dfe3c4) !important; box-shadow: none }` (lowland sage to sienna); zero cells keep `--sunk`. `.hm-k i { background: linear-gradient(90deg, #dfe3c4, #d9c184, #a8683a) }`. Branch the aria-label colour words on `useTheme()` |
+| 3 | Elevation-tint heatmap | removed | Not in the strip: it holds up to four widgets (1, 2, 4, 5) on `repeat(auto-fit, minmax(180px, 1fr))`, so three or four always fill the row. |
 | 4 | Serif cost figure | `.w.cost .w-n`, `.w.cost .w-c` | `.w-n { font-size: 32px; line-height: 34px }`; `.w-c { font-style: italic; border-top: 1px solid var(--rule) }` (footnote line). Value is `usd(c.value)` from insights: untouched |
 | 5 | Dot-survey Why grid | `.wd i`, `.ud-r[data-r="now"] .wd i[data-on]`, `.ud-r[data-r="prior"] .wd i[data-on]`, `.w-fix`, `.story` | Off dots: `background: none; box-shadow: inset 0 0 0 1px var(--line-2)` (open survey point). On, now: `background: var(--brick)`. On, prior: `background: var(--prior)`. `.w-fix { color: var(--inkblue) }` |
-| 6 | Shaded-relief terrain | `.rh-plot`, `.rh-2d i`, `.rh-2d i[data-top]`, `.rh-go` | 3D: palette in section 4. 2D fallback: `.rh-2d i { background: color-mix(in oklab, #a8683a calc(var(--v) * 100%), #dfe3c4) }`, `[data-top] { background: var(--brick) }`. Summit label: `.rh-go { color: var(--ink); font-family: var(--serif) } .rh-go::before { content: "▲ "; color: var(--brick) }`, `.rh-go b { color: var(--brick-ink) }`. Text stays the existing data string |
+| 6 | Shaded-relief terrain | removed | Not in the strip: it holds up to four widgets (1, 2, 4, 5) on `repeat(auto-fit, minmax(180px, 1fr))`, so three or four always fill the row. |
 
 The brief panel above the strip (`.brief`, `.b-top`, `h3#ov-hd`, `.b-acts`): `h3 { font: 700 22px/28px var(--serif) }`,
 `.brief[data-tone="bad"] { border-left: 3px solid var(--brick) }`, `[data-tone="good"]` teal, `flat` `--line-2`.
@@ -209,13 +220,20 @@ Drivers list (`.drv`, `.dv i`, `li[data-tone]`): bars in brick / teal via tokens
 | Exposure category | `.xs .tag[data-cat]`, `.chip[data-cat]` | `secret` / `pii` / `phi` | teal / warn-ink / `#7d3f66` |
 | Playbook effect | `.play-e`, `.play[data-dir="less"] .play-e` | `data-dir` | good-ink / warn-ink |
 | Session outcome | see 2.12 | new `data-out`, `data-sg` | good-ink / brick-ink |
+| Seal: the one recommended row per card | `.play[data-best]::after`, `#s-models tr[data-best] th[scope="row"]::after` | new `data-best="sweet spot"` (top Do-more play) / `"best fit"` (fastest model that fits) | good-ink |
+| Severity: the top row only | `table.sg th[data-top]::after`, `.db [data-top]::after` | new `data-top` on the top friction signal and the intent with most retries | brick-ink |
+| Topic off its cost trend | `#s-topicflags .tag` | card renders only when `topicBreaks` flags a topic | warn-ink |
+
+Seals and severity stamps are scoped to those selectors (never bare `[data-best]` / `[data-top]`: `.rt .cell[data-best]` is a different hook). The word is the attribute value,
+at most one per card, and only on a row the existing ranking already picks: no new threshold such as a "HIGH" cutoff.
 
 Non-verdict `.tag` (intent, "all sessions", "not priced") stays a flat label: `.tag { background: none; border: 1px solid var(--rule); border-radius: 2px }`.
 Do not stamp them; a page of stamps reads as noise.
 
 ### 2.6 Do next = expedition itinerary (`#s-next ol.todo > li`, `govern.css:13-29`)
 - `.todo { gap: 0; position: relative }`, `.todo li { background: none; border: 0; border-radius: 0; border-bottom: 1px solid var(--rule); padding-left: 44px; position: relative }`.
-- Trail: `.todo::before { content: ""; position: absolute; left: 21px; top: 16px; bottom: 16px; border-left: 2px dotted var(--line-2) }`.
+- Trail: one segment per stop, number to number, so it never runs past the last one when a row opens its details:
+  `.todo li:not(:last-child)::before { content: ""; position: absolute; left: 21px; top: 38px; bottom: -9px; border-left: 2px dotted var(--line-2) }`.
 - Waypoint: `.todo .num { position: absolute; left: 8px; top: 10px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 1.5px solid var(--ink); font: 700 13px var(--serif); color: var(--ink); text-align: center }`.
   First row: `li:first-child .num { background: var(--brick); border-color: var(--brick); color: var(--accent-ink) }` (paper on brick 5.90).
 - `.todo h4 { font: 700 15px/20px var(--serif) }`; `.todo .tag` is the stamp. `.todo .tag { white-space: normal }` exists: with long impact text set `rotate: 0` when it wraps? CSS cannot detect wrap; use `rotate: -1deg` for `.todo .tag` only.
@@ -228,18 +246,19 @@ Do not stamp them; a page of stamps reads as noise.
 - Struggle rings: `.sb-edge` (the red outer edge) `fill: var(--brick)`; `.sb-hot { stroke: var(--brick); stroke-width: 1.5px; stroke-dasharray: 2 2 }`.
 - Triangulation markers: `.sb-call polyline { stroke: var(--ink); stroke-width: 1px; stroke-dasharray: 3 2 }`, `.sb-call circle:not(.sb-badge) { fill: var(--ink) }`,
   `.sb-call .sb-badge { fill: var(--surface); stroke: var(--ink); stroke-dasharray: none }`, `.sb .sb-rank { font: 700 10px var(--sans); fill: var(--ink) }`.
-  A true triangle marker needs a different SVG shape; a ringed station dot is the CSS-only equivalent. Do not change the geometry.
-- Flagged summit: `.sb-call[data-rank="1"] .sb-badge { fill: var(--brick); stroke: var(--brick) }` + `.sb-rank { fill: var(--accent-ink) }` (needs the `data-rank` attribute, see flags).
-- Inspector as field notes: `.mm-side { background: var(--surface) repeating-linear-gradient(#0000 0 19px, var(--line) 19px 20px); border: 1px solid var(--rule); border-left: 3px double var(--brick) }`,
-  `.mm-detail p, .mm-note { line-height: 20px }` (sits on the ruled lines), `.mm-nm { font: 700 16px/20px var(--serif) }`, `.mm-big b { font-family: var(--serif) }`, `.mm-eye { letter-spacing: .1em; text-transform: uppercase; font-size: 10px }`.
+  Stations are triangles: `Sunburst.tsx` adds `polygon.sb-stn` beside the `.sb-badge` circle, a `polyline.sb-base` joining the stations in rank order and a `path.sb-flag` on rank 1.
+  `mindmap.css` hides the three by default; ATLAS hides `.sb-badge` and shows them. Callout positions are unchanged.
+- Flagged summit: `.sb-call[data-rank="1"] .sb-stn { fill: var(--brick); stroke: var(--brick) }` + `.sb-rank { fill: var(--accent-ink); font-family: var(--serif) }`, plus the brick `.sb-flag`.
+  The inspector chips match: `.mm-hot[data-rank]` is an ink-ringed number, rank 1 brick; `.legend .hotkey::before` is an ink triangle.
+- Inspector as field notes: `.mm-side { border-left: 3px double var(--brick) }`, `.mm-detail p, .mm-note { line-height: 20px }`, `.mm-nm { font: 700 16px/20px var(--serif) }`, `.mm-big b { font-family: var(--serif) }`, `.mm-eye { letter-spacing: .1em; text-transform: uppercase; font-size: 10px }`.
   Body copy stays sans at its current size; do not use a script or italic face for data text.
+  No ruled-paper background: `.mm-big`, `.mm-kid` (28px) and `.mm-hots .chip` do not sit on a 20px pitch, so the rules struck through the text.
 - `.mm-track i { background: var(--inkblue) }`, `.mm-track[data-bad] i { background: var(--brick) }`, `.mm-kid:hover { background: var(--sunk) }`.
 - Legend keys (`.mm-key .k-arc::before`, `.k-tone::before`, `.k-heat::before`, `.hatch::before`) read tokens; verify `.k-heat` shows brick.
 
 ### 2.8 What works = field-notebook plates (`.play`, `.play-grid`, `.forest .fr`, `table.best`, `.dbt`)
 - `.play { border: 1px solid var(--rule); border-radius: 2px; background: var(--surface); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--line) }` (plate frame); `.play[data-on] { background: var(--accent-soft); border-color: var(--inkblue) }`.
-- Plate number, CSS counter, no data: `.plays { counter-reset: pl } .play { counter-increment: pl } .play-h b::before { content: "Pl. " counter(pl) " "; font: italic 12px var(--serif); color: var(--muted) }`.
-  This is an ordinal of list position, not a metric. Drop it if the list is filter-reordered in a way that makes "Pl. 3" misleading.
+- No plate number: the plays sit in two columns (Do more / Do less) and re-rank with every filter, so a "Pl. 3" ordinal would mislead. The top Do-more plate carries the SWEET SPOT seal instead (2.5).
 - `.play-col h4 { font: italic 700 14px var(--serif) }`, `.play-ci i, .play-ci em { background: var(--inkblue) }`, `.play-c { color: var(--warn-ink) }`.
 - Forest rows: `.fr { border-bottom: 1px dotted var(--rule); border-radius: 0 }`, `.fr[data-on] { background: var(--accent-soft) }`.
 - `table.best td { border-top: 1px solid var(--rule) }` (replaces the white `oklch(1 0 0 / .7)` rule at `govern.css:43`), `.best .link { border-radius: 2px; background: none; border: 1px solid var(--rule) }`.
@@ -323,10 +342,10 @@ Reuse only existing keyframes from `styles.css:384-396`.
 | Effect | Existing hook to reuse | ATLAS change |
 |---|---|---|
 | Route line draws in | `pa-draw` on `.sp-l` (`hero.css:114`) and `.line.draw` (`styles.css:365`). Both paths have `pathLength={1}` | Keep. Because `pa-draw` sets `stroke-dasharray: 1`, a dashed route line is impossible while it animates: keep `.sp-l` solid |
-| Trail draws (Do next) | none on `.todo::before` | `animation: pa-wipe 800ms ... backwards` with `clip-path` top-to-bottom is not what `pa-wipe` does (it wipes left to right). Use `pa-sy` with `transform-origin: 50% 0` on `.todo::before` |
+| Trail draws (Do next) | none on `.todo li::before` | `animation: pa-wipe 800ms ... backwards` with `clip-path` top-to-bottom is not what `pa-wipe` does (it wipes left to right). Use `pa-sy` with `transform-origin: 50% 0` on `.todo::before` |
 | Dots survey in sequence | `pa-cell` on `.wd i` with `--k` stagger (`hero.css:116`); `pa-pop` on `.sp-d`, `.dot.pt`, `.ud-on` | Keep delays. Replace the bouncy easing `cubic-bezier(.2, 1.2, .4, 1)` with `cubic-bezier(.2, .8, .2, 1)` for these selectors (ink does not bounce). Drop `sp-ping` and `wd-flip`: `animation-name` override to the first animation only |
 | Waypoints | `pa-pop` | `.todo .num { animation: pa-pop 300ms backwards; animation-delay: calc(var(--i, 0) * 120ms) }`; `--i` is not set on `li`: use `li:nth-child(1..3)` (only 3 rows show by default) |
-| Heatmap / choropleth tint | `pa-cell` on `.hm i` (`--day` stagger), `.cell:not(.none)` (`--d` stagger) | Keep, same easing swap |
+| Heatmap / choropleth tint | `pa-cell` on `.cell:not(.none)` (`--d` stagger) | Keep, same easing swap |
 | Gauge | `pa-ring` on `.g-fill`, `g-swing` on `.g-ndl` | Keep `g-swing` but with `cubic-bezier(.2, .8, .2, 1)` (no overshoot). Keep `pa-ring` |
 | Terrain rises | `Bars3D.tsx` JS grow: height 0 to 1 over `T = 420ms`, camera settle `SWING` over `TC = 900ms`, gated by `reducedNow()` | Keep as is: that is the terrain rise. In ATLAS set the idle pulse colour to the brick pair (section 4). 2D fallback `.rh-2d i`: existing `pa-cell` with `--v` delay |
 | Cards / tiles enter | `pa-up` on `.card`, `.kpis > li`, `.strip > .w` | Keep; reduce travel is not possible without a new keyframe. Acceptable |
@@ -376,12 +395,12 @@ and the 2D grid plus the data table remain the accessible views.
 ## 5. Budget and build notes
 - Estimated `atlas.css`: 9 to 11 KB raw, about 2.8 to 3.4 KB gzip. TSX deltas (palette object, three attributes, three string
   branches, one `--v`): under 0.5 KB gzip. Well inside the 25 KB headroom. No fonts, no images beyond the two data URIs.
-- Group selectors with `:is()` under one `:root[data-theme="atlas"]` prefix where possible; native CSS nesting
-  (`:root[data-theme="atlas"] { .card { ... } }`) would cut the prefix repetition by roughly 40% if the Vite/lightningcss target
+- Group selectors with `:is()` under one `:root` prefix where possible; native CSS nesting
+  (`:root { .card { ... } }`) would cut the prefix repetition by roughly 40% if the Vite/lightningcss target
   already allows nesting. `vite.config.ts` sets `target: "es2022"` and no `cssTarget`; confirm the minifier keeps or flattens nesting before relying on it.
 - TSX touch list, complete: `Bars3D.tsx` (palette + lighting + pulse test), `Time.tsx` (two chip colours, two colour-word strings),
   `Rhythm.tsx` (`--v` on heat cells, one aria-label branch), `Sessions.tsx` (`data-out`, `data-sg`), `Sunburst.tsx`
   (`data-rank`). Nothing else needs TSX.
 - Verify after build, in this order: Classic pixel-identical (no rule in `atlas.css` without the prefix; grep for lines not starting
-  with `:root[data-theme="atlas"]`, `@media`, `}` or whitespace); glass off in ATLAS at every glass-strength setting; `.kt .val`
+  with `:root`, `@media`, `}` or whitespace); glass off in ATLAS at every glass-strength setting; `.kt .val`
   does not overflow at the narrowest tile with Georgia; rotated stamps do not clip in `.tbl-wrap` (`overflow-x: auto`).

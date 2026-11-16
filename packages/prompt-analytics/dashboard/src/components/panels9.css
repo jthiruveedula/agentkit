@@ -42,4 +42,3 @@
 .fl-mid line { stroke: var(--prior); opacity: 0.6; }
 .fl-mid line.fl-top { stroke: var(--accent); opacity: 1; }
 .fl-n { position: absolute; translate: -50% -50%; padding: 0 4px; border-radius: 7px; background: var(--surface); color: var(--ink); font: 600 11px/14px var(--sans); font-variant-numeric: tabular-nums; pointer-events: none; }
-html.glass .fl-n { background: oklch(1 0 0 / 0.9); }

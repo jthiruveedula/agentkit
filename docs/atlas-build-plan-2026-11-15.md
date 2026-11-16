@@ -4,9 +4,9 @@ Target: Prompt Analytics dashboard (`packages/prompt-analytics/dashboard`). Bran
 
 ## Context
 
-v28.0 is live with the current **Classic** design and MUST stay the default. ATLAS ships as an
-opt-in theme via a header theme switcher (`data-theme` attribute on the app root). All data and
-logic are shared — presentation only. No metric definitions or data computation change.
+**Owner decision (2026-11-15): ATLAS is the product, the default and the only theme.** The
+switcher and Classic-only code are removed. All data and logic are shared; presentation only. No
+metric definitions or data computation change.
 
 ## ATLAS design language (owner-approved; concept images are not in the repo)
 
@@ -79,5 +79,4 @@ the PR.
 
 ## Deliverable
 
-A PR with before/after screenshots of every section in ATLAS and refreshed site stills showing the
-theme switcher; Classic untouched as default. Do not merge — report the PR number and gate results.
+A PR with before/after screenshots of every section in ATLAS and refreshed site stills; ATLAS is the default and only theme. Do not merge — report the PR number and gate results.

@@ -16,9 +16,6 @@
 .why-tag + .sec { scroll-margin-top: calc(var(--hh) + 48px); }
 @media (max-width: 699px) { .why-tag + .sec { scroll-margin-top: 100px; } }
 
-/* quiet strip on the glass page: a tinted pill, not an opaque box. The fill is --gfloor (0.66), not 0.55: the muted label and the accent link
-   only hold 4.5:1 over the darkest wallpaper stop at the floor scripts/contrast.mjs checks */
-html.glass .sec.quiet { height: 40px; background: oklch(1 0 0 / var(--gfloor)); border-color: var(--rim); border-radius: 12px; }
 
 /* Do next on a phone (#s-next outranks govern.css whatever the bundle order): number + action on the first line, then chip, link, button
    and "Why this" share one wrapping row; 32px controls */

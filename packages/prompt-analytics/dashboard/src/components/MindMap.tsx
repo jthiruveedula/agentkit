@@ -172,7 +172,7 @@ export function MindMap() {
     if (x.project) { apply({ project: x.project }); requestAnimationFrame(() => goto("s-sessions")); }   // scroll once the filtered page has laid out
   }}
     onMouseEnter={() => setHotHov(x.id)} onMouseLeave={() => setHotHov(null)} onFocus={() => setHotHov(x.id)} onBlur={() => setHotHov(null)}
-    aria-label={`Hotspot ${x.rank}: ${x.label}, ${chipText(x)}, friction ${x.friction.toFixed(2)}. Filter to this project and show its sessions`}><b className="mm-hot" aria-hidden="true">{x.rank}</b><span className="mm-hl">{x.label}</span> <span className="meta">{chipShort(x)}</span><span className="mm-note">{hot.get(x.id)?.note}</span></button>)}</div>;
+    aria-label={`Hotspot ${x.rank}: ${x.label}, ${chipText(x)}, friction ${x.friction.toFixed(2)}. Filter to this project and show its sessions`}><b className="mm-hot" data-rank={x.rank} aria-hidden="true">{x.rank}</b><span className="mm-hl">{x.label}</span> <span className="meta">{chipShort(x)}</span><span className="mm-note">{hot.get(x.id)?.note}</span></button>)}</div>;
 
   // inspector: the pointer's arc, else a hovered or focused hotspot row, else the selection
   const N = (hov && byId.get(hov)?.node) || (hotHov && byId.get(hotHov)?.node) || sn;
@@ -202,7 +202,7 @@ export function MindMap() {
       <ul className="legend mm-key">
         <li className="k-arc" title={`Arc length = share of ${metric}`}>Arc = share of {metric}</li>
         <li className="k-tone" title="Colour = tool, lighter each ring out: intent, project, session">Tool, lighter outward</li>
-        {avg > 0 && <li className="k-heat" title={`Red outer edge = struggled ${EDGE_OVER} times the ${fmtPct(avg, 0)} average or more, darkest at 3 times it (${ROUTER_MIN_N}+ sessions with a prompt; faded under ${MIN_N})`}>Struggle ≥ {EDGE_OVER}x avg</li>}
+        {avg > 0 && <li className="k-heat" title={`Outer edge = struggled ${EDGE_OVER} times the ${fmtPct(avg, 0)} average or more, darkest at 3 times it (${ROUTER_MIN_N}+ sessions with a prompt; faded under ${MIN_N})`}>Struggle ≥ {EDGE_OVER}x avg</li>}
         {hots.length > 0 && <li className="hotkey" title="Dashed outline and number = hotspot">Hotspot</li>}
         {metric === "cost" && <li className="hatch" title="Hatched = no priced sessions">Unpriced</li>}
       </ul>
@@ -233,7 +233,7 @@ export function MindMap() {
                     <button type="button" className="mm-row" data-id={n.id} data-cur={n.id === curId || undefined} aria-expanded={kids ? on : undefined} aria-label={aria(n)} style={{ paddingLeft: 8 + depth * 14 }} onClick={() => activate(n)}>
                       <span className="mm-caret" aria-hidden="true">{kids ? (on ? "▾" : "▸") : n.kind === "more" ? "+" : "·"}</span>
                       <span className="sw" />
-                      <span className="mm-name">{ed && <i className="mm-heat" data-faded={ed.faded || undefined} aria-hidden="true" />}{hot.has(n.id) && <><b className="mm-hot" aria-hidden="true">#{hot.get(n.id)?.rank}</b><span className="sr-only">Hotspot {hot.get(n.id)?.rank}, </span></>}{nameOf(n)}</span>
+                      <span className="mm-name">{ed && <i className="mm-heat" data-faded={ed.faded || undefined} aria-hidden="true" />}{hot.has(n.id) && <><b className="mm-hot" data-rank={hot.get(n.id)?.rank} aria-hidden="true">#{hot.get(n.id)?.rank}</b><span className="sr-only">Hotspot {hot.get(n.id)?.rank}, </span></>}{nameOf(n)}</span>
                       <span className="mm-val">{val(n)}</span>
                       <span className="mm-share" aria-hidden="true"><i /></span>
                     </button>

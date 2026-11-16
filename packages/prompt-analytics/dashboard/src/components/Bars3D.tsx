@@ -1,7 +1,7 @@
 // Lit, orbitable 3D bars (ECharts GL bar3D) for the activity calendar and the hour-by-weekday card. Lazy-loaded: only mounted once 3D is on
 // and WebGL exists, so the 2D path never builds it. Orthographic, so equal values are equal pixel heights at any depth. Bar height is value from zero.
 // Drag = orbit (beta +-50), arrows rotate 10 degrees, + / - zoom, 0 / Escape reset. The 2D grid and the DataTable stay the accessible views.
-// Colours are the --accent / --sunk / --line / --muted / --amber tokens as sRGB hex (zrender cannot parse oklch); design spec c9-fable.
+// Colours are the ATLAS relief palette (lib/theme.ts RELIEF) as sRGB hex (zrender cannot parse oklch or var()); docs/atlas-design-spec.md section 4.
 import { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts/core";
 import { TooltipComponent } from "echarts/components";
@@ -10,12 +10,12 @@ import { Bar3DChart, Line3DChart } from "echarts-gl/charts";
 import { Grid3DComponent } from "echarts-gl/components";
 import { reducedNow, useSize } from "../lib/hooks";
 import { clamp } from "../lib/math";
-import { RELIEF, useTheme } from "../lib/theme";
+import { RELIEF as pal } from "../lib/theme";
 
 // CanvasRenderer: echarts-gl paints axis labels through a 2D zrender canvas; without a registered painter no label text draws
 echarts.use([CanvasRenderer, TooltipComponent, Bar3DChart, Line3DChart, Grid3DComponent]);
 
-/** One bar: grid position, value, colour strength 0..1, hover text. mark = best hour (amber), off = outside the date window (flat grey plate), sel = selected day. */
+/** One bar: grid position, value, colour strength 0..1, hover text. mark = best hour (brick summit), off = outside the date window (flat grey plate), sel = selected day. */
 export interface B3Cell { c: number; r: number; v: number; mix: number; tip: string; mark?: boolean; off?: boolean; sel?: boolean }
 interface Props {
   cells: B3Cell[]; cols: number; rows: number; colLabel: (c: number) => string; rowLabels: string[]; summary: string;
@@ -53,7 +53,6 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
   const bw = cols * CELL, bd = rows * CELL * deep, bh = 28;
   const S = useRef(1); S.current = wrapSize.w > 0 ? fit(bw, bd, bh, ALPHA, BETA, wrapSize.w / height, height, mini) : 1;
   const reduced = () => reducedNow();
-  const pal = RELIEF[useTheme()];
 
   const cam = () => {   // the live camera after a drag, else the defaults
     const v = (chart.current?.getOption() as { grid3D?: { viewControl?: { alpha?: number; beta?: number; orthographicSize?: number } }[] } | undefined)?.grid3D?.[0]?.viewControl;

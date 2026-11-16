@@ -161,7 +161,7 @@ describe("sessions table UI", () => {
     expect(location.hash).toContain("dn=c"); expect(el.querySelector("#s-sessions table")!.getAttribute("data-dens")).toBe("c");
     const b = [...el.querySelectorAll<HTMLButtonElement>("#s-sessions .btn")].find((x) => x.textContent?.startsWith("Export"))!;
     expect(b.getAttribute("aria-haspopup")).toBe("menu");
-    click(b); const items = el.querySelectorAll('[role="menuitem"]'); expect(items).toHaveLength(3); expect(document.activeElement).toBe(items[0]);
+    click(b); const items = el.querySelectorAll('[role="menuitem"]'); expect(items).toHaveLength(4); expect(document.activeElement).toBe(items[0]);
     act(() => { document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); });
     expect(el.querySelector('[role="menu"]')).toBeNull(); expect(document.activeElement).toBe(b);
   });

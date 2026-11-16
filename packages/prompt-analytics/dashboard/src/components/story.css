@@ -111,7 +111,4 @@
 .receipt > button { font-weight: 600; color: var(--accent); text-align: left; }
 .receipt > button:hover { border-color: var(--accent); }
 .receipt > button:focus-visible { outline-offset: -2px; }   /* inside the cell: the clip-path above cuts anything left of the row, a wrapped button sits on that edge */
-html.glass .receipt > * { background: oklch(1 0 0 / 0.55); border-color: var(--rim); }
-html.glass .receipt > :first-child { border-left-color: var(--bad); }
-html.glass .receipt > button:hover { border-color: var(--accent); }
 @media (pointer: coarse) { .receipt > button { min-height: 40px; } }

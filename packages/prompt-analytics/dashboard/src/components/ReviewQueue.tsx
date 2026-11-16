@@ -4,6 +4,7 @@ import type { ExposureItem, RevealFinding, Source } from "../data/types";
 import { fmtDate, fmtInt } from "../lib/format";
 import { SOURCES, srcLabel } from "../lib/palette";
 import { ToolLogo } from "./Shell";
+import { Empty } from "./ui";
 import "./govern.css";
 
 type Status = ExposureItem["status"];
@@ -151,7 +152,7 @@ export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat:
       </div>
       {!api && <p className="xnote">Read-only export. Run <code>prompt-analytics serve</code> to reveal and review.</p>}
       <p className="sr-only" role="status">{msg}</p>
-      {slice.length === 0 ? <p className="xe">No findings match these filters.</p> : slice.map((g) => {
+      {slice.length === 0 ? <Empty>No findings match these filters.</Empty> : slice.map((g) => {
         const open = g.items.filter((i) => (over[i.id] ?? i.status) === "open").length;
         return (
           <section key={g.key} className="xs" aria-label={g.title ?? "Untitled session"}>

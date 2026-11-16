@@ -20,13 +20,13 @@ function Ci({ p, lim }: { p: Play; lim: number }) {
   return <span className="play-ci" aria-hidden="true" style={{ "--a": pos(p.lo), "--b": pos(p.hi), "--d": pos(p.pts) } as CSSProperties}><i /><em /></span>;
 }
 
-function PlayCard({ p, lim, on, onPick, copySlot }: { p: Play; lim: number; on: boolean; onPick: () => void; copySlot: boolean }) {
+function PlayCard({ p, lim, on, onPick, copySlot, best }: { p: Play; lim: number; on: boolean; onPick: () => void; copySlot: boolean; best: boolean }) {
   const [copied, setCopied] = useState(false);
   const tm = useRef(0);
   useEffect(() => () => clearTimeout(tm.current), []);
   const copy = () => { if (!p.snippet) return; navigator.clipboard?.writeText(p.snippet).then(() => { setCopied(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setCopied(false), 1500); }, () => {}); };
   return (
-    <li className="play" data-dir={p.dir} data-on={on || undefined} data-copy={copySlot || undefined}>
+    <li className="play" data-dir={p.dir} data-on={on || undefined} data-copy={copySlot || undefined} data-best={best ? "sweet spot" : undefined}>
       <button type="button" className="play-b" aria-pressed={on} onClick={onPick}
         aria-label={`${p.dir === "more" ? "Do more" : "Do less"}: ${p.title}, ${pts(p.pts / 100)} on success, 95% CI ${pts(p.lo / 100)} to ${pts(p.hi / 100)}, n=${p.n}. ${p.line}${p.counter ? " Correlation, not cause." : ""} Filter to this topic`}>
         <span className="play-h"><b>{p.title}</b><span className="play-e">{pts(p.pts / 100)}</span></span>
@@ -46,13 +46,13 @@ function Playbook() {
   const b = useMemo(() => playbook(d.what_works, d.galaxy.clusters, d.what_works_tested, d.sessions), [d]);
   const { more, less } = b, cards = [...more, ...less];
   const lim = Math.max(...b.all.flatMap((p) => [Math.abs(p.lo), Math.abs(p.hi)]), 1);
+  const best = more.length ? more.reduce((a, b) => (b.pts > a.pts ? b : a)) : null;
   const col = (title: string, ps: Play[], copySlot: boolean) => (
     <div className="play-col">
       <h4>{title}</h4>
-      {ps.length === 0 ? <p className="note">No effect in this direction passes the FDR check.</p> : <ul className="plays">{ps.map((p) => <PlayCard key={p.key} p={p} lim={lim} copySlot={copySlot} on={f.cluster === p.cluster} onPick={() => drill({ cluster: p.cluster })} />)}</ul>}
+      {ps.length === 0 ? <p className="note">No effect in this direction passes the FDR check.</p> : <ul className="plays">{ps.map((p) => <PlayCard key={p.key} p={p} lim={lim} copySlot={copySlot} best={p === best} on={f.cluster === p.cluster} onPick={() => drill({ cluster: p.cluster })} />)}</ul>}
     </div>
   );
-  const best = more.length ? more.reduce((a, b) => (b.pts > a.pts ? b : a)) : null;
   const so = best ? <>{((t) => t.charAt(0).toUpperCase() + t.slice(1))(best.title.split(": ").pop() ?? "")} lifts applied rate by <b>{fmtInt(best.pts)}</b> pts: do more of it.</> : <>Nothing flagged in this window.</>;
   return (
     <Card so={so} thin={!best} id="s-playbook" src="what_works · overlapping groups" title="Prompt playbook" meta={d.what_works_tested ? `${fmtInt(b.tested)} tested · ${fmtInt(b.pass)} pass FDR 10% · all sessions. Click a card to filter to its topic` : "all sessions"} span={12}>
@@ -131,7 +131,9 @@ function NoGain({ span }: { span: 5 | 12 }) {
   const bs = useMemo(() => promptBuckets(v.rows), [v.rows]), g = useMemo(() => noGain(v.rows), [v.rows]);
   const n = bs.reduce((a, b) => a + b.n, 0);
   if (n === 0) return null;
-  const so = !g ? <>Not enough sessions yet: {bs[2].n < bs[3].n + bs[4].n ? bs[2].n : bs[3].n + bs[4].n} of {MIN_N} needed.</>
+  // the comparison is 6-10 prompts against past 10: name whichever side is short
+  const midShort = bs[2].n < bs[3].n + bs[4].n;
+  const so = !g ? <>Not enough sessions yet: {midShort ? bs[2].n : bs[3].n + bs[4].n} of {MIN_N} needed {midShort ? "with 6-10 prompts" : "past 10 prompts"}.</>
     : g.over.rate! < g.mid.rate! && g.flat ? <>Past <b>10</b> prompts, applied rate falls to {fmtPct(g.over.rate ?? 0)}: start fresh.</>
     : g.flat ? <>Past <b>10</b> prompts, applied rate stays {fmtPct(g.over.rate ?? 0)}: longer does not help.</>
     : <>Past <b>10</b> prompts, applied rate rises to {fmtPct(g.over.rate ?? 0)}.</>;
@@ -140,7 +142,7 @@ function NoGain({ span }: { span: 5 | 12 }) {
   return (
     <Card so={so} thin={!g} id="s-nogain" src={`sessions.prompts \u00b7 n ${fmtInt(n)}`} title="Applied rate by session length" meta="change sessions (not explain), in view, 95% Wilson CI" span={span}>
       <div className="ng-plot">
-        <Cols label="Applied rate by prompts per session" height={150} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--accent)" : "var(--line-2)" }],
+        <Cols label="Applied rate by prompts per session" height={150} max={1} cols={bs.map((b) => ({ key: b.label, label: b.label, segs: [{ v: b.rate ?? 0, color: b.n >= MIN_N ? "var(--teal)" : "var(--line-2)" }],
           aria: b.n ? `${b.label} prompts: ${fmtPct(b.rate ?? 0)} applied, 95% CI ${fmtPct(b.lo)} to ${fmtPct(b.hi)}, n=${b.n}${b.n < MIN_N ? ", too few to read alone" : ""}` : `${b.label} prompts: no sessions` }))} />
         <div className="ng-ci" aria-hidden="true">
           <span className="ng-top">100%</span><span className="ng-mid">50%</span>

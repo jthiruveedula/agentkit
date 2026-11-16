@@ -8,7 +8,7 @@ import { golden, GOLD_MIN_N } from "../lib/econ";
 import { srcLabel } from "../lib/palette";
 import { hasWebGL, useRoving } from "../lib/hooks";
 import type { B3Cell } from "./Bars3D";
-import { RELIEF, useTheme } from "../lib/theme";
+import { RELIEF as pal } from "../lib/theme";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
 import { LineChart } from "./charts";
 import { CurveCard } from "./Curve";
@@ -83,7 +83,6 @@ const FMT: Record<M, (n: number) => string> = { sessions: fmtInt, prompts: fmtCo
 
 function CalGrid() {
   const { d, v, f, drill, apply, caps } = useStore();
-  const pal = RELIEF[useTheme()];
   const [want, setM] = useState<M>("sessions");
   const m: M = want === "cost" && !caps.hasCost ? "sessions" : want;
   const [want3, setThree] = useState(false);
@@ -161,13 +160,12 @@ function CalGrid() {
 
 function Calendar() {
   const { d } = useStore();
-  return d.range.end ? <CalGrid /> : <Card so="Nothing flagged in this window." thin src="calendar" title="Activity calendar" span={6}><Empty /></Card>;
+  return d.range.end ? <CalGrid /> : <Card so="Nothing flagged in this window." thin src="calendar" title="Activity calendar" span={6}>{null}</Card>;
 }
 
 function HourWeek() {
   const { d } = useStore();
-  const theme = useTheme(), pal = RELIEF[theme];
-  const grid = useMemo(() => { const g = Array.from({ length: 7 }, () => Array<number>(24).fill(0)); for (const h of d.hour_week) g[h.dow][h.hour] = h.prompts; return g; }, [d.hour_week]);
+    const grid = useMemo(() => { const g = Array.from({ length: 7 }, () => Array<number>(24).fill(0)); for (const h of d.hour_week) g[h.dow][h.hour] = h.prompts; return g; }, [d.hour_week]);
   const gold = useMemo(() => golden(d.hour_week), [d.hour_week]);   // null on exports without hour_week[].applied (schema 1.0)
   const [mode, setMode] = useState<"prompts" | "success">("prompts");
   const [view, setView] = useState<"heatmap" | "terrain" | "daypart">("heatmap");   // one rhythm home: the same hour_week data as a grid, a 3D terrain, or four dayparts
@@ -214,7 +212,7 @@ function HourWeek() {
             const n = gold.n[r][h], dv = gold.dev[r][h], up = dv !== null && dv >= 0, shade = gold.best.length > 0 && dv !== null;
             const t = `${slot({ dow: r, hour: h })}: ${x === null ? (n ? `not enough data, n=${n}` : "no sessions") : `${fmtPct(x)} applied, n=${n}`}`;
             return { c: h, r, v: x ?? 0, mix: shade ? Math.abs(dv as number) / Math.max(up ? gold.maxUp : gold.maxDown, 1e-9) : 0.3, tip: t, mark: gold.best.some((b) => b.dow === r && b.hour === h) };
-          })), `Applied rate by hour and weekday, bar height from zero. ${theme === "atlas" ? "Brick-red" : "Amber"} bars are above the rest after the multiple-test correction.`, rmax, fmtPct, gold.best.length > 0) : (
+          })), `Applied rate by hour and weekday, bar height from zero. Brick-red bars are above the rest after the multiple-test correction.`, rmax, fmtPct, gold.best.length > 0) : (
           <div className="hw" role="img" aria-label={`Applied rate by hour and weekday. ${gold.best.length ? `Above the rest after adjusting for ${gold.tested} hours tested: ${gold.best.map((x) => `${slot(x)} ${fmtPct(x.rate)}`).join(", ")}` : `No hour is clearly above the rest (${fmtPct(gold.base)} overall)`}`}>
             {gold.rate.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((x, h) => {
               const n = gold.n[r][h], top = gold.best.some((b) => b.dow === r && b.hour === h);
@@ -226,7 +224,7 @@ function HourWeek() {
             <span /><span className="hw-x" style={{ gridColumn: "2 / -1" }}><b>0h</b><b>6h</b><b>12h</b><b>18h</b><b>23h</b></span>
           </div>)}
           {gold.best.length > 0
-            ? <p className="ramp" aria-label={theme === "atlas" ? "Colour scale: sepia is below the rate of all other hours, ink blue is above" : "Colour scale: grey is below the rate of all other hours, blue is above"}><span className="meta">vs other hours</span><span>below</span><i className="div" aria-hidden="true" /><span>above</span></p>
+            ? <p className="ramp" aria-label={"Colour scale: sepia is below the rate of all other hours, teal is above"}><span className="meta">vs other hours</span><span>below</span><i className="div" aria-hidden="true" /><span>above</span></p>
             : <p className="ramp"><span className="meta">No hour clears the corrected bar, so every cell is neutral. Hatched = fewer than {GOLD_MIN_N} sessions.</span></p>}
           <p className="note">{gold.best.length ? <>Above all other hours even after adjusting for {gold.tested} hours tested (Bonferroni): {gold.best.map((x) => `${slot(x)} ${fmtPct(x.rate)} vs ${fmtPct(x.base)} for the rest (adjusted lower bound ${fmtPct(x.lb)}, n=${x.n})`).join("; ")}. Outlined on the grid.</> : <>No hour is clearly above the rest ({fmtPct(gold.base)} overall) once {gold.tested} hours tested are accounted for.</>} Applied rate is compared with all other hours; hatched = fewer than {GOLD_MIN_N} sessions. Descriptive: hour mix confounds with task mix. Ignores filters.</p>
           <DataTable caption="Applied rate by weekday and hour" head={["Weekday", ...Array.from({ length: 24 }, (_, h) => `${h}h`)]} rows={gold.rate.map((r, i) => [DOW[i], ...r.map((x) => (x === null ? "-" : fmtPct(x)))])} />

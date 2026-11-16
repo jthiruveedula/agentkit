@@ -53,20 +53,6 @@ function Body({ onData }: { onData: (d: DashboardData) => void }) {
   const [col, setCol] = useState(railCollapsed);
   const [menu, setMenu] = useState(false);
 
-  useEffect(() => {   // liquid-glass specular follows the mouse over a card (html.fx only; one rAF per move)
-    let raf = 0, e: PointerEvent | null = null;
-    const frame = () => {
-      raf = 0; const t = (e?.target as Element | null)?.closest?.<HTMLElement>(".card:not(.kcard), .kpi");   // the six-tile key numbers card stays still
-      if (!e || !t || !fxOn()) return;
-      const r = t.getBoundingClientRect();
-      t.style.setProperty("--mx", `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`);
-      t.style.setProperty("--my", `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`);
-    };
-    const move = (ev: PointerEvent) => { if (ev.pointerType !== "mouse" || !fxOn()) return; e = ev; if (!raf) raf = requestAnimationFrame(frame); };
-    document.addEventListener("pointermove", move, { passive: true });
-    return () => { document.removeEventListener("pointermove", move); cancelAnimationFrame(raf); };
-  }, []);
-
   // Rank on the date window only, so drilling never reshuffles the page.
   const wv = useMemo(() => views(d, { from: f.from, to: f.to }), [d, f.from, f.to]);
   const next = useNext();   // computed once here and shared with the Do-next card and the Brief through NextCtx

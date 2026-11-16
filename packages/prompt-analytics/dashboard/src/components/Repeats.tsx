@@ -5,7 +5,7 @@ import { cleanSlug, draftCommand, repeatCost, shownRepeats, uniqueSlugs } from "
 import { repeatSpend } from "../lib/insights";
 import { findSecrets, secretReason } from "../lib/secrets";
 import { toast } from "../lib/toast";
-import { Card, Segmented } from "./ui";
+import { Card, Empty, Segmented } from "./ui";
 import "./polish.css";
 
 const SHOW = 3;
@@ -69,7 +69,7 @@ export function Repeats() {
   return (
     <Card so={so} thin={!top} title="Repeated prompts" meta="ignores filters" span={12}
       actions={<><span className="chip">Whole export</span>{rows.length > 1 && <Segmented quiet label="Sort repeated prompts" value={sort} onChange={setSort} options={[{ id: "count", text: "Most typed" }, { id: "cost", text: "Most spend" }]} />}</>}>
-      {rows.length === 0 ? <p className="note">No prompt came up three or more times across sessions. Nothing to turn into a command yet.</p> : (
+      {rows.length === 0 ? <Empty>No prompt came up three or more times across sessions. Nothing to turn into a command yet.</Empty> : (
         <>
           <ul className="reps">{shown.map((x, i) => <Row key={x.r.cluster + x.r.exemplar} {...x} lead={i === 0} />)}</ul>
           {rows.length > SHOW && <button type="button" className="link rep-more" aria-expanded={all} onClick={() => setAll(!all)}>{all ? "Show fewer" : `Show ${rows.length - SHOW} more`}</button>}

@@ -64,7 +64,7 @@ export function Recommend() {
                   <span className={`tag ${r.tone}`}>{r.impact}</span>
                   <span className="go">
                     {sec && <button type="button" className="link" aria-label={`See ${sec.title}: evidence for ${r.action}`} onClick={() => ops.see(r)}>See {sec.title}</button>}
-                    {r.filter && n > 0 && <button type="button" className={i ? "btn" : "btn primary"} aria-label={`Open ${sess(n)} behind: ${r.action}`} onClick={() => ops.open(r)}>Open {sess(n)}</button>}
+                    {r.filter && n > 0 && <button type="button" className="btn" aria-label={`Open ${sess(n)} behind: ${r.action}`} onClick={() => ops.open(r)}>Open {sess(n)}</button>}
                   </span>
                   {r.why && <details><summary>Why this</summary><p>{r.why}</p></details>}
                 </li>

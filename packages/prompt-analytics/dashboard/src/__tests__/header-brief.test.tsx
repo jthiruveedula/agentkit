@@ -282,8 +282,4 @@ describe("brief honesty (H2) and empty actions (M7 / L11)", () => {
       act(() => root?.unmount()); el.remove();
     }
   });
-  it("the Weekly Wrapped live region is mounted even before it has news (L10)", () => {
-    mount("#/s-overview");
-    expect(el.querySelector('.brief .b-acts [role="status"]')).not.toBeNull();
-  });
 });

@@ -5,7 +5,6 @@ import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/f
 import { Card, Count, Empty, Segmented, W } from "./ui";
 import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
-import { WrappedButton } from "./Wrapped";
 import { Bullet, Gauge, sparkPath } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
@@ -21,7 +20,7 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
-import { alerts, forecast, topicBreaks, type Alert } from "../lib/watch";
+import { alerts, forecast, type Alert } from "../lib/watch";
 import "./hero.css";
 import "./story.css";
 
@@ -149,7 +148,7 @@ function Cost() {
   const wk = /^\d{4}-\d{2}-\d{2}$/.test(c.id.split(".").pop() ?? "") ? c.id.split(".").pop()! : "";
   const dp = `${c.delta >= 0 ? "+" : "-"}${fmtInt(Math.round(Math.abs(c.delta) * 100))}%`;
   return (
-    <W n={4} ic="cost" t="Cost / landed change" className="cost" cap={`usually ${usd(usual)}`} label={`${c.claim}, ${dp}`}>
+    <W n={4} ic="cost" t="Cost / change" className="cost" cap={`usually ${usd(usual)}`} label={`${c.claim}, ${dp}`}>
       <p className="w-v">{wk
         ? <button type="button" className="b-num w-n" onClick={() => apply({ from: wk, to: addDays(wk, 6) }, { list: true })} aria-label={`${usd(c.value)} per landed change, week of ${fmtDate(wk)}. Open that week's sessions`}><Count text={usd(c.value)} tick /></button>
         : <Count className="w-n" text={usd(c.value)} tick />}<span className={`chip${c.delta > 0 ? " bad" : ""}`}>{dp}</span></p>
@@ -237,7 +236,7 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
             })}
           </p>
         )}
-        <span className="b-acts"><WrappedButton /><CopySummary /></span>
+        <span className="b-acts"><CopySummary /></span>
       </div>
       <div className="strip">
         <W n={1} ic="gauge" t="Struggle score" className="lead"
@@ -272,7 +271,7 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
         </W>
         <Spark vals={tr.slice(6)} was={was} />
         <Cost />
-        <W n={5} ic="why" t={drv ? `Why: ${drv.key}` : "Why it matters"} className="why"
+        <W n={5} ic="why" t={drv ? "Why" : "Why it matters"} className="why"
           cap={drv && fix ? <button type="button" className="w-fix" title={`${fix.row.detail} (${fix.row.impact})`} onClick={() => toFix(fix.row.id)}
             aria-label={`Fix #${fix.n}: ${fix.row.action} (${fix.row.impact}). Go to this Do next row`}>Fix #{fix.n}: {fix.row.action}</button> : undefined}>
           {why ? <dl className="story"><div><dt className="sr-only">{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div></dl> : <span className="b-say">No single project or intent stands out.</span>}
@@ -346,12 +345,11 @@ function Alerts() {
   );
 }
 
-/** Month-end projection (labelled as one) with the numbers it is built from, plus topics whose weekly cost breaks from their trend. Each number opens its sessions. */
+/** Month-end projection (labelled as one) with the numbers it is built from. Each number opens its sessions. Topic cost flags live in Friction. */
 function Forecast({ all }: { all: SessionRow[] }) {
-  const { d, apply, clusterLabel } = useStore();
+  const { d, apply } = useStore();
   const { start, end } = d.range;
   const fc = useMemo(() => forecast(all, start, end), [all, start, end]);
-  const tb = useMemo(() => topicBreaks(all, start, end), [all, start, end]);
   if (!fc) return null;
   const month = () => apply({ from: fc.monthFrom, to: end }, { list: true });
   const row = (label: string, text: string, go: () => void, aria: string) => <tr key={label}><th scope="row">{label}</th><td><button type="button" className="link" onClick={go} aria-label={aria}>{text}</button></td></tr>;
@@ -370,17 +368,6 @@ function Forecast({ all }: { all: SessionRow[] }) {
         </table>
       </div>
       <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}</p>
-      {tb.length > 0 && (
-        <div className="tbl-wrap">
-          <table className="tbl">
-            <caption className="meta">Topics whose weekly cost broke from their trend (last 4 weeks vs the 8 before)</caption>
-            <thead><tr><th scope="col">Topic</th><th scope="col">Last 4 weeks, a week</th><th scope="col">Before, a week</th><th scope="col"><span className="sr-only">Sessions</span></th></tr></thead>
-            <tbody>{tb.map((t) => (
-              <tr key={t.cluster}><th scope="row">{clusterLabel(t.cluster)}</th><td>{fmtUSD(t.now)}</td><td>{fmtUSD(t.was)}</td>
-                <td><button type="button" className="link" onClick={() => apply({ cluster: t.cluster, from: addDays(end, -27), to: end }, { list: true })} aria-label={`${clusterLabel(t.cluster)}: ${fmtUSD(t.now)} a week, was ${fmtUSD(t.was)}. Open its sessions from the last 4 weeks`}>Open {fmtInt(t.sessions)}</button></td></tr>))}</tbody>
-          </table>
-        </div>
-      )}
     </Card>
   );
 }
@@ -408,7 +395,7 @@ export function Overview() {
     <section id="s-overview" className="sec" aria-labelledby="s-overview-h">
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
-        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /></div>}
+        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /></div>}
         <Alerts />
         <KeyNumbers bs={bs} setMetric={setMetric} all={all} />
         <Forecast all={all} />

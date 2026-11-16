@@ -29,7 +29,6 @@
 .kcard ul.kpis.k5 > li:last-child { grid-column: span 2; }
 @media (max-width: 699px) { .kcard ul.kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); padding: var(--s3); } .kcard ul.kpis.k5 > li:last-child { grid-column: span 2; } }
 .kcard ul.kpis > li { position: relative; container-type: inline-size; background: var(--sunk); border: 1px solid var(--line); border-radius: var(--r3); }
-html.glass .kcard ul.kpis > li { background: oklch(1 0 0 / 0.55); border-color: var(--rim); }   /* nested block on glass: flat, no blur */
 
 .kt { position: relative; display: flex; flex-direction: column; gap: var(--s1); min-height: 100%; min-width: 0; padding: var(--s3); overflow-wrap: anywhere; }   /* min-height, not height: a tile grows with its content, nothing is clipped */
 .kt .kpi-main { gap: 2px; }

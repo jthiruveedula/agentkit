@@ -617,7 +617,7 @@ g[data-hl] > .hit { fill: color-mix(in oklab, var(--accent) 14%, transparent); s
 /* 6c: scorecard cost cell: the price and its tag never overlap */
 .sc td .tag { margin-left: 6px; white-space: nowrap; vertical-align: middle; } .sc td { white-space: nowrap; }
 
-/* 3D bars (Bars3D.tsx): toolbar row, chart, hint line (nothing overlays the canvas). .btn.tog3 (0,3,0) outranks html.glass .btn (0,2,1): the pressed button stays accent, not white */
+/* 3D bars (Bars3D.tsx): toolbar row, chart, hint line (nothing overlays the canvas). */
 .btn.tog3[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.25); }
 .b3d { position: relative; }
 .b3d:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r1); }
@@ -696,9 +696,8 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .top-tools .seg button[aria-pressed="true"], .top-tools .btn[aria-expanded="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--line-2); }
 .top-tools .seg button:hover:not(:disabled):not([aria-pressed="true"]), .top-tools .btn:hover:not(:disabled):not([aria-expanded="true"]) { background: color-mix(in oklab, var(--surface) 60%, transparent); color: var(--ink); }
 .top-tools :focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.top-tools .fbtn, .top-tools .setbtn { position: relative; margin-left: 9px; }
-.top-tools .fbtn::before, .top-tools .setbtn::before { content: ""; position: absolute; left: -6px; top: 7px; bottom: 7px; width: 1px; background: var(--line-2); }   /* hairline between groups */
-.top-tools .setbtn { width: 30px; padding: 0; }
+.top-tools .fbtn { position: relative; margin-left: 9px; }
+.top-tools .fbtn::before { content: ""; position: absolute; left: -6px; top: 7px; bottom: 7px; width: 1px; background: var(--line-2); }   /* hairline between groups */
 .top-tools .kbd { min-width: 30px; padding: 0 var(--s2); font-size: 12px; }
 .kbd-ic { display: none; }
 .top-r3 { gap: var(--s1) var(--s3); }
@@ -707,7 +706,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 @media (pointer: coarse) {
   .top-tools { height: auto; }
   .top-tools .seg, .top-tools .seg button, .top-tools .btn { height: auto; min-height: 40px; }
-  .top-tools .setbtn, .top-tools .kbd { min-width: 40px; }
+  .top-tools .kbd { min-width: 40px; }
   .top-tools .kbd-ic { display: block; } .top-tools .kbd-k { display: none; }
   .top-meta .count, .eng-t { position: relative; }
   .top-meta .count::after, .eng-t::after { content: ""; position: absolute; inset: -11px -4px; }
@@ -752,7 +751,7 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 }
 @media (max-width: 380px) {
   .top-tools .seg button { padding: 0 6px; } .top-tools .fbtn { padding: 0 var(--s2); }
-  .top-tools .fbtn, .top-tools .setbtn { margin-left: 0; } .top-tools .fbtn::before, .top-tools .setbtn::before { display: none; }   /* every px goes to the controls */
+  .top-tools .fbtn { margin-left: 0; } .top-tools .fbtn::before { display: none; }   /* every px goes to the controls */
 }
 @media (max-width: 359px) {   /* 320: 30d / 90d / All fit with no scroll, even at 40px coarse targets; Custom moves into Filters, the Filters label goes to screen readers only */
   .top-tools .seg button:last-child { display: none; }
@@ -789,46 +788,6 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .grid > .mixc:not(.mixc + .mixc):not(:has(+ .mixc)) { grid-column: span 12; }
 @container pa (min-width: 601px) { .grid > .mixc:not(.mixc + .mixc):has(+ .mixc:not(:has(+ .mixc))), .grid > .mixc:not(.mixc + .mixc) + .mixc:not(:has(+ .mixc)) { grid-column: span 6; } }
 
-/* liquid glass: html.glass (lib/hooks.ts: a real browser and no reduced-transparency, more-contrast or forced-colors preference) on a browser with
-   backdrop-filter; otherwise the solid white cards above. Motion is separate: the pointer-following highlight (App.tsx), lifts, tilt and the glyph
-   draw stay under html.fx. --glass 0 (settings) is solid. Inside <main> only cards and the brief blur; nothing nested in them does. */
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  html.glass body { background: transparent; }
-  html.glass body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;   /* fixed, so cards slide over it; nothing darker than --wall-min, no image, no motion */
-    /* four soft blooms over a slate ramp, lightness 0.72 to 0.95: no dots, no repeating pattern */
-    background:
-      radial-gradient(60vw 62vh at 8% 0%, var(--wall-min), transparent 70%),
-      radial-gradient(46vw 50vh at 96% 12%, oklch(0.95 0.012 250), transparent 68%),
-      radial-gradient(50vw 44vh at 55% 48%, oklch(0.90 0.020 240 / 0.7), transparent 72%),
-      radial-gradient(70vw 60vh at 80% 104%, oklch(0.76 0.045 258), transparent 70%),
-      linear-gradient(180deg, oklch(0.86 0.022 258), oklch(0.82 0.028 260)); }
-  /* page text that sits on the wallpaper, not on a card: ink only (contrast.mjs: ink on --wall-min) */
-  html.glass :is(.sec-h .q, .why-tag, .why-tag .link, .why-tag b) { color: var(--ink); }
-  /* fill 1 - 0.25g to 1 - 0.34g, never below --gfloor (contrast.mjs: every text and mark token holds over white at --gfloor on --wall-min);
-     a static specular that follows the pointer only under html.fx */
-  html.glass :is(.grid > .card, .brief) { -webkit-backdrop-filter: blur(calc(24px * var(--glass))) saturate(calc(1 + 0.25 * var(--glass))); backdrop-filter: blur(calc(24px * var(--glass))) saturate(calc(1 + 0.25 * var(--glass)));
-    border-color: var(--rim);
-    box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.9), 0 0 0 0.5px oklch(0.3 0.04 264 / 0.14), 0 1px 2px oklch(0.3 0.04 264 / 0.1), 0 16px 32px -18px oklch(0.3 0.06 264 / 0.32);
-    background: radial-gradient(24rem 12rem at var(--mx, 25%) var(--my, -10%), oklch(1 0 0 / 0.35), transparent 55%), linear-gradient(160deg, oklch(1 0 0 / max(var(--gfloor), 1 - 0.25 * var(--glass))), oklch(1 0 0 / max(var(--gfloor), 1 - 0.34 * var(--glass)))); }
-  /* nested in a card (or a tile on the page): flat tint, rim, no blur, no outer shadow */
-  html.glass :is(.kpi, .mini, .play, .xs) { background: oklch(1 0 0 / 0.55); border-color: var(--rim); box-shadow: none; }
-  html.glass :is(.mini, .play)[data-on] { background: var(--accent-soft); }
-  html.glass :is(.kpi:hover, .play[data-on]) { border-color: var(--accent); }
-  /* controls and tables: dense, no blur. Popovers, menus, panels, tooltips and the source chip stay solid */
-  html.glass :is(.btn, .seg, select, input[type="date"], input[type="text"], input[type="search"]):not(:where(.top-tools *)) { background: oklch(1 0 0 / 0.72); }
-  html.glass .btn.primary { background: var(--accent); }   /* the dense fill above outranks .btn.primary: white label on a white box */
-  html.glass .tbl tbody tr:nth-child(even):not([data-sel]), html.glass .tbl thead th:not(:where(.sess *)) { background: oklch(1 0 0 / 0.72); }
-  /* rail and sticky header: denser (page content scrolls under them) */
-  html.glass .rail { background: linear-gradient(180deg, oklch(1 0 0 / max(var(--gfloor), 1 - 0.22 * var(--glass))), oklch(1 0 0 / max(var(--gfloor), 1 - 0.3 * var(--glass)))); -webkit-backdrop-filter: blur(calc(20px * var(--glass))) saturate(1.2); backdrop-filter: blur(calc(20px * var(--glass))) saturate(1.2); border-right-color: var(--rim); }
-  html.glass .top { background: oklch(1 0 0 / max(var(--gfloor), 1 - 0.22 * var(--glass))); border-bottom-color: oklch(0.3 0.04 264 / 0.1); -webkit-backdrop-filter: blur(calc(20px * var(--glass))) saturate(1.2); backdrop-filter: blur(calc(20px * var(--glass))) saturate(1.2); }
-  html.glass .top[data-fopen] .filters { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; }   /* inside the blurred header: solid, never a nested blur */
-  html.glass .side a[aria-current] { background: oklch(1 0 0 / 0.75); }
-  @media (max-width: 819px) { html.glass .rail { background: var(--surface); -webkit-backdrop-filter: none; backdrop-filter: none; } }
-  @media (max-width: 699px) {   /* phones: cards go flat 0.8 over the wallpaper; only the stuck toolbar and the bottom bar blur */
-    html.glass :is(.grid > .card, .brief) { -webkit-backdrop-filter: none; backdrop-filter: none; background: oklch(1 0 0 / max(0.8, 1 - 0.2 * var(--glass))); }
-    html.glass :is(.top-bar, .bar) { background: oklch(1 0 0 / max(0.78, 1 - 0.2 * var(--glass))); -webkit-backdrop-filter: blur(calc(22px * var(--glass))) saturate(1.4); backdrop-filter: blur(calc(22px * var(--glass))) saturate(1.4); }
-  }
-}
 @media (prefers-reduced-motion: no-preference) { html.fx .brand .glyph .g-orb { stroke-dasharray: 1; animation: pa-draw 900ms cubic-bezier(.2, .7, .2, 1) 120ms backwards; } }
 
 /* source chip: any .card[data-src] names its data on hover / focus (straddles the top border so it never covers the header controls) */
@@ -844,12 +803,10 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .b-top .b-acts .btn { height: 28px; min-height: 28px; padding: 0 var(--s2); border-color: transparent; background: none; color: var(--muted); font-size: 13px; }
 .b-top .b-acts .btn:hover:not(:disabled) { border-color: var(--line); background: var(--sunk); color: var(--ink); }
 .b-top .b-acts .btn[data-done] { color: var(--good-ink); }
-.b-top .b-acts .btn[data-due] { color: var(--accent); }
-@media (max-width: 359px) {   /* 320: Weekly Wrapped and Copy share one full-width row instead of each taking a line */
+@media (max-width: 359px) {   /* 320: Copy takes one full-width row */
   .b-top .b-acts { flex: 1 1 100%; flex-wrap: nowrap; margin-left: 0; }
   .b-top .b-acts .btn { flex: 1 1 0; min-width: 0; padding-inline: var(--s1); }
 }
-.b-top .b-acts .btn[data-due]::after { content: ""; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--accent); display: inline-block; vertical-align: middle; }   /* Weekly Wrapped is new this week */
 .brief { --tone: var(--line-2); --tone-ink: var(--muted); display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--s3) var(--s5); padding: var(--s4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--rw); }
 .brief[data-tone="bad"] { --tone: var(--bad); --tone-ink: var(--bad); } .brief[data-tone="good"] { --tone: var(--good); --tone-ink: var(--good-ink); }
 @container pa (max-width: 699px) { .brief { padding: var(--s3); } }
@@ -899,10 +856,3 @@ main { padding: var(--s3) var(--s5) var(--s6, 40px); container: pa / inline-size
 .drv small { display: block; font-size: 12px; color: var(--muted); }
 .drv li[data-tone="bad"] { --c: var(--bad); } .drv li[data-tone="good"] { --c: var(--good); } .drv li[data-tone="bad"] .n { color: var(--bad); } .drv li[data-tone="good"] .n { color: var(--good); }
 @media (max-width: 599px) { .drv li { grid-template-columns: minmax(0, 1fr); } .brief h3 { font-size: 20px; line-height: 26px; } .b-num { font-size: 48px; } }
-
-/* display settings popover (top bar) */
-.prefs { position: absolute; top: 100%; right: var(--s4); z-index: 35; width: 260px; max-width: calc(100vw - 32px); display: grid; gap: var(--s3); padding: var(--s3) var(--s4); background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r3); box-shadow: 0 12px 32px -12px oklch(0.3 0.03 262 / 0.3); }
-.prefs label > span { font-weight: 600; margin-bottom: var(--s1); }
-.prefs input[type="range"] { width: 100%; accent-color: var(--accent); }
-.prefs output { color: var(--muted); }
-.setbtn svg { display: block; }

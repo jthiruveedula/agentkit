@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useStore } from "../state";
 import { median, quantile } from "../lib/compare";
-import { fmtInt, fmtPct } from "../lib/format";
+import { fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { Card, DataTable, Empty, Section } from "./ui";
 import { srcLabel } from "../lib/palette";
 import { loopCurve, LOOP_MIN_N, stopRule } from "../lib/loops";
@@ -11,6 +11,8 @@ import { Repeats } from "./Repeats";
 import { CurveCard } from "./Curve";
 import { Dumb } from "./Time";
 import type { SessionRow } from "../data/types";
+import { addDays, applyFilter, openExposure } from "../lib/filter";
+import { topicBreaks } from "../lib/watch";
 import "./investigate.css";
 import "./polish.css";
 
@@ -41,7 +43,7 @@ function Signals() {
             <caption className="sr-only">Share of prompts with each friction signal, all tools and by tool</caption>
             <thead><tr><th scope="col">Signal</th>{cols.map((c) => <th key={c.key} scope="col" title={c.short ? c.label : undefined} aria-label={c.short ? c.label : undefined}>{c.short ?? c.label}</th>)}</tr></thead>
             <tbody>{SIGNALS.map((sg) => (
-              <tr key={sg.id}><th scope="row">{sg.text}</th>{cols.map((c) => { const x = c.get(sg.id); return <td key={c.key} style={{ "--v": x / max } as CSSProperties}>{fmtPct(x, 1)}</td>; })}</tr>
+              <tr key={sg.id}><th scope="row" data-top={sg.id === top?.sg.id ? "top signal" : undefined}>{sg.text}</th>{cols.map((c) => { const x = c.get(sg.id); return <td key={c.key} style={{ "--v": x / max } as CSSProperties}>{fmtPct(x, 1)}</td>; })}</tr>
             ))}</tbody>
           </table>
         </div>
@@ -63,7 +65,7 @@ function ByIntent() {
     <Card so={so} thin={!worst} src={`friction.by_intent \u00b7 n ${fmtInt(rows.reduce((a, x) => a + x.n, 0))}`} title="Retries by intent" meta={prior ? "before \u2192 now, mean retries per session" : "mean retries per session"} span={7} half>
       {rows.length === 0 ? <Empty /> : (
         <>
-          <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: <span title={`${fmtInt(x.n)} session${x.n === 1 ? "" : "s"}`}>{x.k}<small className="db-n">n={fmtInt(x.n)}</small></span>, name: x.k, a: x.a, b: x.b, fa: x.a === null ? "" : x.a.toFixed(1), fb: x.b.toFixed(1), bad: x.a !== null && Math.abs(x.b - x.a) >= 0.15 ? x.b > x.a : null }))} />
+          <Dumb median sort max={max} rows={rows.map((x) => ({ k: x.k, label: <span title={`${fmtInt(x.n)} session${x.n === 1 ? "" : "s"}`} data-top={x.k === worst?.k ? "top" : undefined}>{x.k}<small className="db-n">n={fmtInt(x.n)}</small></span>, name: x.k, a: x.a, b: x.b, fa: x.a === null ? "" : x.a.toFixed(1), fb: x.b.toFixed(1), bad: x.a !== null && Math.abs(x.b - x.a) >= 0.15 ? x.b > x.a : null }))} />
           {fr.length > 0 && <>
             <p className="note">Median session friction {median(fr).toFixed(2)}, p90 {quantile(fr, 0.9).toFixed(2)}, n={fmtInt(fr.length)}.</p>
             <button type="button" className="btn" onClick={() => { setView({ so: "friction-d", pg: 1 }); requestAnimationFrame(() => goto("s-sessions")); }}>Sort sessions by friction</button>
@@ -142,10 +144,34 @@ function LoopBreaker() {
   );
 }
 
+/** Topics whose weekly cost broke from their own trend (lib/watch topicBreaks): a hazard list, one stamped row per topic. Uses every date, like the
+ *  projection it used to sit under; not shown when no topic breaks trend. */
+function TopicFlags() {
+  const { d, f, apply, clusterLabel } = useStore();
+  const { start, end } = d.range;
+  const tb = useMemo(() => topicBreaks(applyFilter(d.sessions, { ...f, from: undefined, to: undefined }, openExposure(d)), start, end), [d, f, start, end]);
+  if (tb.length === 0) return null;
+  return (
+    <Card id="s-topicflags" title="Topics off their cost trend" meta="weekly priced cost, last 4 weeks vs the 8 before" src="cost_usd · priced only · by topic" span={12}
+      so={<><b>{fmtInt(tb.length)}</b> topic{tb.length === 1 ? "" : "s"} cost more a week than {tb.length === 1 ? "its" : "their"} trend: {clusterLabel(tb[0].cluster)} first.</>}>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <caption className="sr-only">Topics whose weekly cost broke from their trend (last 4 weeks vs the 8 before)</caption>
+          <thead><tr><th scope="col">Topic</th><th scope="col">Flag</th><th scope="col">Last 4 weeks, a week</th><th scope="col">Before, a week</th><th scope="col"><span className="sr-only">Sessions</span></th></tr></thead>
+          <tbody>{tb.map((t) => (
+            <tr key={t.cluster}><th scope="row">{clusterLabel(t.cluster)}</th><td><span className="tag">off trend</span></td><td>{fmtUSD(t.now)}</td><td>{fmtUSD(t.was)}</td>
+              <td><button type="button" className="link" onClick={() => apply({ cluster: t.cluster, from: addDays(end, -27), to: end }, { list: true })} aria-label={`${clusterLabel(t.cluster)}: ${fmtUSD(t.now)} a week, was ${fmtUSD(t.was)}. Open its sessions from the last 4 weeks`}>Open {fmtInt(t.sessions)}</button></td></tr>))}</tbody>
+        </table>
+      </div>
+      <p className="note">Flagged when a topic's last-4-week cost slope beats its earlier slope by more than a quarter of its earlier weekly mean, with 5 or more priced sessions lately. Needs 12 weeks of export.</p>
+    </Card>
+  );
+}
+
 export function Friction() {
   return (
     <Section id="s-friction" title="Friction" q="Where do you fight the tool?">
-      <Signals /><ByIntent /><LoopBreaker /><CurveCard id="friction.retry_cliff" /><Repeats />
+      <Signals /><ByIntent /><TopicFlags /><LoopBreaker /><CurveCard id="friction.retry_cliff" /><Repeats />
     </Section>
   );
 }

@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state";
 import { fmtCompact, fmtDate, fmtInt, fmtUSD } from "../lib/format";
 import { srcColor, srcLabel } from "../lib/palette";
 import { clampPage, pageCount, pageSlice, rangeText, SIZES, sizeLabel, DEFAULT_SIZE, parseSort, sortToken, type SortKey } from "../lib/paging";
 import type { SessionRow } from "../data/types";
-import { Card, Section } from "./ui";
+import { Card, Empty, Section } from "./ui";
 import { ExportMenu } from "./ExportMenu";
 import { SavedViews } from "./SavedViews";
 import { fileName, MIME, saveFile, serialize, type Fmt } from "../lib/export";
 import { toast } from "../lib/toast";
 import { struggled } from "../lib/filter";
+import { wrapped } from "../lib/wrapped";
+import { openWrapped } from "./Wrapped";
 
 export type { SortKey };
 const PAGE = 100;
@@ -36,7 +38,7 @@ export function SessionList({ rows, current }: { rows: SessionRow[]; current?: s
   const [shown, setShown] = useState(PAGE);
   useEffect(() => { setShown(PAGE); }, [f]);
   const sorted = sortRows(rows, "date", true);
-  if (rows.length === 0) return <p className="empty">No sessions match.</p>;
+  if (rows.length === 0) return <Empty>No sessions match.</Empty>;
   const more = sorted.length > shown && <div className="more"><button type="button" className="btn" onClick={() => setShown(shown + PAGE)}>Show {Math.min(PAGE, sorted.length - shown)} more</button></div>;
   return (
     <>
@@ -78,7 +80,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
   const measure = () => { const e = wrap.current; if (e) setMore(e.scrollWidth - e.scrollLeft - e.clientWidth > 2); };   // right-edge fade only while more columns sit off-screen
   useEffect(() => { measure(); window.addEventListener("resize", measure); return () => window.removeEventListener("resize", measure); });
   const go = (n: number) => { setView({ pg: n > 1 ? n : undefined }); setSaid(`Page ${n} of ${last}, ${rangeText(sorted.length, n, size)}`); };
-  if (rows.length === 0) return <p className="empty">No sessions match.</p>;
+  if (rows.length === 0) return <Empty>No sessions match.</Empty>;
   return (
     <>
       <div className="tbl-wrap" ref={wrap} data-more={more || undefined} onScroll={measure}>
@@ -131,15 +133,15 @@ export function useExporter() {
 }
 
 export function Sessions() {
-  const { v, f, set } = useStore();
-  const exp = useExporter();
+  const { d, v, f, set } = useStore();
+  const exp = useExporter(), wr = useMemo(() => wrapped(d) !== null, [d]);
   return (
     <Section id="s-sessions" title="Sessions" q="Which sessions are behind these numbers?">
-      <Card so={v.rows.length ? <><b>{fmtInt(v.rows.length)}</b> sessions in view, {Math.round((v.rows.filter((r) => r.applied).length / v.rows.length) * 100)}% resolved.</> : "Nothing flagged in this window."} thin={!v.rows.length} title="All sessions in view" meta={`${fmtInt(v.rows.length)} sessions, click one for detail`} span={12}
-        actions={<><SavedViews /><ExportMenu count={v.rows.length} onPick={exp} /></>}>
+      <Card so={v.rows.length ? <><b>{fmtInt(v.rows.length)}</b> sessions in view, {Math.round((v.rows.filter((r) => r.applied).length / v.rows.length) * 100)}% applied.</> : "No sessions in view."} thin={!v.rows.length} title="All sessions in view" meta={`${fmtInt(v.rows.length)} sessions, click one for detail`} span={12}
+        actions={<><SavedViews /><ExportMenu count={v.rows.length} onPick={exp} onWrapped={wr ? openWrapped : undefined} /></>}>
         {!v.legacy && <label className="field s-search"><span>Search titles</span>
           <input type="search" value={f.q ?? ""} placeholder="Type to filter sessions by title" autoComplete="off" onChange={(e) => set({ q: e.target.value || undefined })} /></label>}
-        {v.legacy ? <p className="empty">This export has no per-session rows.</p> : <SessionTable rows={v.rows} />}
+        {v.legacy ? <Empty>This export has no per-session rows.</Empty> : <SessionTable rows={v.rows} />}
       </Card>
     </Section>
   );

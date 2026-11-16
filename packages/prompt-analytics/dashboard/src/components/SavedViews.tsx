@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useStore } from "../state";
 import { addView, loadViews, removeView, storeViews, viewSummary, type SavedView } from "../lib/palette-actions";
 import { toast } from "../lib/toast";
+import { Empty } from "./ui";
 
 /** Visible twin of the palette's saved-view actions: apply, delete, and save the current filters, range and section. */
 
@@ -14,7 +15,7 @@ export function SavedViews() {
     <details className="menu-wrap sv" ref={box} onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); if (box.current) box.current.open = false; (box.current?.querySelector("summary") as HTMLElement | null)?.focus(); } }}>
       <summary className="btn">Saved views{views.length > 0 && <b className="badge">{views.length}</b>} ▾</summary>
       <div className="menu sv-box">
-        {views.length === 0 && <p className="menu-n sv-none">No saved views yet.</p>}
+        {views.length === 0 && <Empty>No saved views yet.</Empty>}
         {views.map((v) => (
           <div key={v.name} className="sv-row">
             <button type="button" onClick={() => { if (box.current) box.current.open = false; go(v.hash); }}><b>{v.name}</b><small>{viewSummary(v.hash)}</small></button>

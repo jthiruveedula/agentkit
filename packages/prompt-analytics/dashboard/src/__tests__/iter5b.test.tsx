@@ -133,9 +133,10 @@ describe("weekly wrapped", () => {
     const crit = normalize(raw);
     expect(hasCritical(crit)).toBe(true); expect(autoShow(crit, now, mem())).toBe(true);   // chip only, never a dialog
   });
-  it("dialog is modal, closes on Escape and the Overview button opens it", () => {
-    mount(noCritical(raw), "#/s-overview");
-    const btn = [...el.querySelectorAll("button")].find((b) => b.textContent === "Weekly Wrapped");
+  it("dialog is modal, closes on Escape and the Sessions Export menu opens it", () => {
+    mount(noCritical(raw), "#/s-sessions");
+    act(() => { [...el.querySelectorAll<HTMLButtonElement>("#s-sessions .btn")].find((b) => b.textContent?.startsWith("Export"))!.click(); });
+    const btn = [...el.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].find((b) => b.textContent?.startsWith("Weekly Wrapped"));
     expect(btn).toBeTruthy();
     act(() => { localStorage.setItem("pa.wrapped.week", isoWeek(new Date())); btn!.click(); });
     const dlg = document.querySelector("[role=dialog][aria-modal=true].wrap");
