@@ -2,7 +2,8 @@
 // and the Usage mix row (model donut, tokens and spend by tool, model tier mix). Plain SVG and CSS, no chart library.
 import { Fragment, useMemo, useState, type ReactNode } from "react";
 import { useStore } from "../state";
-import { bucketSeries, costPerApplied, dayDiff, isWide, METRICS, tokensPerApplied, wilson } from "../lib/compare";
+import { bucketSeries, costPerApplied, dayDiff, delta, isWide, METRICS, MIN_PRIOR_N, tokensPerApplied, wilson } from "../lib/compare";
+import { costPerOutcome } from "../lib/watch";
 import { fmtCompact, fmtInt, fmtPct, fmtRange, fmtUSD } from "../lib/format";
 import { Count, DataTable, Segmented } from "./ui";
 import { Bullet, Donut, WeekCols } from "./charts";
@@ -66,13 +67,19 @@ const KINDS = [["pii", "PII"], ["secret", "Secrets"], ["phi", "PHI"]] as const;
 
 interface Tile { id: string; label: string; value: string; small?: string; delta?: ReactNode; sub?: string; /** `sub` as shown, when it needs markup (title and aria keep the string) */ subEl?: ReactNode; hint?: string; low?: boolean; vis?: ReactNode; note?: ReactNode; primary?: boolean; go: () => void; open: () => void }
 
-/** Key numbers: Sessions, Total spend, Tokens, Cost per applied change, Applied rate, Exposed. Deltas compare on the brief's basis. */
+/** Key numbers: Sessions, Total spend, Cost per successful outcome, Cost per applied change, Applied rate, Exposed. Deltas compare on the brief's basis. */
 export function KeyNumbers({ bs, setMetric, all: undated }: { bs: Basis; setMetric: (m: Metric) => void; /** the selection without its date window: feeds the 12-week bars */ all: SessionRow[] }) {
   const { d, f, v, prior, win, exposed, goto, caps, apply, openList, openSession, setView, secs } = useStore();
   const t = v.totals;
   const open = useMemo(() => openExposure(d), [d]);
   const dl = useMemo(() => kpiDeltas(bs, win, open), [bs, win, open]);
-  const tm = useMemo(() => tierMix(v.rows), [v.rows]);
+  // cost per outcome changes on the same basis as cost per applied: shown only where that change is (comparable pricing) and both sides have enough priced outcomes
+  const dpo = useMemo<KDelta | undefined>(() => {
+    const a = costPerOutcome(bs.cur), b = bs.base ? costPerOutcome(bs.base) : null;
+    if (!dl.cpa || !b || a.value === null || b.value === null || a.outcomes < MIN_PRIOR_N || b.outcomes < MIN_PRIOR_N) return undefined;
+    const x = delta(a.value, b.value, b.outcomes);
+    return x ? { pct: x.kind === "new" ? "new" : x.pct } : undefined;
+  }, [bs, dl.cpa]);
   const sorted = (so: string, list: () => void) => () => { list(); setView({ so }); };
   const applied = () => apply({ applied: true }, { list: true });
   const cut = bs.mode === "split" ? bs.cut : undefined;
@@ -137,15 +144,11 @@ export function KeyNumbers({ bs, setMetric, all: undated }: { bs: Basis; setMetr
         t.unpriced > 0 && "A floor, not a total: unpriced sessions add nothing"),
       go: () => { setMetric("spend"); goto("s-trend"); }, open: sorted("cost-d", openList) });
   }
-  tiles.push({ id: "tokens", label: "Tokens", value: tok.counted ? fmtCompact(t.tokens) : "–", small: tok.perSession === null ? undefined : `${fmtCompact(tok.perSession)}/session`, delta: <KD x={dl.tokens} sense="volume" vs={vs} />,
-    vis: total(tm.tokens) > 0 ? (
-      <div className="kt-tier">
-        <TierBar vals={tm.tokens} />
-        <span className="tkey">{tm.tokens.map((x, i) => (x > 0 ? <span key={i}><i className={`tb-${i}`} aria-hidden="true" />{TIER_KEY[i]} <b>{fmtPct(x / total(tm.tokens))}</b></span> : null))}</span>
-      </div>
-    ) : undefined,
-    sub: !tok.counted ? "no token data" : tok.counted < t.sessions ? `${fmtInt(tok.counted)} of ${fmtInt(t.sessions)} sessions report tokens` : undefined,
-    go: () => goto(secs.has("s-models") ? "s-models" : "s-tools"), open: sorted("tokens-d", openList) });
+  const cpo = costPerOutcome(v.rows), outAll = v.rows.filter((r) => r.reached_stage >= 6).length, cpoLow = cpo.value !== null && cpo.outcomes < MIN_N;
+  tiles.push({ id: "cpo", label: "Cost per successful outcome", value: cpo.value === null ? "–" : fmtUSD(cpo.value), delta: <KD x={dpo} sense="lower" vs={vs} />,
+    sub: !caps.hasCost ? "no prices recorded" : cpo.value === null ? "no priced session reached the outcome stage" : cpoLow ? `Few sessions: ${fmtInt(cpo.outcomes)} priced of ${fmtInt(outAll)} that reached outcome`
+      : `${fmtInt(cpo.outcomes)} priced of ${fmtInt(outAll)} sessions that reached outcome`, low: cpoLow,
+    go: () => goto("s-funnel"), open: sorted("cost-d", () => apply({ stage: 6 }, { list: true })) });
   tiles.push(caps.hasCost
     ? { id: "cpa", primary: true, label: "Cost per applied change", value: cpa.value === null ? "–" : fmtUSD(cpa.value), delta: <KD x={dl.cpa} sense="lower" vs={vs} mean={!!dl.cpa?.med} />,
         sub: cpa.value === null ? "no priced session applied a change" : cpaLow ? `Few sessions: ${fmtInt(cpa.pricedApplied)} priced of ${fmtInt(cpa.applied)} applied`
@@ -219,7 +222,7 @@ export function KeyNumbers({ bs, setMetric, all: undated }: { bs: Basis; setMetr
             {/* the tile is not a button: its main button stretches over it (::after), so the outlier buttons sit in flow without nesting */}
             <div className="kt" data-kpi={c.id} data-primary={c.primary || undefined}>
               <button type="button" className="kpi-main" onClick={c.open} aria-label={`${c.label}: ${c.value === "–" ? c.sub ?? "no data" : c.value}${c.small ? `, ${c.small}` : ""}. Open the sessions behind it`}>
-                <span className="lbl"><i className="ti" aria-hidden="true"><Icon n={c.id === "tpa" ? "cpa" : c.id} /></i>{c.label}</span>
+                <span className="lbl"><i className="ti" aria-hidden="true"><Icon n={c.id === "tpa" || c.id === "cpo" ? "cpa" : c.id} /></i>{c.label}</span>
                 <span className="kv"><Count className="val" text={c.value} />{c.small && <small>{c.small}</small>}</span>
               </button>
               {c.delta}

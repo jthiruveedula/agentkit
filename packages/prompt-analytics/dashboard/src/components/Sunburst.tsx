@@ -227,7 +227,7 @@ export function Sunburst(p: Props) {
         <g className="sb-calls" aria-hidden="true">
           {calls.map((c) => {
             const { lx } = c, dir = c.right ? 1 : -1;
-            return <g key={c.id} className="sb-call" onClick={() => p.onHot(c.id)}>
+            return <g key={c.id} className="sb-call" data-rank={c.x.rank} onClick={() => p.onHot(c.id)}>
               <rect className="sb-hit" x={lx + dir * 9 - 12} y={c.ey - 12} width={24} height={24} />
               <polyline points={`${c.ax.toFixed(1)},${c.ay.toFixed(1)} ${c.ex.toFixed(1)},${c.ey.toFixed(1)} ${(lx - dir * 4).toFixed(1)},${c.ey.toFixed(1)}`} strokeDasharray={c.exact ? undefined : "3 3"} />
               <circle cx={c.ax} cy={c.ay} r={3} />

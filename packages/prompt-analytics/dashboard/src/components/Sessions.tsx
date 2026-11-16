@@ -9,6 +9,7 @@ import { ExportMenu } from "./ExportMenu";
 import { SavedViews } from "./SavedViews";
 import { fileName, MIME, saveFile, serialize, type Fmt } from "../lib/export";
 import { toast } from "../lib/toast";
+import { struggled } from "../lib/filter";
 
 export type { SortKey };
 const PAGE = 100;
@@ -42,10 +43,10 @@ export function SessionList({ rows, current }: { rows: SessionRow[]; current?: s
         <ul className="srows">
           {sorted.slice(0, shown).map((r) => (
             <li key={r.id}>
-              <button type="button" className="srow" aria-current={sel === r.id || current === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
+              <button type="button" className="srow" data-sg={struggled(r) || undefined} aria-current={sel === r.id || current === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
                 <span className="l1"><time dateTime={r.date}>{fmtDate(r.date)}</time><span><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</span><span className="tag">{r.intent}</span></span>
                 <span className={`ti ${r.title ? "" : "none"}`}>{r.title || "Untitled session"}</span>
-                <span className="l3"><span>{fmtInt(r.prompts)} prompts</span><span>{r.cost_usd === null ? "not priced" : fmtUSD(r.cost_usd)}</span><span>{r.applied ? "applied" : "not applied"}</span><span>friction {r.friction.toFixed(2)}</span></span>
+                <span className="l3"><span>{fmtInt(r.prompts)} prompts</span><span>{r.cost_usd === null ? "not priced" : fmtUSD(r.cost_usd)}</span><span data-out={r.applied ? "applied" : undefined}>{r.applied ? "applied" : "not applied"}</span><span>friction {r.friction.toFixed(2)}</span></span>
               </button>
             </li>
           ))}
@@ -87,7 +88,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
               {c.k ? <button type="button" className="th-b" onClick={() => setSort(c.k as SortKey)}>{c.text}{sort.k === c.k ? (sort.desc ? " ▾" : " ▴") : ""}</button> : c.text}
             </th>))}</tr></thead>
           <tbody>{pageSlice(sorted, pg, size).map((r) => (
-            <tr key={r.id} data-sel={sel === r.id || undefined} onClick={() => openSession(r.id)}>
+            <tr key={r.id} data-sel={sel === r.id || undefined} data-sg={struggled(r) || undefined} onClick={() => openSession(r.id)}>
               <td><time dateTime={r.date}>{fmtDate(r.date)}</time></td>
               {caps.multiTool && <td className="hide-s"><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</td>}
               <td className="hide-s">{r.project || "-"}</td><td className="hide-s"><span className="tag">{r.intent}</span></td>
@@ -95,7 +96,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
                 {caps.multiTool && <span className="ti-tool"><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</span>}</th>
               <td className="cx num">{fmtInt(r.prompts)}</td><td className="hide-s num">{fmtCompact(r.tokens)}</td><td className="hide-s num">{fmtInt(r.loops)}</td>
               {priced && <td className="num">{r.cost_usd === null ? <span className="tag">not priced</span> : fmtUSD(r.cost_usd)}</td>}
-              <td className="cx num" data-hi={r.friction > 0.5 || undefined}>{r.friction > 0.5 && <i className="fbar" aria-hidden="true" style={{ "--w": r.friction } as React.CSSProperties} />}{r.friction.toFixed(2)}</td><td className="hide-s">{r.applied ? "yes" : "no"}</td>
+              <td className="cx num" data-hi={r.friction > 0.5 || undefined}>{r.friction > 0.5 && <i className="fbar" aria-hidden="true" style={{ "--w": r.friction } as React.CSSProperties} />}{r.friction.toFixed(2)}</td><td className="hide-s" data-out={r.applied ? "applied" : undefined}>{r.applied ? "yes" : "no"}</td>
             </tr>))}</tbody>
         </table>
       </div>

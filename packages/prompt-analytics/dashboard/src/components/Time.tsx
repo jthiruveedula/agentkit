@@ -8,6 +8,7 @@ import { golden, GOLD_MIN_N } from "../lib/econ";
 import { srcLabel } from "../lib/palette";
 import { hasWebGL, useRoving } from "../lib/hooks";
 import type { B3Cell } from "./Bars3D";
+import { RELIEF, useTheme } from "../lib/theme";
 import { Card, DataTable, Empty, Section, Segmented } from "./ui";
 import { LineChart } from "./charts";
 import { CurveCard } from "./Curve";
@@ -71,6 +72,7 @@ const Bars3D = lazy(() => import("./Bars3D"));
 type M = "sessions" | "prompts" | "cost";
 const WEEKS = 27;
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const PARTS = [["Night", "0–5h", 0, 6], ["Morning", "6–11h", 6, 12], ["Afternoon", "12–17h", 12, 18], ["Evening", "18–23h", 18, 24]] as const;
 /** false under 481px: 3D is off at phone width and both cards fall back to their 2D grids */
 export function useWide() {
   const [wide, setWide] = useState(true);
@@ -81,6 +83,7 @@ const FMT: Record<M, (n: number) => string> = { sessions: fmtInt, prompts: fmtCo
 
 function CalGrid() {
   const { d, v, f, drill, apply, caps } = useStore();
+  const pal = RELIEF[useTheme()];
   const [want, setM] = useState<M>("sessions");
   const m: M = want === "cost" && !caps.hasCost ? "sessions" : want;
   const [want3, setThree] = useState(false);
@@ -126,7 +129,7 @@ function CalGrid() {
           {want3 && wide3 && !gl && <p className="meta">3D needs WebGL; showing 2D</p>}
           {three ? (
             <Suspense fallback={<div className="b3d" style={{ height: 300 }}><p className="meta">Loading 3D view</p></div>}>
-              <Bars3D cells={cells3} cols={cols3} rows={7} colLabel={monthLabel} rowLabels={dowLabels} max={peak} zLabel={FMT[m]} hMin={260} hMax={360} ratio={cols3 <= 14 ? 2 : 2.5} frame={frame3} chips={dated ? [{ color: "#c8cbd0", text: "outside the window" }] : []}
+              <Bars3D cells={cells3} cols={cols3} rows={7} colLabel={monthLabel} rowLabels={dowLabels} max={peak} zLabel={FMT[m]} hMin={260} hMax={360} ratio={cols3 <= 14 ? 2 : 2.5} frame={frame3} chips={dated ? [{ color: pal.off[1][1], text: "outside the window" }] : []}
                 summary={`Daily ${m}, ${cols3 < WEEKS ? `${cols3} weeks around the selected dates` : `last ${WEEKS} weeks`}, bar height from zero.${busy && busy.sessions > 0 ? ` Busiest day ${fmtDate(busy.date)}, ${busy.sessions} sessions.` : ""}`}
                 onPick={(i, shift) => pick(live3[i].date, shift)} />
             </Suspense>
@@ -163,12 +166,19 @@ function Calendar() {
 
 function HourWeek() {
   const { d } = useStore();
+  const theme = useTheme(), pal = RELIEF[theme];
   const grid = useMemo(() => { const g = Array.from({ length: 7 }, () => Array<number>(24).fill(0)); for (const h of d.hour_week) g[h.dow][h.hour] = h.prompts; return g; }, [d.hour_week]);
   const gold = useMemo(() => golden(d.hour_week), [d.hour_week]);   // null on exports without hour_week[].applied (schema 1.0)
   const [mode, setMode] = useState<"prompts" | "success">("prompts");
-  const [view, setView] = useState<"2d" | "3d">("2d");
+  const [view, setView] = useState<"heatmap" | "terrain" | "daypart">("heatmap");   // one rhythm home: the same hour_week data as a grid, a 3D terrain, or four dayparts
   const wide = useWide(), gl = useMemo(hasWebGL, []);
-  const three = view === "3d" && wide && gl;
+  const three = view === "terrain" && wide && gl;
+  const parts = useMemo(() => PARTS.map(([name, span, a, b]) => {
+    const hs = d.hour_week.filter((h) => h.hour >= a && h.hour < b), has = hs.some((h) => h.sessions != null);
+    const sessions = hs.reduce((x, h) => x + (h.sessions ?? 0), 0), applied = hs.reduce((x, h) => x + (h.applied ?? 0), 0);
+    return { name, span, prompts: hs.reduce((x, h) => x + h.prompts, 0), sessions: has ? sessions : null, rate: has && sessions > 0 ? applied / sessions : null };
+  }), [d.hour_week]);
+  const allPrompts = parts.reduce((x, q) => x + q.prompts, 0);
   const succ = mode === "success" && gold !== null;
   const peak = Math.max(...grid.flat(), 1);
   const best = d.hour_week.reduce((a, b) => (b.prompts > a.prompts ? b : a), { dow: 0, hour: 0, prompts: 0 });
@@ -177,22 +187,34 @@ function HourWeek() {
   const hourTick = (h: number) => (h % 6 === 0 ? `${h}h` : "");   // no 23h: the last column sits under the height ticks at the front corner
   const terrain = (cells: B3Cell[], summary: string, max: number, zLabel: (v: number) => string, best = false) => (
     <Suspense fallback={<div className="b3d"><p className="meta">Loading 3D view</p></div>}>
-      <Bars3D cells={cells} cols={24} rows={7} rowLabels={DOW} colLabel={hourTick} summary={summary} max={max} zLabel={zLabel} hMin={220} hMax={320} ratio={2} deep={1.4} chips={best ? [{ color: "#f5af20", text: "best hours" }] : []} />
+      <Bars3D cells={cells} cols={24} rows={7} rowLabels={DOW} colLabel={hourTick} summary={summary} max={max} zLabel={zLabel} hMin={220} hMax={320} ratio={2} deep={1.4} chips={best ? [{ color: pal.mark, text: "best hours" }] : []} />
     </Suspense>
   );
   const so = best.prompts > 0 ? <>Most prompts land {DOW[best.dow]} {best.hour}:00: <b>{fmtInt(best.prompts)}</b>.</> : "Nothing flagged in this window.";
   return (
     <Card so={so} thin={best.prompts <= 0} src="hour_week · all sessions" id="s-golden" title={succ ? "Hours with the highest applied rate" : "Hour by weekday"} meta={<><span className="tag">all sessions</span> {succ ? "applied rate by hour" : "prompts per hour"}</>} span={6}
-      actions={<>{gold && <Segmented quiet label="Heatmap shows" value={mode} onChange={setMode} options={[{ id: "prompts", text: "Prompts" }, { id: "success", text: "Success" }]} />}
-        <span className="tog3d"><Segmented quiet label="Heatmap view" value={view} onChange={setView} options={[{ id: "2d", text: "2D" }, { id: "3d", text: "3D" }]} /></span></>}>
-      {d.hour_week.length === 0 ? <Empty /> : succ ? (
+      actions={<>{gold && view !== "daypart" && <Segmented quiet label="Heatmap shows" value={mode} onChange={setMode} options={[{ id: "prompts", text: "Prompts" }, { id: "success", text: "Success" }]} />}
+        <Segmented quiet label="Rhythm view" value={view} onChange={setView} options={[{ id: "heatmap", text: "Heatmap" }, { id: "terrain", text: "Terrain" }, { id: "daypart", text: "Daypart" }]} /></>}>
+      {d.hour_week.length === 0 ? <Empty /> : view === "daypart" ? (
         <>
-          {view === "3d" && wide && !gl && <p className="meta">3D needs WebGL; showing 2D</p>}
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <caption className="sr-only">Prompts, sessions and applied rate by part of the day, from the hour by weekday data</caption>
+              <thead><tr><th scope="col">Part of day</th><th scope="col">Prompts</th><th scope="col">Share</th><th scope="col">Sessions</th><th scope="col">Applied</th></tr></thead>
+              <tbody>{parts.map((q) => (
+                <tr key={q.name}><th scope="row">{q.name} <small className="n">{q.span}</small></th><td>{fmtInt(q.prompts)}</td><td>{allPrompts ? fmtPct(q.prompts / allPrompts) : "–"}</td><td>{q.sessions === null ? "–" : fmtInt(q.sessions)}</td><td>{q.rate === null ? "–" : fmtPct(q.rate)}</td></tr>))}</tbody>
+            </table>
+          </div>
+          <p className="note">Hours grouped into four parts of the day from the same data as the heatmap. Applied = share of sessions started in that part that applied a change. Ignores filters.</p>
+        </>
+      ) : succ ? (
+        <>
+          {view === "terrain" && !three && <p className="meta">The terrain needs WebGL and a wider screen; showing the heatmap</p>}
           {three ? terrain(gold.rate.flatMap((row, r) => row.map((x, h): B3Cell => {
             const n = gold.n[r][h], dv = gold.dev[r][h], up = dv !== null && dv >= 0, shade = gold.best.length > 0 && dv !== null;
             const t = `${slot({ dow: r, hour: h })}: ${x === null ? (n ? `not enough data, n=${n}` : "no sessions") : `${fmtPct(x)} applied, n=${n}`}`;
             return { c: h, r, v: x ?? 0, mix: shade ? Math.abs(dv as number) / Math.max(up ? gold.maxUp : gold.maxDown, 1e-9) : 0.3, tip: t, mark: gold.best.some((b) => b.dow === r && b.hour === h) };
-          })), `Applied rate by hour and weekday, bar height from zero. Amber bars are above the rest after the multiple-test correction.`, rmax, fmtPct, gold.best.length > 0) : (
+          })), `Applied rate by hour and weekday, bar height from zero. ${theme === "atlas" ? "Brick-red" : "Amber"} bars are above the rest after the multiple-test correction.`, rmax, fmtPct, gold.best.length > 0) : (
           <div className="hw" role="img" aria-label={`Applied rate by hour and weekday. ${gold.best.length ? `Above the rest after adjusting for ${gold.tested} hours tested: ${gold.best.map((x) => `${slot(x)} ${fmtPct(x.rate)}`).join(", ")}` : `No hour is clearly above the rest (${fmtPct(gold.base)} overall)`}`}>
             {gold.rate.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((x, h) => {
               const n = gold.n[r][h], top = gold.best.some((b) => b.dow === r && b.hour === h);
@@ -204,13 +226,14 @@ function HourWeek() {
             <span /><span className="hw-x" style={{ gridColumn: "2 / -1" }}><b>0h</b><b>6h</b><b>12h</b><b>18h</b><b>23h</b></span>
           </div>)}
           {gold.best.length > 0
-            ? <p className="ramp" aria-label="Colour scale: grey is below the rate of all other hours, blue is above"><span className="meta">vs other hours</span><span>below</span><i className="div" aria-hidden="true" /><span>above</span></p>
+            ? <p className="ramp" aria-label={theme === "atlas" ? "Colour scale: sepia is below the rate of all other hours, ink blue is above" : "Colour scale: grey is below the rate of all other hours, blue is above"}><span className="meta">vs other hours</span><span>below</span><i className="div" aria-hidden="true" /><span>above</span></p>
             : <p className="ramp"><span className="meta">No hour clears the corrected bar, so every cell is neutral. Hatched = fewer than {GOLD_MIN_N} sessions.</span></p>}
           <p className="note">{gold.best.length ? <>Above all other hours even after adjusting for {gold.tested} hours tested (Bonferroni): {gold.best.map((x) => `${slot(x)} ${fmtPct(x.rate)} vs ${fmtPct(x.base)} for the rest (adjusted lower bound ${fmtPct(x.lb)}, n=${x.n})`).join("; ")}. Outlined on the grid.</> : <>No hour is clearly above the rest ({fmtPct(gold.base)} overall) once {gold.tested} hours tested are accounted for.</>} Applied rate is compared with all other hours; hatched = fewer than {GOLD_MIN_N} sessions. Descriptive: hour mix confounds with task mix. Ignores filters.</p>
           <DataTable caption="Applied rate by weekday and hour" head={["Weekday", ...Array.from({ length: 24 }, (_, h) => `${h}h`)]} rows={gold.rate.map((r, i) => [DOW[i], ...r.map((x) => (x === null ? "-" : fmtPct(x)))])} />
         </>
       ) : (
         <>
+          {view === "terrain" && !three && <p className="meta">The terrain needs WebGL and a wider screen; showing the heatmap</p>}
           {three ? terrain(grid.flatMap((row, r) => row.map((p, h): B3Cell => ({ c: h, r, v: p, mix: p / peak, tip: `${DOW[r]} ${h}:00, ${fmtInt(p)} prompts` }))), `Prompts by hour and weekday, bar height from zero. Busiest: ${DOW[best.dow]} ${best.hour}:00, ${best.prompts} prompts.`, peak, fmtCompact) : (
           <div className="hw" role="img" aria-label={`Prompts by hour and weekday. Busiest: ${DOW[best.dow]} ${best.hour}:00, ${best.prompts} prompts`}>
             {grid.map((row, r) => <div key={r} style={{ display: "contents" }}><span className="hw-l">{DOW[r]}</span>{row.map((p, h) => <i key={h} className="cell" data-zero={!p || undefined} style={{ "--v": p / peak, "--d": r + h } as React.CSSProperties} title={`${DOW[r]} ${h}:00, ${p} prompts`} />)}</div>)}

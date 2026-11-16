@@ -10,6 +10,7 @@ import { Bar3DChart, Line3DChart } from "echarts-gl/charts";
 import { Grid3DComponent } from "echarts-gl/components";
 import { reducedNow, useSize } from "../lib/hooks";
 import { clamp } from "../lib/math";
+import { RELIEF, useTheme } from "../lib/theme";
 
 // CanvasRenderer: echarts-gl paints axis labels through a 2D zrender canvas; without a registered painter no label text draws
 echarts.use([CanvasRenderer, TooltipComponent, Bar3DChart, Line3DChart, Grid3DComponent]);
@@ -26,8 +27,6 @@ interface Props {
 }
 
 const CELL = 8, ALPHA = 36, BETA = -16, T = 420, TC = 900, SWING = 14;
-const BLUE: [number, string][] = [[0, "#d2dff5"], [0.25, "#b3caf1"], [0.5, "#95b5ec"], [0.75, "#789fe7"], [1, "#5b8ae1"]];
-const GREY: [number, string][] = [[0, "#e1e4e8"], [0.5, "#c8cbd0"], [1, "#b0b4b9"]];
 const ramp = (st: [number, string][], t: number) => {
   t = Math.min(1, Math.max(0, t));
   let i = 1; while (i < st.length - 1 && t > st[i][0]) i++;
@@ -54,6 +53,7 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
   const bw = cols * CELL, bd = rows * CELL * deep, bh = 28;
   const S = useRef(1); S.current = wrapSize.w > 0 ? fit(bw, bd, bh, ALPHA, BETA, wrapSize.w / height, height, mini) : 1;
   const reduced = () => reducedNow();
+  const pal = RELIEF[useTheme()];
 
   const cam = () => {   // the live camera after a drag, else the defaults
     const v = (chart.current?.getOption() as { grid3D?: { viewControl?: { alpha?: number; beta?: number; orthographicSize?: number } }[] } | undefined)?.grid3D?.[0]?.viewControl;
@@ -63,8 +63,9 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
 
   const items = useMemo(() => cells.map((x, i) => ({
     c: x.c, r: x.r, z: x.off ? 0 : x.v, i, tip: x.tip,
-    color: x.sel ? "#1957d2" : x.off ? ramp(GREY, x.mix) : x.mark ? "#f5af20" : x.v > 0 ? ramp(BLUE, x.mix) : "#dde7f7",
-  })), [cells]);
+    mark: !x.sel && !x.off && !!x.mark,
+    color: x.sel ? pal.sel : x.off ? ramp(pal.off, x.mix) : x.mark ? pal.mark : x.v > 0 ? ramp(pal.ramp, x.mix) : pal.zero,
+  })), [cells, pal]);
   // y is reversed: row 0 (Mon) is farthest, the last row nearest
   const data = (t: number) => items.map((x) => ({ value: [x.c, rows - 1 - x.r, x.z * t], i: x.i, tip: x.tip, itemStyle: { color: x.color } }));
 
@@ -83,19 +84,19 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
 
   useEffect(() => {
     const c = chart.current; if (!c) return;
-    const rd = reduced(), muted = "#575e69", axisLine = { lineStyle: { color: "#b9bec6", width: 1 } };
+    const rd = reduced(), muted = pal.muted, axisLine = { lineStyle: { color: pal.axis, width: 1 } };
     const names = (n: number) => Array.from({ length: n }, (_, i) => String(i));
     const axis = (n: number, label: (i: number) => string) => ({ type: "category" as const, name: "", data: names(n), axisLabel: { show: !mini, interval: 0, color: muted, fontSize: 11, margin: 10, formatter: (v: string) => label(+v) }, axisLine, axisTick: { show: false }, splitLine: { show: false }, splitArea: { show: false } });
     const first = !grown.current;
     const f0 = frame ? frame.c0 - 0.5 : 0, f1 = frame ? frame.c1 + 0.5 : 0, y0 = -0.5, y1 = rows - 0.5;
     c.setOption({
       animation: false,
-      tooltip: { confine: true, backgroundColor: "rgba(255,255,255,0.85)", borderColor: "#dadee3", borderWidth: 1, borderRadius: 12, padding: [8, 10], transitionDuration: rd ? 0 : 0.12, textStyle: { color: "#11161f", fontSize: 12, lineHeight: 16 }, extraCssText: "backdrop-filter: blur(12px) saturate(1.4); box-shadow: 0 8px 24px -12px rgba(40,55,90,0.35); max-width: 240px; white-space: normal;", formatter: (p: { data?: { tip: string } }) => tipHtml(p.data?.tip ?? "") },
+      tooltip: { confine: true, backgroundColor: pal.tipBg, borderColor: pal.tipLine, borderWidth: 1, padding: [8, 10], transitionDuration: rd ? 0 : 0.12, textStyle: { color: pal.tipInk, fontSize: 12, lineHeight: 16 }, extraCssText: pal.tipCss + " max-width: 240px; white-space: normal;", formatter: (p: { data?: { tip: string } }) => tipHtml(p.data?.tip ?? "") },
       xAxis3D: axis(cols, colLabel), yAxis3D: axis(rows, (i) => rowLabels[rows - 1 - i] ?? ""),
-      zAxis3D: { type: "value", name: "", min: 0, max, splitNumber: 3, axisLabel: { show: !mini, color: muted, fontSize: 11, margin: 16, formatter: (v: number) => zLabel(v) }, axisLine, axisTick: { show: false }, splitLine: { lineStyle: { color: mini ? "#eceff2" : "#dadee3", width: 1 } }, splitArea: { show: false } },
+      zAxis3D: { type: "value", name: "", min: 0, max, splitNumber: 3, axisLabel: { show: !mini, color: muted, fontSize: 11, margin: 16, formatter: (v: number) => zLabel(v) }, axisLine, axisTick: { show: false }, splitLine: { lineStyle: { color: mini ? pal.splitMini : pal.split, width: 1 } }, splitArea: { show: false } },
       grid3D: {
         boxWidth: bw, boxDepth: bd, boxHeight: bh,
-        light: { main: { intensity: 0.7, alpha: 50, beta: 30, shadow: false }, ambient: { intensity: 0.45 } },
+        light: pal.light,
         axisPointer: { show: false }, postEffect: { enable: false }, temporalSuperSampling: { enable: false },
         viewControl: {
           projection: "orthographic", ...cam(), orthographicSize: cam().size, minAlpha: 12, maxAlpha: 85, minBeta: -50, maxBeta: 50, distance: 200, minDistance: 200, maxDistance: 200,
@@ -103,8 +104,8 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
           autoRotate: false, damping: rd ? 0 : 0.8, animationDurationUpdate: rd ? 0 : 300, animationEasingUpdate: "cubicOut",
         },
       },
-      series: [{ type: "bar3D", shading: "lambert", barSize: [CELL * 0.8, CELL * 0.8 * deep], bevelSize: 0.15, bevelSmoothness: 2, minHeight: 0.4, emphasis: { itemStyle: { color: "#003db7" }, label: { show: false } }, data: data(first && !rd ? 0 : 1) },
-        ...(frame ? [{ type: "line3D", silent: true, lineStyle: { color: "#1957d2", width: 1, opacity: 1 }, data: [[f0, y0, 0], [f1, y0, 0], [f1, y1, 0], [f0, y1, 0], [f0, y0, 0]] }] : [])],
+      series: [{ type: "bar3D", shading: "lambert", barSize: [CELL * 0.8, CELL * 0.8 * deep], bevelSize: pal.bevel, bevelSmoothness: 2, minHeight: 0.4, emphasis: { itemStyle: { color: pal.hover }, label: { show: false } }, data: data(first && !rd ? 0 : 1) },
+        ...(frame ? [{ type: "line3D", silent: true, lineStyle: { color: pal.frame, width: 1, opacity: 1 }, data: [[f0, y0, 0], [f1, y0, 0], [f1, y1, 0], [f0, y1, 0], [f0, y0, 0]] }] : [])],
     }, { replaceMerge: ["series"] });
     grown.current = true;
     if (first && !rd) {   // grow from the floor, cubic-out; the z scale stays fixed. The camera settles from SWING degrees off over TC ms: the parallax tells rows (depth) from columns
@@ -118,13 +119,13 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
         else if (mini) raf.current = requestAnimationFrame(idle);
       };
       // idle: the camera sways +-6 degrees over 14s (paused off-screen or in a hidden tab); the marked bar pulses twice over the first 1.6s
-      const t1 = t0 + TC, hot = items.map((x) => x.color === "#f5af20");
+      const t1 = t0 + TC, hot = items.map((x) => x.mark);
       const idle = (now: number) => {
         const s = (now - t1) / 1000;
         if (seen.current && !document.hidden) {
           const pulse = s < 1.6 ? Math.sin((s / 0.8) * Math.PI) ** 2 : 0;
           c.setOption({ grid3D: { viewControl: { beta: BETA + 6 * Math.sin((s / 14) * 2 * Math.PI), animationDurationUpdate: 0 } },
-            ...(s < 1.7 ? { series: [{ data: data(1).map((d, i) => (hot[i] ? { ...d, value: [d.value[0], d.value[1], (d.value[2] as number) * (1 + 0.18 * pulse)], itemStyle: { color: pulse > 0.5 ? "#ffc94d" : "#f5af20" } } : d)) }] } : {}) });
+            ...(s < 1.7 ? { series: [{ data: data(1).map((d, i) => (hot[i] ? { ...d, value: [d.value[0], d.value[1], (d.value[2] as number) * (1 + 0.18 * pulse)], itemStyle: { color: pulse > 0.5 ? pal.pulse : pal.mark } } : d)) }] } : {}) });
         }
         raf.current = requestAnimationFrame(idle);
       };
@@ -149,7 +150,7 @@ export default function Bars3D({ cells, cols, rows, colLabel, rowLabels, summary
       aria-label={`3D bars. ${summary} Drag to orbit. Arrow keys rotate, plus and minus zoom, 0 or Escape resets. The table below has every value.`}>
       <div className="b3d-bar">
         <span className="note">Bar height: 0 to {zLabel(max)}</span><i className="b3d-ramp" aria-hidden="true" />
-        {frame && <span className="b3d-chip note"><i style={{ boxShadow: "inset 0 0 0 1px #1957d2" }} aria-hidden="true" />{frame.label}</span>}
+        {frame && <span className="b3d-chip note"><i style={{ boxShadow: `inset 0 0 0 1px ${pal.frame}` }} aria-hidden="true" />{frame.label}</span>}
         {chips.map((x) => <span key={x.text} className="b3d-chip note"><i style={{ background: x.color }} aria-hidden="true" />{x.text}</span>)}
         <button type="button" className="btn b3d-reset" onClick={reset}>Reset view</button>
       </div>

@@ -77,8 +77,8 @@ describe("Key numbers and usage mix", () => {
     expect(pressed).toBe(unk);   // same node: focus never fell to <body>
     expect(document.activeElement).toBe(unk);
     expect(card.querySelector(".lede")!.textContent).toMatch(/^Filtered to sessions with no model id: \d+ sessions?\./);
-    expect(tile("tokens").querySelector(".val")!.textContent).toBe("–");
-    expect(tile("tokens").querySelector(".sub")!.textContent).toBe("no token data");
+    expect(tile("cpo").querySelector(".val")!.textContent).toBe("–");
+    expect(tile("cpo").querySelector(".sub")!.textContent).toBe("no prices recorded");
     // no tokens and no prices: the efficiency tile says what is missing, not why tokens stand in for cost
     expect(tile("tpa").querySelector(".val")!.textContent).toBe("–");
     expect(tile("tpa").querySelector(".sub")!.textContent).toBe("no token data");
