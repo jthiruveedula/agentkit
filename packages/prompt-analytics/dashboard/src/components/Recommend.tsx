@@ -11,6 +11,8 @@ import { Card, Empty } from "./ui";
 import { titleOf } from "./Shell";
 import "./govern.css";
 
+const TONE_WORD = { good: "Win", bad: "Risk", warn: "Watch", info: "Note" } as const;
+
 /** The page computes the list once (App provides it, so the why-tags and the card agree); a lone component computes its own. */
 export const NextCtx = createContext<Row[] | null>(null);
 
@@ -56,12 +58,12 @@ export function Recommend() {
         <>
           <ol className="todo" ref={ol}>
             {shown.map((r, i) => {
-              const n = ops.count(r), sec = ops.sec(r);
+              const n = ops.count(r), sec = ops.sec(r); const long = r.impact.length > 24;   // a stamp is a short word: a full-sentence impact moves to the row text
               return (
                 <li key={r.id} data-next={r.id}>
                   <b className="num" aria-hidden="true">{i + 1}</b>
-                  <div className="act"><h4>{r.action}</h4>{r.detail && <p>{r.detail}</p>}</div>
-                  <span className={`tag ${r.tone}`}>{r.impact}</span>
+                  <div className="act"><h4>{r.action}</h4>{r.detail && <p>{r.detail}</p>}{long && <p className="imp">{r.impact}</p>}</div>
+                  <span className={`tag ${r.tone}`} title={long ? r.impact : undefined}>{long ? TONE_WORD[r.tone] : r.impact}</span>
                   <span className="go">
                     {sec && <button type="button" className="link" aria-label={`See ${sec.title}: evidence for ${r.action}`} onClick={() => ops.see(r)}>See {sec.title}</button>}
                     {r.filter && n > 0 && <button type="button" className="btn" aria-label={`Open ${sess(n)} behind: ${r.action}`} onClick={() => ops.open(r)}>Open {sess(n)}</button>}

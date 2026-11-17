@@ -35,6 +35,8 @@ export interface Store {
   panel: "none" | "list" | "detail";
   crumbs: Crumb[];
   section: string;
+  /** Anchor id last jumped to inside the current section (e.g. s-next), else "". */
+  anchor: string;
   setSection: (id: string) => void;
   goto: (id: string) => void;
   /** Filter-bar edit: replaces the history entry so Back is not spammed. */
@@ -92,6 +94,7 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   const sRef = useRef(s);
   const secRef = useRef(sectionOf(first.sec));
   const [section, setSec] = useState(sectionOf(first.sec));
+  const [anchor, setAnchor] = useState("");
   const [exCat, setExCat] = useState<Cat>("all");
   const { f, sel, list, cmp } = s.nav;
   const view = useMemo(() => ({ pg: s.nav.pg, pgs: s.nav.pgs, dens: s.nav.dens, so: s.nav.so }), [s.nav.pg, s.nav.pgs, s.nav.dens, s.nav.so]);
@@ -152,11 +155,14 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
   const setSection = useCallback((raw: string) => {
     const id = sectionOf(raw);
     if (secRef.current === id) return;
-    secRef.current = id; setSec(id);
+    secRef.current = id; setSec(id); setAnchor("");
     if (typeof history !== "undefined") history.replaceState(history.state, "", toHash(sRef.current.nav, id));
   }, []);
   const goto = useCallback((id: string) => {
     setSection(sectionOf(id)); lockSpy(sectionOf(id));
+    const a = id !== sectionOf(id) ? id : "";
+    setAnchor(a);
+    if (a && typeof history !== "undefined") history.replaceState(history.state, "", toHash(sRef.current.nav, a));
     const el = document.getElementById(id);
     if (el) el.scrollIntoView?.({ behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   }, [setSection]);
@@ -167,6 +173,6 @@ export function StoreProvider({ d, children, initial }: { d: DashboardData; chil
 
   const href = (sec: string) => toHash(s.nav, sec);
   const panel = sel ? "detail" : list ? "list" : "none";
-  const store: Store = { d, f, v, caps, capsAll, secs, win, prior, cmp, setCmp, ids, exposed, sel, list, panel, crumbs, section, setSection, goto, set, drill, apply, href, clear, view, setView, go, openList, openSession, back, closePanel, exCat, setExCat, clusterLabel };
+  const store: Store = { d, f, v, caps, capsAll, secs, win, prior, cmp, setCmp, ids, exposed, sel, list, panel, crumbs, section, anchor, setSection, goto, set, drill, apply, href, clear, view, setView, go, openList, openSession, back, closePanel, exCat, setExCat, clusterLabel };
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }

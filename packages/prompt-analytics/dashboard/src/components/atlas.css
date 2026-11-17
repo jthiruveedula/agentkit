@@ -43,6 +43,9 @@
     .mx .cell b, .fr-n, .rep-n b, .rep-row > b:first-child, .panel-h h2, .panel h4, .facts dd, .wk-big b, .mm-val, .sess td.num, .wrap-big, .wrap-t) {
     font-family: var(--serif); letter-spacing: 0; font-variant-numeric: tabular-nums lining-nums;
   }
+  /* one typeface rule: every card title and headline figure is serif (story.css/mix.css/panels9.css set sans with an id or a later cascade) */
+  :is(.card-h h3, #s-overview .card-h h3, .kc-h h3, .lb-quiet h3) { font-family: var(--serif); font-weight: 700; font-size: 16px; line-height: 22px; letter-spacing: 0; }
+  :is(#s-overview .wk-big b, .dn-big, #s-overview .hero .b-num, .mm-big b) { font-family: var(--serif); letter-spacing: 0; font-variant-numeric: tabular-nums lining-nums; }
   .sec-h { border-bottom: 3px double var(--rule); }
   .btn { background: var(--surface); border-color: var(--line-2); }
   .btn.primary, .todo .btn.primary { background: var(--inkblue); border-color: var(--inkblue); color: var(--accent-ink); }
@@ -50,14 +53,17 @@
   .tbl th, .tbl td { border-bottom-color: var(--rule); }
   .tbl thead th { font: 700 10px/16px var(--sans); letter-spacing: .1em; text-transform: uppercase; border-bottom: 2px solid var(--ink); }
   /* controls: one 2px corner, one pressed state (sunk + ink underline); the header tray keeps its raised-paper pressed look */
-  .seg, .seg3 { background: var(--surface); border: 1px solid var(--line-2); border-radius: 2px; box-shadow: none; padding: 0; gap: 0; }
+  .seg, .seg3 { background: var(--sunk); border: 1px solid var(--line-2); border-radius: 2px; box-shadow: none; padding: 0; gap: 0; }
   .top-tools .seg { border: 0; background: none; gap: 2px; }
   :is(.top-tools .seg button, .top-tools .btn, .fp, .xb) { border-radius: 2px; }
-  :is(.seg button, .fp, .xb, .btn.tog3)[aria-pressed="true"] { background: var(--sunk); box-shadow: inset 0 -2px var(--ink); color: var(--ink); border-color: var(--line-2); font-weight: 600; }
+  .seg.seg-q { background: none; border-color: transparent; }
+  .btn.tog3 { background: var(--sunk); }
+  :is(.seg button, #s-overview .card-acts .seg button) { border-radius: 2px; }
+  /* the one pressed/selected state (segmented controls, toggles, tabs): raised paper on a 1px line ring, 2px corner. No pills, no fills of another colour. */
+  :is(.seg button, #s-overview .card-acts .seg button, .seg.seg-q button, .fp, .xb, .btn.tog3, .top-tools .btn)[aria-pressed="true"], .top-tools .btn[aria-expanded="true"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line-2); color: var(--ink); font-weight: 600; border-radius: 2px; }
   .top-tools .btn { background: none; }
-  .top-tools .seg button[aria-pressed="true"], .top-tools .btn[aria-expanded="true"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line-2); }
   .fp { border: 0; }
-  .xb { background: var(--surface); border: 1px solid var(--line-2); box-shadow: none; }
+  .xb { background: var(--sunk); border: 1px solid var(--line-2); box-shadow: none; }
   /* one chip: flat 2px label on a sepia hairline. Status and category only change ink and rule colour */
   .tag, .chip, .crumb.fchip, .mm-prev, .mm-hot, .badge { background: none; border: 1px solid var(--rule); border-radius: 2px; box-shadow: none; }
   .badge, .mm-hot { color: var(--ink); }
@@ -94,12 +100,15 @@
   .xs .tag[data-cat="secret"] { color: var(--good-ink); }
   /* seals (one per card: the recommended row) and severity stamps (the top row only); the word comes from the TSX hook */
   .play[data-best]::after, #s-models tr[data-best] th[scope="row"]::after { content: attr(data-best); color: var(--good-ink); }
-  .play[data-best]::after { position: absolute; top: -9px; right: 10px; background: var(--surface); }
+  .play[data-best] { padding-top: 30px; }
+  .play[data-best]::after { position: absolute; top: 6px; left: 10px; background: var(--surface); }   /* left: the row's own stamp (.play-e) sits top right */
   table.sg th[data-top]::after, .db [data-top]::after { content: attr(data-top); }
-  table.sg th[data-top]::after { position: static; display: block; width: fit-content; margin: 3px 0 0; rotate: -2deg; transform: none; font-size: 8px; line-height: 13px; letter-spacing: .04em; padding: 0 3px; }
-  table.sg th[data-top] { padding-right: 8px; }
+  table.sg th[data-top]::after { position: static; display: block; width: fit-content; margin: 3px 0 0; transform: none; }
   #s-models tr[data-best] th[scope="row"]::after, .db [data-top]::after { margin-left: 8px; }
   #s-topicflags .tag { color: var(--warn-ink); }
+  .drv-why { display: block; width: fit-content; margin: 6px 0 4px; }   /* own line under the row label, not abutting it */
+  #s-alerts .tag[data-sev="warn"] { color: var(--inkblue); }   /* ACT brick, WATCH ink blue: distinct, both AA on paper */
+  #s-alerts .tag[data-sev="bad"] { color: var(--brick-ink); }
   .xs .tag[data-cat="phi"] { color: #7d3f66; }
 
   /* 2.1 header cartouche + compass */
@@ -211,6 +220,7 @@
   .mm-side { border-left: 3px double var(--brick); }
   :is(.mm-detail p, .mm-note) { line-height: 20px; }
   .mm-nm { font: 700 16px/20px var(--serif); }
+  .mm-ov .mm-path { border: 1px solid var(--rule); border-radius: 2px; background: none; }
   .mm-eye { letter-spacing: .1em; text-transform: uppercase; font-size: 10px; }
   .mm-track i { background: var(--inkblue); }
   .mm-track[data-bad] i { background: var(--brick); }
@@ -235,7 +245,10 @@
   td[data-fit] { background: none; }
   td[data-fit] b { font: 700 18px var(--serif); }
   [data-fit="over"] { --c: var(--warn); }
-  .mf-kpis .kpi { background: none; border: 0; border-bottom: 1px solid var(--rule); border-radius: 0; }
+  .mf-kpis { gap: 0; background: var(--surface); border: 1px solid var(--rule); box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--line); padding: 4px; }   /* framed like every card */
+  .mf-kpis .kpi { background: none; border: 0; border-right: 1px solid var(--rule); border-radius: 0; }
+  .mf-kpis .kpi:last-child { border-right: 0; }
+  .drv .dv .n { font-size: 12px; }
   .mf-recs li { border-bottom: 1px dotted var(--rule); }
 
   /* 2.10 tools: field-guide catalog rows */
@@ -272,7 +285,7 @@
   .bars[data-cascade], .grid > .card > .bars[data-cascade] { gap: 0; grid-auto-rows: min-content; flex: 0 0 auto; }
   .bars[data-cascade] .bar-row { min-height: 0; padding-block: 0; }
   .bars[data-cascade] .bar-t { height: 22px; background: none; border-radius: 0; border-bottom: 1px solid var(--line-2); }
-  .bars[data-cascade] > li:not(:last-child) .bar-t:not([data-mark])::after { content: ""; position: absolute; left: calc(var(--w) * 100%); top: 100%; height: 100%; border-left: 1px dashed var(--inkblue); }   /* river: the drop to the next terrace */
+  .bars[data-cascade] > li:not(:last-child) .bar-t:not([data-mark])::after { content: ""; position: absolute; left: calc(var(--w) * 100%); top: 0; height: 100%; border-left: 1px dashed var(--inkblue); }   /* river: the drop, kept inside its own track so it never crosses the next caption */
   .mini .col i { background-image: repeating-linear-gradient(90deg, #0000 0 7px, #fbf6e940 7px 8px); }
   .bars[data-cascade] .bar-t i { border-radius: 0; background-image: repeating-linear-gradient(90deg, #0000 0 7px, #fbf6e940 7px 8px); }
   .bars[data-cascade] > li:nth-child(2) .bar-t i { opacity: .88; }
@@ -284,7 +297,10 @@
 
   /* 2.14 friction: hazard list */
   table.sg td { border-radius: 0; font-family: var(--serif); }
-  .sg tbody th { padding-right: 8px; }
+  table.sg tbody th { padding-right: 16px; }
+  table.sg th[data-top] { padding-right: 16px; }
+  table.sg :is(thead, tbody) tr > :first-child { width: 136px; }
+  table.sg th[data-top]::after { margin: 3px 0 2px 2px; }
   .so .bad { border-bottom: 2px solid var(--brick); }
   .lb-line { stroke: var(--ink); stroke-width: 1.5; }
   .lb-dot { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
@@ -320,7 +336,7 @@
   .b3d-cv { border: 1px solid var(--rule); background: var(--surface); }
 
   /* hover: paper does not lift */
-  :is(.todo li, .w, .kpi, .card, .play, .mini):hover { transform: none; translate: none; }
+  :is(.todo li, .w, .kpi, .card, .play, .mini):hover { transform: none; translate: none; transition: none; }
 }
 
 /* 3. motion: drawn, not glown. End state is the default, so numbers read at first paint; nothing moves under reduced motion. */
@@ -341,8 +357,19 @@
 :root {
   #s-alerts tbody tr { border-left: 3px solid var(--rule); }
   #s-alerts tbody tr:has(.tag[data-sev="bad"]) { border-left-color: var(--brick); }
-  #s-forecast tbody td { font-family: var(--serif); font-size: 16px; font-variant-numeric: tabular-nums lining-nums; }
+  #s-forecast tbody :is(th, td, .link) { font: 16px/24px var(--serif); font-variant-numeric: tabular-nums lining-nums; text-decoration: none; }
+  #s-forecast tbody td { text-align: left; } #s-forecast tbody .link { color: var(--ink); padding: 0; min-height: 0; border: 0; background: none; text-align: left; }
   #s-forecast tbody tr:last-child { border-top: 3px double var(--rule); }
-  #s-forecast tbody tr:last-child td { font-size: 20px; }
+  #s-forecast tbody tr:last-child :is(th, td, .link) { font-weight: 700; }
   :is(#s-models, #s-tools) .tbl tbody td { font-family: var(--serif); font-variant-numeric: tabular-nums lining-nums; }
+}
+
+/* tools: focus rings stay inside their cell, cards never overflow, three-up rows drop to full width before they clip */
+:root {
+  #s-tools .card { min-width: 0; }
+  #s-tools .mx .cell:focus-visible { outline-offset: -3px; z-index: 1; }
+  #s-tools .bar-row { grid-template-columns: minmax(88px, 36%) minmax(0, 1fr) auto; }
+  @container pa (max-width: 1200px) { #s-tools .grid > .s4 { grid-column: span 12; } }
+  .ng-x span { overflow: visible; padding-inline: 1px; }   /* time bin labels (cv-x): wrap, never clip */
+  .ng-x b { overflow-wrap: anywhere; }
 }

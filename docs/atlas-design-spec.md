@@ -151,6 +151,17 @@ A :is(.todo .tag, td[data-fit] span, td[data-out]::after, .srow [data-out], [dat
   Colour modifiers set only `color` (border follows via `currentColor`): good `--good-ink`, warn `--warn-ink`,
   bad `--brick-ink`, info `--ink`. All four are 5.67 or better on every paper. Stamps keep the existing text; no text is added except 2.12.
 
+### 2.0a Canonical rules (consistency pass, 2026-11-16)
+
+These are global and win over any per-section treatment below.
+
+- **Serif titles.** Every card title (`.card-h h3`, including `#s-overview .card-h h3`, `.kc-h h3`, `.lb-quiet h3`) is `var(--serif)` 700 16/22. Headline figures (`.wk-big b`, `.dn-big`, `.b-num`, `.mm-big b`) are serif. One rule in `atlas.css`; no per-section patches.
+- **One pressed/selected state.** Raised paper (`--surface`) on a 1px `--line-2` ring, 2px corner, weight 600, on a `--sunk` track. It covers `.seg` (also `.seg-q` and overview `.card-acts .seg`), `.fp`, `.xb`, `.btn.tog3` and the header tray. No rounded white pills, no underline variant.
+- **One stamp.** 10/16 sans caps, .08em tracking, 1.5px border, 2px corner, rotated -2deg, 6px side padding. No size or angle overrides. A stamp is a short word; a sentence goes in the row text (Do next shows Win/Risk/Watch/Note and moves a long impact into the row). Severity colour: ACT brick, WATCH ink blue.
+- **Seals vs stamps.** A seal sits top left of its card row and a stamp top right, so they never share a corner. A stamp that follows a row label (`.drv-why`) takes its own line.
+- **Framed KPI strips.** `.mf-kpis` carries the same border and double rule as `.card`.
+- **Chips.** The mind-map breadcrumb (`.mm-path`) is the ATLAS chip: 2px corner, no fill, hairline rule.
+
 ### 2.1 Header cartouche + compass (`Shell.tsx`, `.top`, `.brand`, `.glyph`)
 - `.top { background: var(--surface); border-bottom: 3px double var(--line-2) }`.
 - `.brand-t h1 { font: 700 24px/28px var(--serif) }`; cartouche bracket rules: `.brand-t { padding: 2px 12px; border-inline: 1px solid var(--rule) }`

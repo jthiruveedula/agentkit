@@ -235,7 +235,7 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
 export const underMore = (section: string) => !BAR_IDS.includes(section);
 
 export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string> }) {
-  const { section, goto, href, secs, f, capsAll } = useStore();
+  const { section, anchor, goto, href, secs, f, capsAll } = useStore();
   const groups = navFor(secs, capsAll.multiTool);
   const bar = BAR.filter(([id]) => secs.has(id));
   const rest = groups.flatMap((g) => g.items).filter((i) => !BAR_IDS.includes(i.id));
@@ -254,7 +254,7 @@ export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string>
     return () => { document.removeEventListener("keydown", key); document.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); };
   }, [more]);
   const link = (id: string, text: string, cls?: string, icon?: boolean) => (
-    <a key={id} href={href(id)} className={cls} data-quiet={quiet?.has(id) || undefined} title={icon ? text : undefined} aria-current={id === section ? "location" : undefined}
+    <a key={id} href={href(id)} className={cls} data-quiet={quiet?.has(id) || undefined} title={icon ? text : undefined} aria-current={(anchor || section) === id ? "location" : undefined}
       onClick={(e) => { e.preventDefault(); setMore(false); goto(id); }}>
       {icon && <i className="ic"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={ICON[id] ?? ICON["s-overview"]} /></svg></i>}
       {icon ? <span className="nl">{text}</span> : text}

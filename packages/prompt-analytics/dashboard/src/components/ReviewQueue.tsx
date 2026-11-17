@@ -112,6 +112,13 @@ function Row({ its, api, status, onReview }: { its: ExposureItem[]; api: Api | n
   );
 }
 
+/** One definition of the exposure counts: every surface (header, legend, pager) reads these. */
+export function exposureCounts(items: ExposureItem[]) {
+  const open = items.filter((i) => i.status === "open");
+  const sess = (xs: ExposureItem[]) => new Set(xs.map((i) => i.session ?? i.id)).size;
+  return { all: items.length, open: open.length, sessAll: sess(items), sessOpen: sess(open) };
+}
+
 export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat: "all" | Cat; onCat: (c: "all" | Cat) => void }) {
   const api = useMemo(() => getApi(), []);
   const setCat = onCat;
@@ -140,11 +147,12 @@ export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat:
 
   const markAll = (g: Group, status: Status) => g.items.forEach((i) => { if ((over[i.id] ?? i.status) === "open") void review(i.id, status); });
 
+  const ec = exposureCounts(items);
   const count = CATS.map((c) => items.filter((i) => i.category === c).length), total = items.length || 1;
   return (
     <div className="rq">
       <div className="xsum" role="img" aria-label={`${items.length} findings: ${CATS.map((c, i) => `${count[i]} ${CAT_NAME[c]}`).join(", ")}`}>{CATS.map((c, i) => <i key={c} data-cat={c} style={{ width: `${(count[i] / total) * 100}%` }} />)}</div>
-      <p className="xl">{CATS.map((c, i) => <span key={c}><i data-cat={c} />{CAT_NAME[c]} <b>{count[i]}</b></span>)}<span>Total <b>{items.length}</b></span></p>
+      <p className="xl">{CATS.map((c, i) => <span key={c}><i data-cat={c} />{CAT_NAME[c]} <b>{count[i]}</b></span>)}<span>All statuses <b>{ec.all}</b> in {ec.sessAll} sessions</span><span>Open <b>{ec.open}</b> in {ec.sessOpen} sessions</span></p>
       <div className="xf">
         <Seg label="Kind" value={cat} onChange={f(setCat)} options={[{ id: "all", text: "All kinds" }, ...CATS.map((c) => ({ id: c, text: CAT_NAME[c] }))]} />
         <Seg label="Source" value={src} onChange={f(setSrc)} options={[{ id: "all", text: "All sources" }, ...present.map((s) => ({ id: s, text: srcLabel(s) }))]} />
@@ -173,7 +181,7 @@ export function ReviewQueue({ items, cat, onCat }: { items: ExposureItem[]; cat:
       {list.length > PAGE && (
         <nav className="rq-pages" aria-label="Review queue pages">
           <button type="button" className="btn" disabled={cur === 0} onClick={() => setPage(cur - 1)}>Previous</button>
-          <span aria-live="polite">Page {cur + 1} of {pages}, {fmtInt(groups.length)} sessions, {fmtInt(list.length)} findings</span>
+          <span aria-live="polite">Page {cur + 1} of {pages}, showing {fmtInt(groups.length)} sessions, {fmtInt(list.length)} findings (any status, current filters)</span>
           <button type="button" className="btn" disabled={cur >= pages - 1} onClick={() => setPage(cur + 1)}>Next</button>
         </nav>
       )}

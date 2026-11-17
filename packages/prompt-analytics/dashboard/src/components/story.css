@@ -66,7 +66,7 @@
 /* Where it went: numbers in the UI face (tabular), the table spans the card */
 #s-overview .wh { max-width: none; }
 #s-overview .wh-v, #s-overview .wh-f, #s-overview .wh-p { font: 13px/20px var(--sans); font-variant-numeric: tabular-nums; }
-@media (min-width: 700px) { #s-overview .wh-r { grid-template-columns: minmax(80px, 22%) minmax(60px, 1fr) 13ch 13ch 9ch; } }
+@media (min-width: 700px) { #s-overview .wh-r { grid-template-columns: minmax(80px, 22%) minmax(60px, 1fr) 14ch 14ch 10ch; } }
 /* headers stay on one line, numeric ones right-aligned over their columns */
 #s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: nowrap; line-height: 14px; }
 @media (pointer: coarse) { #s-overview .b-act, .b-top .b-acts .btn { height: auto; min-height: 40px; } }

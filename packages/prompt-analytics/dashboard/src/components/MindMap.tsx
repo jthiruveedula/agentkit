@@ -146,7 +146,7 @@ export function MindMap() {
   const hit = v.rows.filter(struggled), byProj = new Map<string, number>();
   for (const r of hit) byProj.set(r.project, (byProj.get(r.project) ?? 0) + 1);
   const hotP = [...byProj].sort((a, b) => b[1] - a[1])[0];
-  const so = hotP ? <>{hotP[0]} is the hotspot: <b>{Math.round((hotP[1] / hit.length) * 100)}%</b> of struggled sessions.</> : <>Nothing flagged in this window.</>;
+  const so = hotP ? <>{hotP[0]} has the most struggled sessions: <b>{Math.round((hotP[1] / hit.length) * 100)}%</b> of all struggled sessions ({fmtInt(hotP[1])} of {fmtInt(hit.length)}).</> : <>Nothing flagged in this window.</>;
   if (v.rows.length === 0) return <Section id="s-map" title="Mind map" q="How does your AI work branch?"><Card so="Nothing flagged in this window." thin title="How your work connects" src="sessions graph · no sessions" span={12}><Empty /></Card></Section>;
 
   // ---- pieces shared by the bar (narrow) and the plot overlay / inspector (wide, medium)
@@ -189,7 +189,7 @@ export function MindMap() {
         {!few && <span className="mm-track" data-bad={bad ? "" : undefined} style={{ "--f": N.struggled / sc, "--a": avg / sc } as CSSProperties}><i /><u /></span>}
       </div>}
       {!idle && N.kind !== "more" && <p className="meta mm-stats">friction <b>{N.friction.toFixed(2)}</b> · applied <b>{fmtPct(N.applied)}</b></p>}
-      {kids.length > 0 && <div className="mm-kids"><span className="muted">Top {kids[0].kind}s</span>{kids.map((c) => (
+      {kids.length > 0 && <div className="mm-kids"><span className="muted">Top {kids[0].kind}s by {metric}</span>{kids.map((c) => (
         <button key={c.id} type="button" className="mm-kid" onClick={() => { setCur(c.id); if (c.kind === "session" && c.session) openSession(c.session); else toggle(N.id, true); }}>
           <span className="mm-name">{nameOf(c)}</span><span className="mm-val">{val(c)}</span>
           <span className="mm-share" aria-hidden="true" style={{ "--w": Math.max(0.02, c.value / (N.value || 1)), "--c": colorOf(c, toolOf(c)) } as CSSProperties}><i /></span>
