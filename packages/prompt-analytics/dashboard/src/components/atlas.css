@@ -299,8 +299,8 @@
   table.sg td { border-radius: 0; font-family: var(--serif); }
   table.sg tbody th { padding-right: 16px; }
   table.sg th[data-top] { padding-right: 16px; }
-  table.sg :is(thead, tbody) tr > :first-child { width: 136px; }
-  table.sg th[data-top]::after { margin: 3px 0 2px 2px; }
+  .sg-wrap table.sg :is(thead, tbody) tr > :first-child { width: 168px; min-width: 168px; }
+  table.sg th[data-top]::after { margin: 3px 0 2px 0; max-width: 100%; box-sizing: border-box; white-space: nowrap; }
   .so .bad { border-bottom: 2px solid var(--brick); }
   .lb-line { stroke: var(--ink); stroke-width: 1.5; }
   .lb-dot { fill: var(--surface); stroke: var(--ink); stroke-width: 1.5; }
@@ -373,3 +373,6 @@
   .ng-x span { overflow: visible; padding-inline: 1px; }   /* time bin labels (cv-x): wrap, never clip */
   .ng-x b { overflow-wrap: anywhere; }
 }
+
+/* programmatic heading focus on route change: no box; keyboard focus-visible rings stay */
+main [tabindex="-1"]:focus { outline: none; }
