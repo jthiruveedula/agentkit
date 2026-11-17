@@ -40,7 +40,7 @@
   .card, .wrap { box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--line); }
   .card::after, .card::before { background: none; }
   :is(.sec-h h2, .card-h h3, .top h1, .kt .val, .w-n, .b-num, .mm-big b, .val, .todo .num, .todo h4, section > h2, .kc-h h3, .lb-quiet h3, .so b, .bar-n, .db > b,
-    .mx .cell b, .fr-n, .rep-n b, .rep-row > b:first-child, .panel-h h2, .panel h4, .facts dd, .wk-big b, .mm-val, .sess td.num, .wrap-big, .wrap-t) {
+    .mx .cell b, .fr-n, .rep-n b, .rep-row > b:first-child, .panel-h h2, .panel h4, .facts dd, .wk-big b, .mm-val, .sess td.num, .wrap-big, .wrap-t, .tbl.nv td, #s-topicflags td, .wh-v b, .wh-p) {
     font-family: var(--serif); letter-spacing: 0; font-variant-numeric: tabular-nums lining-nums;
   }
   /* one typeface rule: every card title and headline figure is serif (story.css/mix.css/panels9.css set sans with an id or a later cascade) */
@@ -57,7 +57,8 @@
   .top-tools .seg { border: 0; background: none; gap: 2px; }
   :is(.top-tools .seg button, .top-tools .btn, .fp, .xb) { border-radius: 2px; }
   .seg.seg-q { background: none; border-color: transparent; }
-  .btn.tog3 { background: var(--sunk); }
+  .btn.tog3 { background: none; border: 1px solid var(--rule); border-radius: 2px; }
+  .card-acts > .chip { border: 0; background: none; padding-inline: 0; }
   :is(.seg button, #s-overview .card-acts .seg button) { border-radius: 2px; }
   /* the one pressed/selected state (segmented controls, toggles, tabs): raised paper on a 1px line ring, 2px corner. No pills, no fills of another colour. */
   :is(.seg button, #s-overview .card-acts .seg button, .seg.seg-q button, .fp, .xb, .btn.tog3, .top-tools .btn)[aria-pressed="true"], .top-tools .btn[aria-expanded="true"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line-2); color: var(--ink); font-weight: 600; border-radius: 2px; }
@@ -70,7 +71,7 @@
   .chip.bad { color: var(--bad-ink); border-color: var(--brick); background: none; }
   .chip.good { color: var(--good-ink); border-color: var(--teal); background: none; }
   .chip[data-cat] { border-color: var(--c, var(--rule)); }
-  .drops .chip { border-style: dashed; }
+  .drops .chip { border-style: solid; }
   .drops .chip[aria-pressed="true"] { border-color: var(--brick); color: var(--bad-ink); }
   .empty { font: italic 13px/20px var(--serif); border-block: 1px dotted var(--rule); padding: 12px 0; text-align: center; }
   .pop-err { color: var(--bad-ink); }
@@ -178,7 +179,6 @@
   .kt .sub[data-low] { color: var(--muted); }
   :is(.kt .sub, .kt .kpi-note, .kg-l) { font-size: 12px; font-style: italic; border-top: 1px dotted var(--rule); padding-top: 4px; }
   .kd > span:first-child { background: none; border-radius: 0; padding: 0; }
-  .kt[data-primary] { box-shadow: inset 0 2px 0 var(--brick); }
   .kpi[data-tilt] { transform: none; }
 
   /* 2.6 do next: expedition itinerary */
@@ -253,7 +253,7 @@
 
   /* 2.10 tools: field-guide catalog rows */
   .tbl.sc tbody tr { border-bottom: 1px solid var(--rule); box-shadow: inset 2px 0 0 var(--rule); }
-  .tbl.sc th[scope="row"] { font: 700 14px var(--serif); }
+  .tbl.sc th[scope="row"] { font: 600 14px var(--sans, inherit); }
   .mx .cell[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--brick); }
 
   /* 2.11 exposure: hazard register */
@@ -299,6 +299,8 @@
   table.sg td { border-radius: 0; font-family: var(--serif); }
   table.sg tbody th { padding-right: 16px; }
   table.sg th[data-top] { padding-right: 16px; }
+  table.sg { width: 100%; }
+  table.sg th { white-space: nowrap; }
   .sg-wrap table.sg :is(thead, tbody) tr > :first-child { width: 168px; min-width: 168px; }
   table.sg th[data-top]::after { margin: 3px 0 2px 0; max-width: 100%; box-sizing: border-box; white-space: nowrap; }
   .so .bad { border-bottom: 2px solid var(--brick); }

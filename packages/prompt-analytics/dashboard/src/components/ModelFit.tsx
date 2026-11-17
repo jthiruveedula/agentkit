@@ -89,7 +89,7 @@ export function ModelFit() {
                 <thead><tr><th scope="col">Model</th><th scope="col">Sessions</th>{caps.hasCost && <th scope="col">Cost</th>}<th scope="col">Time to applied edit p50 / p95</th></tr></thead>
                 <tbody>{byModel.map((m) => (
                   <tr key={m.k} data-best={m === fast ? "best fit" : undefined}>
-                    <th scope="row"><button type="button" aria-pressed={f.model === m.k} onClick={() => drill({ model: m.k })} aria-label={`${m.k || "Unknown model"}: ${fmtInt(m.n)} sessions. Filter to this model`}>{m.k || "Unknown"}</button></th>
+                    <th scope="row" data-best={m === fast ? "best fit" : undefined}><button type="button" aria-pressed={f.model === m.k} onClick={() => drill({ model: m.k })} aria-label={`${m.k || "Unknown model"}: ${fmtInt(m.n)} sessions. Filter to this model`}>{m.k || "Unknown"}</button></th>
                     <td>{fmtInt(m.n)}</td>
                     {caps.hasCost && <td>{m.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(m.cost)}{m.unpriced > 0 && <small className="n"> {fmtInt(m.unpriced)} unpriced</small>}</>}</td>}
                     <td data-low={(m.t !== null && m.t.n < MIN_N) || undefined}>{ttaText(m.t)}{m.t && <small className="n"> n={fmtInt(m.t.n)}{m.t.n < MIN_N ? ", low" : ""}</small>}</td>
