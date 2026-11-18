@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.0](https://github.com/jthiruveedula/agentkit/compare/v0.28.0...v0.29.0) (2026-11-18)
+
+
+### Features
+
+* **dashboard:** ATLAS as sole theme + watchtower analytics ([#147](https://github.com/jthiruveedula/agentkit/issues/147)) ([65093a3](https://github.com/jthiruveedula/agentkit/commit/65093a3440d5045313b391912b7788c84c0b9fa4))
+
 ## [0.28.0](https://github.com/jthiruveedula/agentkit/compare/v0.27.0...v0.28.0) (2026-11-15)
 
 
