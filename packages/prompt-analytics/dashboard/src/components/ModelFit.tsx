@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { useStore } from "../state";
 import { fitMatrix, estSaving, tierOf, taskSize, TIERS, SIZES } from "../lib/models";
-import { fmtPct, fmtUSD } from "../lib/format";
+import { fmtInt, fmtPct, fmtUSD } from "../lib/format";
+import { tta, ttaText, type Tta } from "../lib/watch";
+import { MIN_N } from "../lib/thresholds";
 import { srcLabel } from "../lib/palette";
 import { Card, Empty, Section } from "./ui";
 import { ToolLogo } from "./Shell";
@@ -11,7 +13,7 @@ const MIN_TOOL_N = 15;
 const FIT = { ok: "matched", over: "oversized", under: "undersized" } as const;
 
 export function ModelFit() {
-  const { v } = useStore();
+  const { v, f, drill, caps } = useStore();
   const rows = v.rows;
   const fit = useMemo(() => fitMatrix(rows), [rows]);
   const saving = useMemo(() => estSaving(rows), [rows]);
@@ -27,6 +29,13 @@ export function ModelFit() {
     return [...by].sort((a, b) => b[1].n - a[1].n);
   }, [rows]);
 
+  // per model (sessions with no model id are "Unknown"): sessions, priced spend, time to applied edit
+  const byModel = useMemo(() => {
+    const by = new Map<string, typeof rows>();
+    for (const s of rows) by.set(s.model || "", [...(by.get(s.model || "") ?? []), s]);
+    return [...by].map(([k, rs]) => { const pr = rs.filter((r) => r.cost_usd !== null); return { k, n: rs.length, cost: pr.length ? pr.reduce((a, r) => a + (r.cost_usd as number), 0) : null, unpriced: rs.length - pr.length, t: tta(rs) }; }).sort((a, b) => b.n - a.n || a.k.localeCompare(b.k));
+  }, [rows]);
+  const fast = byModel.filter((m) => m.t !== null && m.t.n >= MIN_N).sort((a, b) => (a.t as Tta).p50 - (b.t as Tta).p50)[0];
   const n = fit.n, p = (x: number) => (n ? fmtPct(x / n) : "–");
   const kpis: [string, string, string][] = [
     ["Right-sized", p(fit.right), "matched tier"],
@@ -34,9 +43,11 @@ export function ModelFit() {
     ["Underpowered", p(fit.under), "smaller than needed"],
     ["Est. saving", saving === null ? "–" : `≥ ${fmtUSD(saving)}`, saving === null || !v.totals.cost ? "no priced data" : `${fmtPct(saving / v.totals.cost)} of spend`],
   ];
-  const light = fit.m[0].reduce((a, x) => a + x, 0);
-  const soMx = light ? <><b>{Math.round((fit.m[0][2] / light) * 100)}%</b> of light tasks ran on the top tier.</> : "Nothing flagged in this window.";
-  const soChg = saving ? <>Move light tasks to a smaller model: saves at least <b>{fmtUSD(saving)}</b> (estimate).</> : "Nothing flagged in this window.";
+  const soMx = fit.over ? <><b>{p(fit.over)}</b> of sessions ran on more model than the task needed.</> : "Nothing flagged in this window.";
+  // with no priced saving, the headline still names the first tool the list below tells to downsize (same 30% line, same counts)
+  const big = tools.find(([, e]) => e.n >= MIN_TOOL_N && e.over / e.n >= 0.3);
+  const soChg = saving ? <>Move light tasks to a smaller model: saves at least <b>{fmtUSD(saving)}</b> (estimate).</>
+    : big ? <>{srcLabel(big[0])}: <b>{big[1].over}</b> of {big[1].n} sessions oversized. Use a smaller model on light tasks.</> : "Nothing flagged in this window.";
   return (
     <Section id="s-models" title="Model fit" q="Is the model sized to the task?">
       {n === 0 ? <div className="s12"><Empty>No sessions with a known model</Empty></div> : <>
@@ -45,18 +56,18 @@ export function ModelFit() {
             <li key={l} className="kpi"><span className="lbl">{l}</span><b className="val">{val}</b><span className="sub">{sub}</span></li>
           ))}
         </ul>
-        <Card so={soMx} thin={!light} title="Task size × model tier" span={6} half src={`model fit (offline model) · n ${n} · estimate`}>
+        <Card so={soMx} thin={!fit.over} title="Task size × model tier" span={6} half src={`model fit (offline model) · n ${n} · estimate`}>
           <table className="mf-mx" aria-label="Task size against model tier, session counts">
             <thead><tr><td aria-hidden="true" style={{ border: 0 }} />{TIERS.map((t) => <th key={t} scope="col">{t}</th>)}</tr></thead>
             <tbody>{SIZES.map((sz, z) => (
               <tr key={sz}><th scope="row">{sz}</th>{TIERS.map((t, i) => {
                 const k = i === z ? "ok" : i > z ? "over" : "under";
-                return <td key={t} data-fit={k}><b>{fit.m[z][i]}</b><span>{FIT[k]}</span></td>;
+                return <td key={t} data-fit={k}><b>{fit.m[z][i]}</b>{fit.m[z][i] > 0 && <span>{FIT[k]}</span>}</td>;
               })}</tr>
             ))}</tbody>
           </table>
         </Card>
-        <Card so={soChg} thin={!saving} title="What to change" span={6} half src="model fit · estimate, untested">
+        <Card so={soChg} thin={!saving && !big} title="What to change" span={6} half src="model fit · estimate, untested">
           <ul className="mf-recs">{tools.map(([src, e]) => {
             const msg = e.n < MIN_TOOL_N ? "too few sessions"
               : e.over / e.n >= 0.3 ? `Use a smaller model on light tasks (${e.over}/${e.n} oversized).`
@@ -70,6 +81,24 @@ export function ModelFit() {
             );
           })}</ul>
         </Card>
+        {caps.hasTtrRows && (
+          <Card so={fast ? <><b>{fast.k || "Unknown"}</b> is quickest to an applied edit: {ttaText(fast.t)}.</> : "Nothing flagged in this window."} thin={!fast} title="Cost and time to applied edit, by model" meta="minutes from session start to the last applied edit" span={12} src="sessions.ttr_min · cost_usd · priced only">
+            <div className="tbl-wrap">
+              <table className="tbl">
+                <caption className="sr-only">Sessions, priced spend and time to applied edit p50 / p95 by model</caption>
+                <thead><tr><th scope="col">Model</th><th scope="col">Sessions</th>{caps.hasCost && <th scope="col">Cost</th>}<th scope="col">Time to applied edit p50 / p95</th></tr></thead>
+                <tbody>{byModel.map((m) => (
+                  <tr key={m.k} data-best={m === fast ? "best fit" : undefined}>
+                    <th scope="row" data-best={m === fast ? "best fit" : undefined}><button type="button" aria-pressed={f.model === m.k} onClick={() => drill({ model: m.k })} aria-label={`${m.k || "Unknown model"}: ${fmtInt(m.n)} sessions. Filter to this model`}>{m.k || "Unknown"}</button></th>
+                    <td>{fmtInt(m.n)}</td>
+                    {caps.hasCost && <td>{m.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(m.cost)}{m.unpriced > 0 && <small className="n"> {fmtInt(m.unpriced)} unpriced</small>}</>}</td>}
+                    <td data-low={(m.t !== null && m.t.n < MIN_N) || undefined}>{ttaText(m.t)}{m.t && <small className="n"> n={fmtInt(m.t.n)}{m.t.n < MIN_N ? ", low" : ""}</small>}</td>
+                  </tr>))}</tbody>
+              </table>
+            </div>
+            <p className="note">Time to applied edit is not response latency. Sessions with nothing applied are left out; unpriced sessions add nothing to Cost, never $0.</p>
+          </Card>
+        )}
       </>}
     </Section>
   );

@@ -1,41 +1,17 @@
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state";
-import { autoShow, markSeen, wrapped } from "../lib/wrapped";
+import { wrapped } from "../lib/wrapped";
 
 export const WRAPPED_EVENT = "pa:wrapped";
-/** Delay before the live region is filled: long enough for assistive tech to register the empty region first. */
-export const SAY_MS = 600;
 export const openWrapped = () => window.dispatchEvent(new Event(WRAPPED_EVENT));
 
-/** Visible entry point (Overview brief). Not offered when the week is too thin to say anything.
- *  At most once per ISO week it is marked new in place (a dot, announced once): no floating toast over the page. */
-export function WrappedButton() {
-  const { d } = useStore();
-  const ok = useMemo(() => wrapped(d) !== null, [d]);
-  const [due, setDue] = useState(false), [say, setSay] = useState(false);
-  useEffect(() => {
-    const now = new Date();
-    if (autoShow(d, now)) { markSeen(now); setDue(true); }
-  }, [d]);
-  // the dot shows at once; the live region gets its text a beat later. React flushes this effect's setState before the first paint,
-  // so text set straight from `due` is already there when the region appears, and screen readers do not announce it.
-  useEffect(() => { if (!due) return; const t = setTimeout(() => setSay(true), SAY_MS); return () => clearTimeout(t); }, [due]);
-  if (!ok) return null;
-  return (
-    <>
-      <button type="button" className="btn" data-due={due || undefined} onClick={() => { setDue(false); openWrapped(); }}>Weekly Wrapped</button>
-      <span className="sr-only" role="status">{due && say ? "Your weekly Wrapped is ready" : ""}</span>
-    </>
-  );
-}
-
-/** Mounted once. Never opens by itself; the brief's button and the palette open the modal. */
+/** Mounted once. Never opens by itself; the Sessions Export menu and the palette open the modal. */
 export function WrappedHost() {
   const { d } = useStore();
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    const on = () => { markSeen(new Date()); setOpen(true); };
+    const on = () => setOpen(true);
     window.addEventListener(WRAPPED_EVENT, on);
     return () => window.removeEventListener(WRAPPED_EVENT, on);
   }, []);

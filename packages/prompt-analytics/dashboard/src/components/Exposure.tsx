@@ -1,7 +1,7 @@
 import { useStore } from "../state";
 import { fmtInt } from "../lib/format";
 import { Card, Empty, Section } from "./ui";
-import { ReviewQueue } from "./ReviewQueue";
+import { ReviewQueue, exposureCounts } from "./ReviewQueue";
 
 export function Exposure() {
   const { d, ids, exCat, setExCat } = useStore();
@@ -11,10 +11,10 @@ export function Exposure() {
   }
   // With a filter active the queue narrows to the matching sessions (items carry a session id).
   const items = ids ? ex.items.filter((i) => i.session !== undefined && ids.has(i.session)) : ex.items;
-  const open = items.filter((i) => i.status === "open");
+  const open = items.filter((i) => i.status === "open"), ec = exposureCounts(items);
   const tally = new Map<string, number>(); for (const i of open) tally.set(i.category, (tally.get(i.category) ?? 0) + 1);
   const kind = [...tally].sort((a, b) => b[1] - a[1])[0]?.[0];
-  const so = open.length ? <><b>{fmtInt(open.length)}</b> open finding{open.length === 1 ? "" : "s"} in {fmtInt(new Set(open.map((i) => i.session ?? i.id)).size)} sessions; {{ secret: "secrets", pii: "PII", phi: "PHI" }[kind as "secret"] ?? kind} {tally.size > 1 ? "is most common" : "only"}.</> : <>Nothing flagged in this window.</>;
+  const so = open.length ? <><b>{fmtInt(ec.open)}</b> open finding{ec.open === 1 ? "" : "s"} in {fmtInt(ec.sessOpen)} sessions ({fmtInt(ec.all)} with reviewed); {{ secret: "secrets", pii: "PII", phi: "PHI" }[kind as "secret"] ?? kind} {tally.size > 1 ? "is most common" : "only"}.</> : <>Nothing flagged in this window.</>;
   return (
     <Section id="s-exposure" title="Exposure" q="What sensitive data did you paste?">
       <Card so={so} thin={!open.length} title="Review queue" src="exposure.sessions · local only" meta="grouped by session, newest first. Previews are masked and stay local" span={12}>

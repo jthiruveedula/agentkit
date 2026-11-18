@@ -111,6 +111,10 @@ for (const x of sessions) {
   }
 }
 
+// Scenario C: one topic leaves its cost trend. Re-label only (own LCG, no cost or count changes): the last week's priced, clustered sessions outside the regression combo move to topic 8.
+const rndTopic = lcg(4421), topicStart = iso(new Date(start.getTime() + (days - 7) * 864e5));
+for (const x of shuffle(sessions.filter((x) => x.date >= topicStart && x.cluster !== -1 && x.cost_usd != null && !(x.project === REG.project && x.intent === REG.intent)), rndTopic).slice(0, 14)) x.cluster = 8;
+
 // ttr_min: minutes from first prompt to last activity. Log-normal; median ~12, tail capped at 180. Null when nothing applied (as export.py).
 const TTR_INTENT = { bugfix: 1.3, devops: 1.3, feature: 1.0, refactor: 1.0, test: 1.0, data: 1.0, other: 0.9, explain: 0.7, docs: 0.7 };
 const r1 = (n) => +n.toFixed(1);

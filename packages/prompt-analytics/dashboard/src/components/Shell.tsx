@@ -9,7 +9,6 @@ import type { DashboardData } from "../data/types";
 import { EnginePill } from "./Engine";
 import { Segmented } from "./ui";
 import { openPalette } from "./Palette";
-import { GLASS, applySettings, loadSettings, saveSettings, type Settings } from "../lib/settings";
 
 type Period = "30" | "90" | "all" | "custom";
 /** Filters the badge counts: the panel's own selects, plus the model (set from the Model mix legend, shown as a chip). */
@@ -191,7 +190,6 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M4 5h16l-6 7.5V19l-4-2v-4.5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" /></svg>
               <span className="fbtn-t">Filters</span>{scoped > 0 && <b className="badge">{scoped}</b>}
             </button>
-            <Prefs />
             <button type="button" className="btn kbd" aria-label="Open command palette" aria-keyshortcuts="Control+K Meta+K" onClick={openPalette}>
               <svg className="kbd-ic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
               <span className="kbd-k">{/Mac|iP/.test(navigator.platform) ? "⌘K" : "Ctrl K"}</span>
@@ -233,40 +231,11 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
   );
 }
 
-/** Display settings: accent preset and glass strength, saved per browser. Esc or the button closes it. */
-export function Prefs() {
-  const [open, setOpen] = useState(false);
-  const [s, setS] = useState(loadSettings);
-  const btn = useRef<HTMLButtonElement>(null), box = useRef<HTMLDivElement>(null);
-  const put = (n: Partial<Settings>) => { const next = { ...s, ...n }; setS(next); applySettings(next); saveSettings(next); };
-  useEffect(() => {
-    if (!open) return;
-    box.current?.querySelector<HTMLElement>("input:checked")?.focus();
-    const on = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); setOpen(false); btn.current?.focus(); } };
-    window.addEventListener("keydown", on, true); return () => window.removeEventListener("keydown", on, true);
-  }, [open]);
-  return (
-    <>
-      <button ref={btn} type="button" className="btn setbtn" aria-label="Display settings" aria-expanded={open} aria-controls={open ? "prefs" : undefined} onClick={() => setOpen(!open)}>
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-      </button>
-      {open && (
-        <div id="prefs" ref={box} className="prefs" role="dialog" aria-label="Display settings">
-          <label><span>Glass</span>
-            <input type="range" min={0} max={GLASS.length - 1} step={1} value={s.glass} aria-valuetext={GLASS[s.glass][1]} onChange={(e) => put({ glass: +e.target.value })} />
-            <output>{GLASS[s.glass][1]}</output>
-          </label>
-        </div>
-      )}
-    </>
-  );
-}
-
 /** True when the active section is only reachable from the mobile "More" menu (so More carries the active state). */
 export const underMore = (section: string) => !BAR_IDS.includes(section);
 
 export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string> }) {
-  const { section, goto, href, secs, f, capsAll } = useStore();
+  const { section, anchor, goto, href, secs, f, capsAll } = useStore();
   const groups = navFor(secs, capsAll.multiTool);
   const bar = BAR.filter(([id]) => secs.has(id));
   const rest = groups.flatMap((g) => g.items).filter((i) => !BAR_IDS.includes(i.id));
@@ -285,7 +254,7 @@ export function Nav({ part, quiet }: { part: "side" | "bar"; quiet?: Set<string>
     return () => { document.removeEventListener("keydown", key); document.removeEventListener("pointerdown", down); window.removeEventListener("scroll", scroll); };
   }, [more]);
   const link = (id: string, text: string, cls?: string, icon?: boolean) => (
-    <a key={id} href={href(id)} className={cls} data-quiet={quiet?.has(id) || undefined} title={icon ? text : undefined} aria-current={id === section ? "location" : undefined}
+    <a key={id} href={href(id)} className={cls} data-quiet={quiet?.has(id) || undefined} title={icon ? text : undefined} aria-current={(anchor || section) === id ? "location" : undefined}
       onClick={(e) => { e.preventDefault(); setMore(false); goto(id); }}>
       {icon && <i className="ic"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d={ICON[id] ?? ICON["s-overview"]} /></svg></i>}
       {icon ? <span className="nl">{text}</span> : text}

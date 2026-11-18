@@ -3,10 +3,11 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { flipFrom } from "../lib/live";
 import { fxOn } from "../lib/hooks";
 import { useStore } from "../state";
-import { STAGES } from "../lib/filter";
+import { STAGES, struggled } from "../lib/filter";
 import { fmtDate, fmtInt, fmtUSD } from "../lib/format";
 import { srcColor, srcLabel } from "../lib/palette";
 import { SessionList } from "./Sessions";
+import { Empty } from "./ui";
 import { hasHabitData, missingHabits } from "../lib/habits";
 import { playbook } from "../lib/playbook";
 import type { SessionRow } from "../data/types";
@@ -30,7 +31,7 @@ function Habits({ r }: { r: SessionRow }) {
 function Detail({ id }: { id: string }) {
   const { d, v, openSession, clusterLabel } = useStore();
   const r = useMemo(() => d.sessions.find((x) => x.id === id), [d.sessions, id]);
-  if (!r) return <p className="empty">This session is not in the export.</p>;
+  if (!r) return <Empty>This session is not in the export.</Empty>;
   const i = v.rows.findIndex((x) => x.id === id), prev = i > 0 ? v.rows[i - 1] : null, next = i >= 0 && i < v.rows.length - 1 ? v.rows[i + 1] : null;
   const open = d.exposure.items.filter((x) => x.session === id && x.status === "open").length;
   const similar = r.cluster >= 0 ? d.sessions.filter((x) => x.id !== id && x.cluster === r.cluster && x.project === r.project).slice(0, 5) : [];
@@ -41,12 +42,12 @@ function Detail({ id }: { id: string }) {
   ];
   return (
     <>
-      <p className={`ti ${r.title ? "" : "none"}`}>{r.title || "Untitled session"}</p>
+      <p className={`ti ${r.title ? "" : "none"}`} data-sg={struggled(r) || undefined}>{r.title || "Untitled session"}</p>
       <ol className="track" aria-label={`Reached ${STAGES[Math.max(0, r.reached_stage - 1)] ?? "no stage"} of ${STAGES.length} stages`}>
         {STAGES.map((s, k) => <li key={s} data-on={r.reached_stage >= k + 1 || undefined} aria-current={r.reached_stage === k + 1 || undefined}><i aria-hidden="true" />{s}</li>)}
       </ol>
       {struggleLine(r.struggle_p) && <p className="meta">{struggleLine(r.struggle_p)}</p>}
-      <dl className="facts">{facts.map(([k, x]) => <div key={k}><dt>{k}</dt><dd>{k === "Tool" ? <><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{x}</> : x}</dd></div>)}</dl>
+      <dl className="facts">{facts.map(([k, x]) => <div key={k}><dt>{k}</dt><dd data-out={k === "Applied" && r.applied ? "applied" : undefined}>{k === "Tool" ? <><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{x}</> : x}</dd></div>)}</dl>
       <div className="pn">
         <button type="button" className="btn" disabled={!prev} onClick={() => prev && openSession(prev.id)}>Previous in view</button>
         <button type="button" className="btn" disabled={!next} onClick={() => next && openSession(next.id)}>Next in view</button>
@@ -108,7 +109,7 @@ export function Panel() {
           <h2 ref={head} tabIndex={-1}>{panel === "detail" ? "Session" : "Sessions"} {panel === "list" && <span className="meta">{fmtInt(v.rows.length)} matching</span>}</h2>
           <button type="button" className="btn" onClick={closePanel}>Close</button>
         </div>
-        <div className="panel-b">{panel === "detail" && sel ? <Detail id={sel} /> : v.legacy ? <p className="empty">This export has no per-session rows.</p> : <SessionList rows={v.rows} current={lastOpen.current} />}</div>
+        <div className="panel-b">{panel === "detail" && sel ? <Detail id={sel} /> : v.legacy ? <Empty>This export has no per-session rows.</Empty> : <SessionList rows={v.rows} current={lastOpen.current} />}</div>
       </aside>
     </>
   );

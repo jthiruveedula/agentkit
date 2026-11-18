@@ -1,14 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "../state";
 import { fmtCompact, fmtDate, fmtInt, fmtUSD } from "../lib/format";
 import { srcColor, srcLabel } from "../lib/palette";
 import { clampPage, pageCount, pageSlice, rangeText, SIZES, sizeLabel, DEFAULT_SIZE, parseSort, sortToken, type SortKey } from "../lib/paging";
 import type { SessionRow } from "../data/types";
-import { Card, Section } from "./ui";
+import { Card, Empty, Section } from "./ui";
 import { ExportMenu } from "./ExportMenu";
 import { SavedViews } from "./SavedViews";
 import { fileName, MIME, saveFile, serialize, type Fmt } from "../lib/export";
 import { toast } from "../lib/toast";
+import { struggled } from "../lib/filter";
+import { wrapped } from "../lib/wrapped";
+import { openWrapped } from "./Wrapped";
 
 export type { SortKey };
 const PAGE = 100;
@@ -35,17 +38,17 @@ export function SessionList({ rows, current }: { rows: SessionRow[]; current?: s
   const [shown, setShown] = useState(PAGE);
   useEffect(() => { setShown(PAGE); }, [f]);
   const sorted = sortRows(rows, "date", true);
-  if (rows.length === 0) return <p className="empty">No sessions match.</p>;
+  if (rows.length === 0) return <Empty>No sessions match.</Empty>;
   const more = sorted.length > shown && <div className="more"><button type="button" className="btn" onClick={() => setShown(shown + PAGE)}>Show {Math.min(PAGE, sorted.length - shown)} more</button></div>;
   return (
     <>
         <ul className="srows">
           {sorted.slice(0, shown).map((r) => (
             <li key={r.id}>
-              <button type="button" className="srow" aria-current={sel === r.id || current === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
+              <button type="button" className="srow" data-sg={struggled(r) || undefined} aria-current={sel === r.id || current === r.id || undefined} aria-label={`Open session: ${r.title || "Untitled"}, ${fmtDate(r.date)}`} onClick={() => openSession(r.id)}>
                 <span className="l1"><time dateTime={r.date}>{fmtDate(r.date)}</time><span><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</span><span className="tag">{r.intent}</span></span>
                 <span className={`ti ${r.title ? "" : "none"}`}>{r.title || "Untitled session"}</span>
-                <span className="l3"><span>{fmtInt(r.prompts)} prompts</span><span>{r.cost_usd === null ? "not priced" : fmtUSD(r.cost_usd)}</span><span>{r.applied ? "applied" : "not applied"}</span><span>friction {r.friction.toFixed(2)}</span></span>
+                <span className="l3"><span>{fmtInt(r.prompts)} prompts</span><span>{r.cost_usd === null ? "not priced" : fmtUSD(r.cost_usd)}</span><span data-out={r.applied ? "applied" : undefined}>{r.applied ? "applied" : "not applied"}</span><span>friction {r.friction.toFixed(2)}</span></span>
               </button>
             </li>
           ))}
@@ -77,7 +80,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
   const measure = () => { const e = wrap.current; if (e) setMore(e.scrollWidth - e.scrollLeft - e.clientWidth > 2); };   // right-edge fade only while more columns sit off-screen
   useEffect(() => { measure(); window.addEventListener("resize", measure); return () => window.removeEventListener("resize", measure); });
   const go = (n: number) => { setView({ pg: n > 1 ? n : undefined }); setSaid(`Page ${n} of ${last}, ${rangeText(sorted.length, n, size)}`); };
-  if (rows.length === 0) return <p className="empty">No sessions match.</p>;
+  if (rows.length === 0) return <Empty>No sessions match.</Empty>;
   return (
     <>
       <div className="tbl-wrap" ref={wrap} data-more={more || undefined} onScroll={measure}>
@@ -87,7 +90,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
               {c.k ? <button type="button" className="th-b" onClick={() => setSort(c.k as SortKey)}>{c.text}{sort.k === c.k ? (sort.desc ? " ▾" : " ▴") : ""}</button> : c.text}
             </th>))}</tr></thead>
           <tbody>{pageSlice(sorted, pg, size).map((r) => (
-            <tr key={r.id} data-sel={sel === r.id || undefined} onClick={() => openSession(r.id)}>
+            <tr key={r.id} data-sel={sel === r.id || undefined} data-sg={struggled(r) || undefined} onClick={() => openSession(r.id)}>
               <td><time dateTime={r.date}>{fmtDate(r.date)}</time></td>
               {caps.multiTool && <td className="hide-s"><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</td>}
               <td className="hide-s">{r.project || "-"}</td><td className="hide-s"><span className="tag">{r.intent}</span></td>
@@ -95,7 +98,7 @@ export function SessionTable({ rows }: { rows: SessionRow[] }) {
                 {caps.multiTool && <span className="ti-tool"><span className="sw" style={{ "--c": srcColor(r.source) } as React.CSSProperties} />{srcLabel(r.source)}</span>}</th>
               <td className="cx num">{fmtInt(r.prompts)}</td><td className="hide-s num">{fmtCompact(r.tokens)}</td><td className="hide-s num">{fmtInt(r.loops)}</td>
               {priced && <td className="num">{r.cost_usd === null ? <span className="tag">not priced</span> : fmtUSD(r.cost_usd)}</td>}
-              <td className="cx num" data-hi={r.friction > 0.5 || undefined}>{r.friction > 0.5 && <i className="fbar" aria-hidden="true" style={{ "--w": r.friction } as React.CSSProperties} />}{r.friction.toFixed(2)}</td><td className="hide-s">{r.applied ? "yes" : "no"}</td>
+              <td className="cx num" data-hi={r.friction > 0.5 || undefined}>{r.friction > 0.5 && <i className="fbar" aria-hidden="true" style={{ "--w": r.friction } as React.CSSProperties} />}{r.friction.toFixed(2)}</td><td className="hide-s" data-out={r.applied ? "applied" : undefined}>{r.applied ? "yes" : "no"}</td>
             </tr>))}</tbody>
         </table>
       </div>
@@ -130,15 +133,15 @@ export function useExporter() {
 }
 
 export function Sessions() {
-  const { v, f, set } = useStore();
-  const exp = useExporter();
+  const { d, v, f, set } = useStore();
+  const exp = useExporter(), wr = useMemo(() => wrapped(d) !== null, [d]);
   return (
     <Section id="s-sessions" title="Sessions" q="Which sessions are behind these numbers?">
-      <Card so={v.rows.length ? <><b>{fmtInt(v.rows.length)}</b> sessions in view, {Math.round((v.rows.filter((r) => r.applied).length / v.rows.length) * 100)}% resolved.</> : "Nothing flagged in this window."} thin={!v.rows.length} title="All sessions in view" meta={`${fmtInt(v.rows.length)} sessions, click one for detail`} span={12}
-        actions={<><SavedViews /><ExportMenu count={v.rows.length} onPick={exp} /></>}>
+      <Card so={v.rows.length ? <><b>{fmtInt(v.rows.length)}</b> {v.rows.length === 1 ? "session" : "sessions"} in view, {Math.round((v.rows.filter((r) => r.applied).length / v.rows.length) * 100)}% applied.</> : "No sessions in view."} thin={!v.rows.length} title="All sessions in view" meta={`${fmtInt(v.rows.length)} ${v.rows.length === 1 ? "session" : "sessions"}, click one for detail`} span={12}
+        actions={<><SavedViews /><ExportMenu count={v.rows.length} onPick={exp} onWrapped={wr ? openWrapped : undefined} /></>}>
         {!v.legacy && <label className="field s-search"><span>Search titles</span>
           <input type="search" value={f.q ?? ""} placeholder="Type to filter sessions by title" autoComplete="off" onChange={(e) => set({ q: e.target.value || undefined })} /></label>}
-        {v.legacy ? <p className="empty">This export has no per-session rows.</p> : <SessionTable rows={v.rows} />}
+        {v.legacy ? <Empty>This export has no per-session rows.</Empty> : <SessionTable rows={v.rows} />}
       </Card>
     </Section>
   );

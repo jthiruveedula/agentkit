@@ -66,7 +66,7 @@
 /* Where it went: numbers in the UI face (tabular), the table spans the card */
 #s-overview .wh { max-width: none; }
 #s-overview .wh-v, #s-overview .wh-f, #s-overview .wh-p { font: 13px/20px var(--sans); font-variant-numeric: tabular-nums; }
-@media (min-width: 700px) { #s-overview .wh-r { grid-template-columns: minmax(80px, 22%) minmax(60px, 1fr) 13ch 13ch 9ch; } }
+@media (min-width: 700px) { #s-overview .wh-r { grid-template-columns: minmax(80px, 22%) minmax(60px, 1fr) 14ch 14ch 10ch; } }
 /* headers stay on one line, numeric ones right-aligned over their columns */
 #s-overview .wh-h { align-items: end; } #s-overview .wh-h > span { white-space: nowrap; line-height: 14px; }
 @media (pointer: coarse) { #s-overview .b-act, .b-top .b-acts .btn { height: auto; min-height: 40px; } }
@@ -111,7 +111,4 @@
 .receipt > button { font-weight: 600; color: var(--accent); text-align: left; }
 .receipt > button:hover { border-color: var(--accent); }
 .receipt > button:focus-visible { outline-offset: -2px; }   /* inside the cell: the clip-path above cuts anything left of the row, a wrapped button sits on that edge */
-html.glass .receipt > * { background: oklch(1 0 0 / 0.55); border-color: var(--rim); }
-html.glass .receipt > :first-child { border-left-color: var(--bad); }
-html.glass .receipt > button:hover { border-color: var(--accent); }
 @media (pointer: coarse) { .receipt > button { min-height: 40px; } }

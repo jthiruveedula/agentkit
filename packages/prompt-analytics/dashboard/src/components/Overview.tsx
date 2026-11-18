@@ -2,10 +2,9 @@ import { useMemo, useState } from "react";
 import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
-import { Count, Empty, Segmented, W } from "./ui";
+import { Card, Count, Empty, Segmented, W } from "./ui";
 import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
-import { WrappedButton } from "./Wrapped";
 import { Bullet, Gauge, sparkPath } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
 import { briefing, type Briefing } from "../lib/briefing";
@@ -21,7 +20,7 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
-import { Heat, Rhythm } from "./Rhythm";
+import { alerts, forecast, type Alert } from "../lib/watch";
 import "./hero.css";
 import "./story.css";
 
@@ -109,6 +108,7 @@ export function trail(rows: SessionRow[], to: string, days = 30): (number | null
 }
 /** Strip widget 2: the 30-day struggled rate as a sparkline (7-day rolling), the earlier rate dashed, min / now chips, and how many weeks it has moved one way. */
 function Spark({ vals, was }: { vals: (number | null)[]; was: number | null }) {
+  const { apply, win } = useStore();
   const W0 = 120, H = 44, n = vals.length, real = vals.filter((v): v is number => v !== null);
   if (real.length < 2) return null;
   const top = Math.max(...real, was ?? 0, 0.01) * 1.15, x = (i: number) => (i * W0) / (n - 1), y = (v: number) => +(H - 2 - (v / top) * (H - 4)).toFixed(2);
@@ -131,22 +131,27 @@ function Spark({ vals, was }: { vals: (number | null)[]; was: number | null }) {
         </svg>
         <i className="sp-d" style={{ left: `${(x(last) / W0) * 100}%`, top: `${(y(now) / H) * 100}%` }} />
       </div>
-      <p className="w-chips" aria-hidden="true"><span className="chip">low {pct(Math.min(...real))}</span><span className={`chip${dir > 0 ? " bad" : ""}`}>7d {pct(now)}</span></p>
+      <p className="w-chips"><span className="chip" aria-hidden="true">low {pct(Math.min(...real))}</span>
+        <button type="button" className={`chip${dir > 0 ? " bad" : ""}`} onClick={() => apply({ struggled: true, from: addDays(win.to, -29), to: win.to }, { list: true })}
+          aria-label={`7-day struggle rate ${pct(now)}. Open the struggled sessions of the last 30 days`}>7d {pct(now)}</button></p>
     </W>
   );
 }
 
 /** Strip widget 4: the latest cost-per-landed-change spike the analyzer flagged (time.anomaly.cost_per_change.<week>; ids sort by week), against its usual level. */
 function Cost() {
-  const { d } = useStore();
+  const { d, apply } = useStore();
   const c = useMemo(() => d.insights.filter((i) => i.id.startsWith("time.anomaly.cost_per_change.") && i.delta !== null && i.delta > -1)
     .sort((a, b) => b.id.localeCompare(a.id))[0], [d.insights]);
   if (!c || c.delta === null) return null;
   const usd = (x: number) => (x >= 1 ? `$${fmtInt(Math.round(x))}` : `$${x.toFixed(2)}`), usual = c.value / (1 + c.delta);
+  const wk = /^\d{4}-\d{2}-\d{2}$/.test(c.id.split(".").pop() ?? "") ? c.id.split(".").pop()! : "";
   const dp = `${c.delta >= 0 ? "+" : "-"}${fmtInt(Math.round(Math.abs(c.delta) * 100))}%`;
   return (
-    <W n={4} ic="cost" t="Cost / landed change" className="cost" cap={`usually ${usd(usual)}`} label={`${c.claim}, ${dp}`}>
-      <p className="w-v"><Count className="w-n" text={usd(c.value)} tick /><span className={`chip${c.delta > 0 ? " bad" : ""}`}>{dp}</span></p>
+    <W n={4} ic="cost" t="Cost / change" className="cost" cap={`usually ${usd(usual)}`} label={`${c.claim}, ${dp}`}>
+      <p className="w-v">{wk
+        ? <button type="button" className="b-num w-n" onClick={() => apply({ from: wk, to: addDays(wk, 6) }, { list: true })} aria-label={`${usd(c.value)} per landed change, week of ${fmtDate(wk)}. Open that week's sessions`}><Count text={usd(c.value)} tick /></button>
+        : <Count className="w-n" text={usd(c.value)} tick />}<span className={`chip${c.delta > 0 ? " bad" : ""}`}>{dp}</span></p>
     </W>
   );
 }
@@ -231,7 +236,7 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
             })}
           </p>
         )}
-        <span className="b-acts"><WrappedButton /><CopySummary /></span>
+        <span className="b-acts"><CopySummary /></span>
       </div>
       <div className="strip">
         <W n={1} ic="gauge" t="Struggle score" className="lead"
@@ -265,14 +270,12 @@ function Brief({ b, bs, cmp: { now, prev, vd }, win, scope, all: unDated }: { b:
           )}
         </W>
         <Spark vals={tr.slice(6)} was={was} />
-        <Heat />
         <Cost />
-        <W n={5} ic="why" t={drv ? `Why: ${drv.key}` : "Why it matters"} className="why"
+        <W n={5} ic="why" t={drv ? "Why" : "Why it matters"} className="why"
           cap={drv && fix ? <button type="button" className="w-fix" title={`${fix.row.detail} (${fix.row.impact})`} onClick={() => toFix(fix.row.id)}
             aria-label={`Fix #${fix.n}: ${fix.row.action} (${fix.row.impact}). Go to this Do next row`}>Fix #{fix.n}: {fix.row.action}</button> : undefined}>
           {why ? <dl className="story"><div><dt className="sr-only">{drv ? "Why" : "Why it matters"}</dt><dd>{why}</dd></div></dl> : <span className="b-say">No single project or intent stands out.</span>}
         </W>
-        <Rhythm />
       </div>
     </section>
   );
@@ -317,6 +320,58 @@ function Drivers({ b, scope, label, rows: cur }: { b: Briefing; scope: Scope; la
   );
 }
 
+/** Watchtower: threshold breaches from the export (lib/watch). Each row opens the sessions behind it; a quiet line when nothing is over. */
+function Alerts() {
+  const { d, v, win, apply, openSession, goto, setExCat } = useStore();
+  const xs = useMemo(() => alerts(d, v.rows, win), [d, v.rows, win]);
+  const open = (a: Alert) => (a.filter ? apply(a.filter, { list: true }) : a.secret?.length === 1 ? openSession(a.secret[0]) : (setExCat("secret"), goto("s-exposure")));
+  return (
+    <Card id="s-alerts" title="Alerts" meta="struggle rate, open secrets, cost spikes" src="thresholds · this view" span={12} thin={!xs.length}
+      so={xs.length ? `${fmtInt(xs.length)} thing${xs.length === 1 ? " is" : "s are"} over a threshold.` : "No alerts: nothing in this view is over its threshold."}>
+      {!xs.length ? null : (
+        <div className="tbl-wrap">
+          <table className="tbl">
+            <caption className="sr-only">Alerts, most urgent first</caption>
+            <tbody>{xs.map((a) => (
+              <tr key={a.id}>
+                <td><span className="tag" data-sev={a.sev}>{a.sev === "bad" ? "Act" : "Watch"}</span></td>
+                <td>{a.text}</td>
+                <td><button type="button" className="link" onClick={() => open(a)} aria-label={`${a.text}. ${a.filter || a.secret?.length === 1 ? "Open the sessions behind it" : "Open the review queue"}`}>{a.filter || a.secret?.length === 1 ? "Open sessions" : "Review"}</button></td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/** Month-end projection (labelled as one) with the numbers it is built from. Each number opens its sessions. Topic cost flags live in Friction. */
+function Forecast({ all }: { all: SessionRow[] }) {
+  const { d, apply } = useStore();
+  const { start, end } = d.range;
+  const fc = useMemo(() => forecast(all, start, end), [all, start, end]);
+  if (!fc) return null;
+  const month = () => apply({ from: fc.monthFrom, to: end }, { list: true });
+  const row = (label: string, text: string, go: () => void, aria: string) => <tr key={label}><th scope="row">{label}</th><td><button type="button" className="link" onClick={go} aria-label={aria}>{text}</button></td></tr>;
+  return (
+    <Card id="s-forecast" title="Cost projection" meta={<><span className="tag">projection</span> to the end of the month, as of {fmtDate(end)}</>} src="cost_usd · priced only" span={12}
+      so={<>Projected month end: <b>{fmtUSD(fc.projected)}</b>, a projection, not a bill.</>}>
+      <div className="tbl-wrap">
+        <table className="tbl">
+          <caption className="sr-only">How the month-end projection is built</caption>
+          <tbody>
+            {row("Month to date, priced", fmtUSD(fc.mtd), month, `Month to date priced spend ${fmtUSD(fc.mtd)}. Open this month's sessions`)}
+            {row(`Daily run-rate, last ${fc.days} days`, `${fmtUSD(fc.rate)} a day`, () => apply({ from: fc.runFrom, to: end }, { list: true }), `Daily run-rate ${fmtUSD(fc.rate)}, from the last ${fc.days} days. Open those sessions`)}
+            <tr><th scope="row">Days left in the month</th><td>{fmtInt(fc.left)}</td></tr>
+            {row("Projected month end", fmtUSD(fc.projected), month, `Projected month-end spend ${fmtUSD(fc.projected)}, a projection. Open this month's sessions`)}
+          </tbody>
+        </table>
+      </div>
+      <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}</p>
+    </Card>
+  );
+}
+
 export function Overview() {
   const { d, f, v, prior, win, exposed, caps, cmp } = useStore();
   const [metric, setMetric] = useState<Metric>("struggled");
@@ -340,8 +395,10 @@ export function Overview() {
     <section id="s-overview" className="sec" aria-labelledby="s-overview-h">
       <h2 id="s-overview-h" className="sr-only">Overview</h2>
       <div className="grid">
-        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><WrappedButton /><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /></div>}
+        {v.legacy ? <div className="s12 b-top"><span className="b-acts"><CopySummary /></span></div> : <div className="s12 hero"><Brief b={bb} bs={bs} cmp={sc} win={win.days} scope={scope} all={all} /></div>}
+        <Alerts />
         <KeyNumbers bs={bs} setMetric={setMetric} all={all} />
+        <Forecast all={all} />
         <Recommend /><Drivers b={bb} scope={scope} rows={bs.cur} label={bs.mode === "split" ? bs.label : undefined} />
         <p className="s12 allt" aria-label="All-time totals, not filtered">
           <span className="meta">All time</span><span>{fmtInt(t.active_days)} active days</span><span>streak {t.longest_streak} longest, {t.current_streak} now</span><span>{fmtInt(t.projects)} projects</span><span>{fmtInt(t.commits_linked)} commits linked</span>

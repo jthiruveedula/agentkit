@@ -6,7 +6,7 @@
 /* no-gain columns: 0-100% scale (top labelled), a 95% Wilson whisker per column, one label per column under it */
 .ng-plot { position: relative; padding-top: 16px; }
 .ng-plot .cols { gap: 2px; }
-.ng-plot .col i { border-radius: 4px 4px 0 0; }
+.ng-plot .col i { border-radius: 0; }
 .ng-ci { position: absolute; left: 0; right: 0; bottom: 0; height: 150px; border-top: 1px solid var(--line); pointer-events: none; }
 .ng-ci::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid var(--line); }
 .ng-top, .ng-mid { position: absolute; right: 0; bottom: 100%; font-size: 11px; line-height: 14px; color: var(--muted); }

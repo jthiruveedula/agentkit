@@ -18,7 +18,7 @@ const mount = () => { el = document.createElement("div"); document.body.append(e
 describe("Do next card", () => {
   it("sits in the row under the Brief and Key numbers, with Drivers after it, and replaces the retired sections", () => {
     mount();
-    const kids = [...el.querySelectorAll("#s-overview .grid > *")].map((c) => c.id || c.className);
+    const kids = [...el.querySelectorAll("#s-overview .grid > *")].map((c) => c.id || c.className).filter((k) => k !== "s-alerts" && k !== "s-forecast");   // the Alerts and Cost projection cards sit beside the Key numbers
     expect(kids[0]).toMatch(/hero/);   // the widget strip: Brief title line and six widgets
     expect(el.querySelector("#s-overview .hero > .brief")).not.toBeNull();
     expect(kids[1]).toMatch(/kcard/);

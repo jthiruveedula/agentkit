@@ -225,14 +225,17 @@ export function Sunburst(p: Props) {
           {curD && <path className="sb-sel" d={arcPath(cx, cy, curD.a.r0, curD.a.r1, curD.a.a0, curD.a.a1)} />}
         </g>
         <g className="sb-calls" aria-hidden="true">
+          {calls.length > 1 && <polyline className="sb-base" points={[...calls].sort((a, b) => a.x.rank - b.x.rank).map((c) => `${(c.lx + (c.right ? 9 : -9)).toFixed(1)},${c.ey.toFixed(1)}`).join(" ")} />}
           {calls.map((c) => {
-            const { lx } = c, dir = c.right ? 1 : -1;
-            return <g key={c.id} className="sb-call" onClick={() => p.onHot(c.id)}>
+            const { lx } = c, dir = c.right ? 1 : -1, sx = lx + dir * 9;
+            return <g key={c.id} className="sb-call" data-rank={c.x.rank} onClick={() => p.onHot(c.id)}>
               <rect className="sb-hit" x={lx + dir * 9 - 12} y={c.ey - 12} width={24} height={24} />
               <polyline points={`${c.ax.toFixed(1)},${c.ay.toFixed(1)} ${c.ex.toFixed(1)},${c.ey.toFixed(1)} ${(lx - dir * 4).toFixed(1)},${c.ey.toFixed(1)}`} strokeDasharray={c.exact ? undefined : "3 3"} />
               <circle cx={c.ax} cy={c.ay} r={3} />
-              <circle cx={lx + dir * 9} cy={c.ey} r={9} className="sb-badge" />
-              <text x={lx + dir * 9} y={c.ey} textAnchor="middle" dominantBaseline="central" className="sb-rank">{c.x.rank}</text>
+              <circle cx={sx} cy={c.ey} r={9} className="sb-badge" />
+              <polygon className="sb-stn" points={`${sx},${c.ey - 11} ${sx + 10.5},${c.ey + 7} ${sx - 10.5},${c.ey + 7}`} />
+              {c.x.rank === 1 && <path className="sb-flag" d={`M${sx} ${c.ey - 11}v-9l7 2.5-7 2.5`} />}
+              <text x={sx} y={c.ey} textAnchor="middle" dominantBaseline="central" className="sb-rank">{c.x.rank}</text>
             </g>;
           })}
         </g>

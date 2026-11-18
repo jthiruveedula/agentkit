@@ -55,6 +55,9 @@ const heat = () => { base["heat-max"] = mixLab(base.accent, base.sunk, 0.6); bas
 heat();
 // every accent preset (:root[data-accent="x"]) is checked as its overrides over the base tokens
 const themes = [["default", base], ...[...css.matchAll(/\n:root\[data-accent="(\w+)"\] \{([^}]*)\}/g)].map((m) => [m[1], { ...base, ...parse(m[2]) }])].map(([n, t]) => [n, { ...t, "heat-max": mixLab(t.accent, t.sunk, 0.6), "heat-min": mixLab(t.accent, t.sunk, 0.08) }]);
+// ATLAS (atlas.css, the only theme): its token block over the base; no glass, so glass = the opaque paper card
+const atlasBlock = readFileSync(new URL("../src/components/atlas.css", import.meta.url), "utf8").match(/\n:root \{([\s\S]*?)\n\}/)[1];
+{ const t = { ...base, ...parse(atlasBlock) }; t.glass = t.surface; t["wall-min"] = t.bg; themes.push(["atlas", { ...t, "heat-max": mixLab(t.accent, t.sunk, 0.5), "heat-min": mixLab(t.accent, t.sunk, 0.08) }]); }   // atlas.css caps heat cells at 45%
 for (const [name, all] of themes) {
   for (const [fg, bg, min] of pairs) {
     const r = ratio(all[fg], all[bg]);

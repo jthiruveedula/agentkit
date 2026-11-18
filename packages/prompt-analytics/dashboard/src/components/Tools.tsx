@@ -11,12 +11,13 @@ import { Ramp, Spark } from "./charts";
 import { MIN_N, ciText } from "../lib/stats";
 import { unpricedNote } from "../lib/capabilities";
 import { struggledRate } from "../lib/metrics";
+import { tta, ttaText } from "../lib/watch";
 import { toolName } from "./Time";
 import "./investigate.css";
 
-type Col = "sessions" | "prompts" | "tokens" | "cost" | "cpa" | "applied" | "friction" | "ttr";
+type Col = "sessions" | "prompts" | "tokens" | "cost" | "tta" | "cpa" | "applied" | "friction" | "ttr";
 const COLS: { id: Col; text: string; hide?: boolean }[] = [
-  { id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts", hide: true }, { id: "tokens", text: "Tokens", hide: true }, { id: "cost", text: "Cost" },
+  { id: "sessions", text: "Sessions" }, { id: "prompts", text: "Prompts", hide: true }, { id: "tokens", text: "Tokens", hide: true }, { id: "cost", text: "Cost" }, { id: "tta", text: "Time to applied edit p50 / p95" },
   { id: "cpa", text: "$ / applied", hide: true }, { id: "applied", text: "Applied" }, { id: "friction", text: "Friction" }, { id: "ttr", text: "Median TTR", hide: true },
 ];
 
@@ -32,19 +33,19 @@ function scoreSo(sources: Src[]) {
 
 function Scorecard() {
   const { d, v, f, win, drill, caps } = useStore();
-  const cols = COLS.filter((c) => (caps.hasCost || (c.id !== "cost" && c.id !== "cpa")) && (caps.hasTtr || c.id !== "ttr"));
+  const cols = COLS.filter((c) => (caps.hasCost || (c.id !== "cost" && c.id !== "cpa")) && (caps.hasTtr || c.id !== "ttr") && (caps.hasTtrRows || c.id !== "tta"));
   const on = (k: Col) => cols.some((c) => c.id === k);
   const [sort, setSort] = useState<{ k: Col; desc: boolean }>({ k: "sessions", desc: true });
   const rows = useMemo(() => v.sources.map((t) => {
     const mine = v.rows.filter((r) => r.source === t.key);
     const tt = d.ttr.filter((x) => x.source === t.key), n = tt.reduce((a, x) => a + x.n, 0);
     return {
-      key: t.key, t, est: d.by_source.find((s) => s.source === t.key)?.cost_is_estimate ?? false, cpa: costPerApplied(mine).value,
+      key: t.key, t, tta: tta(mine), est: d.by_source.find((s) => s.source === t.key)?.cost_is_estimate ?? false, cpa: costPerApplied(mine).value,
       ttr: n ? tt.reduce((a, x) => a + x.n * x.median_min, 0) / n : null, status: d.sources.find((s) => s.source === t.key)?.status ?? "ok",
       spark: sparkSeries(mine, win, METRICS.sessions).slice(-8),
     };
   }), [d, v, win]);
-  const val = (r: (typeof rows)[number], k: Col): number => (k === "applied" ? (r.t.asked ? r.t.applied / r.t.asked : 0) : k === "cpa" ? r.cpa ?? -1 : k === "ttr" ? r.ttr ?? -1 : k === "cost" ? r.t.cost ?? -1 : r.t[k]);
+  const val = (r: (typeof rows)[number], k: Col): number => (k === "applied" ? (r.t.asked ? r.t.applied / r.t.asked : 0) : k === "cpa" ? r.cpa ?? -1 : k === "ttr" ? r.ttr ?? -1 : k === "tta" ? r.tta?.p50 ?? -1 : k === "cost" ? r.t.cost ?? -1 : r.t[k]);
   const sorted = [...rows].sort((a, b) => (sort.desc ? -1 : 1) * (val(a, sort.k) - val(b, sort.k)) || a.key.localeCompare(b.key));
   if (rows.length === 0) return <Empty>No tool has sessions here.</Empty>;
   return (
@@ -63,6 +64,7 @@ function Scorecard() {
                 {toolName(r.key)}</button></th>
               <td>{fmtInt(r.t.sessions)}</td><td className="hide-s">{fmtInt(r.t.prompts)}</td><td className="hide-s">{r.t.tokens > 0 ? fmtCompact(r.t.tokens) : <span className="tag" title="no token data">no data</span>}</td>
               {on("cost") && <td>{r.t.cost === null ? <span className="tag">not priced</span> : <>{fmtUSD(r.t.cost)}{r.est ? <span className="tag">estimate</span> : null}</>}</td>}
+              {on("tta") && <td>{ttaText(r.tta)}{r.tta && <small className="n"> n={fmtInt(r.tta.n)}</small>}</td>}
               {on("cpa") && <td className="hide-s">{r.cpa === null ? "-" : fmtUSD(r.cpa)}</td>}
               <td data-low={r.t.asked < MIN_N || undefined} title={r.t.asked ? ciText(r.t.applied, r.t.asked) : undefined}>{r.t.asked ? <>{fmtPct(r.t.applied / r.t.asked)} <small className="n">n={fmtInt(r.t.asked)}{r.t.asked < MIN_N ? ", low" : ""}</small></> : "-"}</td><td>{r.t.asked ? r.t.friction.toFixed(2) : "-"}</td>
               {on("ttr") && <td className="hide-s">{r.ttr === null ? "-" : `${r.ttr.toFixed(1)} min`}</td>}
@@ -71,7 +73,7 @@ function Scorecard() {
             </tr>))}</tbody>
         </table>
       </div>
-      <p className="note">{[on("ttr") && "Median TTR is an all-sessions aggregate and ignores filters.", on("cpa") && "$ / applied counts priced sessions only.", unpricedNote(caps)].filter(Boolean).join(" ")}</p>
+      <p className="note">{[on("ttr") && "Median TTR is an all-sessions aggregate and ignores filters.", on("tta") && "Time to applied edit is minutes from session start to the last applied edit, not response latency.", on("cpa") && "$ / applied counts priced sessions only.", unpricedNote(caps)].filter(Boolean).join(" ")}</p>
       <DataTable caption="Tool scorecard" head={["Tool", "Sessions", ...(caps.hasCost ? ["Cost USD"] : []), "Applied %", "Friction"]} rows={sorted.map((r) => [srcLabel(r.key), r.t.sessions, ...(caps.hasCost ? [r.t.cost === null ? "not priced" : +r.t.cost.toFixed(2)] : []), r.t.asked ? fmtPct(r.t.applied / r.t.asked) : "-", r.t.friction.toFixed(2)])} />
     </>
   );
