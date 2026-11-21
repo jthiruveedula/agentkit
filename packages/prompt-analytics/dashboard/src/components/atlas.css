@@ -381,3 +381,8 @@
 
 /* programmatic heading focus on route change: no box; keyboard focus-visible rings stay */
 main [tabindex="-1"]:focus { outline: none; }
+
+/* survey notes plate: one dense mono line in the header meta */
+.survey-notes { font: 11px/18px var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.survey-notes b { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--inkblue); margin-right: 4px; }
+.survey-notes span { color: var(--ink); }

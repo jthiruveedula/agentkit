@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useStore } from "../state";
 import { addDays, type Filter } from "../lib/filter";
 import { clampDay, isoDay } from "../lib/hash";
-import { fmtDate, fmtInt, fmtRange } from "../lib/format";
+import { fmtDate, fmtInt, fmtPct, fmtRange } from "../lib/format";
 import { INTENTS, SOURCES, srcLabel } from "../lib/palette";
 import type { Cmp } from "../lib/compare";
 import type { DashboardData } from "../data/types";
@@ -96,6 +96,17 @@ const Glyph = () => (
   </svg>
 );
 
+/** "Survey notes" honesty plate: priced share of the sessions in view (cost_usd !== null / rows), ML tier that ran (engine.mode), export time (generated_at). Missing fields show "—". */
+export function SurveyNotes({ d, rows }: { d: DashboardData; rows: { cost_usd: number | null }[] }) {
+  const priced = rows.length ? fmtPct(rows.filter((r) => r.cost_usd !== null).length / rows.length) : "—";
+  const tier = d.engine?.mode ?? "—", at = d.generated_at ? d.generated_at.replace("T", " ").replace(/:\d\dZ$/, "Z") : "—";
+  return (
+    <span className="survey-notes" role="note" aria-label="Survey notes">
+      <b>Survey notes</b> priced <span>{priced}</span> · ML tier <span>{tier}</span> · exported <span>{at}</span>
+    </span>
+  );
+}
+
 export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onData: (d: DashboardData) => void; onMenu: () => void; menuOpen: boolean }) {
   const { f, set, v, win, cmp, setCmp, crumbs, clear, openList, caps, capsAll, section, panel, back } = useStore();
   const ref = useRef<HTMLElement>(null), fbtn = useRef<HTMLButtonElement>(null), crumbsRef = useRef<HTMLElement>(null);
@@ -179,6 +190,7 @@ export function Header({ d, onData, onMenu, menuOpen }: { d: DashboardData; onDa
                   {fmtInt(v.rows.length)}{v.rows.length !== d.sessions.length ? ` of ${fmtInt(d.sessions.length)}` : ""} sessions
                 </button>
                 {!caps.empty && <EnginePill d={d} onData={onData} />}
+                {!caps.empty && <SurveyNotes d={d} rows={v.rows} />}
               </div>
             </div>
           </div>

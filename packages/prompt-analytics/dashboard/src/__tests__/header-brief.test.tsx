@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Dashboard } from "../App";
+import { SurveyNotes } from "../components/Shell";
 import { ciGeom } from "../components/Overview";
 import { normalize } from "../data/load";
 import { attention } from "../lib/attention";
@@ -281,5 +282,17 @@ describe("brief honesty (H2) and empty actions (M7 / L11)", () => {
       for (const b of el.querySelectorAll(".brief button")) expect(b.textContent).not.toMatch(/\b0 sessions/);
       act(() => root?.unmount()); el.remove();
     }
+  });
+});
+
+describe("Survey notes plate", () => {
+  it("shows priced share, tier and export time; dashes when fields are missing", () => {
+    mount("");
+    const t = el.querySelector(".survey-notes")!.textContent!;
+    expect(t).toMatch(/priced \d+%/); expect(t).toContain(d.engine.mode); expect(t).toMatch(/exported \d{4}-\d\d-\d\d \d\d:\d\dZ/);
+    const e2 = document.createElement("div"); document.body.append(e2); const r2 = createRoot(e2);
+    act(() => r2.render(<SurveyNotes d={{ ...d, generated_at: "", engine: undefined as never }} rows={[]} />));
+    expect(e2.textContent).toContain("priced —"); expect(e2.textContent).toContain("tier —"); expect(e2.textContent).toContain("exported —");
+    act(() => r2.unmount()); e2.remove();
   });
 });
