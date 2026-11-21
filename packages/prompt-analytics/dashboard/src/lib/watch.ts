@@ -24,6 +24,29 @@ export function forecast(rows: SessionRow[], start: string, end: string): Foreca
   return { mtd, rate, days, left, projected: mtd + rate * left, unpriced: mine.length - pr.length, monthFrom: `${m}-01`, runFrom };
 }
 
+export interface Band { lo: number; hi: number; held: number; tested: number; months: number }
+/** Historical-variance band around the straight-line projection. For each of up to 12 earlier complete months (whose first day is on/after the earliest row), re-run the same projection at the same day-of-month (clamped) with the same run-rate length;
+ *  ratio = that month's actual priced total / its projection (skipped when the projection is <= 0). lo/hi = p25/p75 of ratios x projected.
+ *  Report card: each of the last <= 8 months that has >= 3 earlier ratios; held = its ratio fell inside the p25-p75 of the earlier ratios only (no peeking). A p25-p75 band holds about half the time by construction. null when < 4 ratios. */
+export function forecastBand(rows: SessionRow[], end: string, days: number, projected: number): Band | null {
+  if (!end) return null;
+  const pr = priced(rows), first = rows.reduce((a, r) => (r.date < a ? r.date : a), end), dom = +end.slice(8, 10), c = (r: SessionRow) => r.cost_usd as number, ratios: number[] = [];
+  for (let k = 12; k >= 1; k--) {
+    const m = new Date(Date.UTC(+end.slice(0, 4), +end.slice(5, 7) - 1 - k, 1)).toISOString().slice(0, 7);
+    if (`${m}-01` < first) continue;
+    const dim = daysInMonth(`${m}-01`), cut = `${m}-${String(Math.min(dom, dim)).padStart(2, "0")}`, inM = pr.filter((r) => r.date.slice(0, 7) === m), from = addDays(cut, 1 - days);
+    const p = sum(inM.filter((r) => r.date <= cut).map(c)) + (sum(pr.filter((r) => r.date >= from && r.date <= cut).map(c)) / days) * (dim - +cut.slice(8, 10));
+    if (p > 0) ratios.push(sum(inM.map(c)) / p);
+  }
+  if (ratios.length < 4) return null;
+  let held = 0, tested = 0;
+  for (let i = Math.max(3, ratios.length - 8); i < ratios.length; i++) {
+    const prev = ratios.slice(0, i); tested++;
+    if (ratios[i] >= quantile(prev, 0.25) && ratios[i] <= quantile(prev, 0.75)) held++;
+  }
+  return { lo: projected * quantile(ratios, 0.25), hi: projected * quantile(ratios, 0.75), held, tested, months: ratios.length };
+}
+
 export interface TopicBreak { cluster: number; now: number; was: number; sessions: number }
 const slope = (ys: number[]) => { const n = ys.length, mx = (n - 1) / 2, my = sum(ys) / n; return sum(ys.map((y, i) => (i - mx) * (y - my))) / sum(ys.map((_, i) => (i - mx) ** 2)); };
 /** A topic breaks trend when, over 12 weeks ending at `end`, its last-4-week cost slope beats the prior-8-week slope by more than a quarter of the prior weekly mean, the recent mean is higher, and it has >= 5 priced sessions lately; needs 12 weeks of export. */

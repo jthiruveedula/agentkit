@@ -3,7 +3,7 @@ import { bh, playbook, pValue } from "../lib/playbook";
 import { golden, router } from "../lib/econ";
 import { MIN_SHARE, partition } from "../lib/sunburst";
 import { buildTree } from "../lib/mindmap";
-import { autopsy } from "../lib/watch";
+import { autopsy, forecastBand } from "../lib/watch";
 import { monotonePath, niceTicks } from "../lib/trend";
 import type { SessionRow } from "../data/types";
 
@@ -118,5 +118,21 @@ describe("spike autopsy", () => {
   it("returns null without a baseline", () => {
     expect(autopsy(spike, "2026-03-10", "2026-03-01", "2026-03-10")).toBeNull();
     expect(autopsy(base(9), "2026-03-20", "2026-03-01", "2026-03-30")).toBeNull();
+  });
+});
+
+describe("forecast band", () => {
+  it("is null without enough past months", () => {
+    expect(forecastBand([row({ date: "2026-03-02" })], "2026-03-20", 7, 10)).toBeNull();
+  });
+  it("is tight and always held on a steady history", () => {
+    const rows: SessionRow[] = [];
+    for (let d = new Date(Date.UTC(2025, 2, 1)); d <= new Date(Date.UTC(2026, 2, 20)); d.setUTCDate(d.getUTCDate() + 1))
+      rows.push(row({ date: d.toISOString().slice(0, 10) }));
+    const b = forecastBand(rows, "2026-03-20", 7, 31)!;
+    expect(b.lo).toBeCloseTo(31);
+    expect(b.hi).toBeCloseTo(31);
+    expect(b.held).toBe(b.tested);
+    expect(b.months).toBe(12);
   });
 });

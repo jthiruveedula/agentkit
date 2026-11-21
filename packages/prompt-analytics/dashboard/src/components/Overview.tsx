@@ -20,7 +20,7 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
-import { alerts, autopsy, forecast, type Alert } from "../lib/watch";
+import { alerts, autopsy, forecast, forecastBand, type Alert } from "../lib/watch";
 import "./hero.css";
 import "./story.css";
 
@@ -372,6 +372,7 @@ function Forecast({ all }: { all: SessionRow[] }) {
   const { d, apply } = useStore();
   const { start, end } = d.range;
   const fc = useMemo(() => forecast(all, start, end), [all, start, end]);
+  const band = useMemo(() => (fc ? forecastBand(all, end, fc.days, fc.projected) : null), [all, end, fc]);
   if (!fc) return null;
   const month = () => apply({ from: fc.monthFrom, to: end }, { list: true });
   const row = (label: string, text: string, go: () => void, aria: string) => <tr key={label}><th scope="row">{label}</th><td><button type="button" className="link" onClick={go} aria-label={aria}>{text}</button></td></tr>;
@@ -386,10 +387,11 @@ function Forecast({ all }: { all: SessionRow[] }) {
             {row(`Daily run-rate, last ${fc.days} days`, `${fmtUSD(fc.rate)} a day`, () => apply({ from: fc.runFrom, to: end }, { list: true }), `Daily run-rate ${fmtUSD(fc.rate)}, from the last ${fc.days} days. Open those sessions`)}
             <tr><th scope="row">Days left in the month</th><td>{fmtInt(fc.left)}</td></tr>
             {row("Projected month end", fmtUSD(fc.projected), month, `Projected month-end spend ${fmtUSD(fc.projected)}, a projection. Open this month's sessions`)}
+            {band && <tr><th scope="row">Likely range (p25–p75, historical variance)</th><td>{fmtUSD(band.lo)}–{fmtUSD(band.hi)}</td></tr>}
           </tbody>
         </table>
       </div>
-      <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}</p>
+      <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}{band ? ` Band = p25–p75 of actual ÷ projected over ${fmtInt(band.months)} past months; held in ${fmtInt(band.held)} of the last ${fmtInt(band.tested)} (a p25–p75 band holds about half the time by construction).` : " Not enough past months for a band."}</p>
     </Card>
   );
 }
