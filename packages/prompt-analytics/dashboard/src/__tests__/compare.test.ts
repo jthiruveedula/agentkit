@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bucketSeries, buckets, costPerApplied, crossTally, cumulative, delta, histogram, MIN_PRIOR_N, monthProjection, pointDelta, quantile, wilson, isWide, METRICS } from "../lib/compare";
+import { bucketSeries, buckets, costPerApplied, crossTally, cumulative, delta, histogram, MIN_PRIOR_N, pointDelta, quantile, wilson, isWide, METRICS } from "../lib/compare";
 import type { SessionRow } from "../data/types";
 
 const row = (o: Partial<SessionRow>): SessionRow => ({ id: "x", source: "claude_code", date: "2026-03-02", project: "p", intent: "bugfix", prompts: 2, tokens: 10, cost_usd: 1, reached_stage: 5, applied: true, loops: 0, friction: 0.2, cluster: 0, title: "", ...o });
@@ -34,11 +34,6 @@ describe("compare", () => {
   it("cost per applied skips unpriced sessions and counts them", () => {
     const r = costPerApplied([row({ cost_usd: 2 }), row({ cost_usd: 4, applied: false }), row({ cost_usd: null })]);
     expect(r).toMatchObject({ value: 6, excluded: 1, cost: 6, pricedApplied: 1, applied: 2 });
-  });
-  it("month projection runs the month-to-date rate to month end", () => {
-    const p = monthProjection([row({ date: "2026-03-05", cost_usd: 10 })], "2026-03-10")!;
-    expect(p.mtd).toBe(10); expect(p.projected).toBeCloseTo((10 / 10) * 31);
-    expect(monthProjection([row({ cost_usd: null })], "2026-03-10")).toBeNull();
   });
   it("crossTally groups by tool and intent", () => {
     const m = crossTally([row({}), row({ applied: false }), row({ source: "cursor" })]);

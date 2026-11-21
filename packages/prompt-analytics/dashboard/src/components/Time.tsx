@@ -1,8 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import "./investigate.css";
 import { useStore } from "../state";
-import { addDays, views, weekStart } from "../lib/filter";
-import { bucketSeries, buckets, cumulative, median, METRICS, monthProjection } from "../lib/compare";
+import { addDays, applyFilter, openExposure, views, weekStart } from "../lib/filter";
+import { forecast } from "../lib/watch";
+import { bucketSeries, buckets, cumulative, median, METRICS } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtUSD } from "../lib/format";
 import { golden, GOLD_MIN_N } from "../lib/econ";
 import { srcLabel } from "../lib/palette";
@@ -246,11 +247,12 @@ function HourWeek() {
 }
 
 function Cumulative() {
-  const { v, prior, win, apply, caps } = useStore();
+  const { d, f, v, prior, win, apply, caps } = useStore();
   const bks = useMemo(() => buckets(win, 1), [win]);
   const cur = useMemo(() => cumulative(bucketSeries(v.rows, win, 1, METRICS.cost)), [v.rows, win]);
   const prv = useMemo(() => (prior ? cumulative(bucketSeries(prior.v.rows, prior.win, 1, METRICS.cost)) : null), [prior]);
-  const proj = useMemo(() => monthProjection(v.rows, win.to), [v.rows, win.to]);
+  const all = useMemo(() => applyFilter(d.sessions, { ...f, from: undefined, to: undefined }, openExposure(d)), [d, f]);
+  const fc = useMemo(() => forecast(all, d.range.start, d.range.end), [all, d.range.start, d.range.end]);
   const labels = bks.map((b) => fmtDate(b.from));
   const priced = cur.length > 0 && cur[cur.length - 1] > 0;
   const nowC = cur[cur.length - 1] ?? 0, prevAt = prv ? prv[cur.length - 1] ?? prv[prv.length - 1] : null;
@@ -263,7 +265,7 @@ function Cumulative() {
           <LineChart label="Cumulative cost by day. Click a day to filter it" labels={labels} fmt={fmtUSD} height={170}
             lines={[{ name: "This period", color: "var(--accent)", values: cur }, ...(prv ? [{ name: "Previous", color: "var(--prior)", values: prv, dashed: true }] : [])]} onPick={(i) => apply({ from: bks[i].from, to: bks[i].to })} />
           <ul className="legend"><li style={{ "--c": "var(--accent)" } as React.CSSProperties}>This period</li>{prv && <li style={{ "--c": "var(--prior)" } as React.CSSProperties}>Previous period</li>}</ul>
-          {proj && <p className="note">Month to date {fmtUSD(proj.mtd)} over {proj.elapsed} of {proj.dim} days. At {fmtUSD(proj.perDay)} a day this lands near {fmtUSD(proj.projected)}. A straight-line run rate, not a forecast.</p>}
+          {fc && <p className="note">Month to date {fmtUSD(fc.mtd)}. At {fmtUSD(fc.rate)} a day (last {fc.days} days) this lands near {fmtUSD(fc.projected)}. Same run-rate as the Cost projection; a straight line, not a forecast.</p>}
           <DataTable caption="Cumulative cost" head={["Day", "This period", ...(prv ? ["Previous"] : [])]} rows={bks.map((_, i) => [labels[i], +cur[i].toFixed(2), ...(prv ? [+(prv[i] ?? 0).toFixed(2)] : [])])} />
         </>
       )}
