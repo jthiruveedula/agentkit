@@ -1,7 +1,8 @@
 // Watchtower + cost forecast + time-to-applied-edit: pure helpers over the per-session rows. Every number comes from the export; unpriced sessions are never $0.
 import type { DashboardData, SessionRow } from "../data/types";
 import { addDays, type Filter } from "./filter";
-import { daysInMonth, dayDiff, quantile, type Win } from "./compare";
+import { daysInMonth, dayDiff, median, quantile, type Win } from "./compare";
+import { spikes } from "./trend";
 import { struggledRate } from "./metrics";
 import { fmtDate, fmtInt, fmtPct, fmtUSD } from "./format";
 import { MIN_N } from "./thresholds";
@@ -42,7 +43,7 @@ export function topicBreaks(rows: SessionRow[], start: string, end: string): Top
   }).sort((a, b) => b.now / b.was - a.now / a.was);
 }
 
-export interface Alert { id: string; sev: "bad" | "warn"; text: string; filter?: Filter; secret?: string[] }
+export interface Alert { id: string; date?: string; sev: "bad" | "warn"; text: string; filter?: Filter; secret?: string[] }
 /** Threshold breaches from existing data: struggle rate over 10% in the last 4 weeks (the brief's struggled definition, >= MIN_N sessions with a prompt), open secret findings, cost anomalies in the window (|z| >= attention's line). */
 export function alerts(d: DashboardData, rows: SessionRow[], win: Win): Alert[] {
   const out: Alert[] = [], from = win.to ? addDays(win.to, -27) : "", r = struggledRate(rows.filter((x) => x.date >= from && x.date <= win.to));
@@ -50,7 +51,7 @@ export function alerts(d: DashboardData, rows: SessionRow[], win: Win): Alert[] 
   const sec = d.exposure.items.filter((i) => i.status === "open" && i.category === "secret"), ids = [...new Set(sec.flatMap((i) => (i.session ? [i.session] : [])))];
   if (sec.length) out.push({ id: "secret", sev: "bad", text: `${fmtInt(sec.length)} open secret finding${sec.length === 1 ? "" : "s"}${ids.length ? ` in ${fmtInt(ids.length)} session${ids.length === 1 ? "" : "s"}` : ""}`, secret: ids });
   d.anomalies.filter((a) => win.to && a.metric === "cost" && Math.abs(a.z) >= TH.z && a.date >= win.from && a.date <= win.to).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 3)
-    .forEach((a) => out.push({ id: `cost-${a.date}`, sev: Math.abs(a.z) >= TH.zHigh ? "bad" : "warn", text: `Cost spike ${fmtDate(a.date)}: ${fmtUSD(a.value)} (z ${a.z.toFixed(1)})`, filter: { from: a.date, to: a.date } }));
+    .forEach((a) => out.push({ id: `cost-${a.date}`, date: a.date, sev: Math.abs(a.z) >= TH.zHigh ? "bad" : "warn", text: `Cost spike ${fmtDate(a.date)}: ${fmtUSD(a.value)} (z ${a.z.toFixed(1)})`, filter: { from: a.date, to: a.date } }));
   return out;
 }
 
@@ -66,4 +67,38 @@ export const ttaText = (t: Tta | null) => (t ? `${+t.p50.toFixed(1)} / ${+t.p95.
 export function costPerOutcome(rows: SessionRow[]): { value: number | null; outcomes: number; cost: number } {
   const pr = priced(rows), cost = sum(pr.map((r) => r.cost_usd as number)), outcomes = pr.filter((r) => r.reached_stage >= 6).length;
   return { value: outcomes ? cost / outcomes : null, outcomes, cost };
+}
+
+export interface Factor { key: "volume" | "mix" | "size" | "topic" | "residual"; label: string; usd: number }
+export interface Autopsy { spike: number; baseline: number; delta: number; days: number; factors: Factor[]; omitted: string[] }
+/** Spike autopsy: spike-day priced cost minus the median daily priced cost of the other non-spike days in [from, to] (spikes by trend.spikes), split by a chained attribution so volume + mix + size + topic + residual = delta exactly.
+ *  Baseline per-day prompts P0 = pooled prompts / days; u0 = pooled cost / pooled prompts; tau = tokens per prompt. Spike day: P1, tau1, model shares m1.
+ *  volume = (P1-P0)*u0 -> s=P1*u0; mix = P1*sum(m1_k*u0_k) - s (u0_k = baseline cost/prompt of model k, u0 if unseen) -> s updated; size = s*(tau1/tau0-1) -> s*=tau1/tau0;
+ *  topic = cost of spike rows in clusters absent from baseline - their prompts*s/P1; residual = delta - the rest (incl. baseline mean vs median, price changes).
+ *  A factor whose field is missing (model, cluster >= 0, tokens) is omitted and named in `omitted`. null = nothing honest to say. */
+export function autopsy(rows: SessionRow[], date: string, from: string, to: string): Autopsy | null {
+  const by = new Map<string, SessionRow[]>();
+  for (const r of priced(rows)) if (r.date >= from && r.date <= to) by.set(r.date, [...(by.get(r.date) ?? []), r]);
+  const S = by.get(date), days = [...by.keys()], cost = (rs: SessionRow[]) => sum(rs.map((r) => r.cost_usd as number)), pr = (rs: SessionRow[]) => sum(rs.map((r) => r.prompts));
+  if (!S) return null;
+  const hot = new Set(spikes(days.map((d) => cost(by.get(d)!))).map((i) => days[i])), bd = days.filter((d) => d !== date && !hot.has(d));
+  const B = bd.flatMap((d) => by.get(d)!), C0 = cost(B), P0t = pr(B), P1 = pr(S), C1 = cost(S);
+  if (!bd.length || !(C0 > 0) || !(P0t > 0) || !(P1 > 0)) return null;
+  const baseline = median(bd.map((d) => cost(by.get(d)!))), delta = C1 - baseline, u0 = C0 / P0t, tau0 = sum(B.map((r) => r.tokens)) / P0t, tau1 = sum(S.map((r) => r.tokens)) / P1;
+  const factors: Factor[] = [], omitted: string[] = [];
+  let s = P1 * u0;
+  factors.push({ key: "volume", label: "Volume", usd: (P1 - P0t / bd.length) * u0 });
+  if (S.some((r) => r.model != null) && B.some((r) => r.model != null)) {
+    const unit = new Map<string, number[]>(), k = (r: SessionRow) => r.model ?? "unknown";
+    for (const r of B) { const e = unit.get(k(r)) ?? [0, 0]; e[0] += r.cost_usd as number; e[1] += r.prompts; unit.set(k(r), e); }
+    const next = sum(S.map((r) => { const e = unit.get(k(r)); return r.prompts * (e && e[1] > 0 ? e[0] / e[1] : u0); }));
+    factors.push({ key: "mix", label: "Model mix", usd: next - s }); s = next;
+  } else omitted.push("model mix (no model field)");
+  if (tau0 > 0) { factors.push({ key: "size", label: "Prompt size", usd: s * (tau1 / tau0 - 1) }); s *= tau1 / tau0; } else omitted.push("prompt size (no baseline tokens)");
+  if (S.some((r) => r.cluster >= 0) && B.some((r) => r.cluster >= 0)) {
+    const seen = new Set(B.map((r) => r.cluster)), N = S.filter((r) => r.cluster >= 0 && !seen.has(r.cluster));
+    factors.push({ key: "topic", label: "New topic", usd: cost(N) - (pr(N) * s) / P1 });
+  } else omitted.push("new topic (no topic cluster field)");
+  factors.push({ key: "residual", label: "Residual", usd: delta - sum(factors.map((f) => f.usd)) });
+  return { spike: C1, baseline, delta, days: bd.length, factors, omitted };
 }

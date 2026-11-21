@@ -3,6 +3,7 @@ import { bh, playbook, pValue } from "../lib/playbook";
 import { golden, router } from "../lib/econ";
 import { MIN_SHARE, partition } from "../lib/sunburst";
 import { buildTree } from "../lib/mindmap";
+import { autopsy } from "../lib/watch";
 import { monotonePath, niceTicks } from "../lib/trend";
 import type { SessionRow } from "../data/types";
 
@@ -97,5 +98,25 @@ describe("map + trend geometry", () => {
     const pts: [number, number][] = [[0, 10], [1, 50], [2, 51], [3, 0], [4, 49]];
     const ys = monotonePath(pts).replace(/^M/, "").split(/[ C]/).filter(Boolean).map((p) => +p.split(",")[1]);
     expect(Math.min(...ys)).toBeGreaterThanOrEqual(0); expect(Math.max(...ys)).toBeLessThanOrEqual(51);
+  });
+});
+
+describe("spike autopsy", () => {
+  const base = (n: number) => Array.from({ length: 9 }, (_, i) => row({ date: `2026-03-0${i + 1}`, id: `b${i}`, prompts: 4, tokens: 400, cost_usd: 2 + (i % 2) * 0.1, model: i % 3 ? "a" : "b", cluster: 0 }));
+  const spike = [row({ date: "2026-03-10", id: "s1", prompts: 10, tokens: 2000, cost_usd: 12, model: "c", cluster: 7 }), row({ date: "2026-03-10", id: "s2", prompts: 5, tokens: 500, cost_usd: 6, model: "a", cluster: 0 })];
+  it("factors sum to the delta", () => {
+    const a = autopsy([...base(9), ...spike], "2026-03-10", "2026-03-01", "2026-03-10")!;
+    expect(a.factors.map((f) => f.key)).toEqual(["volume", "mix", "size", "topic", "residual"]);
+    expect(Math.abs(a.factors.reduce((t, f) => t + f.usd, 0) - a.delta)).toBeLessThan(1e-9);
+  });
+  it("omits factors whose field is missing", () => {
+    const rs = [...base(9), ...spike].map((r) => ({ ...r, model: undefined, cluster: -1 }));
+    const a = autopsy(rs, "2026-03-10", "2026-03-01", "2026-03-10")!;
+    expect(a.factors.map((f) => f.key)).toEqual(["volume", "size", "residual"]); expect(a.omitted).toHaveLength(2);
+    expect(Math.abs(a.factors.reduce((t, f) => t + f.usd, 0) - a.delta)).toBeLessThan(1e-9);
+  });
+  it("returns null without a baseline", () => {
+    expect(autopsy(spike, "2026-03-10", "2026-03-01", "2026-03-10")).toBeNull();
+    expect(autopsy(base(9), "2026-03-20", "2026-03-01", "2026-03-30")).toBeNull();
   });
 });
