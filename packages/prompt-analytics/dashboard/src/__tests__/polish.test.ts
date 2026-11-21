@@ -95,3 +95,34 @@ describe("anchors, sorting, hotspots", () => {
     expect(h[0].id).toBe(`${ROOT_ID}/claude_code/bugfix/web`);
   });
 });
+
+describe("motion freeze", () => {
+  // vitest blanks CSS imports, and @types/node is not a dependency: read the sources through Node's builtin (cwd = dashboard root under vitest)
+  const proc = (globalThis as unknown as { process: { cwd(): string; getBuiltinModule(n: string): { readFileSync(p: string, e: string): string; readdirSync(p: string): string[] } } }).process;
+  const fs = proc.getBuiltinModule("node:fs"), root = `${proc.cwd()}/src`;
+  const names = ["styles.css", ...fs.readdirSync(`${root}/components`).filter((f) => f.endsWith(".css")).map((f) => `components/${f}`)];
+  const mods: Record<string, string> = Object.fromEntries(names.map((n) => [n, fs.readFileSync(`${root}/${n}`, "utf8")]));
+  const files = names;
+  it("every animation sits in a no-preference block; new keyframes are from-only", () => {
+    const bad: string[] = [];
+    for (const f of files) {
+      const src = mods[f].replace(/\/\*[\s\S]*?\*\//g, "");
+      const stack: boolean[] = [];   // per open brace: this block or an ancestor is no-preference
+      let head = "", kf = 0;
+      const decl = () => { if (!kf && !stack.at(-1) && !/animation(-name)?\s*:\s*none\b/.test(head) && /(^|\s)animation(-name)?\s*:/.test(head)) bad.push(`${f}: ${head.trim()}`); head = ""; };
+      for (const ch of src) {
+        if (ch === "{") { const h = head.trim(); stack.push(!!stack.at(-1) || /prefers-reduced-motion:\s*no-preference/.test(h)); if (!kf && /^@keyframes/.test(h)) kf = stack.length; head = ""; }
+        else if (ch === "}") { decl(); stack.pop(); if (stack.length < kf) kf = 0; }
+        else if (ch === ";") decl();
+        else head += ch;
+      }
+    }
+    expect(bad).toEqual([]);
+    const css = mods["styles.css"];
+    for (const k of ["pa-stamp", "pa-fold"]) {
+      const m = new RegExp(`@keyframes ${k} \\{([^\\n]*)\\}`).exec(css)!;
+      expect(m[1]).toMatch(/^\s*from\s*\{/);
+      expect(m[1]).not.toMatch(/\bto\s*\{|100%/);
+    }
+  });
+});

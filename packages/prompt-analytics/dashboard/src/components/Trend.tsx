@@ -69,7 +69,7 @@ export function WeekChart({ weekly, metric, view, base }: { weekly: Week[]; metr
           : <>
               {runs.map((r, k) => <g key={k}>
                 {r.length > 1 && <polygon className="wk-a" points={`${r[0][0]},${Y0} ${r.map((p) => p.join(",")).join(" ")} ${r[r.length - 1][0]},${Y0}`} />}
-                <polyline className="wk-l" points={r.map((p) => p.join(",")).join(" ")} />
+                <polyline className="wk-l" pathLength="1" points={r.map((p) => p.join(",")).join(" ")} />
               </g>)}
               {vs.map((v, i) => v === null ? null : <circle key={i} className="wk-d" data-last={i === n - 1 || undefined} data-low={low(i) || undefined} cx={x(i)} cy={y(v)} r={3.5}><title>{label(i)}</title></circle>)}
             </>}

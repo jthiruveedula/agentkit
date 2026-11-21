@@ -352,6 +352,9 @@
     .sp-d { animation-name: pa-pop; }
     .wd i { animation-name: pa-cell; }
     :is(.todo li, .w, .kpi):hover { transform: none; translate: none; }
+    .sec[data-in] .todo li .tag { animation: pa-stamp 260ms cubic-bezier(.2, .8, .2, 1) 300ms backwards; }
+    .sec[data-in] .wk-l { animation: pa-draw 1100ms cubic-bezier(.4, .1, .2, 1) 200ms backwards; }
+    :is(.palette, .panel) { transform-origin: top center; animation: pa-fold 220ms cubic-bezier(.2, .8, .2, 1) backwards; }
   }
 }
 
