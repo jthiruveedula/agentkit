@@ -27,7 +27,7 @@ interface Drawn { p: Part; a: Arc; k: number }
 interface Frame { win: Win; parts: ReadonlyMap<string, Part> }
 interface Anim { from: Frame; to: Frame; e: number }
 
-const MS = 560, SWEEP_MS = 900, HEAT = 6, CW = 7, DBL_MS = 800;
+const MS = 560, SWEEP_MS = 900, HEAT = 6, CW = 7, DBL_MS = 800, MIN_LABEL = 0.06;
 const motion = () => fxOn() && !reducedNow();
 /** Fill strength (% of the tool hue over the surface) by kind: the tool ring is strongest, each ring out is lighter. Dark text stays above 4.5:1. */
 const TINT: Record<string, number> = { tool: 44, intent: 30, project: 20, session: 13 };
@@ -202,7 +202,7 @@ export function Sunburst(p: Props) {
         <g className="sb-labels" aria-hidden="true">
           {drawn.map(({ p: q, a }, i) => {
             const name = q.node.kind === "more" ? `+${q.node.more ?? ""}` : p.nameOf(q.node), f = nameFit(cx, cy, a, name), cls = f?.small ? "sb-n sb-n-sm" : "sb-n";
-            if (!f) return null;
+            if (!f || a.a1 - a.a0 < MIN_LABEL) return null;
             if (f.mode === "rad") {   // straight along the radius; a long name wraps onto a second line when the arc is wide enough
               const two = f.lines === 2 ? split2(name, f.chars) : null;
               return <g key={q.id}><text transform={`translate(${f.x.toFixed(1)} ${f.y.toFixed(1)}) rotate(${f.rot.toFixed(1)})`} textAnchor="middle" dominantBaseline="central" className={cls}>
