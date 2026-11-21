@@ -111,7 +111,7 @@
 
 /* phones and touch: every control in the card is a 40px target, list rows 44px */
 @media (max-width: 699px), (pointer: coarse) {
-  #s-map .seg button, #s-map .mm-acts .btn, #s-map .mm-path .crumb, #s-map .mm-hots .chip, #s-map .mm-go, #s-map .mm-kid, #s-map .mm-keys-d summary { min-height: 40px; }
+  #s-map .mm-acts .btn, #s-map .mm-path .crumb, #s-map .mm-hots .chip, #s-map .mm-go, #s-map .mm-kid, #s-map .mm-keys-d summary { min-height: 40px; }
   #s-map .mm-path .crumb { min-width: 40px; }
   #s-map .mm-row { min-height: 44px; }
 }
