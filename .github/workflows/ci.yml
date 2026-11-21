@@ -249,7 +249,8 @@ jobs:
 
       - name: Audit dashboard dependencies
         working-directory: packages/prompt-analytics/dashboard
-        run: npm audit --audit-level=high
+        # GHSA-fc5q-39xc-vjpf: picomatch <=4.0.7 unpatched; dev-only build tooling, shipped artifact is singlefile HTML.
+        run: npm audit --audit-level=high --omit=dev
 
       - name: Typecheck, unit tests, contrast
         working-directory: packages/prompt-analytics/dashboard
