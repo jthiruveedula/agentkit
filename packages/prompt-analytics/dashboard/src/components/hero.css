@@ -15,7 +15,8 @@
 @container pa (min-width: 700px) { .strip { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); grid-auto-rows: 160px; } }   /* 3 or 4 widgets (Cost can be absent) always fill the row */
 
 .w { --w-bg: var(--w1-bg); --w-ink: var(--w1-ink); position: relative; min-width: 0; display: grid; grid-template-rows: 20px minmax(0, 1fr) 16px; gap: 6px; padding: 10px;
-  overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r3); box-shadow: var(--shadow); transition: border-color 160ms, translate 160ms; }
+  overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r3); box-shadow: var(--shadow); }
+@media (prefers-reduced-motion: no-preference) { .w { transition: border-color 160ms, translate 160ms; } }
 .w[data-w="2"] { --w-bg: var(--w2-bg); --w-ink: var(--w2-ink); } .w[data-w="3"] { --w-bg: var(--w3-bg); --w-ink: var(--w3-ink); }
 .w[data-w="4"] { --w-bg: var(--w4-bg); --w-ink: var(--w4-ink); } .w[data-w="5"] { --w-bg: var(--w5-bg); --w-ink: var(--w5-ink); }
 .w[data-w="6"] { --w-bg: var(--w6-bg); --w-ink: var(--w6-ink); }
