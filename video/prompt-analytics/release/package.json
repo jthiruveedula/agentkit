@@ -7,9 +7,9 @@
     "render": "remotion render src/index.ts Release out/remotion.mp4"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.543",
-    "@remotion/google-fonts": "^4.0.543",
-    "@remotion/lottie": "^4.0.543",
+    "@remotion/cli": "^4.0.545",
+    "@remotion/google-fonts": "^4.0.545",
+    "@remotion/lottie": "^4.0.545",
     "@types/react": "^19.3.0",
     "lottie-web": "^5.13.0",
     "playwright-core": "^1.65.1",
