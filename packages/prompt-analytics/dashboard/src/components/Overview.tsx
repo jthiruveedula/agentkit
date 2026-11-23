@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useStore } from "../state";
 import { delta } from "../lib/compare";
 import { fmtCompact, fmtDate, fmtInt, fmtPct, fmtSigned, fmtUSD } from "../lib/format";
@@ -20,7 +20,7 @@ import { kpiDeltas } from "../lib/mix";
 import { whereDims } from "../lib/summary";
 import type { SessionRow, Source } from "../data/types";
 import { KeyNumbers, UsageMix } from "./KeyNumbers";
-import { alerts, forecast, type Alert } from "../lib/watch";
+import { alerts, autopsy, forecast, forecastBand, type Alert } from "../lib/watch";
 import "./hero.css";
 import "./story.css";
 
@@ -320,10 +320,32 @@ function Drivers({ b, scope, label, rows: cur }: { b: Briefing; scope: Scope; la
   );
 }
 
+const AU_FILL: Record<string, string> = { volume: "var(--s1c)", mix: "var(--s3c)", size: "var(--s4c)", topic: "var(--s6c)", residual: "var(--prior)" };
+const sgn = (n: number) => `${n < 0 ? "\u2212" : "+"}${fmtUSD(Math.abs(n))}`;
+/** Spike autopsy: one diverging bar (gains right of zero, savings left), legend in dollars, the formula's honesty label. */
+function Autopsy({ rows, date, from, to }: { rows: SessionRow[]; date: string; from: string; to: string }) {
+  const a = useMemo(() => autopsy(rows, date, from, to), [rows, date, from, to]);
+  if (!a) return <p className="note">No autopsy: this day has no comparable baseline (needs other non-spike priced days with spend).</p>;
+  const pos = a.factors.reduce((t, f) => t + Math.max(0, f.usd), 0), neg = a.factors.reduce((t, f) => t + Math.max(0, -f.usd), 0), tot = pos + neg || 1;
+  let px = (neg / tot) * 100, nx = px;
+  return (
+    <div className="au">
+      <span className="meta">deterministic accounting</span>
+      <svg viewBox="0 0 100 8" preserveAspectRatio="none" role="img" aria-label={`Cost change ${sgn(a.delta)}: ${a.factors.map((f) => `${f.label} ${sgn(f.usd)}`).join(", ")}`}>
+        {a.factors.map((f) => { const w = (Math.abs(f.usd) / tot) * 100, x = f.usd >= 0 ? (px += w) - w : (nx -= w); return <rect key={f.key} x={x} y="0" width={w} height="8" fill={AU_FILL[f.key]} />; })}
+        <line x1={(neg / tot) * 100} x2={(neg / tot) * 100} y1="0" y2="8" stroke="var(--ink)" strokeWidth=".4" vectorEffect="non-scaling-stroke" />
+      </svg>
+      <ul>{a.factors.map((f) => <li key={f.key}><i style={{ background: AU_FILL[f.key] }} aria-hidden="true" />{f.label} <b>{sgn(f.usd)}</b></li>)}</ul>
+      <p className="note">{fmtUSD(a.spike)} against a {fmtUSD(a.baseline)} median day over {fmtInt(a.days)} other day{a.days === 1 ? "" : "s"}: {sgn(a.delta)}. Factors are chained and sum to it; the residual is whatever they do not explain.{a.omitted.length ? ` Not shown: ${a.omitted.join("; ")}.` : ""}</p>
+    </div>
+  );
+}
+
 /** Watchtower: threshold breaches from the export (lib/watch). Each row opens the sessions behind it; a quiet line when nothing is over. */
 function Alerts() {
   const { d, v, win, apply, openSession, goto, setExCat } = useStore();
   const xs = useMemo(() => alerts(d, v.rows, win), [d, v.rows, win]);
+  const [au, setAu] = useState("");
   const open = (a: Alert) => (a.filter ? apply(a.filter, { list: true }) : a.secret?.length === 1 ? openSession(a.secret[0]) : (setExCat("secret"), goto("s-exposure")));
   return (
     <Card id="s-alerts" title="Alerts" meta="struggle rate, open secrets, cost spikes" src="thresholds · this view" span={12} thin={!xs.length}
@@ -333,11 +355,11 @@ function Alerts() {
           <table className="tbl">
             <caption className="sr-only">Alerts, most urgent first</caption>
             <tbody>{xs.map((a) => (
-              <tr key={a.id}>
+              <Fragment key={a.id}><tr>
                 <td><span className="tag" data-sev={a.sev}>{a.sev === "bad" ? "Act" : "Watch"}</span></td>
                 <td>{a.text}</td>
-                <td><button type="button" className="link" onClick={() => open(a)} aria-label={`${a.text}. ${a.filter || a.secret?.length === 1 ? "Open the sessions behind it" : "Open the review queue"}`}>{a.filter || a.secret?.length === 1 ? "Open sessions" : "Review"}</button></td>
-              </tr>))}</tbody>
+                <td>{a.date && <button type="button" className="link" aria-expanded={au === a.id} onClick={() => setAu(au === a.id ? "" : a.id)}>Autopsy</button>} <button type="button" className="link" onClick={() => open(a)} aria-label={`${a.text}. ${a.filter || a.secret?.length === 1 ? "Open the sessions behind it" : "Open the review queue"}`}>{a.filter || a.secret?.length === 1 ? "Open sessions" : "Review"}</button></td>
+              </tr>{au === a.id && a.date && <tr><td colSpan={3}><Autopsy rows={v.rows} date={a.date} from={win.from} to={win.to} /></td></tr>}</Fragment>))}</tbody>
           </table>
         </div>
       )}
@@ -350,6 +372,7 @@ function Forecast({ all }: { all: SessionRow[] }) {
   const { d, apply } = useStore();
   const { start, end } = d.range;
   const fc = useMemo(() => forecast(all, start, end), [all, start, end]);
+  const band = useMemo(() => (fc ? forecastBand(all, end, fc.days, fc.projected) : null), [all, end, fc]);
   if (!fc) return null;
   const month = () => apply({ from: fc.monthFrom, to: end }, { list: true });
   const row = (label: string, text: string, go: () => void, aria: string) => <tr key={label}><th scope="row">{label}</th><td><button type="button" className="link" onClick={go} aria-label={aria}>{text}</button></td></tr>;
@@ -364,10 +387,11 @@ function Forecast({ all }: { all: SessionRow[] }) {
             {row(`Daily run-rate, last ${fc.days} days`, `${fmtUSD(fc.rate)} a day`, () => apply({ from: fc.runFrom, to: end }, { list: true }), `Daily run-rate ${fmtUSD(fc.rate)}, from the last ${fc.days} days. Open those sessions`)}
             <tr><th scope="row">Days left in the month</th><td>{fmtInt(fc.left)}</td></tr>
             {row("Projected month end", fmtUSD(fc.projected), month, `Projected month-end spend ${fmtUSD(fc.projected)}, a projection. Open this month's sessions`)}
+            {band && <tr><th scope="row">Likely range (p25–p75, historical variance)</th><td>{fmtUSD(band.lo)}–{fmtUSD(band.hi)}</td></tr>}
           </tbody>
         </table>
       </div>
-      <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}</p>
+      <p className="note">Projection = month-to-date priced spend + run-rate x days left; a straight line, not a forecast.{fc.unpriced ? ` ${fmtInt(fc.unpriced)} unpriced session${fc.unpriced === 1 ? "" : "s"} this month are left out, not counted as $0.` : ""}{band ? ` Band = p25–p75 of actual ÷ projected over ${fmtInt(band.months)} past months; held in ${fmtInt(band.held)} of the last ${fmtInt(band.tested)} (a p25–p75 band holds about half the time by construction).` : " Not enough past months for a band."}</p>
     </Card>
   );
 }

@@ -393,6 +393,8 @@ button.dot:hover, button.dot[data-on] { box-shadow: 0 0 0 2px var(--ink); z-inde
 @keyframes pa-from { from { translate: calc(var(--d, 0) * 100cqw) 0; } }   /* --d = earlier minus now, as a share of the .bul track (its container) */
 @keyframes pa-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 @keyframes pa-sweep { from { --pa-a: 0deg; mask: conic-gradient(#000 var(--pa-a), #0000 0); } to { --pa-a: 360deg; mask: conic-gradient(#000 var(--pa-a), #0000 0); } }
+@keyframes pa-stamp { from { opacity: 0; transform: scale(1.6) rotate(-8deg); } }
+@keyframes pa-fold { from { opacity: 0; transform: perspective(800px) rotateX(-12deg) scaleY(.92) translateY(-8px); } }
 @keyframes pa-draw { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
 @media print { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
@@ -631,7 +633,7 @@ g[data-hl] > .hit { fill: color-mix(in oklab, var(--accent) 14%, transparent); s
 @media (max-width: 480px) { .tog3d { display: none; } }
 
 /* live refresh: one-shot pulse on the totals (html.fx only, so absent under reduced motion) */
-.fx[data-pulse] .kpi, .fx[data-pulse] .asof { animation: pa-pulse 800ms ease-out; }
+@media (prefers-reduced-motion: no-preference) { .fx[data-pulse] .kpi, .fx[data-pulse] .asof { animation: pa-pulse 800ms ease-out; } }
 .asof { display: inline-block; }
 @keyframes pa-pulse { 35% { scale: 1.03; } }
 

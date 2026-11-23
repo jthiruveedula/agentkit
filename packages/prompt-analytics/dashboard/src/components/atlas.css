@@ -352,6 +352,9 @@
     .sp-d { animation-name: pa-pop; }
     .wd i { animation-name: pa-cell; }
     :is(.todo li, .w, .kpi):hover { transform: none; translate: none; }
+    .sec[data-in] .todo li .tag { animation: pa-stamp 260ms cubic-bezier(.2, .8, .2, 1) 300ms backwards; }
+    .sec[data-in] .wk-l { animation: pa-draw 1100ms cubic-bezier(.4, .1, .2, 1) 200ms backwards; }
+    :is(.palette, .panel) { transform-origin: top center; animation: pa-fold 220ms cubic-bezier(.2, .8, .2, 1) backwards; }
   }
 }
 
@@ -366,6 +369,16 @@
   :is(#s-models, #s-tools) .tbl tbody td { font-family: var(--serif); font-variant-numeric: tabular-nums lining-nums; }
 }
 
+/* spike autopsy: one diverging bar, dollars in the legend */
+:root {
+  .au { padding: 8px 0; }
+  .au .meta { font-variant: small-caps; letter-spacing: .08em; color: var(--muted); font-size: 13px; }
+  .au svg { display: block; width: 100%; height: 16px; margin: 6px 0; background: var(--sunk); }
+  .au ul { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; font: 14px/20px var(--serif); font-variant-numeric: tabular-nums lining-nums; }
+  .au li i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+}
+@media (prefers-reduced-motion: no-preference) { :root.fx .au { animation: pa-fold 220ms cubic-bezier(.2, .8, .2, 1) backwards; } }
+
 /* tools: focus rings stay inside their cell, cards never overflow, three-up rows drop to full width before they clip */
 :root {
   #s-tools .card { min-width: 0; }
@@ -378,3 +391,8 @@
 
 /* programmatic heading focus on route change: no box; keyboard focus-visible rings stay */
 main [tabindex="-1"]:focus { outline: none; }
+
+/* survey notes plate: one dense mono line in the header meta */
+.survey-notes { font: 11px/18px var(--mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.survey-notes b { font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--inkblue); margin-right: 4px; }
+.survey-notes span { color: var(--ink); }
