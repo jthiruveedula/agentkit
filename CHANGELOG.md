@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.30.0](https://github.com/jthiruveedula/agentkit/compare/v0.29.0...v0.30.0) (2026-11-23)
+
+
+### Features
+
+* **dashboard:** ATLAS motion and meaning (v0.31.0) ([#152](https://github.com/jthiruveedula/agentkit/issues/152)) ([c297559](https://github.com/jthiruveedula/agentkit/commit/c297559c1fa658ae87073cf7be3db67a6ac1228c))
+
 ## [0.29.0](https://github.com/jthiruveedula/agentkit/compare/v0.28.0...v0.29.0) (2026-11-18)
 
 
