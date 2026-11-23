@@ -8,7 +8,7 @@ import type { Cmp } from "./compare";
 export interface Nav { f: Filter; sel?: string; list: boolean; cmp: Cmp; pg?: number; pgs?: number; dens?: "c"; so?: string }
 export const SECTIONS = ["s-overview", "s-tools", "s-time", "s-funnel", "s-friction", "s-works", "s-models", "s-exposure", "s-sessions", "s-map"];
 /** Card anchors inside a section: linkable and scroll targets, but the nav / scroll-spy highlight their section. */
-export const ANCHORS: Record<string, string> = { "s-trend": "s-overview", "s-next": "s-overview", "s-playbook": "s-works", "s-loopbreak": "s-friction" };
+export const ANCHORS: Record<string, string> = { "s-trend": "s-overview", "s-next": "s-overview", "s-playbook": "s-works", "s-loopbreak": "s-friction", "s-log": "s-overview" };
 /** Scroll-spy lock: goto() pins the active nav item to the clicked section until the smooth scroll ends (scrollend, or ~900 ms). */
 export const spyLock = { id: "", until: 0 };
 export function lockSpy(id: string, ms = 900) {

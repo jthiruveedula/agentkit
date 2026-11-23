@@ -5,7 +5,11 @@ import { Card, Empty } from "./ui";
 export function Expedition({ weekly }: { weekly: Week[] }) {
   const weeks = weekly.filter((w) => w.sessions > 0).slice().reverse();
   return (
-    <Card title="Expedition log" meta="week by week, newest first" id="s-log" span={12}>
+    <Card
+      title="Expedition log"
+      so={weeks.length ? <><b>{fmtInt(weeks.length)}</b> active weeks logged, newest first.</> : "No active weeks in this window."}
+      thin={weeks.length === 0}
+      meta="week by week, newest first" id="s-log" span={12}>
       {weeks.length === 0 ? (
         <Empty>No weeks with sessions yet.</Empty>
       ) : (
