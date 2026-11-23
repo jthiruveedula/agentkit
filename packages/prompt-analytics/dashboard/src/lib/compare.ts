@@ -57,15 +57,6 @@ export function wilson(k: number, n: number, z = 1.96): [number, number] {
 export const isWide = (k: number, n: number) => { const [a, b] = wilson(k, n); return b - a > 0.3; };
 
 export const daysInMonth = (iso: string) => new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7), 0)).getUTCDate();
-export const runRate = (cost: number, elapsedDays: number, dim: number) => (elapsedDays > 0 ? (cost / elapsedDays) * dim : 0);
-/** Month-to-date priced cost at `end`, and the month-end projection at the current run-rate. null when nothing is priced. */
-export function monthProjection(rows: SessionRow[], end: string): { mtd: number; perDay: number; projected: number; elapsed: number; dim: number } | null {
-  if (!end) return null;
-  const m = end.slice(0, 7), mine = rows.filter((r) => r.cost_usd !== null && r.date.slice(0, 7) === m && r.date <= end);
-  if (!mine.length) return null;
-  const mtd = mine.reduce((a, r) => a + (r.cost_usd ?? 0), 0), elapsed = +end.slice(8, 10), dim = daysInMonth(end);
-  return { mtd, perDay: mtd / elapsed, projected: runRate(mtd, elapsed, dim), elapsed, dim };
-}
 
 /** Priced cost per applied session; unpriced sessions are excluded and counted. */
 export function costPerApplied(rows: SessionRow[]): { value: number | null; excluded: number; cost: number; pricedApplied: number; applied: number } {

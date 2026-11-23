@@ -32,7 +32,7 @@ function DateField({ label, value, min, max, disabled, inputRef, onCommit }: { l
 }
 
 export const NAV: { group: string; items: { id: string; text: string; go?: string }[] }[] = [
-  { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-next", text: "Do next" }] },
+  { group: "Monitor", items: [{ id: "s-overview", text: "Overview" }, { id: "s-next", text: "Do next" }, { id: "s-log", text: "Expedition log" }] },
   { group: "Investigate", items: [{ id: "s-tools", text: "Tools" }, { id: "s-time", text: "Time" }, { id: "s-funnel", text: "Funnel" }, { id: "s-friction", text: "Friction" }] },
   { group: "Optimise", items: [{ id: "s-works", text: "What works" }, { id: "s-models", text: "Model fit" }] },
   { group: "Govern", items: [{ id: "s-exposure", text: "Exposure" }, { id: "s-sessions", text: "Sessions" }] },
@@ -56,6 +56,7 @@ export const titleOf = (id: string, multiTool = true) => (id === "s-tools" && !m
 const ICON: Record<string, string> = {
   "s-overview": "M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z",
   "s-next": "M12 3l9 16H3zM12 10v4M12 17h.01",
+  "s-log": "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
   "s-tools": "M14 6a4 4 0 0 0-5 5l-6 6 3 3 6-6a4 4 0 0 0 5-5l-3 2-2-2z",
   "s-time": "M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z",
   "s-funnel": "M3 4h18l-7 8v6l-4 2v-8z",

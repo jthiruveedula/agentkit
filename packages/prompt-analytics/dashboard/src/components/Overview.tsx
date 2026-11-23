@@ -7,6 +7,7 @@ import { Recommend, useNext } from "./Recommend";
 import { CopySummary } from "./CopySummary";
 import { Bullet, Gauge, sparkPath } from "./charts";
 import { TrendToggles, WeekChart, type Metric, type Ref, type View } from "./Trend";
+import { Expedition } from "./Expedition";
 import { briefing, type Briefing } from "../lib/briefing";
 import { topDrivers } from "../lib/attribute";
 import { struggledRate, type Rate } from "../lib/metrics";
@@ -435,6 +436,7 @@ export function Overview() {
             : <div className="wk-big"><b>{big[m]}</b><span>{m === "spend" ? "priced spend in period" : `${m} in period`}</span></div>}
           <WeekChart weekly={b.weekly} metric={m} view={view} base={ref} />
         </Panel>
+        <Expedition weekly={b.weekly} />
         <WhereWent />
       </div>
     </section>
