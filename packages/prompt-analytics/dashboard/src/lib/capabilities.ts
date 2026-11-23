@@ -77,7 +77,7 @@ export function capabilities(d: DashboardData, v: Views): Caps {
 /** Sections that have something to show; the nav and scroll-spy list only these. */
 export function sectionsFor(c: Caps, d: DashboardData, v: Views): Set<string> {
   if (c.empty) return new Set();
-  const s = new Set(["s-overview", "s-next", "s-sessions"]);
+  const s = new Set(["s-overview", "s-next", "s-log", "s-sessions"]);
   if (c.hasExposure) s.add("s-exposure");   // a zero-finding export gets no dead nav item
   if (c.tooSmall) return s;
   s.add("s-time"); s.add("s-friction"); s.add("s-works");
