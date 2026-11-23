@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.31.0](https://github.com/jthiruveedula/agentkit/compare/v0.30.0...v0.31.0) (2026-11-23)
+
+
+### Features
+
+* **dashboard:** expedition log, sunburst labels, unified seg controls and run-rate ([#154](https://github.com/jthiruveedula/agentkit/issues/154)) ([86bff21](https://github.com/jthiruveedula/agentkit/commit/86bff211eb8167700398127b61d89ffba3365335))
+
 ## [0.30.0](https://github.com/jthiruveedula/agentkit/compare/v0.29.0...v0.30.0) (2026-11-23)
 
 
